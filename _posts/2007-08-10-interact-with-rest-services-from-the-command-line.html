@@ -43,23 +43,23 @@ comments:
   date: '2009-08-26 03:50:11 -0400'
   date_gmt: '2009-08-26 09:50:11 -0400'
   content: "Thanks for the writeup!\r\n\r\nOne should note that Rails (since June
-    27, 2008) ignores the Accept header, see: http:&#47;&#47;github.com&#47;rails&#47;rails&#47;commit&#47;2f4aaed7b3feb3be787a316fab3144c06bb21a27"
+    27, 2008) ignores the Accept header, see: http://github.com/rails/rails/commit/2f4aaed7b3feb3be787a316fab3144c06bb21a27"
 ---
-<p><a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Representational_State_Transfer">REST<&#47;a> is becoming more popular as a means of implementing <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Service-oriented_architecture">Service Oriented Architectures<&#47;a> (SOA) as well as merely providing simple remote APIs for interacting with systems. The main reason for this is that it provides a very simple means of creating and consuming Services. Contrasted to SOA implementations like SOAP and REST can be a relief of simplicity.</p>
-<p>One of the main advantages of REST is that it requires no tooling to use. Unlike <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;SOAP">SOAP<&#47;a>, it is very easy to construct ad-hoc clients to consume a RESTful service. These examples use <a href="http:&#47;&#47;curl.haxx.se&#47;">curl<&#47;a> a command-line utility available on Unix systems or using <a href="http:&#47;&#47;www.cygwin.com&#47;">Cygwin<&#47;a> on Windows. The same concepts can be translated to anything that can send HTTP requests.</p>
-<h2>Example REST Service with Ruby on Rails<&#47;h2><br />
+<p><a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST</a> is becoming more popular as a means of implementing <a href="http://en.wikipedia.org/wiki/Service-oriented_architecture">Service Oriented Architectures</a> (SOA) as well as merely providing simple remote APIs for interacting with systems. The main reason for this is that it provides a very simple means of creating and consuming Services. Contrasted to SOA implementations like SOAP and REST can be a relief of simplicity.</p>
+<p>One of the main advantages of REST is that it requires no tooling to use. Unlike <a href="http://en.wikipedia.org/wiki/SOAP">SOAP</a>, it is very easy to construct ad-hoc clients to consume a RESTful service. These examples use <a href="http://curl.haxx.se/">curl</a> a command-line utility available on Unix systems or using <a href="http://www.cygwin.com/">Cygwin</a> on Windows. The same concepts can be translated to anything that can send HTTP requests.</p>
+<h2>Example REST Service with Ruby on Rails</h2><br />
 As the example implementation, I'll use a Ruby on Rails controller. Rails has very good support for implementing RESTful services so is easy to show.</p>
 <p>To get started with this example you can generate a Rails project and the Order object with the following commands:<br />
 <code><br />
 rails order_example<br />
 cd order_example<br />
-.&#47;script generate resource order name:string<br />
-<&#47;code></p>
+./script generate resource order name:string<br />
+</code></p>
 <p>Then you can implement a RESTful controller with the following code:<br />
 <code lang="ruby"><br />
 class OrdersController < ApplicationController<br />
-  # GET &#47;orders<br />
-  # GET &#47;orders.xml<br />
+  # GET /orders<br />
+  # GET /orders.xml<br />
   def index<br />
     @orders = Order.find(:all)<br />
     respond_to do |format|<br />
@@ -67,8 +67,8 @@ class OrdersController < ApplicationController<br />
       format.xml  { render :xml => @orders.to_xml }<br />
     end<br />
   end</p>
-<p>  # GET &#47;orders&#47;1<br />
-  # GET &#47;orders&#47;1.xml<br />
+<p>  # GET /orders/1<br />
+  # GET /orders/1.xml<br />
   def show<br />
     @order = Order.find(params[:id])<br />
     respond_to do |format|<br />
@@ -76,8 +76,8 @@ class OrdersController < ApplicationController<br />
       format.xml  { render :xml => @order.to_xml }<br />
     end<br />
   end</p>
-<p>  # POST &#47;orders<br />
-  # POST &#47;orders.xml<br />
+<p>  # POST /orders<br />
+  # POST /orders.xml<br />
   def create<br />
     @order = Order.new(params[:order])<br />
     respond_to do |format|<br />
@@ -91,8 +91,8 @@ class OrdersController < ApplicationController<br />
       end<br />
     end<br />
   end</p>
-<p>  # PUT &#47;orders&#47;1<br />
-  # PUT &#47;orders&#47;1.xml<br />
+<p>  # PUT /orders/1<br />
+  # PUT /orders/1.xml<br />
   def update<br />
     @order = Order.find(params[:id])<br />
     respond_to do |format|<br />
@@ -106,8 +106,8 @@ class OrdersController < ApplicationController<br />
       end<br />
     end<br />
   end</p>
-<p>  # DELETE &#47;orders&#47;1<br />
-  # DELETE &#47;orders&#47;1.xml<br />
+<p>  # DELETE /orders/1<br />
+  # DELETE /orders/1.xml<br />
   def destroy<br />
     @order = Order.find(params[:id])<br />
     @order.destroy<br />
@@ -117,39 +117,39 @@ class OrdersController < ApplicationController<br />
     end<br />
   end<br />
 end<br />
-<&#47;code></p>
+</code></p>
 <p>This controller allows you respond to all of the Actions that can be taken on a Resource: GET, POST, PUT and DELETE.</p>
-<h2>Command Line Interaction with the Service<&#47;h2><br />
+<h2>Command Line Interaction with the Service</h2><br />
 Start our Rails application and then you can see the following commands at work.<br />
 <code><br />
-.&#47;script&#47;server<br />
-<&#47;code></p>
-<h3>Get a list of all of the Orders<&#47;h3><br />
+./script/server<br />
+</code></p>
+<h3>Get a list of all of the Orders</h3><br />
 The first thing you want to do is get a list of all of the orders in the system. To do this we perform a GET command  asking for an XML response. The URI in this case represents a list of all the Orders in the system.<br />
 <code><br />
-curl -X GET -H 'Accept: application&#47;xml' http:&#47;&#47;localhost:3000&#47;orders<br />
-<&#47;code></p>
-<h3>Get a single Order<&#47;h3><br />
+curl -X GET -H 'Accept: application/xml' http://localhost:3000/orders<br />
+</code></p>
+<h3>Get a single Order</h3><br />
 If we want to get the XML representation of a single order then we can ask for a specific Order by changing the ID to a URI that represents just one Order.<br />
 <code><br />
-curl -X GET -H 'Accept: application&#47;xml' http:&#47;&#47;localhost:3000&#47;orders&#47;15<br />
-<&#47;code></p>
-<h3>Delete an Order<&#47;h3><br />
+curl -X GET -H 'Accept: application/xml' http://localhost:3000/orders/15<br />
+</code></p>
+<h3>Delete an Order</h3><br />
 REST keeps things simple by having consistent Resource URIs. The URI that represents Order number 15 can also be used to Delete or Modify that Order. In this case the URI for the GET is the same, but we ask it to delete the Order instead.<br />
 <code><br />
-curl -X DELETE -H 'Accept: application&#47;xml' http:&#47;&#47;localhost:3000&#47;orders&#47;15<br />
-<&#47;code></p>
-<h3>Modify an existing Order<&#47;h3><br />
+curl -X DELETE -H 'Accept: application/xml' http://localhost:3000/orders/15<br />
+</code></p>
+<h3>Modify an existing Order</h3><br />
 Just as with delete, if we want to modify an Order we use the URI that represents that specific Order. The only difference is that we have to tell the server that we are sending it XML, and then actually send the XML.<br />
 <code><br />
-curl -i -X PUT -H 'Content-Type: application&#47;xml' -H 'Accept: application&#47;xml' \<br />
--d '<order><name>Foo<&#47;name><&#47;order>'  http:&#47;&#47;localhost:3000&#47;orders&#47;15<br />
-<&#47;code></p>
-<h3>Create a new Order<&#47;h3><br />
+curl -i -X PUT -H 'Content-Type: application/xml' -H 'Accept: application/xml' \<br />
+-d '<order><name>Foo</name></order>'  http://localhost:3000/orders/15<br />
+</code></p>
+<h3>Create a new Order</h3><br />
 Creating an Order looks very similar to modifying an Order but the URI changes to the Resource URI for the collection of all Orders. The response to this command will be an HTTP 302 Redirect that gives you the URI of the newly created Order Resource.<br />
 <code><br />
-curl -i -X POST -H 'Content-Type: application&#47;xml' -H 'Accept: application&#47;xml' \<br />
--d '<order><name>Foo<&#47;name><&#47;order>'  http:&#47;&#47;localhost:3000&#47;orders&#47;<br />
-<&#47;code></p>
-<h2>Conclusion<&#47;h2><br />
+curl -i -X POST -H 'Content-Type: application/xml' -H 'Accept: application/xml' \<br />
+-d '<order><name>Foo</name></order>'  http://localhost:3000/orders/<br />
+</code></p>
+<h2>Conclusion</h2><br />
 I think you can see how easily you can interact with a REST service using only the most basic tools available, namely simple Unix command line utilities. This simplicity offers a lot of power, flexibility and interoperability that you lose when you implement services with more complicated implementations such as SOAP. That's not to say that SOAP and all of the WS-* specifications don't have have their place, because they do. When you can implement a simple solution and meet your needs you will often find that solution to have a surprising amount of added benefits such as flexibility.</p>

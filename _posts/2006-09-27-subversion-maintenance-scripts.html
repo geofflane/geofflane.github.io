@@ -44,7 +44,7 @@ comments:
     then the ls would pick those up too so you'd have errors where the svnadmin command
     would be 'svnadmin dump x.dump > x.dump.dump'\r\n\r\nHere's a one liner that should
     avoid this problem:\r\n<code lang=\"bash\">\r\nfind * -maxdepth 0 -type d -print0
-    | xargs -0 -I{} sh -c 'svnadmin dump {} > {}.dump'\r\n<&#47;code>"
+    | xargs -0 -I{} sh -c 'svnadmin dump {} > {}.dump'\r\n</code>"
 - id: 14284
   author: Geoff Lane
   author_email: geoff@zorched.net
@@ -55,9 +55,9 @@ comments:
     the dump files in there and re-ran the script it would complain about those. I
     generally run it and then move all the dumps somewhere else.\r\n\r\nAn easy way
     around the problem is just to redirect the dump output to another directory:\r\n<code
-    lang=\"bash\">\r\nfor i in *; do\r\n    svnadmin dump $i > ..&#47;dumps&#47;${i}.dump;\r\ndone;\r\n<&#47;code>"
+    lang=\"bash\">\r\nfor i in *; do\r\n    svnadmin dump $i > ../dumps/${i}.dump;\r\ndone;\r\n</code>"
 - id: 14286
-  author: Windows Subversion Maintenance Scripts | Zorched &#47; One Line Fix
+  author: Windows Subversion Maintenance Scripts | Zorched / One Line Fix
   author_email: ''
   author_url: http://www.zorched.net/2008/11/19/windows-subversion-maintenance-scripts/
   date: '2008-11-19 20:46:47 -0500'
@@ -75,39 +75,39 @@ comments:
     the recommended folder structure isn't available as commandline arg to svnadmin
     create
 ---
-<p>With the recent release of <a href="http:&#47;&#47;subversion.tigris.org&#47;svn_1.4_releasenotes.html">Subversion 1.4<&#47;a> I'm going through the process of updating repositories. I often like to use multiple repositories because Subversion versions the entire repository with each checkin (Atomic commits rule!). When I do that, I group all of the repositories in the same directory. It makes it really easy to configure Apache with the SVNParentPath directive. And if you're using svn+ssh or something like that, then it's just easier to remember where they are.</p>
-<h3>SVNParentPath Example<&#47;h3><br />
+<p>With the recent release of <a href="http://subversion.tigris.org/svn_1.4_releasenotes.html">Subversion 1.4</a> I'm going through the process of updating repositories. I often like to use multiple repositories because Subversion versions the entire repository with each checkin (Atomic commits rule!). When I do that, I group all of the repositories in the same directory. It makes it really easy to configure Apache with the SVNParentPath directive. And if you're using svn+ssh or something like that, then it's just easier to remember where they are.</p>
+<h3>SVNParentPath Example</h3><br />
 With this configuration it's very easy to bring new repositories up because it doesn't require any configuration change in Apache.</p>
 <p><code lang="apache"><br />
-<Location &#47;svn><br />
+<Location /svn><br />
     DAV svn<br />
-    SVNParentPath s:&#47;svn<br />
+    SVNParentPath s:/svn<br />
     SVNListParentPath on<br />
     SVNAutoversioning on</p>
 <p>    # authentication<br />
     AuthType Basic<br />
     AuthName "Subversion Access"<br />
-    AuthUserFile s:&#47;logins.txt<br />
+    AuthUserFile s:/logins.txt<br />
     # Access is configured in the access file.<br />
-    AuthzSVNAccessFile s:&#47;access.txt<br />
+    AuthzSVNAccessFile s:/access.txt<br />
     Require valid-user<br />
-<&#47;Location><br />
-<&#47;code></p>
+</Location><br />
+</code></p>
 <p>The one obvious downside to having multiple repositories is managing things like backups and upgrades. You have a lot more to do than just dump and load a single repository. So to help handle that task, I created some simple shell scripts.</p>
-<h3>Dump All Repositories<&#47;h3><br />
+<h3>Dump All Repositories</h3><br />
 This script will dump all of the SVN repositories in a given directory.</p>
 <p><code lang="bash"><br />
-#!&#47;bin&#47;sh</p>
+#!/bin/sh</p>
 <p># Assumes each directory is an SVN repository<br />
 # and creates a dump file for each of them.</p>
 <p>for i in *; do<br />
     svnadmin dump $i > ${i}.dump;<br />
 done;<br />
-<&#47;code></p>
-<h3>Recreate&#47;Load All Dump Files<&#47;h3><br />
+</code></p>
+<h3>Recreate/Load All Dump Files</h3><br />
 This script will take all of the dump files and create new repositories and then load the dump file into them. This is good for major revision changes such as to 1.4 where they have changed some structures and improved the efficiency of storing binary files for example.</p>
 <p><code lang="bash"><br />
-#!&#47;bin&#47;sh</p>
+#!/bin/sh</p>
 <p># Assumes a directory full of dump files<br />
 # Creates a new SVN repository and loads the dump file into it</p>
 <p>for i in *.dump; do<br />
@@ -117,11 +117,11 @@ This script will take all of the dump files and create new repositories and then
     svnadmin create $repos;<br />
     svnadmin load $repos < $i;<br />
 done<br />
-<&#47;code></p>
-<h3>Create New Repository Script<&#47;h3><br />
-This is a handy one I keep around to make it easy to help enforce best practices. This creates a repository and then automatically creates the trunk&#47; branches&#47; and tags&#47; directories.</p>
+</code></p>
+<h3>Create New Repository Script</h3><br />
+This is a handy one I keep around to make it easy to help enforce best practices. This creates a repository and then automatically creates the trunk/ branches/ and tags/ directories.</p>
 <p><code lang="bash"><br />
-#!&#47;bin&#47;sh</p>
+#!/bin/sh</p>
 <p>if [ -z "$1" ]<br />
 then<br />
     echo "Usage: $0 <repository>";<br />
@@ -132,10 +132,10 @@ cur_dir=`pwd`<br />
 # use these 2 if you're running on Cygwin under Windows<br />
 # cur_cyg_dir=`pwd`<br />
 # cur_dir=`cygpath -m $cur_cyg_dir`<br />
-svn_dir=${cur_dir}&#47;${1}</p>
+svn_dir=${cur_dir}/${1}</p>
 <p>svnadmin create "$1"<br />
-svn -m "Create default structure." mkdir file:&#47;&#47;&#47;${svn_dir}&#47;trunk file:&#47;&#47;&#47;${svn_dir}&#47;tags file:&#47;&#47;&#47;${svn_dir}&#47;branches</p>
+svn -m "Create default structure." mkdir file:///${svn_dir}/trunk file:///${svn_dir}/tags file:///${svn_dir}/branches</p>
 <p>echo "done"<br />
-<&#47;code></p>
+</code></p>
 <p>Not that these are incredibly complex shell scripts, but they can do a lot of work while you do other things (like post to your blog). I hope they'll help someone out there.</p>
 <p>And just to be warned, if you're doing this on a bunch of big repositories it can take some time!</p>

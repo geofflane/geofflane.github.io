@@ -72,7 +72,7 @@ comments:
     1.2 allows you to create named constraints based on the existing constraints and
     then apply them to multiple classes. e.g.:\r\n<code lang=\"groovy\">\r\ngrails.gorm.default.constraints
     = {\r\n   myConstraints(nullable:true, blank:false, size:1..20)\r\n}\r\n\r\nstatic
-    constraints = {\r\n  myProperty shared:\"myConstraints\"\r\n}\r\n<&#47;code>\r\n\r\nThe
+    constraints = {\r\n  myProperty shared:\"myConstraints\"\r\n}\r\n</code>\r\n\r\nThe
     constraints plugin allows you to create fundamentally new constraints. It also
     allows you to supply parameters to those custom constraints to change the behavior,
     something that the default constraints setup doesn't do. This is important, for
@@ -98,7 +98,7 @@ comments:
     = {\r\n    anotherSmallVal(smallEnough:true)\r\n  }\r\n}\r\n\r\nclass SmallEnoughConstraint
     {\r\n\r\n  def validator = { val, obj ->\r\n    if (obj.oneSmallVal &amp;&amp;
     val) {\r\n      return (val + obj.oneSmallVal < 1)\r\n    } else {\r\n      return
-    false\r\n    }\r\n  }\r\n}\r\n\r\n}\r\n<&#47;code>"
+    false\r\n    }\r\n  }\r\n}\r\n\r\n}\r\n</code>"
 - id: 274129
   author: Where to put the utility class? &laquo; &aring;&curren;&copy;&aring;&curren;&copy;&aring;&yen;&frac12;&aring;&yen;&frac12;&aring;&shy;&brvbar;&auml;&sup1;&nbsp;
   author_email: ''
@@ -107,21 +107,21 @@ comments:
   date_gmt: '2015-05-30 14:14:49 -0400'
   content: "[&#8230;] You can find an example of a new Grails Artefact in the Constriants
     plugin. The Author of this plugin recommends that users put their Constraint classes
-    in the grails-app&#47;utils&#47; directory. [&#8230;]\n"
+    in the grails-app/utils/ directory. [&#8230;]\n"
 ---
 <p>I've released my first public Grails Plugin today.</p>
 <p>The Grails Constraint plugin gives you the ability to create custom Constraints that you can apply to your Domain classes to validate them. These are applied and act just like the built in Domain class constraints.</p>
-<h3>Why would you want this?<&#47;h3><br />
+<h3>Why would you want this?</h3><br />
 Grails provides two generic, catch-all Constraints in the core application:</p>
 <ul>
-<li>validator - a generic closure mechanism for validation<&#47;li>
-<li>matches - a regular expression mechanism<&#47;li><br />
-<&#47;ul></p>
+<li>validator - a generic closure mechanism for validation</li>
+<li>matches - a regular expression mechanism</li><br />
+</ul></p>
 <p>While those work, I find myself often wanting to use the same Constraints on multiple Domain classes (think Social Security Number, Phone Number, Zipcode, etc.) and I don't like to repeat those regular expressions or validations all over the place.</p>
-<h3>What does this plugin do?<&#47;h3><br />
-With the Grails Constraints plugin, you can write a custom Constraint class, drop it in <em>&#47;grails-app&#47;utils&#47;<&#47;em> and it will automatically be available to all of your domain classes.</p>
-<h3>Example<&#47;h3></p>
-<p>I create a new constrain by hand in <em>&#47;grails-app&#47;utils&#47;ComparisonConstraint.groovy<&#47;em>. (You can also use the provided create-constraint script like <em>grails create-constraint com.foo.MyConstraint<&#47;em>)<br />
+<h3>What does this plugin do?</h3><br />
+With the Grails Constraints plugin, you can write a custom Constraint class, drop it in <em>/grails-app/utils/</em> and it will automatically be available to all of your domain classes.</p>
+<h3>Example</h3></p>
+<p>I create a new constrain by hand in <em>/grails-app/utils/ComparisonConstraint.groovy</em>. (You can also use the provided create-constraint script like <em>grails create-constraint com.foo.MyConstraint</em>)<br />
 <code lang="groovy"><br />
 class ComparisonConstraint {</p>
 <p>    static name = "compareTo"<br />
@@ -133,7 +133,7 @@ class ComparisonConstraint {</p>
 <p>        return val.compareTo(compareVal) == 0<br />
     }<br />
 }<br />
-<&#47;code></p>
+</code></p>
 <p>Then you can apply your constraint to your Domain class:<br />
 <code lang="groovy"><br />
 class Login {<br />
@@ -143,5 +143,5 @@ class Login {<br />
         password(compareTo: 'confirm')<br />
     }<br />
 }<br />
-<&#47;code></p>
-<p>See <a href="http:&#47;&#47;github.com&#47;geofflane&#47;grails-constraints">Grails Custom Constraints Plugin<&#47;a> for the full documentation on what all of the above means and  the source code.</p>
+</code></p>
+<p>See <a href="http://github.com/geofflane/grails-constraints">Grails Custom Constraints Plugin</a> for the full documentation on what all of the above means and  the source code.</p>

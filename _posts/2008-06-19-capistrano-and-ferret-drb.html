@@ -40,7 +40,7 @@ comments:
     \ Just add the following line to your Capistrano recipe:\r\n\r\ndefault_run_options[:shell]
     = false\r\n\r\nThis fixes the setting of ENV['_'] and it works again.  Shouldn't
     affect anything else unless you have a non-POSIX shell by default (unlikely).\r\n\r\nA
-    bit more info here:\r\n\r\nhttp:&#47;&#47;rubyforge.org&#47;pipermail&#47;ferret-talk&#47;2008-July&#47;004622.html\r\n\r\nJohn."
+    bit more info here:\r\n\r\nhttp://rubyforge.org/pipermail/ferret-talk/2008-July/004622.html\r\n\r\nJohn."
 - id: 13506
   author: Geoff Lane
   author_email: geoff@zorched.net
@@ -49,39 +49,39 @@ comments:
   date_gmt: '2008-07-31 21:22:43 -0400'
   content: "John,\r\nThanks for the tip..."
 ---
-<p>This is a bit of a followup to my previous post on <a href="http:&#47;&#47;www.zorched.net&#47;2008&#47;06&#47;17&#47;capistrano-deploy-with-git-and-passenger&#47;">Capistrano with Git and Passenger<&#47;a>. I decided to use Ferret via the <a href="http:&#47;&#47;projects.jkraemer.net&#47;acts_as_ferret&#47;">acts_as_ferret<&#47;a> (<abbr title="Acts As Ferret">AAF<&#47;abbr>) plugin. <a href="http:&#47;&#47;ferret.davebalmain.com&#47;">Ferret<&#47;a> is a full-text search inspired by <a href="http:&#47;&#47;lucene.apache.org&#47;">Apache's Lucene<&#47;a> but written in Ruby.</p>
+<p>This is a bit of a followup to my previous post on <a href="http://www.zorched.net/2008/06/17/capistrano-deploy-with-git-and-passenger/">Capistrano with Git and Passenger</a>. I decided to use Ferret via the <a href="http://projects.jkraemer.net/acts_as_ferret/">acts_as_ferret</a> (<abbr title="Acts As Ferret">AAF</abbr>) plugin. <a href="http://ferret.davebalmain.com/">Ferret</a> is a full-text search inspired by <a href="http://lucene.apache.org/">Apache's Lucene</a> but written in Ruby.</p>
 <p>Basically Ferret and Lucene keep a full-text index outside of the database that allows it to quickly perform full-text searches and find the identifers of rows in your database. Then you can go get those objects out of the database. It's pretty slick.</p>
-<p>Ferret uses <a href="http:&#47;&#47;www.ruby-doc.org&#47;stdlib&#47;libdoc&#47;drb&#47;rdoc&#47;index.html">DRb<&#47;a> as a means of supporting multiple-concurrent clients and for scaling across multiple machines. You really don't need to know much about DRb to use <abbr title="Acts As Ferret">AAF<&#47;abbr>, but you do need to run the ferret DRb server in your production environment. Which gets us to...</p>
-<h3>Automating The Starting and Stopping of ferret_server<&#47;h3></p>
-<p>A few lines of code in your Capistrano <strong>deploy.rb<&#47;strong> and you are off and running.<br />
+<p>Ferret uses <a href="http://www.ruby-doc.org/stdlib/libdoc/drb/rdoc/index.html">DRb</a> as a means of supporting multiple-concurrent clients and for scaling across multiple machines. You really don't need to know much about DRb to use <abbr title="Acts As Ferret">AAF</abbr>, but you do need to run the ferret DRb server in your production environment. Which gets us to...</p>
+<h3>Automating The Starting and Stopping of ferret_server</h3></p>
+<p>A few lines of code in your Capistrano <strong>deploy.rb</strong> and you are off and running.<br />
 <code lang="ruby"><br />
 before "deploy:start" do<br />
-  run "#{current_path}&#47;script&#47;ferret_server -e production start"<br />
+  run "#{current_path}/script/ferret_server -e production start"<br />
 end </p>
 <p>after "deploy:stop" do<br />
-  run "#{current_path}&#47;script&#47;ferret_server -e production stop"<br />
+  run "#{current_path}/script/ferret_server -e production stop"<br />
 end</p>
 <p>after 'deploy:restart' do<br />
-  run "cd #{current_path} && .&#47;script&#47;ferret_server -e production stop"<br />
-  run "cd #{current_path} && .&#47;script&#47;ferret_server -e production start"<br />
+  run "cd #{current_path} && ./script/ferret_server -e production stop"<br />
+  run "cd #{current_path} && ./script/ferret_server -e production start"<br />
 end<br />
-<&#47;code></p>
+</code></p>
 <p>Except it doesn't work. I ended up with some errors like:<br />
-<samp>could not execute command<&#47;samp><br />
-<samp>no such file to load -- &#47;usr&#47;bin&#47;..&#47;config&#47;environment<&#47;samp></p>
+<samp>could not execute command</samp><br />
+<samp>no such file to load -- /usr/bin/../config/environment</samp></p>
 <p>It also ends up that it's not Capistrano's fault.</p>
-<h3>Acts As Ferret server_manager.rb<&#47;h3></p>
-<p>In the file <strong>vendor&#47;plugins&#47;acts_as_ferret&#47;lib&#47;server_manager.rb<&#47;strong> there is a line that sets up where to look for its environment information. For some reason this is the default:<br />
+<h3>Acts As Ferret server_manager.rb</h3></p>
+<p>In the file <strong>vendor/plugins/acts_as_ferret/lib/server_manager.rb</strong> there is a line that sets up where to look for its environment information. For some reason this is the default:<br />
 <code lang="ruby"><br />
-  # require(File.join(File.dirname(__FILE__), '..&#47;..&#47;..&#47;..&#47;config&#47;environment'))<br />
-  require(File.join(File.dirname(ENV['_']), '..&#47;config&#47;environment'))<br />
-<&#47;code></p>
-<p>If you notice, there is a line commented out. It just so happens that uncommenting that line and commenting out the other fixed the issue for me. It ends up that ENV['_'] points to the base path of the executable and thats <strong>&#47;usr&#47;bin&#47;env<&#47;strong>. And that doesn't work. I'm not sure why that's the default behavior.</p>
+  # require(File.join(File.dirname(__FILE__), '../../../../config/environment'))<br />
+  require(File.join(File.dirname(ENV['_']), '../config/environment'))<br />
+</code></p>
+<p>If you notice, there is a line commented out. It just so happens that uncommenting that line and commenting out the other fixed the issue for me. It ends up that ENV['_'] points to the base path of the executable and thats <strong>/usr/bin/env</strong>. And that doesn't work. I'm not sure why that's the default behavior.</p>
 <p>Anyway, it's easily fixed:<br />
 <code lang="ruby"><br />
-  require(File.join(File.dirname(__FILE__), '..&#47;..&#47;..&#47;..&#47;config&#47;environment'))<br />
-  # require(File.join(File.dirname(ENV['_']), '..&#47;config&#47;environment'))<br />
-<&#47;code></p>
+  require(File.join(File.dirname(__FILE__), '../../../../config/environment'))<br />
+  # require(File.join(File.dirname(ENV['_']), '../config/environment'))<br />
+</code></p>
 <p>With that fix in place, the Capistrano deployment will restart the Ferret DRb server when you deploy your application.</p>
-<p><strong><em>Update<&#47;em><&#47;strong><br />
-According to John in the comments below you can fix the AAF problem without changing the code as well. Just add <code class="inline">default_run_options[:shell] = false<&#47;code> to your Capistrano script and that will take care of it.</p>
+<p><strong><em>Update</em></strong><br />
+According to John in the comments below you can fix the AAF problem without changing the code as well. Just add <code class="inline">default_run_options[:shell] = false</code> to your Capistrano script and that will take care of it.</p>

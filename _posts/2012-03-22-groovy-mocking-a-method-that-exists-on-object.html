@@ -31,7 +31,7 @@ comments: []
 def emMock = new MockFor(EntityManager)<br />
 emMock.demand.find { Class clazz, Object rquid -> return new Request(rqUID: rquid) }<br />
 def em = emMock.proxyDelegateInstance()<br />
-<&#47;code></p>
+</code></p>
 <p>This gave me an error though:<br />
 <code><br />
 groovy.lang.MissingMethodException: No signature of method: com.onelinefix.services.RequestRepositoryImplTest$_2_get_closure1.doCall() is applicable for argument types: (groovy.mock.interceptor.Demand) values: [groovy.mock.interceptor.Demand@a27ebd9]<br />
@@ -40,11 +40,11 @@ Possible solutions: doCall(java.lang.Class, java.lang.Object), findAll(), findAl
 	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:877) ~[groovy-all-1.8.6.jar:1.8.6]<br />
 	at groovy.lang.Closure.call(Closure.java:412) ~[groovy-all-1.8.6.jar:1.8.6]<br />
 	at groovy.lang.Closure.call(Closure.java:425) ~[groovy-all-1.8.6.jar:1.8.6]<br />
-<&#47;code><br />
-It ends up that <em>find<&#47;em> is a DefaultGroovyMethod that's added to all Objects and this was causing the mock.demand to get confused because it thought I was trying to call the Object.find.</p>
+</code><br />
+It ends up that <em>find</em> is a DefaultGroovyMethod that's added to all Objects and this was causing the mock.demand to get confused because it thought I was trying to call the Object.find.</p>
 <p>Luckily there is a workaround and that's to use the ordinal argument for find.</p>
 <p><code lang="groovy"><br />
 emMock.demand.find(1) { Class clazz, Object rquid -> return new Request(rqUID: rquid) }<br />
-<&#47;code></p>
+</code></p>
 <p>That's enough of a change to invoke mock version instead of the DefaultGroovyMethod version.<br />
 Now if I only knew why....</p>

@@ -24,7 +24,7 @@ tags:
 - nosql
 comments:
 - id: 16322
-  author: Tweets that mention NoSQL with MongoDB and Ruby Presentation | Zorched &#47;
+  author: Tweets that mention NoSQL with MongoDB and Ruby Presentation | Zorched /
     One-Line Fix -- Topsy.com
   author_email: ''
   author_url: http://topsy.com/www.zorched.net/2010/11/15/nosql-with-mongodb-and-ruby-presentation/?utm_source=pingback&amp;utm_campaign=L2
@@ -32,40 +32,40 @@ comments:
   date_gmt: '2010-11-16 15:29:06 -0500'
   content: "[...] This post was mentioned on Twitter by Alex Lemanski and Milwaukee
     Ruby, geofflane. geofflane said: Posted my presentation on my blog for download:
-    http:&#47;&#47;bit.ly&#47;9sh6C5 @rubymke #devmke [...]"
+    http://bit.ly/9sh6C5 @rubymke #devmke [...]"
 - id: 16323
   author: NoSQL Daily &#8211; Wed Nov 17 &rsaquo; PHP App Engine
   author_email: ''
   author_url: http://php-app-engine.com/2010/nosql/nosql-daily-wed-nov-17/
   date: '2010-11-16 19:15:46 -0500'
   date_gmt: '2010-11-17 01:15:46 -0500'
-  content: "[...] NoSQL with MongoDB and Ruby Presentation | Zorched &#47; One-Line
+  content: "[...] NoSQL with MongoDB and Ruby Presentation | Zorched / One-Line
     Fix [...]"
 ---
 <p>I presented at the Milwaukee Ruby User's Group tonight on NoSQL using MongoDB and Ruby.</p>
-<h3>Code Snippets for the Presentation<&#47;h3></p>
-<h4>Basic Operations<&#47;h4><br />
+<h3>Code Snippets for the Presentation</h3></p>
+<h4>Basic Operations</h4><br />
 <code lang="javascript"></p>
-<p>&#47;&#47; insert data<br />
+<p>// insert data<br />
 db.factories.insert( { name: "Miller", metro: { city: "Milwaukee", state: "WI" } } );<br />
 db.factories.insert( { name: "Lakefront", metro: { city: "Milwaukee", state: "WI" } } );<br />
 db.factories.insert( { name: "Point", metro: { city: "Steven's Point", state: "WI" } } );<br />
 db.factories.insert( { name: "Pabst", metro: { city: "Milwaukee", state: "WI" } } );<br />
 db.factories.insert( { name: "Blatz", metro: { city: "Milwaukee", state: "WI" } } );<br />
 db.factories.insert( { name: "Coors", metro: { city: "Golden Springs", state: "CO" } } );</p>
-<p>&#47;&#47; simple queries<br />
+<p>// simple queries<br />
 db.factories.find()<br />
 db.factories.findOne()<br />
 db.factories.find( { "metro.city" : "Milwaukee" } )<br />
 db.factories.find( { "metro.state": {$in : ["WI", "CO"] } } )</p>
-<p>&#47;&#47; update data<br />
+<p>// update data<br />
 db.factories.update( { name: "Lakefront"}, { $set : { thebest : true } } );<br />
 db.factories.find()</p>
-<p>&#47;&#47; delete data<br />
+<p>// delete data<br />
 db.factories.remove({name:"Coors"})<br />
 db.factories.remove()<br />
-<&#47;code></p>
-<h4>Ruby Example<&#47;h4><br />
+</code></p>
+<h4>Ruby Example</h4><br />
 <code lang="ruby"><br />
 require 'rubygems'<br />
 require 'mongo'<br />
@@ -82,8 +82,8 @@ coll.insert( { :name => "Coors",     :metro => { :city => "Golden Springs", :sta
 <p>puts "There are #{coll.count()} factories. Here they are:"<br />
 coll.find().each { |doc| puts doc.inspect }<br />
 coll.map_reduce("function () { emit(this.metro.city, this.name); }", "function (k, vals) { return vals.join(","); }").each { |r| puts r.inspect }<br />
-<&#47;code></p>
-<h4>Map Reduce Example<&#47;h4><br />
+</code></p>
+<h4>Map Reduce Example</h4><br />
 <code lang="javascript"><br />
 db.factories.insert( { name: "Miller", metro: { city: "Milwaukee", state: "WI" } } );<br />
 db.factories.insert( { name: "Lakefront", metro: { city: "Milwaukee", state: "WI" } } );<br />
@@ -100,7 +100,7 @@ var fred = function (k, vals) {<br />
 res = db.factories.mapReduce(fmap, fred)<br />
 db[res.result].find()<br />
 db[res.result].drop()<br />
-<&#47;code></p>
-<h3>The Presentation<&#47;h3><br />
-<a href="&#47;wp-content&#47;uploads&#47;2010&#47;11&#47;NoSQL-with-MongoDB-and-Ruby.pdf">Download NoSQL with MongoDB and Ruby Slides<&#47;a></p>
-<p>Thanks to Meghan at <a href="http:&#47;&#47;www.10gen.com">10Gen<&#47;a> for sending stickers and a copy of <a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;product&#47;1449381561?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1449381561">MongoDB: The Definitive Guide<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&l=as2&o=1&a=1449381561" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;> that I gave out as a door prize. I read the book quickly this weekend before the talk and found it quite good, so I recommend it if you want to get started with MongoDB.</p>
+</code></p>
+<h3>The Presentation</h3><br />
+<a href="/wp-content/uploads/2010/11/NoSQL-with-MongoDB-and-Ruby.pdf">Download NoSQL with MongoDB and Ruby Slides</a></p>
+<p>Thanks to Meghan at <a href="http://www.10gen.com">10Gen</a> for sending stickers and a copy of <a href="http://www.amazon.com/gp/product/1449381561?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1449381561">MongoDB: The Definitive Guide</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=1449381561" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /> that I gave out as a door prize. I read the book quickly this weekend before the talk and found it quite good, so I recommend it if you want to get started with MongoDB.</p>

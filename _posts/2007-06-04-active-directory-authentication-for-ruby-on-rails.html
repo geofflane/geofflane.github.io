@@ -54,7 +54,7 @@ comments:
   author_url: http://hotgazpacho.org/2009/02/daily-digest-for-2009-02-07/
   date: '2009-02-07 23:30:33 -0500'
   date_gmt: '2009-02-08 05:30:33 -0500'
-  content: "[...] Active Directory Authentication for Ruby on Rails | Zorched &#47;
+  content: "[...] Active Directory Authentication for Ruby on Rails | Zorched /
     One Line Fix [...]"
 - id: 14940
   author: hotgazpacho &raquo; Blog Archive &raquo; Daily Digest for 2009-02-08 - yes,
@@ -63,7 +63,7 @@ comments:
   author_url: http://hotgazpacho.org/2009/02/daily-digest-for-2009-02-08-2/
   date: '2009-02-09 00:39:10 -0500'
   date_gmt: '2009-02-09 06:39:10 -0500'
-  content: "[...] Active Directory Authentication for Ruby on Rails | Zorched &#47;
+  content: "[...] Active Directory Authentication for Ruby on Rails | Zorched /
     One Line Fix [...]"
 - id: 15541
   author: Ldap authentication in ROR | Afraha | Our Own Tiny Planet
@@ -71,7 +71,7 @@ comments:
   author_url: http://www.afraha.com/2009/07/02/ldap-authentication-in-ror-2/
   date: '2009-07-02 11:27:22 -0400'
   date_gmt: '2009-07-02 17:27:22 -0400'
-  content: "[...] http:&#47;&#47;www.zorched.net&#47;2007&#47;06&#47;04&#47;active-directory-authentication-for-ruby-on-rails&#47;
+  content: "[...] http://www.zorched.net/2007/06/04/active-directory-authentication-for-ruby-on-rails/
     [...]"
 - id: 18384
   author: Rails web app authenticated with windows - Just just easy answers
@@ -82,25 +82,25 @@ comments:
   content: "[&#8230;] You can use mod_auth_sspi with Apache to enable NTLM authentication
     (have a look at this post). [&#8230;]"
 ---
-<p>Ruby on Rails can be used to build many kinds of web applications including public internet applications as well as private intranet ones. As an intranet application it is often very interesting to be able to do Single Sign-On using an existing Active Directory setup. Rails does not support <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;NTLM">NTLM<&#47;a> authentication out of the box which is what is required.</p>
-<h3>IIS for NTLM<&#47;h3><br />
+<p>Ruby on Rails can be used to build many kinds of web applications including public internet applications as well as private intranet ones. As an intranet application it is often very interesting to be able to do Single Sign-On using an existing Active Directory setup. Rails does not support <a href="http://en.wikipedia.org/wiki/NTLM">NTLM</a> authentication out of the box which is what is required.</p>
+<h3>IIS for NTLM</h3><br />
 If you are talking about Active Directory authentication then chances are good that you already have a Windows infrastructure. IIS, of course, supports NTLM so that's the first thing I looked into. To use this you have to run Rails under something like FastCGI. To make a long story short,  I could not get FastCGI to work with my Rails installation. This looks like a promising path for people who have a mostly Microsoft infrastructure already. This is an area that I hope to explore further, but I gave up on it for now.</p>
-<p>If you want to try this route, check out <a href="http:&#47;&#47;www.codeplex.com&#47;RORIIS">RoR IIS<&#47;a> which has a lot of instructions as well as an installer that can do a lot for you. (Again, I tried this first and it didn't work, so your mileage my vary.)</p>
-<h3>Apache with NTLM<&#47;h3><br />
-Authentication using Active Directory can be done with Apache on Windows as well using the  <a href="http:&#47;&#47;sourceforge.net&#47;projects&#47;mod-auth-sspi">mod_auth_sspi<&#47;a> authentication module, so this seemed like another promising path as Apache and Rails is a more common combination as opposed to IIS and Rails.</p>
+<p>If you want to try this route, check out <a href="http://www.codeplex.com/RORIIS">RoR IIS</a> which has a lot of instructions as well as an installer that can do a lot for you. (Again, I tried this first and it didn't work, so your mileage my vary.)</p>
+<h3>Apache with NTLM</h3><br />
+Authentication using Active Directory can be done with Apache on Windows as well using the  <a href="http://sourceforge.net/projects/mod-auth-sspi">mod_auth_sspi</a> authentication module, so this seemed like another promising path as Apache and Rails is a more common combination as opposed to IIS and Rails.</p>
 <p>Running Rails under Apache can be a bit tricky. There are a lot of options to choose from: mod_ruby, fast_cgi, proxying and scgi. All of these options with no real breakdown that I could find of why use one over another? Proxying with multiple mongrel instances is a very common combination, but I did not want to have mongrel running because I don't want a way to end-run around the authentication mechanism. So, I again tried FastCGI, this time under Apache. Me and FastCGI don't seem to get along though and it again failed to work. </p>
-<p><a href="http:&#47;&#47;rubyforge.org&#47;projects&#47;instantrails&#47;">InstantRails<&#47;a> uses SCGI though and as a reference implementation for Rails and Apache on Windows, I figured that was a promising path.. SCGI is supposed to be a simpler form of CGI with all of the performance advantages of FastCGI. SCGI is a two part solution. There is an Apache module and there is an <a href="http:&#47;&#47;www.zedshaw.com&#47;projects&#47;scgi_rails&#47;index.html">SCGI server that runs the rails application<&#47;a>. Using this combination, I was able to get Rails running under Apache on Windows.</p>
+<p><a href="http://rubyforge.org/projects/instantrails/">InstantRails</a> uses SCGI though and as a reference implementation for Rails and Apache on Windows, I figured that was a promising path.. SCGI is supposed to be a simpler form of CGI with all of the performance advantages of FastCGI. SCGI is a two part solution. There is an Apache module and there is an <a href="http://www.zedshaw.com/projects/scgi_rails/index.html">SCGI server that runs the rails application</a>. Using this combination, I was able to get Rails running under Apache on Windows.</p>
 <p>Under Apache the setup is fairly simple:<br />
 <code><br />
-LoadModule scgi_module modules&#47;mod_scgi.so<br />
-SCGIMount &#47; 127.0.0.1:9999<br />
-<&#47;code></p>
-<p><a href="http:&#47;&#47;www.zedshaw.com&#47;projects&#47;scgi_rails&#47;index.html">Rails SCGI is well documented<&#47;a> information including configuring Apache. So, I won't repeat everything.</p>
-<h3>Configure Apache for NTLM Authentication<&#47;h3><br />
+LoadModule scgi_module modules/mod_scgi.so<br />
+SCGIMount / 127.0.0.1:9999<br />
+</code></p>
+<p><a href="http://www.zedshaw.com/projects/scgi_rails/index.html">Rails SCGI is well documented</a> information including configuring Apache. So, I won't repeat everything.</p>
+<h3>Configure Apache for NTLM Authentication</h3><br />
 To use mod_auth_sspi, you have to load the module and then configure your application to use the domain to authenticate users. Once that is in place, your users will be authenticating using Active Directory. If you use a browser like Firefox or Safari, the user will see a Login Prompt, but if you are using Internet Explorer it will automatically pass the user's current Active Directory credentials to Apache and mod_auth_sspi will do the authentication transparently.</p>
 <p><code><br />
-LoadModule sspi_auth_module   modules&#47;mod_auth_sspi.so</p>
-<p><Directory "D:&#47;work&#47;rails_app&#47;public&#47;"><br />
+LoadModule sspi_auth_module   modules/mod_auth_sspi.so</p>
+<p><Directory "D:/work/rails_app/public/"><br />
     AuthType SSPI<br />
     SSPIAuth On<br />
     SSPIAuthoritative On<br />
@@ -108,11 +108,11 @@ LoadModule sspi_auth_module   modules&#47;mod_auth_sspi.so</p>
     SSPIOfferBasic On<br />
     SSPIOmitDomain Off<br />
     Require valid-user<br />
-<&#47;Directory><br />
-<&#47;code></p>
-<h3>Tying it Together In Rails<&#47;h3><br />
+</Directory><br />
+</code></p>
+<h3>Tying it Together In Rails</h3><br />
 At this point, anyone who gets access to your application has been authenticated. If your application does not need to know who the user is, congratulations! You're done. But if your application needs to actually know they who is using the app and not just that it's a valid user then you have a little bit more work to do.</p>
-<p>The most common way to check that a user is authenticated in Rails is to use a <em>before_filter<&#47;em> in your controllers to check that the session is properly setup and to send the user to a Login controller if they are not authenticated. You'll need do the same thing in this case:<br />
+<p>The most common way to check that a user is authenticated in Rails is to use a <em>before_filter</em> in your controllers to check that the session is properly setup and to send the user to a Login controller if they are not authenticated. You'll need do the same thing in this case:<br />
 <code><br />
 class ApplicationController < ActionController::Base<br />
   protected<br />
@@ -127,8 +127,8 @@ class ApplicationController < ActionController::Base<br />
     end<br />
   end<br />
 end<br />
-<&#47;code></p>
-<p>Most LoginContollers will show the user a form that allows them to authenticate. A User object is then used to authenticate that the username and password are correct. This implementation will be slightly different though. When Authentication is done by Apache it will set an HTTP variable <em>request.env["REMOTE_USER"]<&#47;em> that will be available in your Controllers to identify who the authenticated User is. You can use this information to learn about the user instead of showing them a login form. Remember, the user has already been authenticated by the Active Directory domain, so the user's credentials have been checked.</p>
+</code></p>
+<p>Most LoginContollers will show the user a form that allows them to authenticate. A User object is then used to authenticate that the username and password are correct. This implementation will be slightly different though. When Authentication is done by Apache it will set an HTTP variable <em>request.env["REMOTE_USER"]</em> that will be available in your Controllers to identify who the authenticated User is. You can use this information to learn about the user instead of showing them a login form. Remember, the user has already been authenticated by the Active Directory domain, so the user's credentials have been checked.</p>
 <p><code><br />
 class LoginController < ApplicationController<br />
   def index<br />
@@ -138,7 +138,7 @@ class LoginController < ApplicationController<br />
       session[:user] = user<br />
       success = true<br />
     end</p>
-<p>    redirect_to request.env["HTTP_REFERER"] ? :back : '&#47;' if success<br />
+<p>    redirect_to request.env["HTTP_REFERER"] ? :back : '/' if success<br />
     redirect_to :action => :error if ! success<br />
   end</p>
 <p>  def logout<br />
@@ -147,8 +147,8 @@ class LoginController < ApplicationController<br />
 <p>  def error<br />
   end<br />
 end<br />
-<&#47;code></p>
-<p>In the login controller you can get the REMOTE_USER information and then do whatever you need to do with that information. Most likely you'll want to call into Active Directory using something like <a href="http:&#47;&#47;ruby-ldap.sourceforge.net&#47;">ruby-ldap<&#47;a> to check on things like groups or role membership and to get extra User information.</p>
-<h3>Conclusion<&#47;h3><br />
+</code></p>
+<p>In the login controller you can get the REMOTE_USER information and then do whatever you need to do with that information. Most likely you'll want to call into Active Directory using something like <a href="http://ruby-ldap.sourceforge.net/">ruby-ldap</a> to check on things like groups or role membership and to get extra User information.</p>
+<h3>Conclusion</h3><br />
 There are a lot more implementation pieces that need to be completed. I would like to be able to pull extra information  about a user from Active Directory the first time they authenticate and store it in the session so I could know their full name for example.</p>
 <p>Hopefully this information will help someone else out because it definitely is not an obvious thing to do (at least it wasn't to me).</p>

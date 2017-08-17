@@ -32,16 +32,16 @@ comments:
     useful in my grails application.\r\nI did change one thing.  I wanted to allow
     for longer passwords then 16 characters.  So I split the password in fourths,
     generated hash-codes, then wrote them to the array.\r\n\r\n<code lang=\"groovy\">\r\nprivate
-    static setupCipher(mode, password) {\r\n  &#47;&#47; setup key\r\n  byte[] keyBytes
-    = new byte[16];\r\n  final int len = password.length();\r\n  &#47;&#47; four 'int's
-    in sixteen bytes\r\n  for(i in 0..<4) {\r\n    &#47;&#47; grab the hashcode of
-    one forth of the string: 0..1&#47;4, 1&#47;4..2&#47;4, 2&#47;4..3&#47;4, 3&#47;4..4&#47;4\r\n
-    \   int hc = password.substring( (int)((len * i)&#47;4), (int)((len * (i+1))&#47;4)
-    ).hashCode();\r\n    &#47;&#47; split an int into four bytes:\r\n    keyBytes[i
+    static setupCipher(mode, password) {\r\n  // setup key\r\n  byte[] keyBytes
+    = new byte[16];\r\n  final int len = password.length();\r\n  // four 'int's
+    in sixteen bytes\r\n  for(i in 0..<4) {\r\n    // grab the hashcode of
+    one forth of the string: 0..1/4, 1/4..2/4, 2/4..3/4, 3/4..4/4\r\n
+    \   int hc = password.substring( (int)((len * i)/4), (int)((len * (i+1))/4)
+    ).hashCode();\r\n    // split an int into four bytes:\r\n    keyBytes[i
     * 4 + 0] =(byte)(  hc >> 24 );\r\n    keyBytes[i * 4 + 1] =(byte)( (hc << 8) >>
     24 );\r\n    keyBytes[i * 4 + 2] =(byte)( (hc << 16) >> 24 );\r\n    keyBytes[i
     * 4 + 3] =(byte)( (hc << 24) >> 24 );\r\n  }\r\n\r\n  SecretKeySpec keySpec =
-    new SecretKeySpec(keyBytes, \"AES\");\r\n  &#47;&#47; ...\r\n<&#47;code>\r\n\r\nAnd
+    new SecretKeySpec(keyBytes, \"AES\");\r\n  // ...\r\n</code>\r\n\r\nAnd
     Thanks again,\r\n- Andy G\r\n"
 - id: 14412
   author: Geoff Lane
@@ -59,26 +59,26 @@ comments:
   content: This is a great post.  Exactly what I needed.
 ---
 <p>Certain data stored as plain text in a database is just asking for trouble these days. We hear too often about misplaced and stolen computers that contain databases full of Social Security numbers and other information that can lead to identity theft. We can help avoid these situations by encrypting those fields in a database so that if someone happens to get the data that they will have a difficult time getting the sensitive data.</p>
-<h3>Codecs<&#47;h3><br />
-Grails provides a very good mechanism for this encryption in its <a href="http:&#47;&#47;grails.org&#47;doc&#47;1.0.x&#47;ref&#47;Plug-ins&#47;codecs.html">Codec support<&#47;a>. Codecs allow you to create encoders and decoders that become very easy to use in your application. Grails comes with a few useful ones built in to do things like Base64, URL, HTML, and Javascript Encoding.</p>
-<p>Anywhere you have a string you can call the encodeAs<em>CodecName<&#47;em> or decode<em>CodecName<&#47;em> to perform the encoding or decoding:<br />
+<h3>Codecs</h3><br />
+Grails provides a very good mechanism for this encryption in its <a href="http://grails.org/doc/1.0.x/ref/Plug-ins/codecs.html">Codec support</a>. Codecs allow you to create encoders and decoders that become very easy to use in your application. Grails comes with a few useful ones built in to do things like Base64, URL, HTML, and Javascript Encoding.</p>
+<p>Anywhere you have a string you can call the encodeAs<em>CodecName</em> or decode<em>CodecName</em> to perform the encoding or decoding:<br />
 <code  lang="groovy"><br />
 assert "apples &amp; oranges " == "apples & oranges".encodeAsHTML()<br />
 assert "apples & oranges " == "apples &amp; oranges".decodeHTML()<br />
-<&#47;code></p>
-<p>This is a nice, generally useful utility that can be used for any kind of string conversion really. There's nothing from stopping you from creating your <em>encodeAsInteger<&#47;em> or <em>decodeShortDate<&#47;em> if that's something you need a lot of in your application.</p>
-<p>The basic format of a Codec is simple. You can create your new Codec in the <em>grails-app&#47;utils<&#47;em> directory and it will be found automatically by Grails based on the naming convention.<br />
+</code></p>
+<p>This is a nice, generally useful utility that can be used for any kind of string conversion really. There's nothing from stopping you from creating your <em>encodeAsInteger</em> or <em>decodeShortDate</em> if that's something you need a lot of in your application.</p>
+<p>The basic format of a Codec is simple. You can create your new Codec in the <em>grails-app/utils</em> directory and it will be found automatically by Grails based on the naming convention.<br />
 <code lang="groovy"><br />
 class MyCodec {<br />
     static encode = { str -><br />
-        &#47;&#47; Implement encoding here<br />
+        // Implement encoding here<br />
     }<br />
     static decode = { str -><br />
-        &#47;&#47; Implement decoding here<br />
+        // Implement decoding here<br />
     }<br />
 }<br />
-<&#47;code></p>
-<h3>Encryption Codec<&#47;h3><br />
+</code></p>
+<h3>Encryption Codec</h3><br />
 In my case I wanted to create something to do encryption. Luckily this is not so hard with the javax.crypto classes. The crypto API is not the most straight forward to use in the world, but with a little bit of reading you can figure out how to encrypt and decrypt data without a lot of hassle. Basically what you see is a fairly simple encryption routine wrapped in the Grails Codec standard.</p>
 <p>As you saw from previous example, the Codec standard is really simple, so all of the complexity here is really just the encryption code.</p>
 <p><code lang="groovy"><br />
@@ -88,9 +88,9 @@ import javax.crypto.spec.IvParameterSpec<br />
 import sun.misc.BASE64Encoder<br />
 import sun.misc.BASE64Decoder<br />
 import org.codehaus.groovy.grails.commons.ConfigurationHolder<br />
-&#47;**<br />
+/**<br />
 * Used for encrypting things to store in the database<br />
-*&#47;<br />
+*/<br />
 class SecureCodec {</p>
 <p>    static BASE64Decoder decoder = new BASE64Decoder()<br />
     static BASE64Encoder encoder = new BASE64Encoder()</p>
@@ -106,8 +106,8 @@ class SecureCodec {</p>
         return ConfigurationHolder.config.encryption.password<br />
     }</p>
 <p>    private static setupCipher(mode, password) {<br />
-        Cipher cipher = Cipher.getInstance("AES&#47;CBC&#47;PKCS5Padding");</p>
-<p>        &#47;&#47; setup key<br />
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");</p>
+<p>        // setup key<br />
         byte[] keyBytes = new byte[16];<br />
         byte[] b = password.getBytes("UTF-8");<br />
         int len = b.length;<br />
@@ -120,11 +120,11 @@ class SecureCodec {</p>
         return cipher<br />
     }<br />
 }<br />
-<&#47;code></p>
-<p>Another handy thing to notice is the <em>ConfigurationHolder.config<&#47;em>. This is the way to access application properties defined in Config.groovy. In a Domain class or a Controller you can get those values using <em>grailsApplication.config<&#47;em> but the grailsApplication variable is not available in Codecs or other classes. I use the Config.groovy to define an application specific secret to use for the encryption.</p>
-<h3>Testing Your Codec<&#47;h3><br />
+</code></p>
+<p>Another handy thing to notice is the <em>ConfigurationHolder.config</em>. This is the way to access application properties defined in Config.groovy. In a Domain class or a Controller you can get those values using <em>grailsApplication.config</em> but the grailsApplication variable is not available in Codecs or other classes. I use the Config.groovy to define an application specific secret to use for the encryption.</p>
+<h3>Testing Your Codec</h3><br />
 Now to confirm that the code works we can write a Unit Tests. Encryption and Codecs are the perfect example of checking an Inverse Relationships to confirm the functionality of the Codec. Basically just encode it and decode it and compare the original value to the decoded value. If they match, it worked! </p>
-<h4>As a Unit Test<&#47;h4><br />
+<h4>As a Unit Test</h4><br />
 Outside the context of your running Grails application your Codec is just another Groovy class. Testing it in a Unit Test is easy though. You can just instantiate an instance of it and call the closures like they are methods.<br />
 <code lang="groovy"><br />
 class SecureCodecTests extends GroovyTestCase {</p>
@@ -138,9 +138,9 @@ class SecureCodecTests extends GroovyTestCase {</p>
         assert original == decoded<br />
     }<br />
 }<br />
-<&#47;code></p>
-<h4>As an Integration Test<&#47;h4><br />
-If you want to be able to test it as it will be used in your Grails application though, you will need to run it as an integration test. The integration tests are loaded, instrumented and run just like they would be by the real Grails application. To do that, you just have to create the test under the <em>tests&#47;integration<&#47;em> directory of your Grails application.<br />
+</code></p>
+<h4>As an Integration Test</h4><br />
+If you want to be able to test it as it will be used in your Grails application though, you will need to run it as an integration test. The integration tests are loaded, instrumented and run just like they would be by the real Grails application. To do that, you just have to create the test under the <em>tests/integration</em> directory of your Grails application.<br />
 <code lang="groovy"><br />
 class SecureCodecTests extends GroovyTestCase {</p>
 <p>    void test_roundtrip_decodes_to_the_same_thing() {<br />
@@ -152,4 +152,4 @@ class SecureCodecTests extends GroovyTestCase {</p>
         assert original == decoded<br />
     }<br />
 }<br />
-<&#47;code></p>
+</code></p>

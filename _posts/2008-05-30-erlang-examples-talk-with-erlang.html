@@ -39,10 +39,10 @@ comments:
     Too much Ruby in my head probably. :)\r\nThanks for pointing that out, it's fixed
     now."
 ---
-<p>This is part of a series on the <a href="http:&#47;&#47;www.erlang.org&#47;course&#47;exercises.html">Erlang Exercises<&#47;a> which is a great set of programming problems that challenge you to implement solutions to some common Erlang problems. I'm going to share some of my solutions to these problems.</p>
-<h2>Implementing Talk with Distributed Erlang<&#47;h2><br />
-Make a simple Talk program that makes it possible to chat with friends at other nodes&#47;hosts.<br />
-<em>Hints: Your program should consist of two registered processes one for reading from the terminal and the other one for recieving messages from the other node then writing them to the terminal.<&#47;em></p>
+<p>This is part of a series on the <a href="http://www.erlang.org/course/exercises.html">Erlang Exercises</a> which is a great set of programming problems that challenge you to implement solutions to some common Erlang problems. I'm going to share some of my solutions to these problems.</p>
+<h2>Implementing Talk with Distributed Erlang</h2><br />
+Make a simple Talk program that makes it possible to chat with friends at other nodes/hosts.<br />
+<em>Hints: Your program should consist of two registered processes one for reading from the terminal and the other one for recieving messages from the other node then writing them to the terminal.</em></p>
 <p><code lang="erlang"><br />
 -module(talk2).<br />
 -compile(export_all).<br />
@@ -85,26 +85,26 @@ receiver() -><br />
     end.<br />
 clean(Data) -><br />
     string:strip(Data, both, $\n).<br />
-<&#47;code></p>
-<h3>Explanation<&#47;h3><br />
-This is functionally similar to <a href="http:&#47;&#47;www.zorched.net&#47;2008&#47;05&#47;29&#47;erlang-examples-talk-with-sockets&#47;">Erlang Talk with Sockets<&#47;a>. The difference is that it is doing Erlang-to-Erlang only communication taking advantage of Erlang's distributed functionality. The Socket example could have been made to interact with any programming language that can do socket programming.</p>
-<p><strong>start() -><&#47;strong><br />
-This starts the application by asking the user for the name of the other Erlang node to talk to. Erlang nodes are started by running them with a node name <em>erl -name foo<&#47;em>. That along with host information are used to talk to a remote node.</p>
-<p>So, first using <strong>io:get_line('What node? ')<&#47;strong> we ask the user then name of the other node. Then we spawn 2 processes. One to receive messages and one to send them. The interesting part here is the use of the <strong>register<&#47;strong> function. It takes an atom and a process id. The register function basically binds a pid to an atom and creates a globally accessible pid. It just simplifies the code a bit so you don't have to pass those pids to all of the other functions.</p>
-<p><strong>get_input() -><&#47;strong><br />
-This is the main user input loop. It asks the user for a message and then sends that message to the sender process. <strong>io:get_line('Talk: ')<&#47;strong> waits for user input before it returns, so only after a user types something and hits return will this function continue. If the <strong>case string:equal("exit!", Message) do<&#47;strong> evaluates to true, then the sender and receiver processes are told to exit and the program ends naturally. Otherwise the message is sent.</p>
-<p><strong>talk(Message) -><&#47;strong><br />
+</code></p>
+<h3>Explanation</h3><br />
+This is functionally similar to <a href="http://www.zorched.net/2008/05/29/erlang-examples-talk-with-sockets/">Erlang Talk with Sockets</a>. The difference is that it is doing Erlang-to-Erlang only communication taking advantage of Erlang's distributed functionality. The Socket example could have been made to interact with any programming language that can do socket programming.</p>
+<p><strong>start() -></strong><br />
+This starts the application by asking the user for the name of the other Erlang node to talk to. Erlang nodes are started by running them with a node name <em>erl -name foo</em>. That along with host information are used to talk to a remote node.</p>
+<p>So, first using <strong>io:get_line('What node? ')</strong> we ask the user then name of the other node. Then we spawn 2 processes. One to receive messages and one to send them. The interesting part here is the use of the <strong>register</strong> function. It takes an atom and a process id. The register function basically binds a pid to an atom and creates a globally accessible pid. It just simplifies the code a bit so you don't have to pass those pids to all of the other functions.</p>
+<p><strong>get_input() -></strong><br />
+This is the main user input loop. It asks the user for a message and then sends that message to the sender process. <strong>io:get_line('Talk: ')</strong> waits for user input before it returns, so only after a user types something and hits return will this function continue. If the <strong>case string:equal("exit!", Message) do</strong> evaluates to true, then the sender and receiver processes are told to exit and the program ends naturally. Otherwise the message is sent.</p>
+<p><strong>talk(Message) -></strong><br />
 This function sends the message to the sender process.</p>
-<p><strong>sender(OtherNode) -><&#47;strong><br />
-This is the function that is running as the sender process. It is initialized with the remote <strong>OtherNode<&#47;strong> information. It receives messages and forwards them to the OtherNode. The <strong>rpc:call(OtherNode, talk2, send_message, [Message]),<&#47;strong> call invokes the <strong>send_message<&#47;strong> function running on the remote node.</p>
-<p><strong>send_message(Message) -><&#47;strong><br />
-This is really an RPC helper method that passes messages it get to the process running the <strong>receive<&#47;strong> function.</p>
-<p><strong>receiver() -><&#47;strong><br />
+<p><strong>sender(OtherNode) -></strong><br />
+This is the function that is running as the sender process. It is initialized with the remote <strong>OtherNode</strong> information. It receives messages and forwards them to the OtherNode. The <strong>rpc:call(OtherNode, talk2, send_message, [Message]),</strong> call invokes the <strong>send_message</strong> function running on the remote node.</p>
+<p><strong>send_message(Message) -></strong><br />
+This is really an RPC helper method that passes messages it get to the process running the <strong>receive</strong> function.</p>
+<p><strong>receiver() -></strong><br />
 The receiver is the function that is being run as the receiver process. It listens for messages and when it gets one it prints it out to the user.</p>
-<h2>Thoughts<&#47;h2><br />
+<h2>Thoughts</h2><br />
 The other interesting way to solve this would be to actually spawn processes remotely on the other node. The code can then have a reference to a pid running on the remote node and can pass messages to it directly without using the RPC approach. This would allow one side of the conversation to initiate it without the other knowing about it.</p>
 <p><code><br />
 register(remote_receiver, spawn(OtherNode, talk2, receiver, [])),<br />
 remote_receiver ! "Hello".<br />
-<&#47;code></p>
+</code></p>
 <p>An exercise I'll leave up to you!</p>

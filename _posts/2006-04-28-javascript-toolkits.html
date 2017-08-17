@@ -21,27 +21,27 @@ categories:
 tags: []
 comments: []
 ---
-<p>For much of the web's history <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Javascript">JavaScript<&#47;a> has been the domain of the  web designer who was often not a skilled programmer. So JavaScript was often a messy endeavor and did not follow a lot of the tenets of good software development. What has been missed this whole time is that JavaScript is a really interesting and powerful language. It shares many things that I like so much about Ruby. It has <a href="http:&#47;&#47;jibbering.com&#47;faq&#47;faq_notes&#47;closures.html">closures<&#47;a> and prototyping (the ability to add methods to Objects at runtime). It is a highly dynamic language that can do a lot.</p>
+<p>For much of the web's history <a href="http://en.wikipedia.org/wiki/Javascript">JavaScript</a> has been the domain of the  web designer who was often not a skilled programmer. So JavaScript was often a messy endeavor and did not follow a lot of the tenets of good software development. What has been missed this whole time is that JavaScript is a really interesting and powerful language. It shares many things that I like so much about Ruby. It has <a href="http://jibbering.com/faq/faq_notes/closures.html">closures</a> and prototyping (the ability to add methods to Objects at runtime). It is a highly dynamic language that can do a lot.</p>
 <p>The rising popularity of AJAX and rich-client web applications and the power that they can provide to offer very good user experience have led to interest by the hard-core development community. This interest has led to the development of a number of frameworks for client-side JavaScript development. These frameworks aim to handle the plumbing of JavaScript including handling the incompatibilities across various browsers. These toolkits lower the barrier of entry to building interesting, dynamic web applications.</p>
-<h3>Toolkits<&#47;h3></p>
-<h4>Prototype<&#47;h4><br />
-Ruby on Rails comes with a JavaScript toolkit called <a href="http:&#47;&#47;prototype.conio.net&#47;">Prototype<&#47;a>. Prototype has added a lot of Ruby-like constructs onto JavaScript that makes it a lot more natural to Ruby programmers to use. Adding onto Prototype is the <a href="http:&#47;&#47;script.aculo.us&#47;">Scriptaculous<&#47;a> library. Scriptaculous adds interesting visual effects to the core Prototype toolkit.</p>
+<h3>Toolkits</h3></p>
+<h4>Prototype</h4><br />
+Ruby on Rails comes with a JavaScript toolkit called <a href="http://prototype.conio.net/">Prototype</a>. Prototype has added a lot of Ruby-like constructs onto JavaScript that makes it a lot more natural to Ruby programmers to use. Adding onto Prototype is the <a href="http://script.aculo.us/">Scriptaculous</a> library. Scriptaculous adds interesting visual effects to the core Prototype toolkit.</p>
 <p>While these are the toolkits of choice for Ruby on Rails, there is nothing that will prevent you from using them in any web application, no matter what the underlying server-side technology.</p>
-<p>There is a great <a href="http:&#47;&#47;www.sergiopereira.com&#47;articles&#47;prototype.js.html">Prototype Reference<&#47;a> available to get you started.</p>
-<h4>Dojo<&#47;h4><br />
-Where Prototype is built like Ruby, <a href="http:&#47;&#47;www.dojotoolkit.org&#47;">Dojo<&#47;a> is "just JavaScript". They do not try and change the core language in any way that is not natural JavaScript. They also have taken a very good software engineering perspective on the system including a suite of unit tests and a build system. Dojo has a complete AJAX abstraction, visual effects and a very cool event mechanism. Dojo also has the concept of Widgets that allows you to build reusable components. It seems like it has a lot of potential.</p>
-<p><a href="http:&#47;&#47;tacos.sourceforge.net&#47;">Tacos<&#47;a> is a blending of the Dojo toolkit with the Tapestry framework allowing Tapestry to do AJAX.</p>
-<h4>Other Toolkits<&#47;h4><br />
+<p>There is a great <a href="http://www.sergiopereira.com/articles/prototype.js.html">Prototype Reference</a> available to get you started.</p>
+<h4>Dojo</h4><br />
+Where Prototype is built like Ruby, <a href="http://www.dojotoolkit.org/">Dojo</a> is "just JavaScript". They do not try and change the core language in any way that is not natural JavaScript. They also have taken a very good software engineering perspective on the system including a suite of unit tests and a build system. Dojo has a complete AJAX abstraction, visual effects and a very cool event mechanism. Dojo also has the concept of Widgets that allows you to build reusable components. It seems like it has a lot of potential.</p>
+<p><a href="http://tacos.sourceforge.net/">Tacos</a> is a blending of the Dojo toolkit with the Tapestry framework allowing Tapestry to do AJAX.</p>
+<h4>Other Toolkits</h4><br />
 Prototype and Dojo seem to be the most interesting toolkits to me, but there are a number of others available:<br />
-<a href="http:&#47;&#47;www.mochikit.com&#47;">MochiKit<&#47;a><br />
-<a href="http:&#47;&#47;developer.yahoo.com&#47;yui&#47;index.html">Yahoo! UI Toolkit<&#47;a><br />
-<a href="http:&#47;&#47;www.zimbra.com&#47;community&#47;open_ajax.html">Zimbra<&#47;a><br />
-<a href="http:&#47;&#47;trimpath.com&#47;project&#47;wiki&#47;TrimJunction">TrimJunction<&#47;a></p>
-<h3>Development Tools<&#47;h3><br />
-Client side development has lacked many of the tools that serious developers are used to for "regular" development. This is probably one of the many reasons that <em>hard-core<&#47;em> programmers have snubbed their noses as client side development. Well, yet another excuse has been removed.</p>
-<p>Syntax highlighting and code completion are available in a number of IDEs these days including <a href="http:&#47;&#47;www.jetbrains.com&#47;idea&#47;features&#47;javascript.html">Intellij IDEA<&#47;a> and <a href="http:&#47;&#47;www.interaktonline.com&#47;Products&#47;Eclipse&#47;JSEclipse&#47;Overview&#47;">Eclipse<&#47;a>.</p>
-<p>There are interesting debugging tools for both Firefox and Internet Explorer that allow you to easily debug problems in each browser. In addition to the Javascript console in Firefox and <a href="http:&#47;&#47;www.mozilla.org&#47;projects&#47;venkman&#47;">Venkman<&#47;a> some other handy tools are available.</p>
-<p><a href="http:&#47;&#47;www.joehewitt.com&#47;software&#47;firebug&#47;">Firebug<&#47;a> is a really nice Firefox plugin.<br />
-<a href="http:&#47;&#47;blogs.msdn.com&#47;ie&#47;archive&#47;2004&#47;10&#47;26&#47;247912.aspx">IE Script Debugger<&#47;a> is available for the same task in Internet Explorer.</p>
-<h3>Other References<&#47;h3><br />
-<a href="http:&#47;&#47;www.javascriptkit.com&#47;">JavaScript Kit<&#47;a> offers some really good documentation and tutorials. It includes some interesting in-depth discussion of some discussion of creating <a href="http:&#47;&#47;www.javascriptkit.com&#47;javatutors&#47;oopjs.shtml">Object Oriented<&#47;a> constructs in JavaScript.</p>
+<a href="http://www.mochikit.com/">MochiKit</a><br />
+<a href="http://developer.yahoo.com/yui/index.html">Yahoo! UI Toolkit</a><br />
+<a href="http://www.zimbra.com/community/open_ajax.html">Zimbra</a><br />
+<a href="http://trimpath.com/project/wiki/TrimJunction">TrimJunction</a></p>
+<h3>Development Tools</h3><br />
+Client side development has lacked many of the tools that serious developers are used to for "regular" development. This is probably one of the many reasons that <em>hard-core</em> programmers have snubbed their noses as client side development. Well, yet another excuse has been removed.</p>
+<p>Syntax highlighting and code completion are available in a number of IDEs these days including <a href="http://www.jetbrains.com/idea/features/javascript.html">Intellij IDEA</a> and <a href="http://www.interaktonline.com/Products/Eclipse/JSEclipse/Overview/">Eclipse</a>.</p>
+<p>There are interesting debugging tools for both Firefox and Internet Explorer that allow you to easily debug problems in each browser. In addition to the Javascript console in Firefox and <a href="http://www.mozilla.org/projects/venkman/">Venkman</a> some other handy tools are available.</p>
+<p><a href="http://www.joehewitt.com/software/firebug/">Firebug</a> is a really nice Firefox plugin.<br />
+<a href="http://blogs.msdn.com/ie/archive/2004/10/26/247912.aspx">IE Script Debugger</a> is available for the same task in Internet Explorer.</p>
+<h3>Other References</h3><br />
+<a href="http://www.javascriptkit.com/">JavaScript Kit</a> offers some really good documentation and tutorials. It includes some interesting in-depth discussion of some discussion of creating <a href="http://www.javascriptkit.com/javatutors/oopjs.shtml">Object Oriented</a> constructs in JavaScript.</p>

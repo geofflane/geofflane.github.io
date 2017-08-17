@@ -69,28 +69,28 @@ comments:
   content: "Grant,\r\nI updated the post to add a link that points out many of the
     advantages of having immutable objects, specifically in the case of Strings."
 ---
-<h2>What You Should Know About Strings<&#47;h2><br />
-In both Java and .NET (and other languages) String objects are <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Immutable_object">immutable<&#47;a>. They don't change. Period. If you "change" a String, it creates a new String. That includes String concatenation using a <em>+<&#47;em></p>
+<h2>What You Should Know About Strings</h2><br />
+In both Java and .NET (and other languages) String objects are <a href="http://en.wikipedia.org/wiki/Immutable_object">immutable</a>. They don't change. Period. If you "change" a String, it creates a new String. That includes String concatenation using a <em>+</em></p>
 <p><code lang="java"><br />
-&#47;&#47; One string created "foo"<br />
+// One string created "foo"<br />
 String foo = "foo";<br />
-&#47;&#47; foo exists, "bar" is created and the combination of foo and "bar" is a third string<br />
+// foo exists, "bar" is created and the combination of foo and "bar" is a third string<br />
 String bar = foo + " bar";<br />
-<&#47;code></p>
-<p>Ok, if you don't know this, fine. But if you don't know this, why would you EVER use a <em>StringBuilder<&#47;em>?</p>
-<h2>Why Does StringBuilder Exist?<&#47;h2><br />
+</code></p>
+<p>Ok, if you don't know this, fine. But if you don't know this, why would you EVER use a <em>StringBuilder</em>?</p>
+<h2>Why Does StringBuilder Exist?</h2><br />
 We know that Strings are immutable. If you need to do a bunch of string modification, concatenation, replacement - you will create a bunch of strings. Ok, great...why do I care? We care because we are told that creating a lot of Objects (and then later having to Garbage Collect them) is inefficient. To start with, I will guarantee right now that concatenating strings WILL NOT be the thing that prevents your application from performing. Guaranteed. Period.</p>
 <p>Ok fine, it's not going to be a problem. But you want to be a responsible coder and not do things that are intentionally inefficient if you can help it.</p>
 <p>So you use a StringBuilder. StringBuilder is implemented internally as an array of characters. The code manages the allocation and copying of data to new arrays if the buffer gets filled. It sometimes over allocates the new buffer so that it has to perform allocations less often. You sacrifice a bit of memory overhead to avoid some Object creation and Garbage Collection later.</p>
-<h2>My Biggest Pet Peeve<&#47;h2><br />
-Your use of StringBuilder is a <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Optimization_(computer_science)">premature optimization<&#47;a> but probably a forgivable one.</p>
+<h2>My Biggest Pet Peeve</h2><br />
+Your use of StringBuilder is a <a href="http://en.wikipedia.org/wiki/Optimization_(computer_science)">premature optimization</a> but probably a forgivable one.</p>
 <p>So, WHY, OH WHY do you do this:<br />
 <code lang="java"><br />
-&#47;&#47; One string created "foo"<br />
+// One string created "foo"<br />
 StringBuilder sb = new StringBuilder();<br />
 sb.append("Foo: " + fooValue + " \n");<br />
 sb.append("Bar: " + barValue + "\n");<br />
-<&#47;code></p>
+</code></p>
 <p>It makes me have violent thoughts. Please stop.</p>
-<p><strong><em>Update:<&#47;em><&#47;strong><br />
-For some of the reasons why Strings are immutable, see <a href="http:&#47;&#47;mindprod.com&#47;jgloss&#47;immutable.html">this post on immutability<&#47;a> and its positive qualities.</p>
+<p><strong><em>Update:</em></strong><br />
+For some of the reasons why Strings are immutable, see <a href="http://mindprod.com/jgloss/immutable.html">this post on immutability</a> and its positive qualities.</p>

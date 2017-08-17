@@ -53,7 +53,7 @@ comments:
     that's good for wildcard queries ('%').  Of course you should validate the data
     first.\r\n\r\n<code lang=\"groovy\">\r\ndef user_params = ['slug', 'category']\r\n\r\ndef
     articles = Article.withCriteria {\r\n  for (e in params) {\r\n    if (e.key in
-    user_params) {\r\n        ilike(e.key, '%' + e.value + '%')\r\n    }\r\n  }\r\n}\r\n<&#47;code>"
+    user_params) {\r\n        ilike(e.key, '%' + e.value + '%')\r\n    }\r\n  }\r\n}\r\n</code>"
 - id: 15641
   author: Geoff Lane
   author_email: geoff@zorched.net
@@ -64,7 +64,7 @@ comments:
     doesn't automatically apply it to all criteria. So if you want to find all approved
     and not approved you just do something like:\r\n<code lang=\"groovy\">\r\nstatic
     findAllByCategory(String category) {\r\n        withCriteria {\r\n                eq('category',
-    category)\r\n        }\r\n    }\r\n<&#47;code>\r\n\r\nWithout the approved {}
+    category)\r\n        }\r\n    }\r\n</code>\r\n\r\nWithout the approved {}
     block."
 - id: 15642
   author: Geoff Lane
@@ -88,8 +88,8 @@ comments:
   date_gmt: '2009-10-20 07:54:19 -0400'
   content: "Hi Geoff,\r\n\r\nOne other thing that can be done to Hibernate Criteria
     Builder is adding some methods that will add the actual restriction only if searched
-    value is not null&#47;empty.\r\n\r\nYou can check the code from my post here:
-    http:&#47;&#47;www.aqris.com&#47;x&#47;NoBx"
+    value is not null/empty.\r\n\r\nYou can check the code from my post here:
+    http://www.aqris.com/x/NoBx"
 - id: 15890
   author: Kyle Dickerson
   author_email: kbdjunk@gmail.com
@@ -99,7 +99,7 @@ comments:
   content: 'I came up with a more flexible way that doesn''t require monkey-patching
     the metaclass.  It involves currying the CriteriaBuilder object to separate closures
     that you want to combine into a single query.  I wrote it up on my blog, you can
-    read it there: http:&#47;&#47;dickersonshypotheticalblog.blogspot.com&#47;2009&#47;10&#47;grails-dynamically-building-criteria.html'
+    read it there: http://dickersonshypotheticalblog.blogspot.com/2009/10/grails-dynamically-building-criteria.html'
 - id: 16034
   author: Peter Willis
   author_email: willispeter.willis@gmail.com
@@ -111,7 +111,7 @@ comments:
     q2 = {\r\n le 'time', new Date() - 7\r\n}\r\n\r\nClosure join(Object[] queries)
     {    \r\n    return {\r\n        for(q in queries) {\r\n            q.delegate
     = delegate\r\n            q()\r\n        }\r\n    }\r\n}\r\n\r\nc.list( join(q0,
-    q1, q2) )\r\n<&#47;code>"
+    q1, q2) )\r\n</code>"
 - id: 16054
   author: Martin
   author_email: martin@thegoodvibe.de
@@ -141,10 +141,10 @@ comments:
   author_url: http://www.hkwebentrepreneurs.com
   date: '2012-11-22 22:00:12 -0500'
   date_gmt: '2012-11-23 04:00:12 -0500'
-  content: "This is a really useful technique! I've submitted a <a href=\"https:&#47;&#47;github.com&#47;grails&#47;grails-doc&#47;pull&#47;101\"
-    rel=\"nofollow\">pull request<&#47;a> to get it added to the grails core docs.\r\n\r\nAlso
-    take a look at Grails 2 <a href=\"http:&#47;&#47;grails.org&#47;doc&#47;latest&#47;guide&#47;single.html#detachedCriteria\"
-    rel=\"nofollow\">Detached Criteria<&#47;a>, which can be used to achieve similar
+  content: "This is a really useful technique! I've submitted a <a href=\"https://github.com/grails/grails-doc/pull/101\"
+    rel=\"nofollow\">pull request</a> to get it added to the grails core docs.\r\n\r\nAlso
+    take a look at Grails 2 <a href=\"http://grails.org/doc/latest/guide/single.html#detachedCriteria\"
+    rel=\"nofollow\">Detached Criteria</a>, which can be used to achieve similar
     results and are arguably more flexible."
 - id: 68722
   author: timo
@@ -161,7 +161,7 @@ comments:
 
     Great post though!
 ---
-<p>When you're writing code, Don't Repeat Yourself. Now say that 5 times. <em>*rimshot*<&#47;em> </p>
+<p>When you're writing code, Don't Repeat Yourself. Now say that 5 times. <em>*rimshot*</em> </p>
 <p>One of the things that I find myself repeating a lot of in many business apps is queries. It's common to have a rule or filter that applies to many different cases. I came across such a situation recently and wanted to figure out a way to share that filter across many different queries. This is what I came up with for keeping those Criteria DRY.</p>
 <p>To start with, I'll use an example of an Article. This could be a blog post or a newspaper article. One of the rules of the system is that Articles need to be published before they are visible by end users. Because of this seemingly simple rule, every time we query for Articles, we will need to check the published flag. If you get a lot of queries, that ends up being a lot of repetition.</p>
 <p>Here's our example domain class:<br />
@@ -177,8 +177,8 @@ class Article {<br />
         slug(nullable: true)<br />
     }<br />
 }<br />
-<&#47;code></p>
-<p>Now we need to add a query that will retrieve our domain instance by its <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Slug_(production)">slug<&#47;a> (a slug is a publishing term for a short name given to an article, in the web world it has become a term often used for a search engine optimization technique that uses the title instead of an artificial ID). To perform that query we might write something like this on the Article class:<br />
+</code></p>
+<p>Now we need to add a query that will retrieve our domain instance by its <a href="http://en.wikipedia.org/wiki/Slug_(production)">slug</a> (a slug is a publishing term for a short name given to an article, in the web world it has become a term often used for a search engine optimization technique that uses the title instead of an artificial ID). To perform that query we might write something like this on the Article class:<br />
 <code lang="groovy"><br />
     static getBySlug(String slug) {<br />
         withCriteria(uniqueResult:true) {<br />
@@ -188,7 +188,7 @@ class Article {<br />
             }<br />
         }<br />
     }<br />
-<&#47;code></p>
+</code></p>
 <p>We want to query based on the slug, but we also want to only allow a published Article to be shown. This would allow us to unpublish an article if necessary. Without the approved filter, if the link had gotten out, people could still view the article.</p>
 <p>Next we decide we want to list all of the Articles in a particular category so we write something like this, again filtering by the approved flag.<br />
 <code lang="groovy"><br />
@@ -200,23 +200,23 @@ class Article {<br />
             }<br />
         }<br />
     }<br />
-<&#47;code></p>
+</code></p>
 <p>Two simple examples like this might not be that big of a deal. But you can easily see how this would grow if you added more custom queries or if you had some more complicated filtering logic.  Another common case would be if you had the same filter across many different domain objects. (What if the Article had attachments and comments all of which needed their own approval?) What you need is a way to share that logic among multiple withCriteria calls.</p>
-<p>The trick to this is understanding how <em>withCriteria<&#47;em> and <em>createCriteria<&#47;em> work in GORM. They are both implemented using a custom class called <em>HibernateCriteriaBuilder<&#47;em>. That class invokes the closures that you pass to it on itself. Sounds confusing. Basically the elements in the closure of your criteria queries get executed as if the were called on an instance of HibernateCriteriaBuilder.</p>
+<p>The trick to this is understanding how <em>withCriteria</em> and <em>createCriteria</em> work in GORM. They are both implemented using a custom class called <em>HibernateCriteriaBuilder</em>. That class invokes the closures that you pass to it on itself. Sounds confusing. Basically the elements in the closure of your criteria queries get executed as if the were called on an instance of HibernateCriteriaBuilder.</p>
 <p>e.g.<br />
 <code lang="groovy"><br />
 withCriteria {<br />
      eq('a', 1)<br />
      like('b', '%foo%')<br />
 }<br />
-<&#47;code></p>
+</code></p>
 <p>would be the equivalent of calling something like:</p>
 <p><code lang="groovy"><br />
 def builder = new HibernateCriteriaBuilder(...)<br />
 builder.eq('a', 1)<br />
 builder.like('b', '%foo%')<br />
-<&#47;code></p>
-<p>That little bit of knowledge allow you to reach into your meta programming bag of tricks and add new calls to the HibernateCriteriaBuilder. Every Class in groovy has a <em>metaClass<&#47;em> that is used to extend types of that Class. In this case we'll add a Closure that will combine our criteria with other criteria like so:<br />
+</code></p>
+<p>That little bit of knowledge allow you to reach into your meta programming bag of tricks and add new calls to the HibernateCriteriaBuilder. Every Class in groovy has a <em>metaClass</em> that is used to extend types of that Class. In this case we'll add a Closure that will combine our criteria with other criteria like so:<br />
 <code lang="groovy"><br />
 HibernateCriteriaBuilder.metaClass.published = { Closure c -><br />
     and {<br />
@@ -224,15 +224,15 @@ HibernateCriteriaBuilder.metaClass.published = { Closure c -><br />
         c()<br />
     }<br />
 }<br />
-<&#47;code></p>
-<p>This <em>ands<&#47;em> together our eq call with all of the other parts of the passed in closure.<br />
+</code></p>
+<p>This <em>ands</em> together our eq call with all of the other parts of the passed in closure.<br />
 Now we can put the whole thing together into a domain class with a reusable filter.</p>
 <p><code lang="groovy"><br />
 package net.zorched.domain</p>
 <p>import grails.orm.HibernateCriteriaBuilder</p>
 <p>class Article {</p>
 <p>    static {<br />
-        &#47;&#47; monkey patch HibernateCriteriaBuilder to have a reusable 'published' filter<br />
+        // monkey patch HibernateCriteriaBuilder to have a reusable 'published' filter<br />
         HibernateCriteriaBuilder.metaClass.published = { Closure c -><br />
             and {<br />
                 eq('published', true)<br />
@@ -274,5 +274,5 @@ package net.zorched.domain</p>
         slug(nullable: true)<br />
     }<br />
 }<br />
-<&#47;code></p>
+</code></p>
 <p>And there you have it. Do you have any other techniques that can be used to DRY criteria?</p>

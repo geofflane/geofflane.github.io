@@ -34,11 +34,11 @@ comments:
     ASP.NET. As I was playing around with the solution I hit on the fact that I was
     only injecting at the Page [...]"
 ---
-<p><a href="http:&#47;&#47;www.codeplex.com&#47;ObjectBuilder">ObjectBuilder<&#47;a> is a .NET framework made for building <a href="http:&#47;&#47;www.martinfowler.com&#47;articles&#47;injection.html">Inversion of Control or Dependency Injection<&#47;a> containers. Unlike Spring or Pico, ObjectBuilder is not a full DI framework, instead it's a framework for building DI solutions. Yes, that's incredibly weird to me too.</p>
-<h3>Why Use Object Builder?<&#47;h3><br />
-Why would you use ObjectBuilder instead of a fully baked DI solution? In the .NET world it seems like if it's not built by Microsoft then it's not on the table. People really are looking for the "garden path". So in part it's really a psychological thing. On the other hand the Microsoft Application Blocks and <a href="http:&#47;&#47;www.codeplex.com&#47;entlib">Enterprise Library<&#47;a> are built using ObjectBuilder. So, if you are already using some of those solutions, then you already have a dependency on ObjectBuilder. It is natural to try to control the number of dependencies that a project relies upon. In this case, you have a simple solution that just requires a bit of custom code.</p>
+<p><a href="http://www.codeplex.com/ObjectBuilder">ObjectBuilder</a> is a .NET framework made for building <a href="http://www.martinfowler.com/articles/injection.html">Inversion of Control or Dependency Injection</a> containers. Unlike Spring or Pico, ObjectBuilder is not a full DI framework, instead it's a framework for building DI solutions. Yes, that's incredibly weird to me too.</p>
+<h3>Why Use Object Builder?</h3><br />
+Why would you use ObjectBuilder instead of a fully baked DI solution? In the .NET world it seems like if it's not built by Microsoft then it's not on the table. People really are looking for the "garden path". So in part it's really a psychological thing. On the other hand the Microsoft Application Blocks and <a href="http://www.codeplex.com/entlib">Enterprise Library</a> are built using ObjectBuilder. So, if you are already using some of those solutions, then you already have a dependency on ObjectBuilder. It is natural to try to control the number of dependencies that a project relies upon. In this case, you have a simple solution that just requires a bit of custom code.</p>
 <p>In addition to the fact that it's basically a roll-your-own DI framework, the other downside of ObjectBuilder is that the documentation is non-existent. It's said 'Under construction...' sine July of 2006, so don't get your hopes up if you don't want to look at the API and read the source.</p>
-<h3>Wire Together Services<&#47;h3><br />
+<h3>Wire Together Services</h3><br />
 If you are going to build a service you could do property based injection. What this means is that in your service layer all of the dependencies are passed into a service via property setters. This keeps the code clean and makes changing the implementation of a dependency very easy. If you have a hardcoded constructor for your dependency in a class then making this kind of change will be harder. It also makes Unit Testing very easy because you can mock out dependencies and isolate the layers of your code.</p>
 <p><code lang="csharp"><br />
 public class SomeService<br />
@@ -56,8 +56,8 @@ public class SomeService<br />
             SomeDAO.Save(o);<br />
     }<br />
 }<br />
-<&#47;code></p>
-<h3>ASP.NET<&#47;h3><br />
+</code></p>
+<h3>ASP.NET</h3><br />
 Most of the examples you can find on the web dealing with ObjectBuilder are about how to use ObjectBuilder as a ServiceBroker where you instantiate a service type object in a view.</p>
 <p><code lang="csharp"><br />
 public partial class SomePage : System.Web.UI.Page<br />
@@ -70,10 +70,10 @@ public partial class SomePage : System.Web.UI.Page<br />
     }</p>
 <p>    private Builder NewBuilder()<br />
     {<br />
-        &#47;&#47; Create a Builder<br />
+        // Create a Builder<br />
     }<br />
 }<br />
-<&#47;code></p>
+</code></p>
 <p>While that's ok, I think it's a pretty limiting way to do things. Once you get to any sort of complex object construction, you are going to have to create another class to encapsulate all of the policies and strategies for building objects. The other issue is that using the Services in UI code is very different than compositing the services themselves. It also stands in stark contrast to the clean implementation of the Service layer.</p>
 <p>I want to make my pages look more like my Service layer.</p>
 <p><code lang="csharp"><br />
@@ -90,39 +90,39 @@ public partial class SomePage : System.Web.UI.Page<br />
         set { someService = value; }<br />
     }<br />
 }<br />
-<&#47;code></p>
-<h3>IHttpModules to the Rescue<&#47;h3><br />
+</code></p>
+<h3>IHttpModules to the Rescue</h3><br />
 Page lifecycles are handled by the ASP.NET worker processes so there is no way to construct your own pages and do the Dependency Injection. I immediately went to the idea of a filter (which is how this is done in the Java world). The filter concept in ASP.NET is implemented as an IHttpModule.</p>
 <p>The module should do 2 main things:</p>
 <ul>
-<li>Construct and manage the DI container<&#47;li>
-<li>Inject Properties into the Page object that is going to handle the request<&#47;li><br />
-<&#47;ul></p>
+<li>Construct and manage the DI container</li>
+<li>Inject Properties into the Page object that is going to handle the request</li><br />
+</ul></p>
 <p>Construct a series of ObjectBuilder classes to create your DI container.<br />
 <code lang="csharp"><br />
 Locator locator = new Locator();<br />
 ILifetimeContainer container = new LifetimeContainer();</p>
-<p>&#47;&#47; Setup the strategy for how objects can be created<br />
+<p>// Setup the strategy for how objects can be created<br />
 BuilderStrategyChain chain = new BuilderStrategyChain();<br />
 chain.Add(new CreationStrategy());<br />
 chain.Add(new PropertyReflectionStrategy());<br />
 chain.Add(new PropertySetterStrategy());<br />
 locator.Add(typeof(ILifetimeContainer), container);</p>
-<p>&#47;&#47; Create a context to build an object<br />
+<p>// Create a context to build an object<br />
 BuilderContext builderContext = new BuilderContext(chain, locator, null);<br />
 builderContext.Policies.SetDefault<ICreationPolicy>(new DefaultCreationPolicy());<br />
-<&#47;code></p>
+</code></p>
 <p>You can access the current Page that will handle the request in an IHttpModule using:<br />
 <code lang="csharp"><br />
 HttpApplication app;<br />
-app.Context.CurrentHandler; &#47;&#47; The Page handler<br />
-<&#47;code></p>
-<p>Now to tie it all together we create an IHttpModule that will filter each request and wire up our Pages with their dependencies. IHttpModules are configured to respond to callback events related to the <a href="http:&#47;&#47;msdn2.microsoft.com&#47;en-us&#47;library&#47;system.web.httpapplication(VS.80).aspx">Life Cycle of a request<&#47;a>. In this case we need wire up our Pages after the PostMapRequestHandler because the Page is created prior to this. I set this up on the PreRequestHandlerExecute because everything is setup at this point and it is right before the Page methods are called.</p>
+app.Context.CurrentHandler; // The Page handler<br />
+</code></p>
+<p>Now to tie it all together we create an IHttpModule that will filter each request and wire up our Pages with their dependencies. IHttpModules are configured to respond to callback events related to the <a href="http://msdn2.microsoft.com/en-us/library/system.web.httpapplication(VS.80).aspx">Life Cycle of a request</a>. In this case we need wire up our Pages after the PostMapRequestHandler because the Page is created prior to this. I set this up on the PreRequestHandlerExecute because everything is setup at this point and it is right before the Page methods are called.</p>
 <p><code lang="csharp"><br />
-&#47;&#47;&#47;<br />
+///<br />
 <summary>
-&#47;&#47;&#47; ObjectBuilderModule handles PropertyBased Injection for ASP.NET Forms.<br />
-&#47;&#47;&#47; <&#47;summary><br />
+/// ObjectBuilderModule handles PropertyBased Injection for ASP.NET Forms.<br />
+/// </summary><br />
 public class ObjectBuilderModule : IHttpModule<br />
 {<br />
     private HttpApplication app;<br />
@@ -142,7 +142,7 @@ public class ObjectBuilderModule : IHttpModule<br />
 <p>    public void Init(HttpApplication context)<br />
     {<br />
         app = context;<br />
-        &#47;&#47; PreRequestHandler so that everything is setup including the Session, etc<br />
+        // PreRequestHandler so that everything is setup including the Session, etc<br />
         app.PreRequestHandlerExecute += InjectProperties;<br />
     }</p>
 <p>    void InjectProperties(object sender, EventArgs e)<br />
@@ -157,6 +157,6 @@ public class ObjectBuilderModule : IHttpModule<br />
         app.PostMapRequestHandler -= InjectProperties;<br />
     }<br />
 }<br />
-<&#47;code></p>
-<h3>Conclusion<&#47;h3><br />
+</code></p>
+<h3>Conclusion</h3><br />
 Hopefully this shows you that you can create a powerful, transparent solution for doing Dependency Injection with ASP.NET. This isn't necessarily a complete solution. We could implement many other things like Singleton management for various service classes for example. Now all you have to do is extend it for your application's own needs.</p>

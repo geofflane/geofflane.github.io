@@ -51,7 +51,7 @@ comments:
 <p>Let's say one is a computer programmer and let's say one's wife (or roommate; or significant other) does social science research (a totally hypothetical scenario of course). When doing social science research one needs to create randomized groups of participants. </p>
 <p>So in a group you might be testing a variable X and you need to divide the group in half to test that variable with a number of control subjects. In this scenario, one needs to create groups A and B (or 1 and 2) such that there are the same number of A and B in a given set.</p>
 <p>Now normally when generating random numbers you can just generate an arbitrary set of random numbers. But if you need a set of 10 numbers with 5 1's and 5 2's then that's a different problem. You could of course generate a set and test to make sure it's evenly distributed and then throw it away if it doesn't meet this constraint. That of course is an inefficient way of generating your sets because you would likely have to throw a lot of them away.</p>
-<p>The solution to this conundrum is to use random numbers not to create your set, but to shuffle it. Luckily other smart people have proven ways to do this already. The <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Fisher&acirc;&euro;&ldquo;Yates_shuffle">Fisher-Yates shuffle<&#47;a> is the technique that I used.</p>
+<p>The solution to this conundrum is to use random numbers not to create your set, but to shuffle it. Luckily other smart people have proven ways to do this already. The <a href="http://en.wikipedia.org/wiki/Fisher&acirc;&euro;&ldquo;Yates_shuffle">Fisher-Yates shuffle</a> is the technique that I used.</p>
 <p><code lang="python"><br />
 from random import randrange<br />
 items = [1,1,1,1,1,2,2,2,2,2]</p>
@@ -62,7 +62,7 @@ while n > 1:<br />
     n = n - 1<br />
     items[k], items[n] = items[n], items[k]</p>
 <p>print items    # e.g. [2, 1, 2, 1, 1, 2, 1, 2, 2, 1]<br />
-<&#47;code></p>
+</code></p>
 <p>Basically the Fisher-Yates shuffle shuffle picks a random item and puts it at the end of the list by swapping the end with the randomly selected item. It then continues with the 'unpicked' numbers and puts them at the end of the unpicked set until it reaches the beginning of the list. Once it's traveled through, you have a randomly sorted set.</p>
 <p>That's fine if you're a programmer and want to run python from the command line and change your items set if you need a different size, etc. But if you want an end-user who's not a programmer to use it, you better come up with something a bit configurable. So I need to allow for some variation to the sets that will be generated and shuffled.</p>
 <p>Based on this information I created a simple class that would allow you to specify 3 properties that would define the random sets to generate: blocks, the number of individual sets; size, the number of numbers in each block; and groups, the number of variants within each block. So now you could generate a set of 10 blocks, with 12 numbers in each containing 1, 2, and 3 evenly distributed (i.e. 4 of each number).</p>
@@ -106,10 +106,10 @@ from random import randrange</p>
         for i in range(self.blockSize):<br />
             result.append(i % self.groups + 1)<br />
         return result<br />
-<&#47;code></p>
+</code></p>
 <p>Finally to wrap the shuffler in a nice command-line interface I created a simple specialization of the Shuffler class that would take command line arguments to generate blocks of specific properties.</p>
 <p><code lang="python"><br />
-#!&#47;usr&#47;bin&#47;env python<br />
+#!/usr/bin/env python<br />
 """<br />
 Usage: %(program)s [options] ... [-b <number>] [-s <number>] [-g <number>]<br />
 Options:<br />
@@ -166,5 +166,5 @@ import shuffle</p>
 <p>if __name__ == "__main__":<br />
     shuffler = CliShuffler()<br />
     shuffler.run(sys.argv[1:])<br />
-<&#47;code></p>
+</code></p>
 <p>Happy shuffling...</p>

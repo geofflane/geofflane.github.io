@@ -20,10 +20,10 @@ categories:
 tags: []
 comments: []
 ---
-<p>Yeah, so I'm sure everyone who cares already knows that <a href="http:&#47;&#47;www.rubyonrails.com">Ruby on Rails<&#47;a> 1.1 has been released. Congratulations to the core team for what appears to be a quality release. They are building on their strengths for sure and offering some compelling new features.</p>
-<p>The <a href="http:&#47;&#47;weblog.rubyonrails.org&#47;articles&#47;2006&#47;03&#47;28&#47;rails-1-1-rjs-active-record-respond_to-integration-tests-and-500-other-things">official announcement<&#47;a> is available, and the semi-official overview of <a href="http:&#47;&#47;scottraymond.net&#47;articles&#47;2006&#47;02&#47;28&#47;rails-1.1">what's new in Rails 1.1<&#47;a> was posted by Scott Raymond.</p>
-<h3>My Favorite Ruby 1.1 Features<&#47;h3></p>
-<h4>with_scope<&#47;h4><br />
+<p>Yeah, so I'm sure everyone who cares already knows that <a href="http://www.rubyonrails.com">Ruby on Rails</a> 1.1 has been released. Congratulations to the core team for what appears to be a quality release. They are building on their strengths for sure and offering some compelling new features.</p>
+<p>The <a href="http://weblog.rubyonrails.org/articles/2006/03/28/rails-1-1-rjs-active-record-respond_to-integration-tests-and-500-other-things">official announcement</a> is available, and the semi-official overview of <a href="http://scottraymond.net/articles/2006/02/28/rails-1.1">what's new in Rails 1.1</a> was posted by Scott Raymond.</p>
+<h3>My Favorite Ruby 1.1 Features</h3></p>
+<h4>with_scope</h4><br />
 You can now set up blocks to easily filter the selection of your model objects. This with_scope feature uses blocks, so you can easily store these blocks as variables and share them among multiple Model objects or methods.</p>
 <p><code><br />
 dateFilter = Proc.new {:conditions =><br />
@@ -32,29 +32,29 @@ dateFilter = Proc.new {:conditions =><br />
 Actual.with_scope(:find =< dateFilter) do<br />
   @actuals = Actual.find(:all, :conditions => ["user_id = ?", @user.id])<br />
 end<br />
-<&#47;code></p>
-<h4>Eager Loading<&#47;h4><br />
-Lazy loading is often a big performance benefit for rarely used objects, but in cases when you know you are going to need the children of an object, <acronym title="Object Relational Mapping">ORM<&#47;acronym> tools can optimize queries by doing Eager Loading in appropriate cases. Eager Loading can be done by doing outer joins and getting all of the children in the same query as the parent (or at the very least getting the collection in a single SELECT statement).</p>
-<p><code>Menu.find(:all, :include => {:categories=>:menuItems})<&#47;code></p>
-<h4>Polymorphic Database Associations<&#47;h4><br />
+</code></p>
+<h4>Eager Loading</h4><br />
+Lazy loading is often a big performance benefit for rarely used objects, but in cases when you know you are going to need the children of an object, <acronym title="Object Relational Mapping">ORM</acronym> tools can optimize queries by doing Eager Loading in appropriate cases. Eager Loading can be done by doing outer joins and getting all of the children in the same query as the parent (or at the very least getting the collection in a single SELECT statement).</p>
+<p><code>Menu.find(:all, :include => {:categories=>:menuItems})</code></p>
+<h4>Polymorphic Database Associations</h4><br />
 A complicated name for the fairly simple concept of allowing more than one table to be associated with a child table.</p>
 <p><code><br />
 class Tags < ActiveRecord::Base<br />
   belongs_to :taggable, :polymorphic => true<br />
 end<br />
-<&#47;code><br />
+</code><br />
 <code><br />
 class Page < ActiveRecord::Base<br />
   has_many :tag, :as => :taggable<br />
 end<br />
-<&#47;code><br />
+</code><br />
 <code><br />
 class Picture < ActiveRecord::Base<br />
   has_many :tags, :as => :taggable<br />
 end<br />
-<&#47;code></p>
-<p>The only problem with this implementation is that this is implemented in such a way that you can't do foreign key contraints. Basically the <code class="inline">tag<&#47;code> table will have a <code class="inline">taggable_id<&#47;code> which corresponds to the parent table's id and a <code class="inline">taggable_type<&#47;code> which corresponds to the class of the parent. </p>
-<h3>What I'm Curious About (and might be real cool)<&#47;h3></p>
-<h4>RJS<&#47;h4><br />
+</code></p>
+<p>The only problem with this implementation is that this is implemented in such a way that you can't do foreign key contraints. Basically the <code class="inline">tag</code> table will have a <code class="inline">taggable_id</code> which corresponds to the parent table's id and a <code class="inline">taggable_type</code> which corresponds to the class of the parent. </p>
+<h3>What I'm Curious About (and might be real cool)</h3></p>
+<h4>RJS</h4><br />
 RJS is described as "JavaScript written in Ruby". Basically there is a new kind of template in addition to .rhtml and .rxml you can now create .rjs files. These are used as the response to AJAX calls and render JavaScript. This JavaScript is used to change an already rendered page from an AJAX callback.</p>
 <p>I'm keeping my eye on this one cause I think it could be interesting.</p>

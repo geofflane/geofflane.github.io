@@ -40,28 +40,28 @@ comments:
   date_gmt: '2009-01-12 02:24:28 -0500'
   content: "Robert,\r\nOk so a bit late (like more than year)...but I did show some
     examples of doing updates in another post. Basically you just have to do a PUT
-    and send the proper XML data. See <a href=\"http:&#47;&#47;www.zorched.net&#47;2007&#47;08&#47;10&#47;interact-with-rest-services-from-the-command-line&#47;\"
-    rel=\"nofollow\">Interact With REST Services from the Command Line<&#47;a>."
+    and send the proper XML data. See <a href=\"http://www.zorched.net/2007/08/10/interact-with-rest-services-from-the-command-line/\"
+    rel=\"nofollow\">Interact With REST Services from the Command Line</a>."
 ---
 <p>Ruby on Rails 1.2 added full support for building RESTful services to the already nice web page support. REST is a conceptually simple idea, yet incredibly powerful. REST is a Web based API to an application. It builds on the basic building blocks of HTTP: URLs and HTTP Methods (think verbs).</p>
-<p>A URL (Uniform Resource Locator) uniquely identifies a resources on the web. HTTP uses the concept of Methods to give context to a request to a URL. Most developers will be familiar with a GET and a POST. These methods are used to get a resource and to modify a resource respectively. But there are <a href="http:&#47;&#47;www.w3.org&#47;Protocols&#47;rfc2616&#47;rfc2616-sec9.html">other http verbs<&#47;a> as well. The two other interesting ones for a REST service are PUT and DELETE. Both of these are pretty self explanatory. PUT creates a resource at the remote location and DELETE removes one.</p>
+<p>A URL (Uniform Resource Locator) uniquely identifies a resources on the web. HTTP uses the concept of Methods to give context to a request to a URL. Most developers will be familiar with a GET and a POST. These methods are used to get a resource and to modify a resource respectively. But there are <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html">other http verbs</a> as well. The two other interesting ones for a REST service are PUT and DELETE. Both of these are pretty self explanatory. PUT creates a resource at the remote location and DELETE removes one.</p>
 <p>For Example:<br />
 GET<br />
-http:&#47;&#47;example.com&#47;catalog&#47;item&#47;1</p>
+http://example.com/catalog/item/1</p>
 <p>DELETE<br />
-http:&#47;&#47;example.com&#47;catalog&#47;item&#47;1</p>
+http://example.com/catalog/item/1</p>
 <p>Both of these use the same URL, but the HTTP Method means different things will happen.</p>
-<h3>Creating A RESTful API with Rails<&#47;h3><br />
+<h3>Creating A RESTful API with Rails</h3><br />
 Rails makes it easy to create a RESTful application. The same controllers can be used to render a web page and to provide a programmatic API to your application.</p>
-<p>Rails provides a <em>scaffold_resource<&#47;em> generator that creates the skeleton of a resource driven application:<br />
+<p>Rails provides a <em>scaffold_resource</em> generator that creates the skeleton of a resource driven application:<br />
 <code><br />
-.&#47;script&#47;generate scaffold_resource order<br />
-<&#47;code></p>
+./script/generate scaffold_resource order<br />
+</code></p>
 <p>This creates Model, View and Controllers just like regular scaffold, but unlike scaffold, it adds some extra functionality.<br />
 <code lang="ruby"><br />
 class OrdersController < ApplicationController<br />
-  # GET &#47;orders&#47;1<br />
-  # GET &#47;orders&#47;1.xml<br />
+  # GET /orders/1<br />
+  # GET /orders/1.xml<br />
   def show<br />
     @order = Order.find(params[:id])</p>
 <p>    respond_to do |format|<br />
@@ -70,16 +70,16 @@ class OrdersController < ApplicationController<br />
     end<br />
   end<br />
 end<br />
-<&#47;code></p>
-<p>Now if you request a path ending in <em>.xml<&#47;em> it will render the response as an XML document that can be consumed by another program.</p>
-<h3>Applying REST as an Ajax solution<&#47;h3><br />
-The great news is that you can use this RESTful API directly as an API to use for building a highly-dynamic Ajax application. (See my post on <a href="http:&#47;&#47;www.zorched.net&#47;2006&#47;10&#47;30&#47;ajax-with-json-using-php-and-dojo&#47;">using Ajax with PHP<&#47;a> for an example). But what's even cooler is that you can use the same technique to build a <a href="http:&#47;&#47;www.json.org&#47;">JSON<&#47;a> API. JSON is much easier and less resource intensive to consume in an Ajax application than XML.</p>
+</code></p>
+<p>Now if you request a path ending in <em>.xml</em> it will render the response as an XML document that can be consumed by another program.</p>
+<h3>Applying REST as an Ajax solution</h3><br />
+The great news is that you can use this RESTful API directly as an API to use for building a highly-dynamic Ajax application. (See my post on <a href="http://www.zorched.net/2006/10/30/ajax-with-json-using-php-and-dojo/">using Ajax with PHP</a> for an example). But what's even cooler is that you can use the same technique to build a <a href="http://www.json.org/">JSON</a> API. JSON is much easier and less resource intensive to consume in an Ajax application than XML.</p>
 <p>Changing your controller to support JSON ends up being really easy. All you have to do is add a single line in the respond_to block to support it:<br />
 <code lang="ruby"><br />
 class OrdersController < ApplicationController<br />
-  # GET &#47;orders&#47;1<br />
-  # GET &#47;orders&#47;1.xml<br />
-  # GET &#47;orders&#47;1.js<br />
+  # GET /orders/1<br />
+  # GET /orders/1.xml<br />
+  # GET /orders/1.js<br />
   def show<br />
     @order = Order.find(params[:id])</p>
 <p>    respond_to do |format|<br />
@@ -89,15 +89,15 @@ class OrdersController < ApplicationController<br />
     end<br />
   end<br />
 end<br />
-<&#47;code></p>
-<p>Just like in the XML example, if you make a request that ends in <em>.js<&#47;em> then you will get a response rendered as JSON. Consuming that JSON Service with something like Dojo allows you to easily create a dynamic web application.</p>
+</code></p>
+<p>Just like in the XML example, if you make a request that ends in <em>.js</em> then you will get a response rendered as JSON. Consuming that JSON Service with something like Dojo allows you to easily create a dynamic web application.</p>
 <p><code lang="javascript"><br />
 dojo.require("dojo.event.*");<br />
 dojo.require("dojo.io.*");<br />
 dojo.require("dojo.date.*");<br />
 dojo.require("dojo.lfx.*");</p>
 <p>function getOrder(id) {<br />
-    dojo.io.bind({url: "&#47;orders&#47;" + id + ".js", handler: showOrder, mimetype: "text&#47;json"});<br />
+    dojo.io.bind({url: "/orders/" + id + ".js", handler: showOrder, mimetype: "text/json"});<br />
 }</p>
 <p>function showOrder(type, data, evt) {<br />
     dojo.dom.removeChildren(dojo.byId('order'));<br />
@@ -115,6 +115,6 @@ function init() {<br />
 	getOrder(1);<br />
 }</p>
 <p>dojo.addOnLoad(init);<br />
-<&#47;code></p>
-<h3>Conclusion<&#47;h3><br />
+</code></p>
+<h3>Conclusion</h3><br />
 With a few simple lines of code you can not only render a web page, you can also create an XML API and a JSON API. That's what I call developer friendly!</p>

@@ -96,7 +96,7 @@ comments:
     nothing would work. \r\n\r\nYou can't imagine how happy you've made me! I really
     appreciate it."
 ---
-<p>The Struts2 documentation contains examples that are often basic at best which can make it challenging to figure out how to do things sometimes. I was working on creating a form that would allow me to select values from a list to connect 2 objects in a <em>One-to-Many<&#47;em> relationship. This is a common relationship for many things. In this example, I'll use a <em>User and Role<&#47;em> class to demonstrate the concept.</p>
+<p>The Struts2 documentation contains examples that are often basic at best which can make it challenging to figure out how to do things sometimes. I was working on creating a form that would allow me to select values from a list to connect 2 objects in a <em>One-to-Many</em> relationship. This is a common relationship for many things. In this example, I'll use a <em>User and Role</em> class to demonstrate the concept.</p>
 <p>For background, here's a JPA mapped User and Role class.<br />
 <code lang="java"><br />
 import java.util.List;<br />
@@ -104,7 +104,7 @@ import javax.persistence.*;</p>
 <p>@Entity<br />
 public class User {</p>
 <p>    private Long id;<br />
-    &#47;&#47; ... other member variables<br />
+    // ... other member variables<br />
     private List<Role> roles;</p>
 <p>    @Id<br />
     @GeneratedValue(strategy = GenerationType.AUTO)<br />
@@ -126,7 +126,7 @@ public class User {</p>
 <p>    public void setRoles(List<Role> roles) {<br />
         this.roles = roles;<br />
     }</p>
-<p>    &#47;&#47; ... other properties<br />
+<p>    // ... other properties<br />
 }</p>
 <p>@Entity<br />
 public class Role {</p>
@@ -139,16 +139,16 @@ public class Role {</p>
 <p>    public void setId(Long id) {<br />
         this.id = id;<br />
     }</p>
-<p>    &#47;&#47; ... other properties<br />
+<p>    // ... other properties<br />
 }<br />
-<&#47;code></p>
+</code></p>
 <p>A list of Roles exists in the database. When a User is created, they are assigned one or more Roles. The User and Roles are connected in the Database through a join table as defined in the mapping.  At this point I created some DAO Repository classes to manage the persistence and an Action to handle the form values. (The details of JPA, setting up Persistence and Actions are beyond the scope of this post.)</p>
-<p>The part that caused me the most grief ended up being the form. I wanted to add a checkbox list that contained all of the Roles. The example on the Struts site for <a href="http:&#47;&#47;struts.apache.org&#47;2.x&#47;docs&#47;checkboxlist.html">checkboxlist<&#47;a>, a control with 43 documented properties is:<br />
+<p>The part that caused me the most grief ended up being the form. I wanted to add a checkbox list that contained all of the Roles. The example on the Struts site for <a href="http://struts.apache.org/2.x/docs/checkboxlist.html">checkboxlist</a>, a control with 43 documented properties is:<br />
 <code lang="html"><br />
-<s:checkboxlist name="foo" list="bar"&#47;><br />
-<&#47;code><br />
+<s:checkboxlist name="foo" list="bar"/><br />
+</code><br />
 Needless to say, there was some 'figuring out' to be done.</p>
-<p>The form itself is pretty vanilla for the most part. The <em>checkboxlist<&#47;em> is the interesting part because it's what allows us to map the User to the Roles.  I knew that I was looking for something to put into the <em>value<&#47;em> property of the control that would tell it to pre-select the Role values that were already associated with the User. </p>
+<p>The form itself is pretty vanilla for the most part. The <em>checkboxlist</em> is the interesting part because it's what allows us to map the User to the Roles.  I knew that I was looking for something to put into the <em>value</em> property of the control that would tell it to pre-select the Role values that were already associated with the User. </p>
 <p>I started out with something like:<br />
 <code lang="html"><br />
 <s:checkboxlist name="user.roles.id"<br />
@@ -156,11 +156,11 @@ Needless to say, there was some 'figuring out' to be done.</p>
                     listKey="id"<br />
                     listValue="name"<br />
                     label="%{getText('label.roles')}"<br />
-                    value="user.roles"&#47;><br />
-<&#47;code></p>
+                    value="user.roles"/><br />
+</code></p>
 <p>That didn't work. When you think about it, that makes sense because the keys in the list are ids and the values supplied are Role objects. So I needed to figure out how to get the Ids from the Roles. I could have done that in the Action class, but it seemed like there should be a better way. A way that would allow me to continue in more of a Domain fashion.</p>
-<p>Doing some research into <a href="http:&#47;&#47;www.opensymphony.com&#47;ognl&#47;">OGNL<&#47;a>, I came upon the <a href="http:&#47;&#47;www.opensymphony.com&#47;ognl&#47;html&#47;LanguageGuide&#47;projection.html">list projections<&#47;a> section which was the key...</p>
-<p>The OGNL projection syntax gives us <em>user.roles.{id}<&#47;em>. Basically that is a list comprehension that takes of list of Role objects and turns it into a list of Role Ids. That list of Ids becomes the list of values that will be preselected.</p>
+<p>Doing some research into <a href="http://www.opensymphony.com/ognl/">OGNL</a>, I came upon the <a href="http://www.opensymphony.com/ognl/html/LanguageGuide/projection.html">list projections</a> section which was the key...</p>
+<p>The OGNL projection syntax gives us <em>user.roles.{id}</em>. Basically that is a list comprehension that takes of list of Role objects and turns it into a list of Role Ids. That list of Ids becomes the list of values that will be preselected.</p>
 <p>Knowing that I can now create a select box that will include the pre-selected values on an edit form:<br />
 <code lang="html"><br />
 <s:checkboxlist name="user.roles.id"<br />
@@ -168,6 +168,6 @@ Needless to say, there was some 'figuring out' to be done.</p>
                     listKey="id"<br />
                     listValue="name"<br />
                     label="%{getText('label.roles')}"<br />
-                    value="user.roles.{id}"&#47;><br />
-<&#47;code></p>
+                    value="user.roles.{id}"/><br />
+</code></p>
 <p>Enjoy.</p>

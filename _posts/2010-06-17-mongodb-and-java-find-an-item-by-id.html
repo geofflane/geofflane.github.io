@@ -45,11 +45,11 @@ comments:
   date_gmt: '2012-07-25 15:44:28 -0400'
   content: Very useful, saved my life! ;-)
 ---
-<p><a href="http:&#47;&#47;www.mongodb.org">MongoDB<&#47;a> is one of a number of new databases that have cropped up lately eschewing SQL. These <em><a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;NoSQL">NoSQL<&#47;a><&#47;em> databases provide non-relational models that are suitable for solving different kinds of problems. This camp includes document oriented, tabular and key&#47;value oriented models among others. These non-relational databases are supposed to excel at scalability through parallelization and replication but sometimes (although not always) at the expense of some of the <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;ACID">transactional guarantees of SQL databases<&#47;a>.</p>
-<p>Why would you care about any of this? Document oriented databases allow for each document to store arbitrary pieces of data. This could allow for much easier customization of data storage such as when you want to store custom fields. Many of these databases also make <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Scalability#Scale_vertically_vs._horizontally">horizontal scaling<&#47;a> quite simple as well as providing high performance for write heavy applications.</p>
+<p><a href="http://www.mongodb.org">MongoDB</a> is one of a number of new databases that have cropped up lately eschewing SQL. These <em><a href="http://en.wikipedia.org/wiki/NoSQL">NoSQL</a></em> databases provide non-relational models that are suitable for solving different kinds of problems. This camp includes document oriented, tabular and key/value oriented models among others. These non-relational databases are supposed to excel at scalability through parallelization and replication but sometimes (although not always) at the expense of some of the <a href="http://en.wikipedia.org/wiki/ACID">transactional guarantees of SQL databases</a>.</p>
+<p>Why would you care about any of this? Document oriented databases allow for each document to store arbitrary pieces of data. This could allow for much easier customization of data storage such as when you want to store custom fields. Many of these databases also make <a href="http://en.wikipedia.org/wiki/Scalability#Scale_vertically_vs._horizontally">horizontal scaling</a> quite simple as well as providing high performance for write heavy applications.</p>
 <p>With this in mind I figured I should look and see what's there. So I started looking at MongoDB.</p>
-<h3>Start by creating an object to add to the database<&#47;h3><br />
-With MongoDB, a collection is conceptually similar to a table in a SQL database. It holds a collection of related documents. A DBObject represents a document that you want to add to a collection. MongoDB automatically creates an id for each document that you add. That id is set in the DBObject after you pass it to the <em>save<&#47;em> method of the collection. In a real world application you might need that id to later access the document.</p>
+<h3>Start by creating an object to add to the database</h3><br />
+With MongoDB, a collection is conceptually similar to a table in a SQL database. It holds a collection of related documents. A DBObject represents a document that you want to add to a collection. MongoDB automatically creates an id for each document that you add. That id is set in the DBObject after you pass it to the <em>save</em> method of the collection. In a real world application you might need that id to later access the document.</p>
 <p><code lang="java"><br />
 DBObject obj = new BasicDBObject();<br />
 obj.put("title", getTitle());<br />
@@ -57,25 +57,25 @@ obj.put("body", getBody());</p>
 <p>DBCollection coll = db.getCollection("note"));<br />
 coll.save(obj);</p>
 <p>String idString = obj.get("_id").toString();<br />
-<&#47;code></p>
-<h3>Retrieve an object previously added to a collection<&#47;h3><br />
-To get a document from MongoDB you again use a DBObject. It does double duty in this case acting as a the parameters you want to use to identify a matching document. <em>(There are ways you can do comparisons other than equality, of course, but I'll leave that for a later post.)<&#47;em> Using this as a "query by example" model we can set the _id property that we previously retrieved. The one catch is that the id is not just a string, it's actually an instance of an ObjectId. Fortunately when we know that it's quite easy to construct an instance with the string value.</p>
+</code></p>
+<h3>Retrieve an object previously added to a collection</h3><br />
+To get a document from MongoDB you again use a DBObject. It does double duty in this case acting as a the parameters you want to use to identify a matching document. <em>(There are ways you can do comparisons other than equality, of course, but I'll leave that for a later post.)</em> Using this as a "query by example" model we can set the _id property that we previously retrieved. The one catch is that the id is not just a string, it's actually an instance of an ObjectId. Fortunately when we know that it's quite easy to construct an instance with the string value.</p>
 <p><code lang="java"><br />
 String idString = "a456fd23ac56d";<br />
 DBCollection coll = db.getCollection(getCollectionName());<br />
 DBObject searchById = new BasicDBObject("_id", new ObjectId(idString));<br />
 DBObject found = coll.findOne(searchById);<br />
-<&#47;code></p>
+</code></p>
 <p>A couple of easy examples, but it wasn't obvious to me when I started how to get the id of a document that I just added to the database. More to come in the future.</p>
 <p>For more on MongoDB check out these books:</p>
 <ul>
 <li>
-<a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;product&#47;1449381561?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1449381561">MongoDB: The Definitive Guide<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&l=as2&o=1&a=1449381561" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;><br />
-<&#47;li></p>
+<a href="http://www.amazon.com/gp/product/1449381561?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1449381561">MongoDB: The Definitive Guide</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=1449381561" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /><br />
+</li></p>
 <li>
-<a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;product&#47;1430230517?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1430230517">The Definitive Guide to MongoDB: The NoSQL Database for Cloud and Desktop Computing<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&l=as2&o=1&a=1430230517" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;><br />
-<&#47;li></p>
+<a href="http://www.amazon.com/gp/product/1430230517?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1430230517">The Definitive Guide to MongoDB: The NoSQL Database for Cloud and Desktop Computing</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=1430230517" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /><br />
+</li></p>
 <li>
-<a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;product&#47;0321705335?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0321705335">MongoDB for Web Development (Developer's Library)<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&l=as2&o=1&a=0321705335" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;><br />
-<&#47;li><br />
-<&#47;ul></p>
+<a href="http://www.amazon.com/gp/product/0321705335?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0321705335">MongoDB for Web Development (Developer's Library)</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=0321705335" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /><br />
+</li><br />
+</ul></p>

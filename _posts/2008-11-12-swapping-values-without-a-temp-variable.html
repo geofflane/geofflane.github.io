@@ -28,8 +28,8 @@ comments:
   content: "And for real fun: \r\n\r\n  a ^= (b ^= (a ^= b));"
 ---
 <p>It's been a long time since I've done any C programming (the only C I ever really did was in school 10+ years ago) and I've never done it outside of school. I figure since I look at and study languages that are pretty esoteric, it's only fair to throw in a language that is really widely used. It should make my Objective-C better (which probably isn't saying much). It also gives me a chance to go "a little closer to the metal" I guess. Hey look, a Bus Error!</p>
-<p>Anyway, one of the things that I love&#47;hate about C are the little tricks that people often use. Sometimes they're really fun but often they take a bit of thinking to understand if you're not familiar with them. One of those that I ran across again was swapping values without a temp variable.</p>
-<h3>How Normal People Swap Values<&#47;h3><br />
+<p>Anyway, one of the things that I love/hate about C are the little tricks that people often use. Sometimes they're really fun but often they take a bit of thinking to understand if you're not familiar with them. One of those that I ran across again was swapping values without a temp variable.</p>
+<h3>How Normal People Swap Values</h3><br />
 The simplest way of swapping two values is ususally accomplished using a temp variable to hold one of the values for a moment.<br />
 <code lang="c"><br />
 int a = 2;<br />
@@ -38,9 +38,9 @@ int temp = 0;</p>
 <p>temp = a;<br />
 a = b;<br />
 b = temp;<br />
-<&#47;code></p>
-<h3>And Another Way<&#47;h3><br />
-But you can accomplish the same thing using an <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Exclusive_or">Exclusive Or (XOR)<&#47;a> operation.</p>
+</code></p>
+<h3>And Another Way</h3><br />
+But you can accomplish the same thing using an <a href="http://en.wikipedia.org/wiki/Exclusive_or">Exclusive Or (XOR)</a> operation.</p>
 <p>To review bitwise operations:</p>
 <pre>
 & AND<br />
@@ -58,32 +58,32 @@ But you can accomplish the same thing using an <a href="http:&#47;&#47;en.wikipe
   1100 (12)<br />
   ----<br />
 | 1001 (9)<br />
-<&#47;pre></p>
-<p>The <em>^=<&#47;em> just combines the XOR with an Assignment.<br />
+</pre></p>
+<p>The <em>^=</em> just combines the XOR with an Assignment.<br />
 <code lang="c"><br />
 int a = 2;<br />
 int b = 5;</p>
 <p>a ^= b;<br />
 b ^= a;<br />
 a ^= b;<br />
-<&#47;code><br />
+</code><br />
 Now isn't that totally intuitive? Yeah, not to me either. Technically once you know this piece of trivia, you don't really need to think about it. You'll just recognize the pattern and understand what's going on. But understanding why it works is probably a good thing.</p>
 <p>So, I just came up with an example that shows what's happening:<br />
 <code lang="c"><br />
-int a = 2;  &#47;&#47; 0010<br />
-int b = 5;  &#47;&#47; 0101</p>
-<p>a ^= b;     &#47;&#47; 0111 = 0010 ^ 0101<br />
-b ^= a;     &#47;&#47; 0010 = 0101 ^ 0111<br />
-a ^= b;     &#47;&#47; 0101 = 0111 ^ 0010<br />
-<&#47;code></p>
+int a = 2;  // 0010<br />
+int b = 5;  // 0101</p>
+<p>a ^= b;     // 0111 = 0010 ^ 0101<br />
+b ^= a;     // 0010 = 0101 ^ 0111<br />
+a ^= b;     // 0101 = 0111 ^ 0010<br />
+</code></p>
 <p>What are some of the principles in why this works?:<br />
 <code lang="c"><br />
 a ^ b == b ^ a<br />
-<&#47;code></p>
+</code></p>
 <p>XOR is a reversible binary operation.<br />
 <code lang="c"><br />
-a = a ^ b  &#47;&#47; now a is some other value<br />
-b = a ^ b  &#47;&#47; now b is the original value of a<br />
-a = a ^ b  &#47;&#47; now a is the original value of b<br />
-<&#47;code></p>
-<p>This isn't a proof of any sort, but hopefully it will help you understand why it actually works. If you want even more of an explanation, and a proof, check out the article on Wikipedia: <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;XOR_swap_algorithm">XOR Swap Algorithm<&#47;a></p>
+a = a ^ b  // now a is some other value<br />
+b = a ^ b  // now b is the original value of a<br />
+a = a ^ b  // now a is the original value of b<br />
+</code></p>
+<p>This isn't a proof of any sort, but hopefully it will help you understand why it actually works. If you want even more of an explanation, and a proof, check out the article on Wikipedia: <a href="http://en.wikipedia.org/wiki/XOR_swap_algorithm">XOR Swap Algorithm</a></p>

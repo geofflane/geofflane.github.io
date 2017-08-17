@@ -43,12 +43,12 @@ comments:
     to alter execution. \r\n \r\nThere are many flavours of metaprogramming, and this
     is certainly one of them."
 ---
-<p>I thought I'd follow up with my previous post with the  <a href="http:&#47;&#47;www.zorched.net&#47;2007&#47;03&#47;05&#47;understanding-domain-specific-languages-as-jargon&#47;">Coffee Domain Specific Language<&#47;a> in the Groovy Language.</p>
+<p>I thought I'd follow up with my previous post with the  <a href="http://www.zorched.net/2007/03/05/understanding-domain-specific-languages-as-jargon/">Coffee Domain Specific Language</a> in the Groovy Language.</p>
 <p>This is really one of my first forays into Groovy, so it's pretty rough. It's really just a direct translation of the Ruby code and not what I would expect to be 'idiomatic Groovy'. I'll try and update this once I learn some more Groovy.</p>
 <p><code><br />
-&#47;&#47; CoffeeDSL.groovy<br />
-&#47;&#47; This is the input from the user, likely read from a file<br />
-&#47;&#47; or input through a user interface of some sort</p>
+// CoffeeDSL.groovy<br />
+// This is the input from the user, likely read from a file<br />
+// or input through a user interface of some sort</p>
 <p>CoffeeInput = "venti nonfat decaf whip latte"</p>
 <p>class Coffee<br />
 {<br />
@@ -83,8 +83,8 @@ comments:
 		println("Ordering coffee: ${size} ${params}${type}\n")<br />
 	}</p>
 <p>	public load(input) {<br />
-		&#47;&#47; turn one line into multi-line "method calls"<br />
-		def cleaned = input.split(&#47;\s+&#47;)<br />
+		// turn one line into multi-line "method calls"<br />
+		def cleaned = input.split(/\s+/)<br />
 		instance_eval(cleaned)<br />
 	}</p>
 <p>	public instance_eval(methods) {<br />
@@ -93,9 +93,9 @@ comments:
 		}<br />
 	}<br />
 }</p>
-<p>&#47;&#47; this is your code which loads the DSL input and executes it<br />
+<p>// this is your code which loads the DSL input and executes it<br />
 coffee = new Coffee()<br />
-coffee.load(CoffeeInput)    &#47;&#47; load the user input<br />
-coffee.order()                 &#47;&#47; submit the order<br />
-<&#47;code></p>
+coffee.load(CoffeeInput)    // load the user input<br />
+coffee.order()                 // submit the order<br />
+</code></p>
 <p>This isn't even metaprogramming. You could do this in any language, Java, C#, whatever. Everyone talks about metaprogramming in Groovy, but I have not yet found a lot of information on it. Does anyone have any pointers?</p>

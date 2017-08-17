@@ -59,8 +59,8 @@ comments:
   date: '2008-02-13 11:38:27 -0500'
   date_gmt: '2008-02-13 17:38:27 -0500'
   content: "Do you know, who I can do that in compact framework?\r\nbecause BinaryFormatter
-    doesn't exist.\r\n\r\n        &#47;&#47;&#47; \r\n        &#47;&#47;&#47; Implementacion
-    de la interfaz IClonable.\r\n        &#47;&#47;&#47; Retorna un objeto clonado.\r\n
+    doesn't exist.\r\n\r\n        /// \r\n        /// Implementacion
+    de la interfaz IClonable.\r\n        /// Retorna un objeto clonado.\r\n
     \       public object Clone()\r\n        {\r\n            MemoryStream buffer
     = new MemoryStream();\r\n            BinaryFormatter format = new BinaryFormatter();\r\n
     \           format.Serialize(buffer, this);\r\n            buffer.Position = 0;\r\n
@@ -74,8 +74,8 @@ comments:
   content: Your article was very helpful. Thank you.
 ---
 <p>XML Serialization in the .NET Compact Framework seems to be buggy enough that it is generally not useful if you need to serialize a class that conforms to a schema of some sort. If all you need to do is serialize and deserialize representations of a class you are probably fine. But if you need to use the serialized data to interoperate with a service (for example) it likely will not work.</p>
-<h3>Enums<&#47;h3><br />
-I wrote previously about <a href="http:&#47;&#47;www.zorched.net&#47;2006&#47;12&#47;21&#47;bug-in-the-net-compactframework-xmlenum-with-whitespace&#47;">Problems with Enum Serialization<&#47;a> on the .NET compact framework. To summarize: The XmlEnum attribute allows you to change the value that is serialized. One of the reasons to do this is to limit the valid values in the document. Of course, Enums have naming restrictions such as not being able to have spaces in them. So, one of the main reasons you would do this would be to put spaces in the name that was serialized.</p>
+<h3>Enums</h3><br />
+I wrote previously about <a href="http://www.zorched.net/2006/12/21/bug-in-the-net-compactframework-xmlenum-with-whitespace/">Problems with Enum Serialization</a> on the .NET compact framework. To summarize: The XmlEnum attribute allows you to change the value that is serialized. One of the reasons to do this is to limit the valid values in the document. Of course, Enums have naming restrictions such as not being able to have spaces in them. So, one of the main reasons you would do this would be to put spaces in the name that was serialized.</p>
 <p>The problem is that the XmlEnum under the .NET Compact Framework truncates the value at the first space. So, in the example below your Enums would serialize to "Some" and "Another" instead of the correct "Some Value" and "Another Value".</p>
 <p><code><br />
 public enum Foo {<br />
@@ -84,26 +84,26 @@ public enum Foo {<br />
     [XmlEnum("Another Value")]<br />
     Other<br />
 }<br />
-<&#47;code></p>
-<h3>Controlling Serialization of Value Types<&#47;h3><br />
-.NET has reference types and value types. Reference types are stored on the heap and can be null. Value types are stored on the stack and can not be null. What is a value type and what is a reference type is not always obvious. <code class="inline">int<&#47;code> and <code class="inline">double<&#47;code> are value types but so is <code class="inline">DateTime<&#47;code>. <code class="inline">string<&#47;code> is a reference type though.</p>
+</code></p>
+<h3>Controlling Serialization of Value Types</h3><br />
+.NET has reference types and value types. Reference types are stored on the heap and can be null. Value types are stored on the stack and can not be null. What is a value type and what is a reference type is not always obvious. <code class="inline">int</code> and <code class="inline">double</code> are value types but so is <code class="inline">DateTime</code>. <code class="inline">string</code> is a reference type though.</p>
 <p>The serialization code is smart enough to not serialize null values. But what about those value types? They can not be null, so how do you determine if they should be serialized or not? There are two ways you can do it.</p>
 <ol>
-<li>DefaultValue<&#47;li>
-<li><em>Property<&#47;em>Specified<&#47;em><&#47;li><br />
-<&#47;ol> </p>
-<h3>DefaultValue<&#47;h3><br />
+<li>DefaultValue</li>
+<li><em>Property</em>Specified</em></li><br />
+</ol> </p>
+<h3>DefaultValue</h3><br />
 One way is to specify a default value. If the property has that default value it will not be serialized.</p>
 <p>Example:<br />
 <code><br />
 [XmlAttribute("age"), DefaultValue(-1)]<br />
 public int Age;<br />
-<&#47;code></p>
+</code></p>
 <p>I have not found any problem with this on the .NET Compact Framework, but I haven't used it extensively.<br />
 DefaultValue really does not make sense for every case. What about a value where negative, positive and zero all make sense? What about a boolean value where true and false are both meaningful and different from null? Valid values are really a business concept and many business concepts will not constrain them in such a way that you can specify a DefaultValue to control serialization, so this is not always useful.</p>
-<p><em>See: <a href="http:&#47;&#47;www.distribucon.com&#47;blog&#47;PermaLink,guid,6bb6b064-6d03-4485-949c-04e679e51f5f.aspx">more information on DefaultValue<&#47;a><&#47;em>.</p>
-<h3><em>Property<&#47;em>Specified<&#47;em><&#47;h3><br />
-.NET serialization also allows you to specify a control value to check to see if a property should be serialized. The form of the control value is <em>propertyname<&#47;em>Specified. It is a boolean value. If the value is false, then the property it controls will not be serialized. If the value, is true then it will be serialized.</p>
+<p><em>See: <a href="http://www.distribucon.com/blog/PermaLink,guid,6bb6b064-6d03-4485-949c-04e679e51f5f.aspx">more information on DefaultValue</a></em>.</p>
+<h3><em>Property</em>Specified</em></h3><br />
+.NET serialization also allows you to specify a control value to check to see if a property should be serialized. The form of the control value is <em>propertyname</em>Specified. It is a boolean value. If the value is false, then the property it controls will not be serialized. If the value, is true then it will be serialized.</p>
 <p>Example:<br />
 <code><br />
 [XmlIgnore]<br />
@@ -116,8 +116,8 @@ public int Foo {<br />
         this.FooSpecified = true;<br />
     }<br />
 }<br />
-<&#47;code></p>
-<p>This is fine in the full framework. The problem is with the .NET Compact Framework. When the serializer comes across a <em>propertyname<&#47;em>Specified value that is false, the serialization of that class stops. This means if you have 5 properties and the second property has a control value set to false, only the first value will be serialized!</p>
-<h4>Coming Soon<&#47;h4><br />
+</code></p>
+<p>This is fine in the full framework. The problem is with the .NET Compact Framework. When the serializer comes across a <em>propertyname</em>Specified value that is false, the serialization of that class stops. This means if you have 5 properties and the second property has a control value set to false, only the first value will be serialized!</p>
+<h4>Coming Soon</h4><br />
 In a future post, I will write about how you can relatively easily write your own XML Serializer for the .NET Compact Framework in about 500 lines of code.</p>
-<p><strong><em>Update:<&#47;em><&#47;strong> follow-up post on <a href="http:&#47;&#47;www.zorched.net&#47;2007&#47;02&#47;28&#47;custom-xml-serialization-for-the-net-compact-framework&#47;">Writing a Custom XML Serializer<&#47;a> has been posted.</p>
+<p><strong><em>Update:</em></strong> follow-up post on <a href="http://www.zorched.net/2007/02/28/custom-xml-serialization-for-the-net-compact-framework/">Writing a Custom XML Serializer</a> has been posted.</p>

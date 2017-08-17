@@ -21,12 +21,12 @@ tags:
 - erlang exercises
 comments: []
 ---
-<p>This is part of a series on the <a href="http:&#47;&#47;www.erlang.org&#47;course&#47;exercises.html">Erlang Exercises<&#47;a> which is a great set of programming problems that challenge you to implement solutions to some common Erlang problems. I'm going to share some of my solutions to these problems.</p>
-<h2>Interaction between processes, Concurrency<&#47;h2><br />
+<p>This is part of a series on the <a href="http://www.erlang.org/course/exercises.html">Erlang Exercises</a> which is a great set of programming problems that challenge you to implement solutions to some common Erlang problems. I'm going to share some of my solutions to these problems.</p>
+<h2>Interaction between processes, Concurrency</h2><br />
 3) Write a function which starts N processes in a star, and sends a message to each of them M times. After the messages have been sent the processes should terminate gracefully.</p>
 <p><code lang="erlang"><br />
 -module(star).<br />
--export([start&#47;2, loop&#47;0, sendMessage&#47;2]).<br />
+-export([start/2, loop/0, sendMessage/2]).<br />
 start(0, _) -><br />
     io:format("done~n", []);<br />
 start(N, M) -><br />
@@ -48,15 +48,15 @@ loop() -><br />
             io:format(": Process: ~10w, Message#: ~w ..~n", [self(), R]),<br />
             loop()<br />
     end.<br />
-<&#47;code></p>
-<h3>Explanation<&#47;h3><br />
-<strong>start(N, M)<&#47;strong><br />
-The entry point to the code defines the Number of processes to start and the number of Messages to pass. <strong>timer:sleep(random:uniform(10) * 100),<&#47;strong> is just to demonstrate that things are actually happening concurrently. Without this the program usually runs to fast and everything is sequential. <strong>LoopPid = spawn(?MODULE, loop, []),<&#47;strong> creates a new process running the loop function. That process is set up to receive messages and print some information out. <strong>spawn(?MODULE, sendMessage, [M, LoopPid]),<&#47;strong> is then called to create a new process whose job it is to send each LoopPid (really the nodes in the star) M number of messages. Finally <strong>start(N - 1, M).<&#47;strong> is called tail recursively with one less Node count.</p>
-<p><strong>start(0, _)<&#47;strong><br />
-This function is called or matched when the tail recursion from <strong>start(N, M)<&#47;strong> finally gets down to the value where N is zero. In that case we no longer want to spawn processes so we just write "done" and exit the function.</p>
-<p><strong>sendMessage(M, Pid)<&#47;strong><br />
-Following a similar pattern to the <strong>start<&#47;strong> function this counts down M to zero and sends M as a message to the given Pid. The tail recursion handles decrementing to the count of M until the pattern (0, Pid) is matched at which point <strong>sendMessage(0, Pid)<&#47;strong> is matched and the Pid is sent the 'done' message.</p>
-<p><strong>loop()<&#47;strong><br />
-This is the function that is run as the individual processes or the "points of the star". Its job is to receive messages passed to it. When <strong>done -><&#47;strong> is matched by a message, the process will print out some information and then end gracefully. <strong>R -><&#47;strong> represents a message being passed with a single value that is anything other than the atom 'done'. When it is matched the value is printed and the process waits for another message by calling back to itself with <strong>loop()<&#47;strong></p>
-<h3>Thoughts<&#47;h3><br />
-One of the interesting things to me is the tail recursion of Erlang and other Functional Programming Languages. This accomplished the same thing as a looping construct without using <em>for<&#47;em> or <em>while<&#47;em> or any of those usual imperative methods.</p>
+</code></p>
+<h3>Explanation</h3><br />
+<strong>start(N, M)</strong><br />
+The entry point to the code defines the Number of processes to start and the number of Messages to pass. <strong>timer:sleep(random:uniform(10) * 100),</strong> is just to demonstrate that things are actually happening concurrently. Without this the program usually runs to fast and everything is sequential. <strong>LoopPid = spawn(?MODULE, loop, []),</strong> creates a new process running the loop function. That process is set up to receive messages and print some information out. <strong>spawn(?MODULE, sendMessage, [M, LoopPid]),</strong> is then called to create a new process whose job it is to send each LoopPid (really the nodes in the star) M number of messages. Finally <strong>start(N - 1, M).</strong> is called tail recursively with one less Node count.</p>
+<p><strong>start(0, _)</strong><br />
+This function is called or matched when the tail recursion from <strong>start(N, M)</strong> finally gets down to the value where N is zero. In that case we no longer want to spawn processes so we just write "done" and exit the function.</p>
+<p><strong>sendMessage(M, Pid)</strong><br />
+Following a similar pattern to the <strong>start</strong> function this counts down M to zero and sends M as a message to the given Pid. The tail recursion handles decrementing to the count of M until the pattern (0, Pid) is matched at which point <strong>sendMessage(0, Pid)</strong> is matched and the Pid is sent the 'done' message.</p>
+<p><strong>loop()</strong><br />
+This is the function that is run as the individual processes or the "points of the star". Its job is to receive messages passed to it. When <strong>done -></strong> is matched by a message, the process will print out some information and then end gracefully. <strong>R -></strong> represents a message being passed with a single value that is anything other than the atom 'done'. When it is matched the value is printed and the process waits for another message by calling back to itself with <strong>loop()</strong></p>
+<h3>Thoughts</h3><br />
+One of the interesting things to me is the tail recursion of Erlang and other Functional Programming Languages. This accomplished the same thing as a looping construct without using <em>for</em> or <em>while</em> or any of those usual imperative methods.</p>

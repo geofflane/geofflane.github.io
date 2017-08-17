@@ -53,7 +53,7 @@ comments:
   date_gmt: '2009-03-16 17:15:00 -0400'
   content: |-
     @Callixte,
-    Check out the <a href="http:&#47;&#47;wiki.github.com&#47;geofflane&#47;partcover-fork" rel="nofollow">github wiki<&#47;a>. It's got the information on the differences.
+    Check out the <a href="http://wiki.github.com/geofflane/partcover-fork" rel="nofollow">github wiki</a>. It's got the information on the differences.
     Basically it's got an MSBuild task and I made an option to output the coverage data in a format compatible with NCover 1.5.8 to make it easier to integrate with other tools.
 - id: 15088
   author: links for 2009-05-20 - graemef.com
@@ -66,9 +66,9 @@ comments:
     code coverage with your automated build. There was no support for MSBuild out
     of the box, so I decided to build it. (tags: codecoverage .NET)   No TweetBacks
     yet. (Be the first to Tweet this post)        blog comments powered by Disqus
-    \ var disqus_url = 'http:&#47;&#47;graemef.com&#47;2009&#47;05&#47;21&#47;links-for-2009-05-20&#47;
-    '; var disqus_container_id = 'disqus_thread'; var facebookXdReceiverPath = 'http:&#47;&#47;graemef.com&#47;wp-content&#47;plugins&#47;disqus-comment-system&#47;xd_receiver.htm';
-    \  var DsqLocal = { 'trackbacks': [ ], 'trackback_url': 'http:&#47;&#47;graemef.com&#47;2009&#47;05&#47;21&#47;links-for-2009-05-20&#47;trackback&#47;'
+    \ var disqus_url = 'http://graemef.com/2009/05/21/links-for-2009-05-20/
+    '; var disqus_container_id = 'disqus_thread'; var facebookXdReceiverPath = 'http://graemef.com/wp-content/plugins/disqus-comment-system/xd_receiver.htm';
+    \  var DsqLocal = { 'trackbacks': [ ], 'trackback_url': 'http://graemef.com/2009/05/21/links-for-2009-05-20/trackback/'
     }; [...]"
 - id: 15105
   author: Frank
@@ -86,9 +86,9 @@ comments:
   date_gmt: '2009-05-26 13:34:02 -0400'
   content: "@Frank,\r\n\r\nYou should be able to define multiple items in the TestAssemblies
     group like this:\r\n<code lang=\"xml\">\r\n<!-- Setup a property so you can use
-    it in your task -->\r\n<ItemGroup>\r\n    <TestAssemblies Include=\"src&#47;ZorchedProj&#47;bin&#47;$(Configuration)&#47;ZorchedProj.Tests1.dll\"
-    &#47;>\r\n    <TestAssemblies Include=\"src&#47;ZorchedProj&#47;bin&#47;$(Configuration)&#47;ZorchedProj.Tests2.dll\"
-    &#47;>\r\n<&#47;ItemGroup>\r\n<&#47;code>\r\n\r\nThen the rest should just work."
+    it in your task -->\r\n<ItemGroup>\r\n    <TestAssemblies Include=\"src/ZorchedProj/bin/$(Configuration)/ZorchedProj.Tests1.dll\"
+    />\r\n    <TestAssemblies Include=\"src/ZorchedProj/bin/$(Configuration)/ZorchedProj.Tests2.dll\"
+    />\r\n</ItemGroup>\r\n</code>\r\n\r\nThen the rest should just work."
 - id: 15412
   author: Frank
   author_email: frank-huster@gmx.de
@@ -112,7 +112,7 @@ comments:
   date: '2010-02-11 07:45:51 -0500'
   date_gmt: '2010-02-11 13:45:51 -0500'
   content: "Exclude=\"[*.Test]*\"\r\n\r\nhow to exclude multiple kind of files, like
-    Exclude=\"[*.Test]*&#47;[*Mock]*\"???"
+    Exclude=\"[*.Test]*/[*Mock]*\"???"
 - id: 16047
   author: chris
   author_email: chris@chriscpeterson.com
@@ -127,11 +127,11 @@ comments:
   author_url: ''
   date: '2010-02-27 16:19:53 -0500'
   date_gmt: '2010-02-27 22:19:53 -0500'
-  content: "To add multiple includes&#47;excludes, either:\n\nExclude=\"[nunit*]*;[log4net*]*\"
+  content: "To add multiple includes/excludes, either:\n\nExclude=\"[nunit*]*;[log4net*]*\"
     \n\n\nor\n\n\n  \n      \n      \n \n\n\n \n     <!-- Configure the task to execute
-    -->\n    <PartCover ToolPath=\"$(LibDirectory)&#47;PartCover\"\n                    Target=\"$(LibDirectory)NUnitnunit-console.exe\"\n
-    \                   TargetArgs=\"%(TestAssemblies.FullPath) &#47;xml=%(TestAssemblies.Filename).xml
-    &#47;labels &#47;nologo &#47;noshadow\"\n\t\t    WorkingDirectory=\"$(MSBuildProjectDirectory)\"\n\t\t
+    -->\n    <PartCover ToolPath=\"$(LibDirectory)/PartCover\"\n                    Target=\"$(LibDirectory)NUnitnunit-console.exe\"\n
+    \                   TargetArgs=\"%(TestAssemblies.FullPath) /xml=%(TestAssemblies.Filename).xml
+    /labels /nologo /noshadow\"\n\t\t    WorkingDirectory=\"$(MSBuildProjectDirectory)\"\n\t\t
     \   Output=\"partcover.xml\"\n\t\t    Exclude=\"@(CoverageExclusions)\" \n.\n."
 - id: 16051
   author: Phill Demoore
@@ -177,54 +177,54 @@ comments:
   author_url: http://granadacoder.wordpress.com/2012/12/03/47/
   date: '2013-01-23 10:34:07 -0500'
   date_gmt: '2013-01-23 16:34:07 -0500'
-  content: "[...] &#47;&#47;&#47; Append the command and argument only if the argument
-    exists. Repped from the internet at http:&#47;&#47;www.zorched.net&#47;2009&#47;01&#47;08&#47;msbuild-task-for-partcover&#47;
-    &#47;&#47;&#47; <&#47;summary> &#47;&#47;&#47; <param name=&#8221;builder&#8221;>The
+  content: "[...] /// Append the command and argument only if the argument
+    exists. Repped from the internet at http://www.zorched.net/2009/01/08/msbuild-task-for-partcover/
+    /// </summary> /// <param name=&#8221;builder&#8221;>The
     containing string [...]"
 ---
-<p><strong><em><![Rant[<&#47;em><&#47;strong></p>
+<p><strong><em><![Rant[</em></strong></p>
 <p>I continue to lament the dearth of option for Test Coverage in the .NET world.</p>
-<p>In the Java world you have open source tools like <a href="http:&#47;&#47;emma.sourceforge.net&#47;">Emma<&#47;a> and <a href="http:&#47;&#47;cobertura.sourceforge.net&#47;">Cobertura<&#47;a> that are widely used and supported (and <a href="http:&#47;&#47;java-source.net&#47;open-source&#47;code-coverage">many more<&#47;a>) as well as proprietary tools like <a href="http:&#47;&#47;www.atlassian.com&#47;software&#47;clover&#47;">Clover<&#47;a> available.</p>
-<p>.NET we have an open source <a href="http:&#47;&#47;sourceforge.net&#47;projects&#47;ncover&#47;">NCover SF<&#47;a> that requires you to do odd code instrumentation and is essentially dead it seams, another <a href="http:&#47;&#47;www.ncover.com">NCover<&#47;a> which is proprietary and costs money and <a href="http:&#47;&#47;sourceforge.net&#47;projects&#47;partcover&#47;">PartCover<&#47;a> which is open source, but doesn't seem real active.</p>
-<p>Don't get me wrong, NCover.org is a good option if you are willing to spend the money for it. But with a team of 30+ and a CI server, I'm not sure if I want to drop $10k on it. <em>(NCover up until version 1.5.8 was Free Software (GPL) before it was closed. Who has the source and why haven't you forked it yet?)<&#47;em></p>
-<p><strong><em>]]><&#47;em><&#47;strong></p>
+<p>In the Java world you have open source tools like <a href="http://emma.sourceforge.net/">Emma</a> and <a href="http://cobertura.sourceforge.net/">Cobertura</a> that are widely used and supported (and <a href="http://java-source.net/open-source/code-coverage">many more</a>) as well as proprietary tools like <a href="http://www.atlassian.com/software/clover/">Clover</a> available.</p>
+<p>.NET we have an open source <a href="http://sourceforge.net/projects/ncover/">NCover SF</a> that requires you to do odd code instrumentation and is essentially dead it seams, another <a href="http://www.ncover.com">NCover</a> which is proprietary and costs money and <a href="http://sourceforge.net/projects/partcover/">PartCover</a> which is open source, but doesn't seem real active.</p>
+<p>Don't get me wrong, NCover.org is a good option if you are willing to spend the money for it. But with a team of 30+ and a CI server, I'm not sure if I want to drop $10k on it. <em>(NCover up until version 1.5.8 was Free Software (GPL) before it was closed. Who has the source and why haven't you forked it yet?)</em></p>
+<p><strong><em>]]></em></strong></p>
 <p>If you're not willing to pay that basically leaves PartCover. But of course you want to integrate your code coverage with your automated build. There was no support for MSBuild out of the box, so I decided to build it.</p>
-<h3>Creating an MSBuild Task<&#47;h3><br />
+<h3>Creating an MSBuild Task</h3><br />
 I need to do 2 things to run PartCover:</p>
 <ol>
-<li>Register the native <em>PartCover.CorDriver.dll<&#47;em><&#47;li>
-<li>Execute the PartCover.exe with the proper options<&#47;li><br />
-<&#47;ol></p>
-<h4>Register Native DLL<&#47;h4><br />
-To see the details on how to register a native DLL using .NET code so my earlier post <a href="http:&#47;&#47;www.zorched.net&#47;2009&#47;01&#47;01&#47;register-and-unregister-com-dll-from-net-code&#47;">Register and Unregister COM DLL from .NET Code<&#47;a>.</p>
-<h4>Execute PartCover<&#47;h4><br />
-The MSBuild framework provides a <a href="http:&#47;&#47;msdn.microsoft.com&#47;en-us&#47;library&#47;microsoft.build.utilities.tooltask.aspx">ToolTask<&#47;a> base class whose whole purpose is for executing external command line tools. I used this as the base of the task.</p>
-<h5>1. ToolName<&#47;h5><br />
-First you override the <em>ToolName<&#47;em> property to return the name of the EXE to run. Nothing special here, it's just the executable name.</p>
+<li>Register the native <em>PartCover.CorDriver.dll</em></li>
+<li>Execute the PartCover.exe with the proper options</li><br />
+</ol></p>
+<h4>Register Native DLL</h4><br />
+To see the details on how to register a native DLL using .NET code so my earlier post <a href="http://www.zorched.net/2009/01/01/register-and-unregister-com-dll-from-net-code/">Register and Unregister COM DLL from .NET Code</a>.</p>
+<h4>Execute PartCover</h4><br />
+The MSBuild framework provides a <a href="http://msdn.microsoft.com/en-us/library/microsoft.build.utilities.tooltask.aspx">ToolTask</a> base class whose whole purpose is for executing external command line tools. I used this as the base of the task.</p>
+<h5>1. ToolName</h5><br />
+First you override the <em>ToolName</em> property to return the name of the EXE to run. Nothing special here, it's just the executable name.</p>
 <p><code lang="csharp"><br />
 protected override string ToolName<br />
 {<br />
     get { return "PartCover.exe"; }<br />
 }<br />
-<&#47;code></p>
-<h5>2. Properties<&#47;h5><br />
+</code></p>
+<h5>2. Properties</h5><br />
 Next to start build the task you go about defining all of the settings that a user will need to set to execute the task. You then create those as Properties on the class and they will be set by MSBuild. Start with the simple things that someone will need to pass to get the tool to execute properly. You can build from there for other properties. If possible give the properties sane defaults so that people don't have to override them in their build file.</p>
 <p><code lang="csharp"><br />
-&#47;&#47; ...</p>
-<p>&#47;&#47;&#47;<br />
+// ...</p>
+<p>///<br />
 <summary>
-&#47;&#47;&#47; The application to execute to get the coverage results.<br />
-&#47;&#47;&#47; Generally this will be your unit testing exe.<br />
-&#47;&#47;&#47; <&#47;summary><br />
+/// The application to execute to get the coverage results.<br />
+/// Generally this will be your unit testing exe.<br />
+/// </summary><br />
 public string Target<br />
 {<br />
     get { return _target; }<br />
     set { _target = value; }<br />
 }</p>
-<p>&#47;&#47;&#47;<br />
+<p>///<br />
 <summary>
-&#47;&#47;&#47; The arguments to pass to the <see cref="Target"&#47;> executable<br />
-&#47;&#47;&#47; <&#47;summary><br />
+/// The arguments to pass to the <see cref="Target"/> executable<br />
+/// </summary><br />
 public string TargetArgs<br />
 {<br />
     get { return _targetArgs; }<br />
@@ -235,10 +235,10 @@ public string TargetArgs<br />
     get { return _workingDirectory; }<br />
     set { _workingDirectory = value; }<br />
 }</p>
-<p>&#47;&#47; ...<br />
-<&#47;code></p>
-<h5>3. Command Arguments<&#47;h5><br />
-Then you need to override <em>string GenerateCommandLineCommands()<&#47;em> method. The whole purpose of this method is to construct any command line parameters that need to be passed to the <em> ToolName<&#47;em> command using the Properties defined in the task.</p>
+<p>// ...<br />
+</code></p>
+<h5>3. Command Arguments</h5><br />
+Then you need to override <em>string GenerateCommandLineCommands()</em> method. The whole purpose of this method is to construct any command line parameters that need to be passed to the <em> ToolName</em> command using the Properties defined in the task.</p>
 <p><code lang="csharp"><br />
 protected override string GenerateCommandLineCommands()<br />
 {<br />
@@ -252,9 +252,9 @@ protected override string GenerateCommandLineCommands()<br />
 <p>    Log.LogCommandLine(builder.ToString());</p>
 <p>    return builder.ToString();<br />
 }<br />
-<&#47;code></p>
-<h5>5. Execute<&#47;h5><br />
-Finally, if you have anything special to do, you can override the <em>Execute()<&#47;em>. In this case, I wanted to handle the registering and de-registering of the Core.dll. Make sure that you call the <em>base.Execute()<&#47;em> method so that the TaskTarget can do the work that it needs to do.</p>
+</code></p>
+<h5>5. Execute</h5><br />
+Finally, if you have anything special to do, you can override the <em>Execute()</em>. In this case, I wanted to handle the registering and de-registering of the Core.dll. Make sure that you call the <em>base.Execute()</em> method so that the TaskTarget can do the work that it needs to do.</p>
 <p><code lang="csharp"><br />
 public override bool Execute()<br />
 {<br />
@@ -266,30 +266,30 @@ public override bool Execute()<br />
         return base.Execute();<br />
     }<br />
 }<br />
-<&#47;code></p>
+</code></p>
 <p>To see the whole thing, download the files at the bottom of this post.</p>
-<h3>How to Use PartCover with MSBuild<&#47;h3><br />
+<h3>How to Use PartCover with MSBuild</h3><br />
 Now that you have a Custom task you need to create a Target in your MSBuild file to execute the task.</p>
 <p><code lang="xml"></p>
 <p><!-- Register the PartCover.MSBuild.dll so the PartCover task is available --><br />
-<UsingTask TaskName="PartCover.MSBuild.PartCover" AssemblyFile="$(LibDirectory)&#47;PartCover&#47;PartCover.MSBuild.dll" &#47;></p>
+<UsingTask TaskName="PartCover.MSBuild.PartCover" AssemblyFile="$(LibDirectory)/PartCover/PartCover.MSBuild.dll" /></p>
 <p><!-- Setup a property so you can use it in your task --><br />
 <ItemGroup><br />
-    <TestAssemblies Include="src&#47;ZorchedProj&#47;bin&#47;$(Configuration)&#47;ZorchedProj.Tests.dll" &#47;><br />
-<&#47;ItemGroup></p>
+    <TestAssemblies Include="src/ZorchedProj/bin/$(Configuration)/ZorchedProj.Tests.dll" /><br />
+</ItemGroup></p>
 <p><!-- Create a Target to call the PartCover task --><br />
 <Target Name="Test" DependsOnTargets="CoreBuild"></p>
 <p>     <!-- Configure the task to execute --><br />
-    <PartCover ToolPath="$(LibDirectory)&#47;PartCover"<br />
+    <PartCover ToolPath="$(LibDirectory)/PartCover"<br />
                     Target="$(LibDirectory)NUnitnunit-console.exe"<br />
-                    TargetArgs="%(TestAssemblies.FullPath) &#47;xml=%(TestAssemblies.Filename).xml &#47;labels &#47;nologo &#47;noshadow"<br />
+                    TargetArgs="%(TestAssemblies.FullPath) /xml=%(TestAssemblies.Filename).xml /labels /nologo /noshadow"<br />
 		    WorkingDirectory="$(MSBuildProjectDirectory)"<br />
 		    Output="partcover.xml"<br />
                     Include="[Zorched.*]*"<br />
                     Exclude="[*.Test]*"<br />
-    &#47;><br />
-<&#47;Target><br />
-<&#47;code></p>
-<p><strong>Download the code:<&#47;strong><br />
-<a href='http:&#47;&#47;www.zorched.net&#47;wp-content&#47;uploads&#47;2009&#47;01&#47;partcovermsbuild.zip'>PartCover MSbuild.zip<&#47;a></p>
+    /><br />
+</Target><br />
+</code></p>
+<p><strong>Download the code:</strong><br />
+<a href='http://www.zorched.net/wp-content/uploads/2009/01/partcovermsbuild.zip'>PartCover MSbuild.zip</a></p>
 <p>Good luck and I hope someone else finds this useful.</p>

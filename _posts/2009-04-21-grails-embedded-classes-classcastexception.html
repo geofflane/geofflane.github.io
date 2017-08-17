@@ -59,13 +59,13 @@ comments:
   content: "@stewie,\r\nIn your views, for databinding, you use the name declared
     as it's declared in the property. So in your case you would have:\r\n<code lang=\"groovy\">\r\nclass
     Person {\r\n    static embedded = ['homeAddress', 'businessAddress']\r\n    Address
-    homeAddress\r\n    Address businessAddress\r\n}\r\n<&#47;code>\r\n\r\nIn your
+    homeAddress\r\n    Address businessAddress\r\n}\r\n</code>\r\n\r\nIn your
     view you might have something like:\r\n<code lang=\"html\">\r\n<tr class=\"prop\">\r\n
-    \   <td valign=\"top\" class=\"name\">\r\n        <label for=\"homeAddress.street\">Street:<&#47;label>\r\n
-    \   <&#47;td>\r\n    <td valign=\"top\" class=\"value ${hasErrors(bean:personInstance,field:'homeAddress.street','errors')}\">\r\n
+    \   <td valign=\"top\" class=\"name\">\r\n        <label for=\"homeAddress.street\">Street:</label>\r\n
+    \   </td>\r\n    <td valign=\"top\" class=\"value ${hasErrors(bean:personInstance,field:'homeAddress.street','errors')}\">\r\n
     \       <input type=\"text\" id=\"homeAddress.street\" name=\"homeAddress.street\"
     \r\n                value=\"${fieldValue(bean:personInstance,field:'homeAddress.street')}\"
-    &#47;>\r\n    <&#47;td>\r\n<&#47;tr> \r\n<&#47;code>\r\n\r\nThe replace homeAddress
+    />\r\n    </td>\r\n</tr> \r\n</code>\r\n\r\nThe replace homeAddress
     with businessAddress for the other values."
 - id: 15766
   author: Juan
@@ -94,8 +94,8 @@ comments:
     value is posted instead. Sorry for that comment, now I'm happy to know this is
     not a bug.
 ---
-<p>Using ORM tools allow you to map the data to a database independently of how your object model looks. Grails supports one-to-many and one-to-one relationships if you want to have the data in different table. But what about when you want to map a single table to multiple objects? In Grails a <em>has a<&#47;em> relationship where all the data is stored in a single table is defined by using the <em>embedded<&#47;em> syntax. (This creates a component in the Hibernate mapping world.)</p>
-<p>An example of using the <em>embedded<&#47;em> syntax to create a compositional relationship:<br />
+<p>Using ORM tools allow you to map the data to a database independently of how your object model looks. Grails supports one-to-many and one-to-one relationships if you want to have the data in different table. But what about when you want to map a single table to multiple objects? In Grails a <em>has a</em> relationship where all the data is stored in a single table is defined by using the <em>embedded</em> syntax. (This creates a component in the Hibernate mapping world.)</p>
+<p>An example of using the <em>embedded</em> syntax to create a compositional relationship:<br />
 <code lang="groovy"><br />
 class Person {<br />
     static embedded = ['address']</p>
@@ -113,7 +113,7 @@ class Person {<br />
         street2(nullable:true)<br />
     }<br />
 }<br />
-<&#47;code></p>
+</code></p>
 <p>This is all great, but...<br />
 When you attempt to databind against the Person model including Address properties, you end up with an exception:</p>
 <blockquote><p>
@@ -126,8 +126,8 @@ org.codehaus.groovy.runtime.InvokerInvocationException: java.lang.ClassCastExcep
 	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:892)<br />
 	at groovy.lang.Closure.call(Closure.java:279)<br />
 	at groovy.lang.Closure.call(Closure.java:274)<br />
-<&#47;blockquote></p>
+</blockquote></p>
 <p>It ends up there is a bug in Grails versions 1.0.4, 1.0.5 and 1.1 that is causing this. That bug is related to the constraints on the embedded class, in this case the Address class. Removing the constraints allows the object to be properly databound, with the obvious downside of lacking constraints.</p>
-<p>I have filed a bug about this: <a href="http:&#47;&#47;jira.codehaus.org&#47;browse&#47;GRAILS-4446">GRAILS-4446<&#47;a>. So hopefully it will be fixed soon. Hopefully if other people are having this problem they will help them out.</p>
-<p><strong><em>Update:<&#47;em><&#47;strong><br />
+<p>I have filed a bug about this: <a href="http://jira.codehaus.org/browse/GRAILS-4446">GRAILS-4446</a>. So hopefully it will be fixed soon. Hopefully if other people are having this problem they will help them out.</p>
+<p><strong><em>Update:</em></strong><br />
 There is another workaround which is to declare the embedded class in its own file which makes it a first-class Domain object. When that's done the constraints work as expected. The downside is that this means that a table will be created for the embedded domain class (and never used).</p>

@@ -60,34 +60,34 @@ comments:
     having a tool to actually measure your real code corvaege, regardless of what
     % it ends up being or what % you strive for, is the biggest value.  Because that
     moves you on the road toward making informed, rather than speculative, decisions
-    about your testing practices.<&#47;p>
+    about your testing practices.</p>
 
 '
 ---
 <p>How do you track the health of your software projects? Ideally you could come up with few, easy to collect metrics and have your Continuous Integration system generate the information and maybe even graph it over time. What we track is going to be based on a set of beliefs and assumptions, so I think we should make that clear.</p>
-<h3>My Software Metrics Beliefs and Assumptions<&#47;h3></p>
+<h3>My Software Metrics Beliefs and Assumptions</h3></p>
 <ul>
-<li>The simplest code that solves the problem is the best. Simple does not mean rote or repetitive. It means well designed, well abstracted, well factored.<&#47;li>
-<li>Unit Testing improves the quality of code.<&#47;li>
-<li>Overly complex code, code that is not well factored, "big" code is hard to unit test.<&#47;li>
-<li>The metrics need to be easy to interpret and easy to gather or I won't do it.<&#47;li><br />
-<&#47;ul></p>
+<li>The simplest code that solves the problem is the best. Simple does not mean rote or repetitive. It means well designed, well abstracted, well factored.</li>
+<li>Unit Testing improves the quality of code.</li>
+<li>Overly complex code, code that is not well factored, "big" code is hard to unit test.</li>
+<li>The metrics need to be easy to interpret and easy to gather or I won't do it.</li><br />
+</ul></p>
 <p>Based on those beliefs and assumptions we have defined the kinds of things we care about. We want simple, small classes and methods. We want classes that fit the Single Responsibility Principle. We want unit test coverage. And we want to know when we deviate from those things.</p>
 <p>Inevitably this won't tell you the whole picture of a project. Some deviation is inevitable as well (we're not perfect). But this is giving us a picture into a project that would let us look at "hot spots" and determine if they are things we want to deal with. It will never tell you if the system does what a user really wants. It will never fully tell you if a project will be successful.</p>
-<h3>The Metrics I Came Up With<&#47;h3></p>
+<h3>The Metrics I Came Up With</h3></p>
 <ul>
-<li>Unit Test Coverage - How many code paths are being exercised in our tests.<&#47;li>
-<li>Cyclomatic Complexity - Number of methods over 10, 20, 40<&#47;li>
-<li>Lines of Code - General size information<&#47;li>
-<li>Methods over a certain size - Number of methods over 15, 30, 45 lines<&#47;li>
-<li>Classes over a certain size - Number of classes over 150, 300, 600 lines<&#47;li>
-<li>Afferent&#47;Efferent Coupling - Dead code and code that does too much<&#47;li><br />
-<&#47;ul></p>
-<h3>Tools<&#47;h3><br />
-I'm currently thinking mostly about .NET projects because at <a href="http:&#47;&#47;www.spiderlogic.com">work<&#47;a> we do a lot of small to mid-size projects using .NET. Many of the tools already exist and are Open Source in the Java world and many Java Continuous Integration servers support calculating some of those metrics for you already. So you're probably in pretty good shape if you're doing Java development.</p>
-<h4>FxCop<&#47;h4><br />
-Out-of-the-box <a href="http:&#47;&#47;msdn.microsoft.com&#47;en-us&#47;library&#47;bb429476(VS.80).aspx">FxCop<&#47;a> doesn't really give you many of these things. But it does provide you a way that you can fairly easily your own rules using their API.</p>
-<p>For Example to calculate Cyclomatic Complexity you can implement a class that extends <em>BaseIntrospectionRule<&#47;em> and overrides the VistBranch and VisitSwitchInstruction.</p>
+<li>Unit Test Coverage - How many code paths are being exercised in our tests.</li>
+<li>Cyclomatic Complexity - Number of methods over 10, 20, 40</li>
+<li>Lines of Code - General size information</li>
+<li>Methods over a certain size - Number of methods over 15, 30, 45 lines</li>
+<li>Classes over a certain size - Number of classes over 150, 300, 600 lines</li>
+<li>Afferent/Efferent Coupling - Dead code and code that does too much</li><br />
+</ul></p>
+<h3>Tools</h3><br />
+I'm currently thinking mostly about .NET projects because at <a href="http://www.spiderlogic.com">work</a> we do a lot of small to mid-size projects using .NET. Many of the tools already exist and are Open Source in the Java world and many Java Continuous Integration servers support calculating some of those metrics for you already. So you're probably in pretty good shape if you're doing Java development.</p>
+<h4>FxCop</h4><br />
+Out-of-the-box <a href="http://msdn.microsoft.com/en-us/library/bb429476(VS.80).aspx">FxCop</a> doesn't really give you many of these things. But it does provide you a way that you can fairly easily your own rules using their API.</p>
+<p>For Example to calculate Cyclomatic Complexity you can implement a class that extends <em>BaseIntrospectionRule</em> and overrides the VistBranch and VisitSwitchInstruction.</p>
 <p><code lang="csharp"><br />
 public override void VisitBranch(Branch branch)<br />
 {<br />
@@ -102,20 +102,20 @@ public override void VisitBranch(Branch branch)<br />
     Level += switchInstruction.Targets.Count;<br />
     base.VisitSwitchInstruction(switchInstruction);<br />
 }<br />
-<&#47;code></p>
-<h4>Coverage<&#47;h4><br />
-<a href="https:&#47;&#47;sourceforge.net&#47;projects&#47;partcover&#47;">PartCover<&#47;a> is an open source code coverage tool for .NET. It does the job but does not have what I'd call any "wow" factor.</p>
-<p><a href="http:&#47;&#47;www.ncover.com">NCover<&#47;a> is a proprietary coverage tool. High on wow factor, but expensive. NCover was once free and open source and gained a good following, but they switched and closed it and made the decision to charge $150 - $300 a license for it depending on the version.</p>
+</code></p>
+<h4>Coverage</h4><br />
+<a href="https://sourceforge.net/projects/partcover/">PartCover</a> is an open source code coverage tool for .NET. It does the job but does not have what I'd call any "wow" factor.</p>
+<p><a href="http://www.ncover.com">NCover</a> is a proprietary coverage tool. High on wow factor, but expensive. NCover was once free and open source and gained a good following, but they switched and closed it and made the decision to charge $150 - $300 a license for it depending on the version.</p>
 <p>(I lament the state of the .NET ecosystem with regard to tooling. Either an OK open source version or an expensive commercial version is not a real choice. There are so many good options in the Unit Testing space, but not in the coverage space.)</p>
-<h4>NDepend Mini-Review<&#47;h4><br />
-<strong><em>Disclosure:<&#47;em><&#47;strong> I received a free copy of NDepend from the creator. I would like to think that didn't influence this at all, but wanted to make that known.</p>
-<p>One of the tools that I've been looking at for .NET projects is <a href="http:&#47;&#47;www.ndepend.com&#47;">NDepend<&#47;a>. It seems to cover all of the cases that I mentioned above except for the Code Coverage case (although it integrates with NCover, but I haven't looked at that). It has a really cool query languages, that looks a lot like SQL, that lets you customize any of the existing metrics that it tracks or write your own (it comes with so many that it seems like I just customize). It comes with so many metrics that in practice it can be seem quite overwhelming. I think the right thing to do for most projects is to pick the handful that you care about and limit it to that.</p>
+<h4>NDepend Mini-Review</h4><br />
+<strong><em>Disclosure:</em></strong> I received a free copy of NDepend from the creator. I would like to think that didn't influence this at all, but wanted to make that known.</p>
+<p>One of the tools that I've been looking at for .NET projects is <a href="http://www.ndepend.com/">NDepend</a>. It seems to cover all of the cases that I mentioned above except for the Code Coverage case (although it integrates with NCover, but I haven't looked at that). It has a really cool query languages, that looks a lot like SQL, that lets you customize any of the existing metrics that it tracks or write your own (it comes with so many that it seems like I just customize). It comes with so many metrics that in practice it can be seem quite overwhelming. I think the right thing to do for most projects is to pick the handful that you care about and limit it to that.</p>
 <p>NDepend comes with NAnt and MSBuild tasks that will let you integrate it into your build automation. It also comes with an XSL stylesheet to integrate the NDepend output into CruiseControl.NET for reporting purposes.</p>
 <p>Some things you might run into:</p>
 <ul>
-<li>C# support is the primary language (e.g. No support for code level Cyclomatic Complexity for non-C# language, but still supports IL level CC). Only a problem if you are forced to do VB.NET of course, or use another CLR language.<&#47;li>
-<li>A single license is $400 and 20 licenses or more are over $200 each. So price could be a concern to many people. I'm thinking it might make the most sense to run this on a CI server, so in that case you would probably only need a small number of licenses.<&#47;li>
-<li>It integrates with code coverage tools, but currently only NCover. See the previous comments about the cost of NCover combined with the cost of NDepend if price is an issue.<&#47;li><br />
-<&#47;ul></p>
-<h3>What Else?<&#47;h3><br />
+<li>C# support is the primary language (e.g. No support for code level Cyclomatic Complexity for non-C# language, but still supports IL level CC). Only a problem if you are forced to do VB.NET of course, or use another CLR language.</li>
+<li>A single license is $400 and 20 licenses or more are over $200 each. So price could be a concern to many people. I'm thinking it might make the most sense to run this on a CI server, so in that case you would probably only need a small number of licenses.</li>
+<li>It integrates with code coverage tools, but currently only NCover. See the previous comments about the cost of NCover combined with the cost of NDepend if price is an issue.</li><br />
+</ul></p>
+<h3>What Else?</h3><br />
 What does everyone else think? What do you care about and what are the right metrics for keeping track of the health of a software project?</p>

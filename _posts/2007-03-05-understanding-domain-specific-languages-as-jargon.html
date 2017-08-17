@@ -40,7 +40,7 @@ comments:
     Coffee DSL that would allow code to parse an order written by a human and [...]"
 ---
 <p>Domain Specific Languages (DSLs) are the idea of creating syntaxes that model a very specific problem domain. Domain Specific Languages are not a new concept. Some people call them 'little languages'. The Unix world has a bunch of little languages. Grep, awk, sed, lex, and yacc all exhibit features of these domain specific languages. They are little tools that do one thing well. In these cases they are often highly encoded and not in  natural language of any sort. Modern domain specific languages should aim to be humane and literate in the language of the user.</p>
-<p>Domain Specific Languages should be expressed in the language of the problem being solved. They are a higher level of abstraction than for loops and object instantiation. They are at the level of abstraction of the problem space. <a href="http:&#47;&#47;www.nealford.com&#47;">Neal Ford<&#47;a> uses the example of "venti nonfat decaf whip latte". What am I talking about if I use those terms? If you guessed coffee, then you know the Jargon of one coffee chain out there. The person listening to the order understands that you are ordering a decaf coffee drink of a certain size, with non-fat milk and whipped cream. There is a lot of shared context in the Jargon of the coffee drinker and the coffee order taker. This shared context sets the stage for a rich conversation without a lot of unnecessary noise. This is true of all Jargon.</p>
+<p>Domain Specific Languages should be expressed in the language of the problem being solved. They are a higher level of abstraction than for loops and object instantiation. They are at the level of abstraction of the problem space. <a href="http://www.nealford.com/">Neal Ford</a> uses the example of "venti nonfat decaf whip latte". What am I talking about if I use those terms? If you guessed coffee, then you know the Jargon of one coffee chain out there. The person listening to the order understands that you are ordering a decaf coffee drink of a certain size, with non-fat milk and whipped cream. There is a lot of shared context in the Jargon of the coffee drinker and the coffee order taker. This shared context sets the stage for a rich conversation without a lot of unnecessary noise. This is true of all Jargon.</p>
 <p><code><br />
 # CoffeeDSL.rb<br />
 # This is the input from the user, likely read from a file<br />
@@ -72,7 +72,7 @@ CoffeeInput = "venti nonfat decaf whip latte"</p>
     end</p>
 <p>    def load<br />
         # turn one line into multi-line "method calls"<br />
-        cleaned = CoffeeInput.gsub(&#47;\s+&#47;, "\n")<br />
+        cleaned = CoffeeInput.gsub(/\s+/, "\n")<br />
         self.instance_eval(cleaned)<br />
     end<br />
 end</p>
@@ -80,8 +80,8 @@ end</p>
 coffee = Coffee.new<br />
 coffee.load       # load the user input<br />
 coffee.order      # submit the order<br />
-<&#47;code></p>
-<p><a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Jargon">Jargon<&#47;a> is the terminology of a specific proffession or   group. Does your user community or problem space have a vocabulary? Can they express the things they want out of a system using that vocabulary or Jargon? If so, there is a very real possibility that you could utilize a DSL to solve some set of problems for those users.</p>
+</code></p>
+<p><a href="http://en.wikipedia.org/wiki/Jargon">Jargon</a> is the terminology of a specific proffession or   group. Does your user community or problem space have a vocabulary? Can they express the things they want out of a system using that vocabulary or Jargon? If so, there is a very real possibility that you could utilize a DSL to solve some set of problems for those users.</p>
 <p>What about field validation?<br />
 <code><br />
 # ValidationDSL.rb<br />
@@ -124,5 +124,5 @@ print val.validate('')<br />
 print "\n"<br />
 print val.validate('abbbbbbbbbbbbbbbbbbbbbb')<br />
 print "\n"<br />
-<&#47;code></p>
+</code></p>
 <p>How does your user community talk about a problem? Can they easily express what they intend with simple Jargon that they already know? Is that more natural for a power user than some complicated UI with buttons and checkboxes? Then you might have a good place to use a DSL.</p>

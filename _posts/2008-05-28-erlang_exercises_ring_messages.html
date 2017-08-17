@@ -27,18 +27,18 @@ comments:
   date: '2009-02-26 23:33:03 -0500'
   date_gmt: '2009-02-27 05:33:03 -0500'
   content: "Nice write up, I also tried this problem and came up with this solution:
-    http:&#47;&#47;sudothinker.com&#47;2009&#47;2&#47;27&#47;erlang-exercises-interaction-between-processes-concurrency-ring-code.
+    http://sudothinker.com/2009/2/27/erlang-exercises-interaction-between-processes-concurrency-ring-code.
     I'm still getting my head around erlang, the foldl approach seems sweet though.\r\n\r\nIt
     does look a little more cumbersome than yours but I also made each node aware
     of the one before it. That way each node know to only accept messages from the
     node before it in the ring, so that added a bit of complexity."
 ---
-<p><a href="http:&#47;&#47;www.erlang.org&#47;course&#47;exercises.html">Erlang Exercises<&#47;a> has a great little series of programming problems that challenge you to implement solutions to some common Erlang problems. It's a great way to learn the language. I'm going to share some of my solutions to these problems. Maybe for some discussion, maybe for some feedback from some people more experienced with Erlang, maybe just to give some new people a flavor of the language.</p>
-<h2>Interaction between processes, Concurrency<&#47;h2><br />
+<p><a href="http://www.erlang.org/course/exercises.html">Erlang Exercises</a> has a great little series of programming problems that challenge you to implement solutions to some common Erlang problems. It's a great way to learn the language. I'm going to share some of my solutions to these problems. Maybe for some discussion, maybe for some feedback from some people more experienced with Erlang, maybe just to give some new people a flavor of the language.</p>
+<h2>Interaction between processes, Concurrency</h2><br />
 2) Write a function which starts N processes in a ring, and sends a message M times around all the processes in the ring. After the messages have been sent the processes should terminate gracefully.</p>
 <p><code lang="erlang"><br />
 -module(ring).<br />
--export([start&#47;2, loop&#47;2]).<br />
+-export([start/2, loop/2]).<br />
 start(N, M) -><br />
     Seq = lists:seq(1, N),<br />
     Messages = lists:reverse(lists:seq(0, M-1)),<br />
@@ -58,17 +58,17 @@ loop(N, NextPid) -><br />
             io:format("* Process: ~8w, Sequence#: ~w, Message#: terminate!~n",<br />
                             [self(), N])<br />
     end.<br />
-<&#47;code></p>
-<h3>Explanation<&#47;h3><br />
-<strong>Seq = lists:seq(1, N)<&#47;strong> and <strong>Messages = lists:reverse(lists:seq(0, M-1)),<&#47;strong><br />
+</code></p>
+<h3>Explanation</h3><br />
+<strong>Seq = lists:seq(1, N)</strong> and <strong>Messages = lists:reverse(lists:seq(0, M-1)),</strong><br />
 These create lists of integers from 1 - N and then from M-1 - 0 (because of the reverse). These lists are used for creating processes and the messages that will be passed to those processes respectively.</p>
-<p><strong>LastP = lists:foldl(...<&#47;strong><br />
-This is an accumulator function. The self() value passed to the function is passed in as Pid on the first iteration, but subsequent iterations get the value computed in the method with the <strong>spawn<&#47;strong> function. The final <strong>spawn<&#47;strong> Pid is returned from the accumulator and is stored in LastP. The spawn function is setting up new processes which are running the <strong>loop<&#47;strong> function with the given values.</p>
-<p><strong>spawn(fun() -> [ LastP ! R || R <- Messages ] end).<&#47;strong><br />
-This is a <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;List_comprehension">list comprehension<&#47;a> in Erlang. It basically takes each value from the <strong>Messages<&#47;strong> list and sends that as a message to the LastP pid which is the beginning of the Ring.</p>
-<p><strong>loop(N, NextPid) -><&#47;strong><br />
+<p><strong>LastP = lists:foldl(...</strong><br />
+This is an accumulator function. The self() value passed to the function is passed in as Pid on the first iteration, but subsequent iterations get the value computed in the method with the <strong>spawn</strong> function. The final <strong>spawn</strong> Pid is returned from the accumulator and is stored in LastP. The spawn function is setting up new processes which are running the <strong>loop</strong> function with the given values.</p>
+<p><strong>spawn(fun() -> [ LastP ! R || R <- Messages ] end).</strong><br />
+This is a <a href="http://en.wikipedia.org/wiki/List_comprehension">list comprehension</a> in Erlang. It basically takes each value from the <strong>Messages</strong> list and sends that as a message to the LastP pid which is the beginning of the Ring.</p>
+<p><strong>loop(N, NextPid) -></strong><br />
 This is the function that is being run as the processes of each of the elements of the ring.</p>
-<p><strong>R when R > 0 -> <&#47;strong><br />
-When this process receives a message where the message is an integer greater than zero then write some info to the console and forward the message to the NextPid and use <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Tail_recursion">tail recursion<&#47;a> to start waiting for another message.</p>
-<p><strong>R when R =:= 0 -><&#47;strong><br />
+<p><strong>R when R > 0 -> </strong><br />
+When this process receives a message where the message is an integer greater than zero then write some info to the console and forward the message to the NextPid and use <a href="http://en.wikipedia.org/wiki/Tail_recursion">tail recursion</a> to start waiting for another message.</p>
+<p><strong>R when R =:= 0 -></strong><br />
 When this process receives a message where the message is an integer that equals zero then write some info to the console and forward the message to the NextPid, but allow this process to complete naturally.</p>

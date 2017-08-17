@@ -53,9 +53,9 @@ comments:
     I need to look into making it useful for the other supported systems and then
     proposing a patch.  In case anyone else wants to see it, here is the class that
     handles my stamp-like columns:\r\n<code lang=\"csharp\">\r\npublic static class
-    MigrationHelper\r\n{\r\n    &#47;&#47;&#47; \r\n    &#47;&#47;&#47; This SQL Server-Specific
-    method creates a Timestamp column.\r\n    &#47;&#47;&#47; \r\n    &#47;&#47;&#47;
-    \r\n    &#47;&#47;&#47; \r\n     public static void AddConcurrencyChecking(ITransformationProvider
+    MigrationHelper\r\n{\r\n    /// \r\n    /// This SQL Server-Specific
+    method creates a Timestamp column.\r\n    /// \r\n    ///
+    \r\n    /// \r\n     public static void AddConcurrencyChecking(ITransformationProvider
     database, string tableName)\r\n    {\r\n          string addTimestampQuery = \"ALTER
     TABLE \" + tableName + \" ADD timestamp TIMESTAMP NOT NULL;\";\r\n          IDbCommand
     cmd = database.GetCommand();\r\n          cmd.Connection.Open();\r\n          database.ExecuteNonQuery(addTimestampQuery);\r\n
@@ -68,7 +68,7 @@ comments:
     DbType.Int32);\r\n          AddColumn(database, tableName, \"updated_by\", DbType.Int32);\r\n
     \   }\r\n     private static void AddColumn(ITransformationProvider database,
     string tableName, string columnName, DbType dbType)\r\n    {\r\n          database.AddColumn(tableName,
-    new Migrator.Framework.Column(columnName,dbType));\r\n    }\r\n}\r\n<&#47;code>"
+    new Migrator.Framework.Column(columnName,dbType));\r\n    }\r\n}\r\n</code>"
 - id: 16040
   author: Terry
   author_email: terry@helpfulmove.com
@@ -89,9 +89,9 @@ comments:
     also supports migrations (to my knowledge) is Lightspeed [...]"
 ---
 <p>One of the more difficult things to manage in software projects is often changing a database schema over time. On the projects that I work on, we don't usually have DBAs who manage the schema so it is left up to the developers to figure out. The other thing you have to manage is applying changes to the database in such a way that you don't disrupt the work of other developers on your team. We need the change to go in at the same time as the code so that Continuous Integration can work.</p>
-<h3>Migrations<&#47;h3><br />
+<h3>Migrations</h3><br />
 While I don't know if they were invented there, migrations seem to have been popularized by Ruby on Rails. Rails is a database centric framework that implies the properties of your domain from the schema of your database. For that reason it makes sense that they came up with a very good way of These are some example migrations to give you an idea of the basics of creating a schema.</p>
-<p><strong>001_AddAddressTable.cs<&#47;strong>:<br />
+<p><strong>001_AddAddressTable.cs</strong>:<br />
 <code lang="csharp"><br />
 using Migrator.Framework;<br />
 using System.Data;<br />
@@ -112,8 +112,8 @@ public class AddAddressTable : Migration<br />
         Database.RemoveTable("Address");<br />
     }<br />
 }<br />
-<&#47;code></p>
-<p><strong>02_AddAddressColumns.cs<&#47;strong>:<br />
+</code></p>
+<p><strong>02_AddAddressColumns.cs</strong>:<br />
 <code lang="csharp"><br />
 using Migrator.Framework;<br />
 using System.Data;<br />
@@ -131,8 +131,8 @@ public class AddAddressColumns : Migration<br />
         Database.RemoveColumn("Address", "street3");<br />
     }<br />
 }<br />
-<&#47;code></p>
-<p><strong>003_AddPersonTable.cs<&#47;strong>:<br />
+</code></p>
+<p><strong>003_AddPersonTable.cs</strong>:<br />
 <code lang="csharp"><br />
 using Migrator.Framework;<br />
 using System.Data;<br />
@@ -154,36 +154,36 @@ public class AddPersonTable : Migration<br />
         Database.RemoveTable("Person");<br />
     }<br />
 }<br />
-<&#47;code></p>
-<h3>Run Your Migrations<&#47;h3><br />
+</code></p>
+<h3>Run Your Migrations</h3><br />
 The best way to run your migrations will be to integrate it into your build automation tool of choice. If you are not using one, now is the time.</p>
 <p>MigratorDotNet supports MSBuild and NAnt.</p>
-<p><strong>MSBuild<&#47;strong>:<br />
+<p><strong>MSBuild</strong>:<br />
 <code lang="xml"><br />
 <Target name="Migrate" DependsOnTargets="Build"><br />
     <CreateProperty Value="-1"  Condition="'$(SchemaVersion)'==''"><br />
-        <Output TaskParameter="Value" PropertyName="SchemaVersion"&#47;><br />
-    <&#47;CreateProperty><br />
+        <Output TaskParameter="Value" PropertyName="SchemaVersion"/><br />
+    </CreateProperty><br />
     <Migrate Provider="SqlServer"<br />
             Connectionstring="Database=MyDB;Data Source=localhost;User Id=;Password=;"<br />
-            Migrations="bin&#47;MyProject.dll"<br />
-            To="$(SchemaVersion)"&#47;><br />
-<&#47;Target><br />
-<&#47;code></p>
-<p><strong>NAnt<&#47;strong>:<br />
+            Migrations="bin/MyProject.dll"<br />
+            To="$(SchemaVersion)"/><br />
+</Target><br />
+</code></p>
+<p><strong>NAnt</strong>:<br />
 <code lang="xml"><br />
 <target name="migrate" description="Migrate the database" depends="build"></p>
-<property name="version" value="-1" overwrite="false" &#47;>
+<property name="version" value="-1" overwrite="false" />
   <migrate<br />
     provider="MySql|PostgreSQL|SqlServer"<br />
     connectionstring="Database=MyDB;Data Source=localhost;User Id=;Password=;"<br />
-    migrations="bin&#47;MyProject.dll"<br />
-    to="${version}" &#47;><br />
-<&#47;target><br />
-<&#47;code></p>
-<h3>So You Want to Migrate?<&#47;h3><br />
-Some more documentation and example are available <a href="http:&#47;&#47;code.google.com&#47;p&#47;migratordotnet&#47;w&#47;list>on the wiki<&#47;a>.</p>
-<p>The code can be downloaded at <a href="http:&#47;&#47;code.google.com&#47;p&#47;migratordotnet">MigratorDotNet<&#47;a>.  Some of the changes represented are still in an experimental branch that is in the process of being merged.</p>
+    migrations="bin/MyProject.dll"<br />
+    to="${version}" /><br />
+</target><br />
+</code></p>
+<h3>So You Want to Migrate?</h3><br />
+Some more documentation and example are available <a href="http://code.google.com/p/migratordotnet/w/list>on the wiki</a>.</p>
+<p>The code can be downloaded at <a href="http://code.google.com/p/migratordotnet">MigratorDotNet</a>.  Some of the changes represented are still in an experimental branch that is in the process of being merged.</p>
 <p><em><br />
-MigratorDotNet is a continuation of code started by <a href="http:&#47;&#47;macournoyer.wordpress.com&#47;">Marc-Andr&Atilde;&copy; Cournoyer<&#47;a> and Nick Hemsley.<br />
-<&#47;em></p>
+MigratorDotNet is a continuation of code started by <a href="http://macournoyer.wordpress.com/">Marc-Andr&Atilde;&copy; Cournoyer</a> and Nick Hemsley.<br />
+</em></p>

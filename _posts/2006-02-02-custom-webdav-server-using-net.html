@@ -65,14 +65,14 @@ comments:
     that response.\r\n\r\nBasically there are a couple of different kinds of responses:\r\n<ol>\r\n<li>PROPFIND
     for example responds with an XML document defining the resources available at
     a given path. Some basic headers are set (app.Request.Headers.Add(\"Content-Type\",
-    \"text&#47;xml\")) and then the XML is written to the Request.Ouptut stream.<&#47;li>\r\n<li>COPY
+    \"text/xml\")) and then the XML is written to the Request.Ouptut stream.</li>\r\n<li>COPY
     and MOVE don't write a response to the output stream, but generally just set HTTP
-    Response Codes.<&#47;li>\r\n<li>GET Requests are just like a regular HTTP GET.
+    Response Codes.</li>\r\n<li>GET Requests are just like a regular HTTP GET.
     The person is requesting the contents of a file. In that case you set the Response
     status code, set the Content-Type, and then just stream the contents of the file
-    to the Response.Output stream.<&#47;li>\r\n<&#47;ol>\r\n\r\nAll of the specifics
-    about the status codes and things are available at <a href=\"http:&#47;&#47;www.webdav.org\"
-    rel=\"nofollow\">www.webdav.org<&#47;a>. The Response status codes are really
+    to the Response.Output stream.</li>\r\n</ol>\r\n\r\nAll of the specifics
+    about the status codes and things are available at <a href=\"http://www.webdav.org\"
+    rel=\"nofollow\">www.webdav.org</a>. The Response status codes are really
     important for protocol compliance.\r\n\r\nHope That Helps."
 - id: 44
   author: Geoff Lane
@@ -84,11 +84,11 @@ comments:
     what I described building. I just provided some more information in my Response
     to Kavitas. Maybe that will help you out a bit?\r\n\r\nIf you have specific questions,
     I can try to answer them.\r\n\r\nThe best place to start is probably with the
-    specs from <a href=\"http:&#47;&#47;www.webdav.org\" rel=\"nofollow\">www.webdav.org<&#47;a>.
+    specs from <a href=\"http://www.webdav.org\" rel=\"nofollow\">www.webdav.org</a>.
     It tells you basically everything you need to implement the protocol. The only
     tricky part for me was figuring out the IIS Mapping to get my code to respond
-    to every incoming request. I describe that in <a href=\"http:&#47;&#47;www.zorched.net&#47;2006&#47;01&#47;20&#47;aspnet-web-application-without-aspx-extension&#47;\"
-    rel=\"nofollow\">ASP.NET Web Application Without ASPX Extension<&#47;a>"
+    to every incoming request. I describe that in <a href=\"http://www.zorched.net/2006/01/20/aspnet-web-application-without-aspx-extension/\"
+    rel=\"nofollow\">ASP.NET Web Application Without ASPX Extension</a>"
 - id: 46
   author: Kavitas
   author_email: kavitas@interrait.com
@@ -109,8 +109,8 @@ comments:
   date_gmt: '2006-02-20 13:14:28 -0500'
   content: "Kavitas,\r\nDid you map an HttpModule that you created in your site's
     Web.config? \r\n\r\nIn your Web.config:\r\n<code>\r\n<system.web>\r\n    <httpModules>\r\n
-    \       <add name=\"DavModule\" type=\"Zorched.Dav.DavModule, DavModule\"&#47;>\r\n
-    \   <&#47;httpModules>\r\n<&#47;system.web>\r\n<&#47;code>\r\n\r\nZorched.Dav.DavModule
+    \       <add name=\"DavModule\" type=\"Zorched.Dav.DavModule, DavModule\"/>\r\n
+    \   </httpModules>\r\n</system.web>\r\n</code>\r\n\r\nZorched.Dav.DavModule
     implements System.Web.IHttpModule. It's the code that gets the incoming request
     and then writes the response. You could start with something simple by just writing
     some plain-text back to the browser.\r\n\r\nIf you've already done that, then
@@ -138,10 +138,10 @@ comments:
   date_gmt: '2006-02-21 14:03:41 -0500'
   content: "DMA,\r\n\r\nGreat to see you got it started!\r\n\r\nAs for the User issue,
     I would imagine that you just don't have any authentication going on. The User
-    object is an IPrincipal. See the <a href=\"http:&#47;&#47;msdn.microsoft.com&#47;library&#47;default.asp?url=&#47;library&#47;en-us&#47;cpref&#47;html&#47;frlrfSystemWebHttpApplicationPropertiesTopic.asp\"
-    rel=\"nofollow\"> documentation of HttpApplication<&#47;a> for details. Basically,
-    you can't create a log-in form, so you're going to have to use <a href=\"http:&#47;&#47;www.faqs.org&#47;rfcs&#47;rfc2617.html\"
-    rel=\"nofollow\">Basic or Digest<&#47;a> authentication. Depending on your needs,
+    object is an IPrincipal. See the <a href=\"http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpref/html/frlrfSystemWebHttpApplicationPropertiesTopic.asp\"
+    rel=\"nofollow\"> documentation of HttpApplication</a> for details. Basically,
+    you can't create a log-in form, so you're going to have to use <a href=\"http://www.faqs.org/rfcs/rfc2617.html\"
+    rel=\"nofollow\">Basic or Digest</a> authentication. Depending on your needs,
     I guess the built-in IIS Authentication might work (although I don't know if that
     will set the IPrincipal that you need), otherwise you are going to need to implement
     your own Authentication and set your own IPrincipal on each Request.\r\n\r\nJust
@@ -170,20 +170,20 @@ comments:
   content: "1. My requirement is to create a custom webdav server, which will return
     me documents and their meta data from database (instead of physical directory).
     Users may access this webdav server from windows exploer, so requirment is to
-    display folders&#47;documents similar to windows folders.\r\n\r\n2. What I have
+    display folders/documents similar to windows folders.\r\n\r\n2. What I have
     done :\r\n\r\na. I have created a custom webdav server using httpmodule that traps
     all request and if the request contains a WebDAV method, it returns a Custom response.
     \r\n\r\nb. The response that I am sending is below. \r\n\r\n<code>\r\n<a>\r\n
-    \ <&#47;a><a>\r\n    <&#47;a><a>http:&#47;&#47;localhost&#47;test&#47;<&#47;a>\r\n
-    \   <a>\r\n      <&#47;a><a>HTTP&#47;1.1 200 OK<&#47;a>\r\n      <a>\r\n        <&#47;a><a>0<&#47;a>\r\n
-    \       <a>2005-12-02T04:42:45.033Z<&#47;a>\r\n        <a>test<&#47;a>\r\n        <a>\"36d979d6faf6c51:c46a\"<&#47;a>\r\n
-    \       <a>Fri, 02 Dec 2005 04:42:45 GMT<&#47;a>\r\n        <a>\r\n          <&#47;a><a
-    &#47; rel=\"nofollow\">\r\n        <&#47;a>\r\n        <a &#47; rel=\"nofollow\">\r\n
-    \       <&#47;a><a>0<&#47;a>\r\n        <a>1<&#47;a>\r\n        <a &#47; rel=\"nofollow\">\r\n
-    \     <&#47;a>\r\n<&#47;code>\r\n  \t\r\n\r\nheader \r\n\r\nc. Along with this
-    response I am sending these headers,\r\n\tServer               : Microsoft-IIs&#47;5.1\r\n\tX-Powered
-    by         : ASP.NET\r\n\tContentLocation      : http:&#47;&#47;localhost&#47;test\r\n\tContentType
-    \         : text&#47;xml\r\n\tTransferEncoding     : chunked\r\n\r\nd. After accessing
+    \ </a><a>\r\n    </a><a>http://localhost/test/</a>\r\n
+    \   <a>\r\n      </a><a>HTTP/1.1 200 OK</a>\r\n      <a>\r\n        </a><a>0</a>\r\n
+    \       <a>2005-12-02T04:42:45.033Z</a>\r\n        <a>test</a>\r\n        <a>\"36d979d6faf6c51:c46a\"</a>\r\n
+    \       <a>Fri, 02 Dec 2005 04:42:45 GMT</a>\r\n        <a>\r\n          </a><a
+    / rel=\"nofollow\">\r\n        </a>\r\n        <a / rel=\"nofollow\">\r\n
+    \       </a><a>0</a>\r\n        <a>1</a>\r\n        <a / rel=\"nofollow\">\r\n
+    \     </a>\r\n</code>\r\n  \t\r\n\r\nheader \r\n\r\nc. Along with this
+    response I am sending these headers,\r\n\tServer               : Microsoft-IIs/5.1\r\n\tX-Powered
+    by         : ASP.NET\r\n\tContentLocation      : http://localhost/test\r\n\tContentType
+    \         : text/xml\r\n\tTransferEncoding     : chunked\r\n\r\nd. After accessing
     my custom webdav server from explorer, the following error occurs.\r\n\"\\\\localhost\\CustomWebDAVServer
     is not accessible. You might not have permission to use this network resource.
     Contact the administrator of this server to find out if you have access permissions.The
@@ -200,7 +200,7 @@ comments:
   content: "DMA,\r\nAre you literally sending back a response that uses <a> wrapped
     around the values? That's not gonna work of course.\r\n\r\nContent-Location and
     Content-Type also have dashes in them.\r\n\r\nYou're trying to access \\\\localhost\\CustomWebDAVServer
-    but sending back a Content-Location and an href of http:&#47;&#47;localhost&#47;test.
+    but sending back a Content-Location and an href of http://localhost/test.
     It expects a URL that corresponds to the URL requested.\r\n\r\nImplementing a
     protocol is all about details. The details really matter a lot."
 - id: 69
@@ -308,7 +308,7 @@ comments:
   author_url: http://www.zorched.net
   date: '2006-03-05 17:30:07 -0500'
   date_gmt: '2006-03-05 23:30:07 -0500'
-  content: "Stacy,\r\n1. Yes you will have to keep track of the lock status&#47;token
+  content: "Stacy,\r\n1. Yes you will have to keep track of the lock status/token
     for a given resource. You also have to check whether a resource is locked (and
     if the user supplies the proper lock token) for requests that modify the resource.
     The exact command are specified in the WebDAV RFC. This is easily done in a database
@@ -356,7 +356,7 @@ comments:
   date_gmt: '2006-03-13 21:25:31 -0500'
   content: "I am trying to implement the WebDav for Readonly access to documents.\r\nI
     tried your idea and got \"ASP.NET Web Application without ASPX Extension\" working.\r\nNow
-    when I tired to open the same location (http:&#47;&#47;localhost&#47;WebDav) \r\nby
+    when I tired to open the same location (http://localhost/WebDav) \r\nby
     typing \\\\localhost\\WebDav in the Explorer\r\ni am getting the error \r\n\r\n\"\\\\localhost\\WebDav
     is not accessible. You might not have permission to use this network resource.
     Contact the administrator of this erver to find out if you have access permission\"\r\n\r\n\"The
@@ -393,7 +393,7 @@ comments:
   date: '2006-03-14 17:03:35 -0500'
   date_gmt: '2006-03-14 23:03:35 -0500'
   content: "Fahad,\r\nYou don't want to use a UNC path (\\\\example\\Path) to connect
-    to a WebDAV share. You want to map a network drive and use the HTTP path (http:&#47;&#47;example&#47;Path).
+    to a WebDAV share. You want to map a network drive and use the HTTP path (http://example/Path).
     From Internet Explorer you can also do File -> Open and use the HTTP path along
     with checking the checkbox on the form.\r\n\r\nIn general, the \"No permission\"
     or \"Can't map network location\" kind of errors could be just about any sort
@@ -415,7 +415,7 @@ comments:
   date_gmt: '2006-03-15 15:47:43 -0500'
   content: "Thanks Geoff,\r\n\r\nAll... I'll be releasing the code on SourceForge
     in the next month or so (as time permits!) and will also have the latest code
-    available on http:&#47;&#47;www.sphorium.com."
+    available on http://www.sphorium.com."
 - id: 86
   author: stacy
   author_email: stacyo@gmail.com
@@ -436,7 +436,7 @@ comments:
   date: '2006-03-22 07:47:27 -0500'
   date_gmt: '2006-03-22 13:47:27 -0500'
   content: "Stacy,\r\n\r\nIf it's sending a HEAD (or most other verb really) request
-    for a path like '&#47;webdav&#47;example&#47;New Folder' and New Folder does not
+    for a path like '/webdav/example/New Folder' and New Folder does not
     exist, the proper response is returning a 404 to indicate that the resource is
     not found on the server.\r\n\r\nIt sounds like your WebDAV client is probing to
     see if the resource exists.\r\n\r\nThe only command this doesn't apply to that
@@ -461,7 +461,7 @@ comments:
   author_url: ''
   date: '2006-04-14 08:17:43 -0400'
   date_gmt: '2006-04-14 14:17:43 -0400'
-  content: 'If you have IIS 6.0, this article will helpful to enable wildcards: http:&#47;&#47;www.ureader.com&#47;message&#47;1251379.aspx'
+  content: 'If you have IIS 6.0, this article will helpful to enable wildcards: http://www.ureader.com/message/1251379.aspx'
 - id: 91
   author: Geoff Lane
   author_email: geoff@zorched.net
@@ -476,9 +476,9 @@ comments:
   date: '2006-05-02 11:32:04 -0400'
   date_gmt: '2006-05-02 17:32:04 -0400'
   content: "Guys,\r\n\r\nI've initial ASP.NET WebDav Server framework (beta 2) has
-    finally been released https:&#47;&#47;sourceforge.net&#47;projects&#47;webdav&#47;.
-    It currently supports RFC2518 (http:&#47;&#47;www.webdav.org&#47;specs&#47;rfc2518.html)
-    and I am in the process for supporting RFC3253 (http:&#47;&#47;www.webdav.org&#47;specs&#47;rfc3253.html)\r\n\r\nIt
+    finally been released https://sourceforge.net/projects/webdav/.
+    It currently supports RFC2518 (http://www.webdav.org/specs/rfc2518.html)
+    and I am in the process for supporting RFC3253 (http://www.webdav.org/specs/rfc3253.html)\r\n\r\nIt
     includes all source code in addition to a custom file implementation demo project.\r\n\r\nI'm
     open for suggestions!\r\n\r\nThanks."
 - id: 96
@@ -517,7 +517,7 @@ comments:
     the timeout value with the LOCK and check and see if the timeout has expired when
     you check the database. If it's expired, then remove the lock from the database.\r\n\r\nA
     client will resend LOCK commands to keep the lock fresh if it needs to hold on
-    to it, so you would then just update the timeout&#47;timestamp when you get a
+    to it, so you would then just update the timeout/timestamp when you get a
     LOCK request to update an existing lock."
 - id: 124
   author: Miss Lane
@@ -565,8 +565,8 @@ comments:
   date_gmt: '2006-08-08 15:26:10 -0400'
   content: "JJ,\r\nSorry, the code I did was for a client, so I was not able to share
     it. I just wanted to share some ideas in case anyone else was doing the same thing.\r\n\r\nOne
-    of my blog readers has implemented an Open Source project available at <a href=\"https:&#47;&#47;sourceforge.net&#47;projects&#47;webdav&#47;\"
-    rel=\"nofollow\">https:&#47;&#47;sourceforge.net&#47;projects&#47;webdav&#47;<&#47;a>\r\nif
+    of my blog readers has implemented an Open Source project available at <a href=\"https://sourceforge.net/projects/webdav/\"
+    rel=\"nofollow\">https://sourceforge.net/projects/webdav/</a>\r\nif
     you would like to look at someone else's code."
 - id: 233
   author: Stacy
@@ -592,15 +592,15 @@ comments:
   date_gmt: '2006-09-01 13:33:21 -0400'
   content: "Stacy,\r\nThe IIS version on the client won't matter (IIS would only matter
     on the server receiving the requests). What might matter is the version of the
-    \ mini-redirector and&#47;or the version of Microsoft Office installed on the
+    \ mini-redirector and/or the version of Microsoft Office installed on the
     client machine. I never had to deal with the problem myself, all of the client
     machines were going to be running Windows XP.\r\n\r\nIn general, the standards
     support in Windows is pretty bad. There are a lot of things that they do that
     I would consider incorrect with regards to the WebDAV standard. In general I found
     though that if my code passed the WebDAV litmus tests, then Windows XP would work,
     even if it was doing more or different commands from what I would expect.\r\n\r\nCheck
-    out my <a href=\"http:&#47;&#47;www.zorched.net&#47;2006&#47;03&#47;01&#47;more-webdav-tips-tricks-and-bugs&#47;\"
-    rel=\"nofollow\">other WebDAV article<&#47;a>. It's got some information on the
+    out my <a href=\"http://www.zorched.net/2006/03/01/more-webdav-tips-tricks-and-bugs/\"
+    rel=\"nofollow\">other WebDAV article</a>. It's got some information on the
     different implementations as well as some useful (I hope) links that talk about
     the different WebDAV implementations in various version of Windows."
 - id: 249
@@ -609,8 +609,8 @@ comments:
   author_url: ''
   date: '2006-09-04 10:51:17 -0400'
   date_gmt: '2006-09-04 16:51:17 -0400'
-  content: "Hi DMA, try this one: http:&#47;&#47;www.webdavsystem.com&#47;\r\n\r\n<small><em>ed.
-    I need to start charging for these links<&#47;em><&#47;small>"
+  content: "Hi DMA, try this one: http://www.webdavsystem.com/\r\n\r\n<small><em>ed.
+    I need to start charging for these links</em></small>"
 - id: 340
   author: Anton
   author_email: akhodakivskiy@gmail.com
@@ -618,9 +618,9 @@ comments:
   date: '2006-09-18 14:45:34 -0400'
   date_gmt: '2006-09-18 20:45:34 -0400'
   content: "Hi\r\n\r\nTell me please which external tool can I use to track the request
-    \ and response packets send to&#47;from WebDav server?\r\n\r\nI tried Ethereal,
+    \ and response packets send to/from WebDav server?\r\n\r\nI tried Ethereal,
     but I can't cath any packets. I created a web application in visual studio 2005,
-    so the address of the page, which I run from VS is like http:&#47;&#47;localhost:1233&#47;WebDavServer.
+    so the address of the page, which I run from VS is like http://localhost:1233/WebDavServer.
     Even when I use no filters in Etherreal I can't see any packets.\r\n\r\nThaks
     for your Consideration\r\nAnton"
 - id: 341
@@ -672,8 +672,8 @@ comments:
   author_url: http://www.zorched.net
   date: '2006-09-19 11:38:16 -0400'
   date_gmt: '2006-09-19 17:38:16 -0400'
-  content: "Anton,\r\nPlease take a look at my <a href=\"http:&#47;&#47;www.zorched.net&#47;2006&#47;03&#47;01&#47;more-webdav-tips-tricks-and-bugs&#47;\"
-    rel=\"nofollow\">other WebDAV article<&#47;a> for information and links about
+  content: "Anton,\r\nPlease take a look at my <a href=\"http://www.zorched.net/2006/03/01/more-webdav-tips-tricks-and-bugs/\"
+    rel=\"nofollow\">other WebDAV article</a> for information and links about
     the Mini-Redirector.\r\n\r\n404 is a Not Found error\r\n403 is Forbidden\r\n\r\nI
     can't comment specifically on Germinal's code as I haven't looked at it much.
     If it's not allowing PROPFIND on a folder, then it is broken. I would recommend
@@ -681,8 +681,8 @@ comments:
     would double check the IIS mappings for the IHttpModule though. By default IIS
     is only going to pass requests to things that have an extension. You need to map
     the IIS request to handle all incoming request or using URL rewriting to get that
-    to work. See my article about <a href=\"http:&#47;&#47;www.zorched.net&#47;2006&#47;01&#47;20&#47;aspnet-web-application-without-aspx-extension&#47;\"
-    rel=\"nofollow\">mapping  asp.net applications without extensions<&#47;a> for
+    to work. See my article about <a href=\"http://www.zorched.net/2006/01/20/aspnet-web-application-without-aspx-extension/\"
+    rel=\"nofollow\">mapping  asp.net applications without extensions</a> for
     some information on that."
 - id: 506
   author: Anton
@@ -705,8 +705,8 @@ comments:
   author_url: http://www.zorched.net
   date: '2006-10-14 09:56:00 -0400'
   date_gmt: '2006-10-14 15:56:00 -0400'
-  content: "Anton,\r\nTake a look at my other post <a href=\"http:&#47;&#47;www.zorched.net&#47;2006&#47;03&#47;01&#47;more-webdav-tips-tricks-and-bugs&#47;\"
-    rel=\"nofollow\">Web DAV Tips and Tricks<&#47;a> and look at the section on Server
+  content: "Anton,\r\nTake a look at my other post <a href=\"http://www.zorched.net/2006/03/01/more-webdav-tips-tricks-and-bugs/\"
+    rel=\"nofollow\">Web DAV Tips and Tricks</a> and look at the section on Server
     Discovery. I think that might help you out. It's definitely not to the WebDAV
     spec, but there are a few things you need to do to get Explorer to work."
 - id: 2486
@@ -725,10 +725,10 @@ comments:
     in the request URL. This works great on my development machine, but when I set
     it up on another server and add a web folder in windows to a public URL, it does
     not work. Let me clarify with an example: If I use a local webbserver, and add
-    a web folder with a url like \"http:&#47;&#47;localhost:1067&#47;TemplateBusiness&#47;filelibrary\"
+    a web folder with a url like \"http://localhost:1067/TemplateBusiness/filelibrary\"
     it works great. The \"filelibrary\"-flag is found in the URL and therefore the
     request is a WebDAV request. But when I place the application on a production
-    server, and try to add a webb folder using a URL like \"http:&#47;&#47;www.mydomain.com&#47;filelibrary\"
+    server, and try to add a webb folder using a URL like \"http://www.mydomain.com/filelibrary\"
     I have no luck at all. Internet Explorer tells me it's not a WebDAV server (up
     yours, IE =), because I know it is) without even sending a request to my server!
     I log all requests, but there are no incoming requests at all! You have any ideas
@@ -740,8 +740,8 @@ comments:
   author_url: http://www.zorched.net
   date: '2006-12-18 11:54:47 -0500'
   date_gmt: '2006-12-18 17:54:47 -0500'
-  content: "Jonas,\r\nDid you see my other post <a href=\"http:&#47;&#47;www.zorched.net&#47;2006&#47;03&#47;01&#47;more-webdav-tips-tricks-and-bugs&#47;\"
-    rel=\"nofollow\">More WebDAV Tips, Tricks and Bugs<&#47;a>? Specifically the section
+  content: "Jonas,\r\nDid you see my other post <a href=\"http://www.zorched.net/2006/03/01/more-webdav-tips-tricks-and-bugs/\"
+    rel=\"nofollow\">More WebDAV Tips, Tricks and Bugs</a>? Specifically the section
     about server discovery. That might help you?"
 - id: 2595
   author: Jonas
@@ -763,8 +763,8 @@ comments:
   content: "Jonas,\r\nWell, the OPTIONS command will get sent to the ROOT of the web
     server, so it will not get sent to your code or handler. I had to manually modify
     the properties of IIS to return PROPFIND, etc when an OPTIONS command is issued
-    to any path.\r\n\r\nSo it won't send it to \"http:&#47;&#47;www.mydomain.com&#47;filelibrary&#47;\",
-    but to \"http:&#47;&#47;www.mydomain.com&#47;\" instead. You probably don't have
+    to any path.\r\n\r\nSo it won't send it to \"http://www.mydomain.com/filelibrary/\",
+    but to \"http://www.mydomain.com/\" instead. You probably don't have
     .NET code running there to capture the request?\r\n\r\nIf that's not what you
     meant, then I'm not entirely sure..."
 - id: 2849
@@ -774,8 +774,8 @@ comments:
   date: '2006-12-23 09:50:32 -0500'
   date_gmt: '2006-12-23 15:50:32 -0500'
   content: "You're right, because of some strange reason my .NET-code does not catch
-    request sent to the root. If I enter the domain http:&#47;&#47;www.mydomain.com&#47;
-    it redirects to http:&#47;&#47;www.mydomain.com&#47;Default.aspx though. Seems
+    request sent to the root. If I enter the domain http://www.mydomain.com/
+    it redirects to http://www.mydomain.com/Default.aspx though. Seems
     IIS takes care of all root requests so that it can redirect them to the correct
     standard page. Makes no difference if I disable standard pages either.\r\n\r\nThanks
     for your help this far; would be great if you gave a little more details on how
@@ -788,8 +788,8 @@ comments:
   author_url: http://www.zorched.net
   date: '2006-12-24 11:27:10 -0500'
   date_gmt: '2006-12-24 17:27:10 -0500'
-  content: "Jonas,\r\nI have an article that explains how I <a href=\"http:&#47;&#47;www.zorched.net&#47;2006&#47;01&#47;20&#47;aspnet-web-application-without-aspx-extension&#47;\"
-    rel=\"nofollow\">set up IIS to not require the .aspx extension to load .NET code<&#47;a>.\r\n\r\nFor
+  content: "Jonas,\r\nI have an article that explains how I <a href=\"http://www.zorched.net/2006/01/20/aspnet-web-application-without-aspx-extension/\"
+    rel=\"nofollow\">set up IIS to not require the .aspx extension to load .NET code</a>.\r\n\r\nFor
     the OPTIONS, I just modifed the default setting of IIS to change the values returned
     for an OPTIONS request (I can't remember the details at this point, but will try
     and look through my notes in the next few days at some point). I think I also
@@ -852,7 +852,7 @@ comments:
     stream. Maybe that will help?\r\n\r\n<code>\r\nbyte[] buf = new byte[1024];\r\nint
     read = 0;\r\nusing (Stream outs = resp.OutputStream) {\r\n  do {\r\n         read
     = content.Read(buf, 0, buf.Length);\r\n        outs.Write(buf, 0, read);\r\n     }
-    while (read > 0);\r\n     outs.Flush();\r\n  }\r\n<&#47;code>"
+    while (read > 0);\r\n     outs.Flush();\r\n  }\r\n</code>"
 - id: 6066
   author: Jonas
   author_email: junk@sonhult.se
@@ -865,9 +865,9 @@ comments:
     instead.\r\n\r\nBut that still leaves me with the problem when the client sends
     (puts) data to the server... can I receive that in chunks aswell? I suppose it
     doesn't matter if the Request.InputStream is read in chunks... anyhow, this is
-    my code (almost pseudo-code, there are some more logic but this is the core):\r\n\r\n&#47;&#47;
+    my code (almost pseudo-code, there are some more logic but this is the core):\r\n\r\n//
     Get the data from the request\r\ndata = new byte[request.InputStream.Length];\r\nrequest.InputStream.Read(data,
-    0, data.Length);\r\nrequest.InputStream.Close();\r\nrequest.InputStream.Dispose();\r\n&#47;&#47;
+    0, data.Length);\r\nrequest.InputStream.Close();\r\nrequest.InputStream.Dispose();\r\n//
     Save the data into the database through the filedata-object\r\nfiledata.SetBinaryDataReference(ref
     data);\r\nfiledata.Insert();\r\n\r\nThanks for your quick answers and your patience!"
 - id: 6069
@@ -878,10 +878,10 @@ comments:
   date_gmt: '2007-02-02 23:01:31 -0500'
   content: "Jonas,\r\nIf you make your byte array the same length as the input stream,
     then you are not reading it in chunks. If you notice in my previous example, I
-    read&#47;write in a 1k chunk. That's done in a loop so you get the whole thing
+    read/write in a 1k chunk. That's done in a loop so you get the whole thing
     in 1k chunks.\r\n\r\nBasically you just change the input stream and the output
     stream to   change from reading to writing.\r\n\r\nWhen dealing with IO, you should
-    also always use a using() block or a try&#47;finally block and close the stream
+    also always use a using() block or a try/finally block and close the stream
     in the finally block, otherwise if an exception is thrown the IO won't get closed
     properly."
 - id: 6221
@@ -892,7 +892,7 @@ comments:
   date_gmt: '2007-02-03 22:49:23 -0500'
   content: "I just recently discovered that SharePoints WebDAV does not show status
     on ongoing transfers either (on large, single files that is). Seems to be a limitation
-    in the Windows WebDAV-client.\r\n\r\nI am aware of that my data is not read&#47;written
+    in the Windows WebDAV-client.\r\n\r\nI am aware of that my data is not read/written
     in chunks. What I am wondering is why I would bother - there is no difference
     to the client, right? Also, I think I will have a hard time writing data in chunks
     into my database, but I used your example when reading and outputting data to
@@ -953,9 +953,9 @@ comments:
     select file->Properties then MS word fires a PROPFIND back to my server asking
     for a \"save-profile-form-location\" property, and word load a single \"OK\" dialog
     that says \"Verifying Web Properties\".\r\n\r\nWord sends a PROPFIND request that
-    looks like this.\r\n\r\n<a>\r\n  <a>\r\n    \r\n  <&#47;a>\r\n<&#47;a>\r\n\r\nand
-    I am current replying as below but have tried lots of different schemas\r\n\r\n\r\n\t\r\n\t\ttest.doc\r\n\t\t\r\n\t\t\tHTTP&#47;1.1
-    200 OK\r\n\t\t\t\r\n\t\t\t\t&#47;WDClient&#47;profile.doc\r\n\t\t\t\r\n\t\t\r\n\t\r\n\r\n\r\nI
+    looks like this.\r\n\r\n<a>\r\n  <a>\r\n    \r\n  </a>\r\n</a>\r\n\r\nand
+    I am current replying as below but have tried lots of different schemas\r\n\r\n\r\n\t\r\n\t\ttest.doc\r\n\t\t\r\n\t\t\tHTTP/1.1
+    200 OK\r\n\t\t\t\r\n\t\t\t\t/WDClient/profile.doc\r\n\t\t\t\r\n\t\t\r\n\t\r\n\r\n\r\nI
     have tried to return all sorts of data (href, htm , aspx etc etc ) back to word
     via my webdav server to get word to do anything but it seems to totally ignore
     my servers PROPFIND response for this property and loads the properties dialog
@@ -971,10 +971,10 @@ comments:
   content: "Sorry my propfind headers got mangled here they are again, with [ ]  \r\n\r\nWord
     Sends\r\n\r\n[a:propfind xmlns:a=\"DAV:\" xmlns:b=\"urn:schemas-microsoft-com:datatypes\"]\r\n
     \ [a:prop xmlns:c=\"urn:schemas-microsoft-com:office:office\"]\r\n    [c:save-profile-form-location
-    &#47;]\r\n  [&#47;a:prop]\r\n[&#47;a:propfind]\r\n\r\nI am replying\r\n\r\n[D:multistatus
+    /]\r\n  [/a:prop]\r\n[/a:propfind]\r\n\r\nI am replying\r\n\r\n[D:multistatus
     xmlns:b=\"urn:uuid:c2f41010-65b3-11d1-a29f-00aa00c14882\" xmlns:MS=\"urn:schemas-microsoft-com:office:office\"
-    xmlns:D=\"DAV:\"]\r\n\t[D:response]\r\n\t\t[D:href]test.doc[&#47;D:href]\r\n\t\t[D:propstat]\r\n\t\t\t[D:status]HTTP&#47;1.1
-    200 OK[&#47;D:status]\r\n\t\t\t[D:prop]\r\n\t\t\t\t[MS:save-profile-form-location]&#47;WDClient&#47;profile.doc[&#47;MS:save-profile-form-location]\r\n\t\t\t[&#47;D:prop]\r\n\t\t[&#47;D:propstat]\r\n\t[&#47;D:response]\r\n[&#47;D:multistatus]"
+    xmlns:D=\"DAV:\"]\r\n\t[D:response]\r\n\t\t[D:href]test.doc[/D:href]\r\n\t\t[D:propstat]\r\n\t\t\t[D:status]HTTP/1.1
+    200 OK[/D:status]\r\n\t\t\t[D:prop]\r\n\t\t\t\t[MS:save-profile-form-location]/WDClient/profile.doc[/MS:save-profile-form-location]\r\n\t\t\t[/D:prop]\r\n\t\t[/D:propstat]\r\n\t[/D:response]\r\n[/D:multistatus]"
 - id: 10684
   author: Geoff Lane
   author_email: geoff@zorched.net
@@ -1012,8 +1012,8 @@ comments:
     The WebDAV spec says that \"WebDAV applications MUST support the Digest authentication
     scheme\". So, I'd got that route if I was you. If you send an HTTP 401 Unauthorized
     response to the client with the proper  WWW-Authenticate header, Windows should
-    automatically show a dialog box.\r\n\r\n<a href=\"http:&#47;&#47;www.ietf.org&#47;rfc&#47;rfc2617.txt\"
-    rel=\"nofollow\">HTTP Basic and Digest Authentication RFC<&#47;a>\r\n\r\nI think
+    automatically show a dialog box.\r\n\r\n<a href=\"http://www.ietf.org/rfc/rfc2617.txt\"
+    rel=\"nofollow\">HTTP Basic and Digest Authentication RFC</a>\r\n\r\nI think
     it's a bit of an accident that a user that logged into a web application and got
     a cookie would be able to authenticate against your WebDAV server. I wouldn't
     rely on that."
@@ -1036,7 +1036,7 @@ comments:
   content: "I'm adding this post because this blog post is the one I first saw when
     searching around for some code and information to help implement a webdav server.
     \ The solution I implemented will not suit everyone but for those that may benefit
-    the code is on CodeProject (http:&#47;&#47;www.codeproject.com&#47;useritems&#47;NET_WebDAV_Server.asp).\r\n\r\nI've
+    the code is on CodeProject (http://www.codeproject.com/useritems/NET_WebDAV_Server.asp).\r\n\r\nI've
     no doubt there's better code out there but it may give someone a head start. \r\n\r\nI
     think I've the answer to a couple of the questions posted here.  One is about
     being able to use a pretty file list that Excel and Word present when interacting
@@ -1084,7 +1084,7 @@ comments:
   content: "Hi geoff, \r\n\r\nJust thought I would let you know that I have just posted
     a post on my blog about C# webdav server with SQL backend. I have included the
     full source so it may be useful to anyone wanting to have a look at how you might
-    go about building something like this. You can check it out at:\r\n\r\nhttp:&#47;&#47;thehojusaram.blogspot.com&#47;2007&#47;06&#47;c-webdav-server-with-sql-backend-source.html\r\n\r\nThanks"
+    go about building something like this. You can check it out at:\r\n\r\nhttp://thehojusaram.blogspot.com/2007/06/c-webdav-server-with-sql-backend-source.html\r\n\r\nThanks"
 - id: 10960
   author: Surendran
   author_email: arakkotos@hotmail.com
@@ -1103,30 +1103,30 @@ comments:
     a different way of doing it in .NET?\r\n\r\n[STAThread]\r\n      static void Main(string[]
     args)\r\n      {\r\n         System.Net.HttpWebRequest Request;\r\n         System.Net.WebResponse
     Response;\r\n         System.Net.CredentialCache MyCredentialCache;\r\n         string
-    strSourceURI = \"http:&#47;&#47;localhost&#47;Extracts&#47;Client1&#47;test.csv\";\r\n
-    \        string strDestURI = \"https:&#47;&#47;200.150.100.50&#47;Uploads&#47;test.csv\";\r\n
+    strSourceURI = \"http://localhost/Extracts/Client1/test.csv\";\r\n
+    \        string strDestURI = \"https://200.150.100.50/Uploads/test.csv\";\r\n
     \        string strUserName = \"UserName\";\r\n         string strPassword = \"password\";\r\n
     \        string strDomain = \"Domain\";\r\n\r\n         try\r\n         {\r\n
-    \           &#47;&#47; Create a new CredentialCache object and fill it with the
-    network\r\n            &#47;&#47; credentials required to access the server.\r\n
+    \           // Create a new CredentialCache object and fill it with the
+    network\r\n            // credentials required to access the server.\r\n
     \           MyCredentialCache = new System.Net.CredentialCache();\r\n            MyCredentialCache.Add(
     new System.Uri(strSourceURI),\r\n               \"NTLM\",\r\n               new
     System.Net.NetworkCredential(strUserName, strPassword, strDomain)\r\n               );\r\n\r\n
-    \           &#47;&#47; Create the HttpWebRequest object.\r\n            Request
-    = (System.Net.HttpWebRequest)HttpWebRequest.Create(strSourceURI);\r\n\r\n            &#47;&#47;
+    \           // Create the HttpWebRequest object.\r\n            Request
+    = (System.Net.HttpWebRequest)HttpWebRequest.Create(strSourceURI);\r\n\r\n            //
     Add the network credentials to the request.\r\n            Request.Credentials
-    = MyCredentialCache;\r\n\r\n            &#47;&#47; Specify the COPY method.\r\n
-    \           Request.Method = \"COPY\";\r\n\r\n            &#47;&#47; Specify the
+    = MyCredentialCache;\r\n\r\n            // Specify the COPY method.\r\n
+    \           Request.Method = \"COPY\";\r\n\r\n            // Specify the
     destination URI.\r\n            Request.Headers.Add(\"Destination\", strDestURI);\r\n\r\n
-    \           &#47;&#47; Specify that if a resource already exists at the\r\n            &#47;&#47;
-    destination URI, it will not be overwritten.  The\r\n            &#47;&#47; server
+    \           // Specify that if a resource already exists at the\r\n            //
+    destination URI, it will not be overwritten.  The\r\n            // server
     would return a 412 Precondition Failed status code.\r\n            Request.Headers.Add(\"Overwrite\",
-    \"F\");\r\n\r\n            &#47;&#47; Send the COPY method request.\r\n            Response
-    = (System.Net.HttpWebResponse)Request.GetResponse();\r\n\r\n            &#47;&#47;
+    \"F\");\r\n\r\n            // Send the COPY method request.\r\n            Response
+    = (System.Net.HttpWebResponse)Request.GetResponse();\r\n\r\n            //
     Close the HttpWebResponse object.\r\n            Response.Close();\r\n\r\n            Console.WriteLine(\"Item
     successfully copied.\");\r\n\r\n         }\r\n         catch(Exception ex)\r\n
-    \        {\r\n            &#47;&#47; Catch any exceptions. Any error codes from
-    the COPY\r\n            &#47;&#47; method request on the server will be caught
+    \        {\r\n            // Catch any exceptions. Any error codes from
+    the COPY\r\n            // method request on the server will be caught
     here, also.\r\n            Console.WriteLine(ex.Message);\r\n         }\r\n      }\r\n
     \  }\r\n\r\nMany thanks."
 - id: 10995
@@ -1136,7 +1136,7 @@ comments:
   date: '2007-10-11 09:17:03 -0400'
   date_gmt: '2007-10-11 15:17:03 -0400'
   content: "Guys,\r\n\r\nAfter a long hiatus, I'm back on the project... the code
-    has been upgraded to VS 2005 \r\n\r\nhttps:&#47;&#47;sourceforge.net&#47;projects&#47;webdav&#47;\r\n\r\nComments
+    has been upgraded to VS 2005 \r\n\r\nhttps://sourceforge.net/projects/webdav/\r\n\r\nComments
     and suggestions welcome!\r\n\r\nGerminal"
 - id: 11115
   author: geetha
@@ -1167,7 +1167,7 @@ comments:
   author_url: ''
   date: '2008-08-11 04:35:31 -0400'
   date_gmt: '2008-08-11 10:35:31 -0400'
-  content: "hi i downloaded from the following site http:&#47;&#47;sourceforge.net&#47;projects&#47;webdav\r\nthis
+  content: "hi i downloaded from the following site http://sourceforge.net/projects/webdav\r\nthis
     one is maintaining the filesystem only\r\nin that i want with sql database also
     \r\nhi anybody developed the webdav with sql backend database share the coding\r\nwith
     me"
@@ -1184,24 +1184,24 @@ comments:
     contents as webfolders and Office products can understand the req from these protocols
     .Can u please help to me create a custom webdav where i have to start with \n\nThanks,\nMaddy"
 ---
-<p>As I discussed in a <a href="http:&#47;&#47;www.zorched.net&#47;2006&#47;01&#47;20&#47;aspnet-web-application-without-aspx-extension&#47;">previous post "ASP.NET Web Application without ASPX Extension"<&#47;a>, I've been working on a custom <a href="http:&#47;&#47;www.webdav.org">WebDAV<&#47;a> server for a client. The initial proof-of-concept was just to see if we could get some .NET code that would respond to all paths for a given web application. From there I had to make WebDAV work.</p>
-<h3>What is WebDAV<&#47;h3><br />
-To recap: <a href="http:&#47;&#47;www.webdav.org">WebDAV<&#47;a> is an <abbr name="Internet Engineering Task Force">IETF<&#47;abbr> Standard Protocol. It is an extension to the ubiquitous HTTP standard, adding on request methods to get property information about files and folders, make folders (called collections in WebDAV parlance), change properties, lock files, etc. Basically anything that you would want on a distributed file system. WebDAV is natively supported by Windows 2000 and XP, Mac OS X, and Linux (using <a href="http:&#47;&#47;dav.sourceforge.net&#47;">davfs<&#47;a>). When using this native support, you're able to interact with WebDAV just like you are using a local filesystem or a network share. There are also many standalone client implementations that act more like FTP clients.</p>
-<h3>Why Would You Write Your Own DAV Server?<&#47;h3><br />
+<p>As I discussed in a <a href="http://www.zorched.net/2006/01/20/aspnet-web-application-without-aspx-extension/">previous post "ASP.NET Web Application without ASPX Extension"</a>, I've been working on a custom <a href="http://www.webdav.org">WebDAV</a> server for a client. The initial proof-of-concept was just to see if we could get some .NET code that would respond to all paths for a given web application. From there I had to make WebDAV work.</p>
+<h3>What is WebDAV</h3><br />
+To recap: <a href="http://www.webdav.org">WebDAV</a> is an <abbr name="Internet Engineering Task Force">IETF</abbr> Standard Protocol. It is an extension to the ubiquitous HTTP standard, adding on request methods to get property information about files and folders, make folders (called collections in WebDAV parlance), change properties, lock files, etc. Basically anything that you would want on a distributed file system. WebDAV is natively supported by Windows 2000 and XP, Mac OS X, and Linux (using <a href="http://dav.sourceforge.net/">davfs</a>). When using this native support, you're able to interact with WebDAV just like you are using a local filesystem or a network share. There are also many standalone client implementations that act more like FTP clients.</p>
+<h3>Why Would You Write Your Own DAV Server?</h3><br />
 Sharing files over a network is nothing new of course. Using Windows File Sharing, many people are used to using network shares to store files on a server and to share with their coworkers. The limitation of most of these file sharing systems is that they share exactly what is on the filesystem. What if you want to integrate file sharing with an application that stores file meta-data in a database? What if you want to programmatically control the files and folders that you show to your users? By building your own WebDAV server you can query a database to get all of the meta-data (and even file contents) to serve to your users.</p>
-<h3>How To Build a WebDAV Server<&#47;h3><br />
-I did quite a bit of searching and found WebDAV server implementation in <a href="http:&#47;&#47;www.comlounge.net&#47;webdav&#47;">Python<&#47;a>, <a href="http:&#47;&#47;redhanded.hobix.com&#47;inspect&#47;webrickWebdavHandlerSafelyExtractedFromTheWild.html">Ruby<&#47;a>, and <a href="http:&#47;&#47;jakarta.apache.org&#47;slide&#47;index.html">Java<&#47;a>, but could not find anything done in a .NET language which my client uses for all of their application infrastructure. So, I built one!</p>
-<p>As I mentioned in my <a href="http:&#47;&#47;www.zorched.net&#47;2006&#47;01&#47;20&#47;aspnet-web-application-without-aspx-extension&#47;">previous post<&#47;a>, we can take over the complete HTTP request for all requested paths. I use a <a href="http:&#47;&#47;www.dofactory.com&#47;Patterns&#47;PatternCommand.aspx">Command Pattern<&#47;a> to handle the different types of WebDAV requests. The Commands are responsible for getting information from the HTTP Request that they need to fulfill the request and for writing the proper HTTP Response. Each of the Commands delegates the actual File manipulation to a set of provider classes. Those classes are accessed through an <a href="http:&#47;&#47;www.dofactory.com&#47;Patterns&#47;PatternAbstract.aspx">Abstract Factory<&#47;a> which allows for me to easily change the backend implementation. This allows for a good separation of concerns. The WebDAV Service layer knows how to read and write WebDAV and the File Provider layer knows how to get and store information about files and folders. <em>(The abstraction between the Commands and the File Providers is a bit leaky still, but I'm confident I'll be able to refactor it into a cleaner separation.)<&#47;em></p>
-<p>The first backend provider that I created for testing was a FileSystem provider. I've mapped the WebDAV server to a specific directory and use standard <code>System.IO<&#47;code> commands to manipulate files. This is a lot easier because it allowed me to focus on implementing the protocol without worrying about interacting with a less familiar data access layer.</p>
-<h3>Test Your Implementation<&#47;h3><br />
-The WebDAV folks have built a great test suite called <a href="http:&#47;&#47;www.webdav.org&#47;neon&#47;litmus&#47;">Litmus<&#47;a> that you can use to validate your server implementation. It performs all of the basic operations on files and collections to validate that the server performs to the specification. Start with Litmus and you've got your entire functional test harness written for you. That is some <abbr name="Test Driven Development">TDD<&#47;abbr> in action!<br />
+<h3>How To Build a WebDAV Server</h3><br />
+I did quite a bit of searching and found WebDAV server implementation in <a href="http://www.comlounge.net/webdav/">Python</a>, <a href="http://redhanded.hobix.com/inspect/webrickWebdavHandlerSafelyExtractedFromTheWild.html">Ruby</a>, and <a href="http://jakarta.apache.org/slide/index.html">Java</a>, but could not find anything done in a .NET language which my client uses for all of their application infrastructure. So, I built one!</p>
+<p>As I mentioned in my <a href="http://www.zorched.net/2006/01/20/aspnet-web-application-without-aspx-extension/">previous post</a>, we can take over the complete HTTP request for all requested paths. I use a <a href="http://www.dofactory.com/Patterns/PatternCommand.aspx">Command Pattern</a> to handle the different types of WebDAV requests. The Commands are responsible for getting information from the HTTP Request that they need to fulfill the request and for writing the proper HTTP Response. Each of the Commands delegates the actual File manipulation to a set of provider classes. Those classes are accessed through an <a href="http://www.dofactory.com/Patterns/PatternAbstract.aspx">Abstract Factory</a> which allows for me to easily change the backend implementation. This allows for a good separation of concerns. The WebDAV Service layer knows how to read and write WebDAV and the File Provider layer knows how to get and store information about files and folders. <em>(The abstraction between the Commands and the File Providers is a bit leaky still, but I'm confident I'll be able to refactor it into a cleaner separation.)</em></p>
+<p>The first backend provider that I created for testing was a FileSystem provider. I've mapped the WebDAV server to a specific directory and use standard <code>System.IO</code> commands to manipulate files. This is a lot easier because it allowed me to focus on implementing the protocol without worrying about interacting with a less familiar data access layer.</p>
+<h3>Test Your Implementation</h3><br />
+The WebDAV folks have built a great test suite called <a href="http://www.webdav.org/neon/litmus/">Litmus</a> that you can use to validate your server implementation. It performs all of the basic operations on files and collections to validate that the server performs to the specification. Start with Litmus and you've got your entire functional test harness written for you. That is some <abbr name="Test Driven Development">TDD</abbr> in action!<br />
 Litmus goes a long way to get you to protocol compliance, but it took a bit of cleaning and tweaking before Windows Explorer would happily mount the Web Folder.</p>
 <p>In addition to Litmus I found a couple of other tools really handy for debugging:</p>
 <ul>
-<li><a href="http:&#47;&#47;www.ethereal.com&#47;">Ethereal<&#47;a> - a very nice protocol analyzer that will let you inspect a series of requests and responses.<&#47;li>
-<li><a href="http:&#47;&#47;www.ics.uci.edu&#47;%7Ewebdav&#47;">DAVExplorer<&#47;a> - a Java WebDAV client that will write detailed logs of requests and responses.<&#47;li><br />
-<&#47;ul></p>
+<li><a href="http://www.ethereal.com/">Ethereal</a> - a very nice protocol analyzer that will let you inspect a series of requests and responses.</li>
+<li><a href="http://www.ics.uci.edu/%7Ewebdav/">DAVExplorer</a> - a Java WebDAV client that will write detailed logs of requests and responses.</li><br />
+</ul></p>
 <p>Don't be afraid to write your own WebDAV server, it's really fun!</p>
-<h3>References<&#47;h3></p>
+<h3>References</h3></p>
 <p>WebDAV Reference Book:<br />
-<a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;redirect.html?ie=UTF8&location=http%3A%2F%2Fwww.amazon.com%2FWebDAV-Next-Generation-Collaborative-Web-Authoring%2Fdp%2F0130652083%3Fie%3DUTF8%26s%3Dbooks%26qid%3D1178055436%26sr%3D8-1&tag=zorchednet-20&linkCode=ur2&camp=1789&creative=9325">WebDAV: Next-Generation Collaborative Web Authoring<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&amp;l=ur2&amp;o=1" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;> by Lisa Dusseault</p>
+<a href="http://www.amazon.com/gp/redirect.html?ie=UTF8&location=http%3A%2F%2Fwww.amazon.com%2FWebDAV-Next-Generation-Collaborative-Web-Authoring%2Fdp%2F0130652083%3Fie%3DUTF8%26s%3Dbooks%26qid%3D1178055436%26sr%3D8-1&tag=zorchednet-20&linkCode=ur2&camp=1789&creative=9325">WebDAV: Next-Generation Collaborative Web Authoring</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&amp;l=ur2&amp;o=1" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /> by Lisa Dusseault</p>

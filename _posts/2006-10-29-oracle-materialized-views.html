@@ -24,7 +24,7 @@ tags:
 - oracle
 comments:
 - id: 1442
-  author: Zorched &#47; One Line Fix &raquo; Fake Materialized Views
+  author: Zorched / One Line Fix &raquo; Fake Materialized Views
   author_email: ''
   author_url: http://www.zorched.net/2006/11/27/fake-materialized-views/
   date: '2006-11-27 20:22:19 -0500'
@@ -49,25 +49,25 @@ comments:
     appreciate it very much.
 ---
 <p>So the existence of Materialized Views might not be news to the Oracle DBAs around the world, but I present topics from the perspective of a software developer. As software developers we often have to use databases with our applications. As a user of a database, I think it is very important that software developers know what is available to them to leverage when they build their applications. I don't want developers to be afraid of the database.</p>
-<p><smal>(As an aside, I have not found Materialized Views in any database other than Oracle. If you know of any others that support this, please leave a comment.)<&#47;small></p>
-<h2>What Are Materialized Views?<&#47;h2><br />
+<p><smal>(As an aside, I have not found Materialized Views in any database other than Oracle. If you know of any others that support this, please leave a comment.)</small></p>
+<h2>What Are Materialized Views?</h2><br />
 Database Views offer a way to encapsulate a query in the database and present it to a caller in a way that it looks like a regular table. Every time you query a view, join a view to another table or take similar actions, the query that makes up the view is rerun against the database.</p>
 <p>Materialized views are a similar concept to regular views but with one very interesting difference. Materialized views are backed by a real object in the database. When a materialized view is created the query is run and a table (or a table-like structure) is created in the database. Materialized views, like regular Views, can be read-only or can be configured as read-write as well. The other thing that you can configure is who that materialized view is refreshed. The interesting thing is that these materialized views can be asynchronously refreshed in the database when dependent tables are changed. The refresh rules can be everything from never to whenever a row is updated, deleted or inserted. There are a number of rules and limitations on the various refresh schemes, rules that are too complicated to address in a short article, which means having the help of a good DBA would likely be very helpful.</p>
 <p>This denormalization can give you really good performance gains. Of course you can do this with a View as well, but the database has to do even less work in the case of a materialized view because all of the relationships, aggregations, etc are pre-calculated and the results stored in a database object.</p>
-<h2>How Do I Use Them in my Application?<&#47;h2><br />
-Tying this back into software development, how do we make use of them in our applications? The good news is that this is really straight forward. Using tools like Hibernate, you can map to materialized views just like you can to real tables. You can query them using JDBC (or PHP or Ruby Active Record) the same as you would a regular table. What I've been finding is that Materialized Views can be a great tool for <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Denormalization">denormalization<&#47;a>. You can maintain a nicely normalized database schema for you application, but use the Materialized Views to offer some denormalized views of the data.</p>
+<h2>How Do I Use Them in my Application?</h2><br />
+Tying this back into software development, how do we make use of them in our applications? The good news is that this is really straight forward. Using tools like Hibernate, you can map to materialized views just like you can to real tables. You can query them using JDBC (or PHP or Ruby Active Record) the same as you would a regular table. What I've been finding is that Materialized Views can be a great tool for <a href="http://en.wikipedia.org/wiki/Denormalization">denormalization</a>. You can maintain a nicely normalized database schema for you application, but use the Materialized Views to offer some denormalized views of the data.</p>
 <p>Some Example of Materialized View Use Cases:</p>
 <ul title="Good uses of Materialized Views">
-<li>Pre-calculatd Aggregate Values (sum, max, min)<&#47;li>
-<li>Flatten hierarchies<&#47;li>
-<li>Giving pre-filtered data selections<&#47;li>
-<li>Anything that involves a complicated or slow series of calculations or joins<&#47;li><br />
-<&#47;ul></p>
+<li>Pre-calculatd Aggregate Values (sum, max, min)</li>
+<li>Flatten hierarchies</li>
+<li>Giving pre-filtered data selections</li>
+<li>Anything that involves a complicated or slow series of calculations or joins</li><br />
+</ul></p>
 <p>In an application I'm currently working with I found it very helpful to map parent-child relationships of objects using Hibernate through a materialized view to flatten a hierarchy. (Using the many-to-many mapping where the relationship table was a Materialized View.)</p>
 <p>Example:<br />
 Company -> Division -> Department -> Employee</p>
 <p>To answer the question of who works for a given Company you would join all the way down through those tables. Now image you have just one logical Organization tables that is self-referential (i.e. the Division of a Company has a parent_id of another row in the Organization table). Those hierarchical queries can be complicated and expensive. But you don't suffer from the expense of the query (or many queries) if you flatten the hierarchy and create a "denormalized" table that maps Employees to their Company. The flattened tables or calculation tables that you choose to use are, of course, driven by your applications need for the data.</p>
-<h2>Example Query<&#47;h2></p>
+<h2>Example Query</h2></p>
 <p>A pre-calculated value table:<br />
 <code lang="sql"><br />
 create materialized view dept_salary as<br />
@@ -77,8 +77,8 @@ from Department dept<br />
     inner join Employee emp<br />
         on emp.dept_id=dept.id<br />
 group by dept.id<br />
-<&#47;code></p>
-<h2>Some More Reading<&#47;h2><br />
-<a href="http:&#47;&#47;asktom.oracle.com&#47;pls&#47;ask&#47;f?p=4950:8:::::F4950_P8_DISPLAYID:349809082244">Ask Tom "Materialized Views<&#47;a><br />
-<a href="http:&#47;&#47;www.akadia.com&#47;services&#47;ora_materialized_views.html">Secrets of Materialized Views<&#47;a><br />
-<a href="http:&#47;&#47;www.oracle.com&#47;technology&#47;oramag&#47;oracle&#47;05-may&#47;o35asktom.html">Materialized Views for Hierarchy Expansion<&#47;a></p>
+</code></p>
+<h2>Some More Reading</h2><br />
+<a href="http://asktom.oracle.com/pls/ask/f?p=4950:8:::::F4950_P8_DISPLAYID:349809082244">Ask Tom "Materialized Views</a><br />
+<a href="http://www.akadia.com/services/ora_materialized_views.html">Secrets of Materialized Views</a><br />
+<a href="http://www.oracle.com/technology/oramag/oracle/05-may/o35asktom.html">Materialized Views for Hierarchy Expansion</a></p>

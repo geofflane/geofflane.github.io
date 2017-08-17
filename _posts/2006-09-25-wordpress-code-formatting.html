@@ -39,7 +39,7 @@ comments:
     block with a class attribute denoting the language.  Then I would active some
     Javascript to run through the code elements and highlight the keywords for the
     respective languages.  That would be an excellent addition to one of the major
-    Javascript frameworks.  And then auto-linking the import&#47;using statements
+    Javascript frameworks.  And then auto-linking the import/using statements
     to the official online documentation would be even better."
 - id: 380
   author: Geoff Lane
@@ -51,7 +51,7 @@ comments:
     class name to use as your template for syntax highlighting.\r\n\r\nI'm gonna start
     working on it! :)"
 - id: 381
-  author: Zorched &#47; One Line Fix &raquo; Javascript Code Formatting
+  author: Zorched / One Line Fix &raquo; Javascript Code Formatting
   author_email: ''
   author_url: http://www.zorched.net/2006/09/26/javascript-code-formatting/
   date: '2006-09-26 18:24:10 -0400'
@@ -101,8 +101,8 @@ comments:
   author_url: http://www.zorched.net
   date: '2007-07-04 08:57:21 -0400'
   date_gmt: '2007-07-04 14:57:21 -0400'
-  content: "Nauveen,\r\nCheck out the link in the article to the <a href=\"http:&#47;&#47;www.coffee2code.com&#47;archives&#47;2005&#47;03&#47;29&#47;plugin-preserve-code-formatting&#47;\"
-    rel=\"nofollow\">Preserve Code Formatting<&#47;a> plugin."
+  content: "Nauveen,\r\nCheck out the link in the article to the <a href=\"http://www.coffee2code.com/archives/2005/03/29/plugin-preserve-code-formatting/\"
+    rel=\"nofollow\">Preserve Code Formatting</a> plugin."
 - id: 10860
   author: fluxcapacity &raquo; Blog Archive &raquo; One solution to Wordpress code-snippet
     formatting problems
@@ -130,36 +130,36 @@ comments:
 <p>I finally got tired of dealing with reformatting that Wordpress does in its attempt to be "user friendly". In general it does the right thing, but when you deal with code snipits inside <code> tags a lot it can quickly become a problem.</p>
 <p>I wanted to accomplish two things</p>
 <ol>
-<li>Have whitespace matter<&#47;li>
-<li>Not have Wordpress add extra linebreaks or evaluate my >s as HTML<&#47;li><br />
-<&#47;ol></p>
-<h3>1. Is easily done with CSS<&#47;h3><br />
+<li>Have whitespace matter</li>
+<li>Not have Wordpress add extra linebreaks or evaluate my >s as HTML</li><br />
+</ol></p>
+<h3>1. Is easily done with CSS</h3><br />
 <code><br />
 code {<br />
     white-space: pre;<br />
 }<br />
-<&#47;code></p>
+</code></p>
 <p>This CSS will render the text including showing the spaces and line-breaks however they are in the source. This is just the right things for code.</p>
-<h3>2. Getting Wordpress to not muck with code blocks<&#47;h3><br />
-This on the other hand requires coding a solution. Luckily someone has done the hard work for us. There is an existing plugin called <a href="http:&#47;&#47;www.coffee2code.com&#47;archives&#47;2005&#47;03&#47;29&#47;plugin-preserve-code-formatting&#47;">Preserve Code Formatting<&#47;a> that handles this. Basically it looks through the HTML source of a posting and looks for <code> and
+<h3>2. Getting Wordpress to not muck with code blocks</h3><br />
+This on the other hand requires coding a solution. Luckily someone has done the hard work for us. There is an existing plugin called <a href="http://www.coffee2code.com/archives/2005/03/29/plugin-preserve-code-formatting/">Preserve Code Formatting</a> that handles this. Basically it looks through the HTML source of a posting and looks for <code> and
 <pre> blocks. When it finds those blocks it removes all of the extra Wordpress formatting and handles escaping HTML entity characters.</p>
-<p>The other thing I was running into was that Wordpress was "closing" things that looked like HTML. I ran into this when I was writing code snipits that contained <a href="http:&#47;&#47;java.sun.com&#47;j2se&#47;1.5.0&#47;docs&#47;guide&#47;language&#47;generics.html">Generics<&#47;a> syntax.</p>
+<p>The other thing I was running into was that Wordpress was "closing" things that looked like HTML. I ran into this when I was writing code snipits that contained <a href="http://java.sun.com/j2se/1.5.0/docs/guide/language/generics.html">Generics</a> syntax.</p>
 <p>I tracked that down to a writing setting in Wordpress. Under Options -> Writing there is a checkbox that says: "WordPress should correct invalidly nested XHTML automatically". When this option is enabled, Wordpress will erroneously see certain things as HTML markup and try to create closing tags.</p>
 <p>With this option selected I would get:<br />
 <code><br />
 List<br />
 <address> addresses;<br />
-<&#47;address><br />
-<&#47;code></p>
+</address><br />
+</code></p>
 <p>Instead of the correct output I would get when I unselected the option:<br />
 <code><br />
 List<Address> addresses;<br />
-<&#47;code></p>
+</code></p>
 <p>With the plugin in place, a bit of CSS and turning off one option, I can now copy-and-paste code snipits into Wordpress and not have to deal with formatting.</p>
 <p>Next step...syntax highlighting.</p>
-<p><strong><em>Update<&#47;em><&#47;strong>:<br />
+<p><strong><em>Update</em></strong>:<br />
 The other thing that I found in the functions-formatting.php file there is a method called 'wpautop'. This method has a call to remove breaks from
 <pre> tags. So I copied the line and changed it to do the same thing to <code> tags.</p>
 <p><code><br />
-$pee = preg_replace('!(<code.*?>)(.*?)<&#47; code>!ise', " stripslashes('$1') . stripslashes(clean_pre('$2'))  . '<&#47; code>' ", $pee);<br />
-<&#47;code></p>
+$pee = preg_replace('!(<code.*?>)(.*?)</ code>!ise', " stripslashes('$1') . stripslashes(clean_pre('$2'))  . '</ code>' ", $pee);<br />
+</code></p>

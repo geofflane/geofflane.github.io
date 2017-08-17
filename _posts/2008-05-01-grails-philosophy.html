@@ -34,7 +34,7 @@ comments:
     this functionality later as a SOAP, REST, XMLRPC or other service technology.
     \r\n\r\nOur domain classes are not anaemic - we put functionality related to the
     class in there in our apps, but typically this is very minimal on the basis that
-    anything that is not just for preparing&#47;managing the domain model is functionality
+    anything that is not just for preparing/managing the domain model is functionality
     and that may be exposed via many different outlets."
 - id: 11231
   author: Geoff Lane
@@ -69,23 +69,23 @@ comments:
 <p>There was a post on the Grails Mailing list today asking about the philosophy of Grails. This is my response:</p>
 <p>I think I might have ripped this off from somewhere, but fundamentally there are 4 questions to answer for a basic application like this:</p>
 <ol>
-<li>How do you display data to a User?<&#47;li>
-<li>How do you implement business logic?<&#47;li>
-<li>How do you encapsulate complex business logic (Domain) interactions?<&#47;li>
-<li>How do you implement data access?<&#47;li><br />
-<&#47;ol></p>
+<li>How do you display data to a User?</li>
+<li>How do you implement business logic?</li>
+<li>How do you encapsulate complex business logic (Domain) interactions?</li>
+<li>How do you implement data access?</li><br />
+</ol></p>
 <p>Most of the time when there is a layered approach one of 2 things happen. You've implemented a Transaction Script pattern where your business logic is implemented in the Service layer, or your Services are thin wrappers around a Data Access layer. Transaction Script is fine, but doesn't handle complexity as well as a more Domain Driven, OO approach. The thin-wrapper thing is mostly just busy work and annoying to me.</p>
 <p>In Grails:</p>
 <ol>
-<li>Controllers gather Data and hand it to GSPs for rendering<&#47;li>
-<li>Business Logic goes in Domain Objects<&#47;li>
-<li>Data Access goes in Domain Objects<&#47;li>
-<li>Complex Interaction are encapsulated in Services<&#47;li><br />
-<&#47;ol></p>
-<h3>Thin Controllers<&#47;h3><br />
+<li>Controllers gather Data and hand it to GSPs for rendering</li>
+<li>Business Logic goes in Domain Objects</li>
+<li>Data Access goes in Domain Objects</li>
+<li>Complex Interaction are encapsulated in Services</li><br />
+</ol></p>
+<h3>Thin Controllers</h3><br />
 Keep your controllers thin so they just mediate between views and Domains.</p>
-<h3>Active Record<&#47;h3><br />
+<h3>Active Record</h3><br />
 2&3 happen in the same Domain objects because Grails implements the Active Record pattern. So, implement any extra queries in the Domain objects themselves.</p>
-<h3>Services for Encapsulation<&#47;h3><br />
+<h3>Services for Encapsulation</h3><br />
 Only introduce a Service when you have complex interactions (multiple objects being constructed or working together to answer a question) among multiple Domain objects that need to be encapsulated.</p>
 <p>This is a Domain Driven framework. The complexity should be encapsulated in your Domain Objects so you can use Polymorphism to manage complexity.</p>

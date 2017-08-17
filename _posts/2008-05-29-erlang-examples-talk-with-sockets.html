@@ -43,10 +43,10 @@ comments:
   date_gmt: '2008-12-20 04:14:51 -0500'
   content: safari, thanks for pointing out the typo. It's fixed now.
 ---
-<p>This is part of a series on the <a href="http:&#47;&#47;www.erlang.org&#47;course&#47;exercises.html">Erlang Exercises<&#47;a> which is a great set of programming problems that challenge you to implement solutions to some common Erlang problems. I'm going to share some of my solutions to these problems.</p>
-<h2>Erlang using UNIX sockets<&#47;h2><br />
+<p>This is part of a series on the <a href="http://www.erlang.org/course/exercises.html">Erlang Exercises</a> which is a great set of programming problems that challenge you to implement solutions to some common Erlang problems. I'm going to share some of my solutions to these problems.</p>
+<h2>Erlang using UNIX sockets</h2><br />
 Do you want to talk with a friend on another machine? Shouldn't it be nice to have a shell connected to your friend and transfer messages in between?<br />
-This can be implemented using the client&#47;server concept with a process on each side listening to a socket for messages.</p>
+This can be implemented using the client/server concept with a process on each side listening to a socket for messages.</p>
 <p><code lang="erlang"><br />
 -module(talk).<br />
 -compile(export_all).<br />
@@ -108,23 +108,23 @@ send(Port, Data) -><br />
         {error, Reason} -><br />
             {error, Reason}<br />
     end.<br />
-<&#47;code></p>
-<h3>Explanation<&#47;h3><br />
-<strong>start(LocalPort, RemotePort) -><&#47;strong><br />
+</code></p>
+<h3>Explanation</h3><br />
+<strong>start(LocalPort, RemotePort) -></strong><br />
 The entry point to the talk program. This spawns a new start_server process that will handle opening a socket and listening for messages from a remote client. It then runs the command line interface and waits for data from the user to send to the remote port.</p>
-<p><strong>cli(RemotePort, ServerPid) -><&#47;strong><br />
+<p><strong>cli(RemotePort, ServerPid) -></strong><br />
 This is the loop that will get the data from the user and send it to the remote port.</p>
-<p><strong>clean(Data)<&#47;strong><br />
+<p><strong>clean(Data)</strong><br />
 This is a simple function that removes the newlines from the end of the data sent to the client.</p>
-<p><strong>should_stop(Str)<&#47;strong><br />
+<p><strong>should_stop(Str)</strong><br />
 This is a simple function that determines whether the client and server should shut down. The rule is that if it's an empty string then the processes should stop.</p>
-<p><strong>start_server(Port) -><&#47;strong><br />
-This function gets run in a process and opens a Listening socket. It then hands off to <strong>server(Listen) -><&#47;strong> to handle dealing with new incoming socket connections.</p>
-<p><strong>server(Listen) -><&#47;strong><br />
-The server gets a new Socket when an incoming connection connects to the Listening port. It then goes into a receive state and waits for an incoming connection to send it data. The receive state is handled in the <strong>server_loop<&#47;strong>.</p>
-<p><strong>send(Port, Data) -><&#47;strong><br />
+<p><strong>start_server(Port) -></strong><br />
+This function gets run in a process and opens a Listening socket. It then hands off to <strong>server(Listen) -></strong> to handle dealing with new incoming socket connections.</p>
+<p><strong>server(Listen) -></strong><br />
+The server gets a new Socket when an incoming connection connects to the Listening port. It then goes into a receive state and waits for an incoming connection to send it data. The receive state is handled in the <strong>server_loop</strong>.</p>
+<p><strong>send(Port, Data) -></strong><br />
 This is the client side of the application. It connects to a remote port and sends the data to that port.</p>
-<p><strong>case ... of<&#47;strong><br />
+<p><strong>case ... of</strong><br />
 In a number of these functions you see a common idiom:<br />
 <code lang="erlang"><br />
 case fun() of<br />
@@ -133,5 +133,5 @@ case fun() of<br />
     AnotherMatch -><br />
         Do something else<br />
 end<br />
-<&#47;code></p>
-<p>With socket connections and many others it is common to return a tuple like <strong>{ok, Val}<&#47;strong> when the function call is successful and will return <strong>{error, Reason}<&#47;strong> or a similar tuple when there is an error in the function. The case statement is just an easy way to handle these differences.</p>
+</code></p>
+<p>With socket connections and many others it is common to return a tuple like <strong>{ok, Val}</strong> when the function call is successful and will return <strong>{error, Reason}</strong> or a similar tuple when there is an error in the function. The case statement is just an easy way to handle these differences.</p>

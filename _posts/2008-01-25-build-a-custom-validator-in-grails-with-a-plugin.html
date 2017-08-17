@@ -108,7 +108,7 @@ comments:
   date_gmt: '2010-07-22 21:04:37 -0400'
   content: "@we,\r\nThe constraint for a given property is a map of constraints, so
     you can have multiple, comma-separated values.\r\n\r\ne.g.\r\n<code lang=\"groovy\">\r\nstatic
-    constraints = {\r\n    postalCode(blank:false, postalCode:true, inWisconsin:true)\r\n}\r\n<&#47;code>"
+    constraints = {\r\n    postalCode(blank:false, postalCode:true, inWisconsin:true)\r\n}\r\n</code>"
 - id: 18012
   author: aditi
   author_email: aditiy@yahoo.com
@@ -130,8 +130,8 @@ comments:
     bid. Take a look at the \"UniqueEgConstraint\" example on GitHub for an example
     of how to write a persistent constraint."
 ---
-<p><a href="http:&#47;&#47;grails.org">Grails<&#47;a> is a really nice MVC framework inspired by Ruby on Rails. The difference is that Grails is built using Groovy and Java and leverages existing, well known frameworks as it's foundation. It is essentially a fairly thin convention-over-configuration and integration layer on top of Spring and Hibernate. The documentation for common scenarios is pretty good, but once you get outside of the common cases it deteriorates pretty quickly. This is part of my contribution I guess.</p>
-<h3>Constraints and Validation<&#47;h3><br />
+<p><a href="http://grails.org">Grails</a> is a really nice MVC framework inspired by Ruby on Rails. The difference is that Grails is built using Groovy and Java and leverages existing, well known frameworks as it's foundation. It is essentially a fairly thin convention-over-configuration and integration layer on top of Spring and Hibernate. The documentation for common scenarios is pretty good, but once you get outside of the common cases it deteriorates pretty quickly. This is part of my contribution I guess.</p>
+<h3>Constraints and Validation</h3><br />
 Grails has a fairly good set of built in constraints to use to validate your domain objects. This allows you to decorate your Domain with constraints which are validated prior to persisting the objects.<br />
 <code lang="groovy"><br />
 class Address {<br />
@@ -144,8 +144,8 @@ class Address {<br />
         state(size:2..2)<br />
     }<br />
 }<br />
-<&#47;code></p>
-<p>You can find a comprehensive list of the <a href="http:&#47;&#47;grails.org&#47;Validation+Reference">built in validations on the Grails website<&#47;a>. It includes the ability to create a custom validator for a domain class if the built in ones do not suffice. So you can write a validator inline to your domain object.</p>
+</code></p>
+<p>You can find a comprehensive list of the <a href="http://grails.org/Validation+Reference">built in validations on the Grails website</a>. It includes the ability to create a custom validator for a domain class if the built in ones do not suffice. So you can write a validator inline to your domain object.</p>
 <p><code lang="groovy"><br />
 class Student {<br />
     String name<br />
@@ -154,21 +154,21 @@ class Student {<br />
 <p>    static constraints = {<br />
         name(blank:false)<br />
         dateOfBirth(blank:false, validator: { val, obj -><br />
-            &#47;&#47; Ensure that the date of birth is before the enrollment date<br />
+            // Ensure that the date of birth is before the enrollment date<br />
             return ! val.after(obj.enrollmentDate)<br />
         }))<br />
     }<br />
 }<br />
-<&#47;code></p>
+</code></p>
 <p>This validator is just a closure, so you could write it external to the class and reuse it among many different domain classes. I was interested to know how to create a "first-class" validator though that looked and acted just like the built in ones.</p>
-<h3>Create a Plugin<&#47;h3><br />
+<h3>Create a Plugin</h3><br />
 Grails is essentially built as a series of plugins. Everything from Hibernate support to Service Injection is implemented as a Plugin. Because of this it obviously must have a strong plugin system that allows you to do almost anything. So I decided to look at using a plugin to create a shared validation.</p>
 <p>So, first: Generate a plugin.<br />
-On the command line issue the command <em>grails create-plugin MyApp<&#47;em>. This will create a directory containing everything you need to construct a new plugin. The directory really looks like a mini Grails application. In fact you can run it exactly as a grails app which is great for testing.</p>
-<p>This will create a <em>src&#47;<&#47;em> directory in the plugin as well. We can create our validator in there. You can create some directories under <em>src&#47;groovy<&#47;em> or <em>src&#47;java<&#47;em> to create a package. Use groovy or java depending on which language you want to use to implement your validator.</p>
-<h3>Create your Validator<&#47;h3><br />
-Grails provides <em>org.codehaus.groovy.grails.validation.AbstractConstraint<&#47;em> as a simple base class to inherit from to get the basic functionality. Of course if you want to implement the whole thing yourself you just need to implement the interface<br />
-<em>org.codehaus.groovy.grails.validation.Constraint<&#47;em>. That would be a lot of work, so just inherit from the AbstractConstraint.</p>
+On the command line issue the command <em>grails create-plugin MyApp</em>. This will create a directory containing everything you need to construct a new plugin. The directory really looks like a mini Grails application. In fact you can run it exactly as a grails app which is great for testing.</p>
+<p>This will create a <em>src/</em> directory in the plugin as well. We can create our validator in there. You can create some directories under <em>src/groovy</em> or <em>src/java</em> to create a package. Use groovy or java depending on which language you want to use to implement your validator.</p>
+<h3>Create your Validator</h3><br />
+Grails provides <em>org.codehaus.groovy.grails.validation.AbstractConstraint</em> as a simple base class to inherit from to get the basic functionality. Of course if you want to implement the whole thing yourself you just need to implement the interface<br />
+<em>org.codehaus.groovy.grails.validation.Constraint</em>. That would be a lot of work, so just inherit from the AbstractConstraint.</p>
 <p>Here's an example of a constraint used to validate a Postal Code (or zip code). This is a simple implementation that supports validating Canadian and US postal codes.<br />
 <code lang="groovy"><br />
 package net.zorched.validation</p>
@@ -179,10 +179,10 @@ import org.springframework.validation.Errors</p>
     public static final String POSTAL_CODE_CONSTRAINT = "postalCode";</p>
 <p>    private boolean postalCode;</p>
 <p>    private US = { postalCode-><br />
-        postalCode ==~ &#47;\d{5}&#47;<br />
+        postalCode ==~ /\d{5}/<br />
     }</p>
 <p>    private CA = { postalCode-><br />
-        postalCode ==~ &#47;[A-Z]\d[A-Z] \d[A-Z]\d&#47;<br />
+        postalCode ==~ /[A-Z]\d[A-Z] \d[A-Z]\d/<br />
     }</p>
 <p>    public void setParameter(Object constraintParameter) {<br />
         if(!(constraintParameter instanceof Boolean))<br />
@@ -216,7 +216,7 @@ import org.springframework.validation.Errors</p>
         this."$country"(propertyValue)<br />
     }<br />
 }<br />
-<&#47;code></p>
+</code></p>
 <p>The name property is the key used to match your validator in your domain class to this Constraint instance.<br />
 <code lang="groovy"><br />
 class Address {<br />
@@ -232,8 +232,8 @@ class Address {<br />
         postalCode(blank:false,postalCode:true)<br />
     }<br />
 }<br />
-<&#47;code></p>
-<h3>Unit Test It<&#47;h3></p>
+</code></p>
+<h3>Unit Test It</h3></p>
 <p>You'll notice that I wrote the main algorithm for doing the validation as its own method. That will make it easy for me to write Unit Tests to confirm the functionality of my validator before I implement it in a domain class. So, now when someone comes back and wants to support Zip+4 in the US, I'll can write a test, see that it fails and then fix my Constraint to support that case as well.</p>
 <p><code lang="groovy"><br />
 class PostalCodeConstraintTests extends GroovyTestCase {</p>
@@ -257,9 +257,9 @@ class PostalCodeConstraintTests extends GroovyTestCase {</p>
 	String country<br />
 	String postalCode<br />
 }<br />
-<&#47;code></p>
-<h3>Wire It Into Grails<&#47;h3><br />
-The only thing left to do is to register your Constraint so that Grails knows about it. When you created the plugin, grails generated a plugin "bootstrap" class for you. You can do that by registering your class with the <em>ConstrainedProperty<&#47;em> class provided by the Grails framework.</p>
+</code></p>
+<h3>Wire It Into Grails</h3><br />
+The only thing left to do is to register your Constraint so that Grails knows about it. When you created the plugin, grails generated a plugin "bootstrap" class for you. You can do that by registering your class with the <em>ConstrainedProperty</em> class provided by the Grails framework.</p>
 <p><code lang="groovy"><br />
 import net.zorched.validation.PostalCodeConstraint</p>
 <p>import org.codehaus.groovy.grails.validation.ConstrainedProperty</p>
@@ -277,10 +277,10 @@ This plugin adds specific functionality to the application for my app.<br />
             PostalCodeConstraint.class);<br />
     }<br />
 }<br />
-<&#47;code></p>
+</code></p>
 <p>ConstrainedProperty basically keeps a map of the constraint keys to the class type that implements the constraint. </p>
-<h3>Conclusion<&#47;h3><br />
+<h3>Conclusion</h3><br />
 Grails Plugins basically allow you to do anything that you might want to create an easily packaged piece of reusable functionality. I didn't find a anything in the documentation about how to build validators like the built in ones, so I read a bunch of source code. Now you don't have to, except for fun.</p>
 <p><strong><em><br />
-UPDATE: Please check out the Grails Custom Constraints plugin that automates all of this at <a href="http:&#47;&#47;grails.org&#47;plugin&#47;constraints">http:&#47;&#47;grails.org&#47;plugin&#47;constraints<&#47;a><br />
-<&#47;em><&#47;strong></p>
+UPDATE: Please check out the Grails Custom Constraints plugin that automates all of this at <a href="http://grails.org/plugin/constraints">http://grails.org/plugin/constraints</a><br />
+</em></strong></p>

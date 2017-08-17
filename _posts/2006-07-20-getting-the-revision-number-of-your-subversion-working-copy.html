@@ -57,7 +57,7 @@ comments:
   author_url: ''
   date: '2009-04-02 03:31:41 -0400'
   date_gmt: '2009-04-02 09:31:41 -0400'
-  content: "The commands you quote are broken.\r\ne.g. \r\ngrep revision .svn&#47;entries
+  content: "The commands you quote are broken.\r\ne.g. \r\ngrep revision .svn/entries
     | awk -F\" '{print $2}'\r\n\r\nhas a single double-quote in it. This won't run.
     What are the correct commands please?\r\n\r\nThanks!"
 - id: 14980
@@ -125,20 +125,20 @@ comments:
 '
 ---
 <p>I was asked today "How do I find out the revision number of my Subversion directory?" and I didn't know the answer. The good news is there is an easy answer:<br />
-<code lang="bash">svnversion . <&#47;code><&#47;p></p>
-<p>From the <code>svnversion help<&#47;code> command:<&#47;p></p>
+<code lang="bash">svnversion . </code></p></p>
+<p>From the <code>svnversion help</code> command:</p></p>
 <blockquote><p>
 The version number will be a single number if the working<br />
   copy is single revision, unmodified, not switched and with<br />
   an URL that matches the TRAIL_URL argument.  If the working<br />
   copy is unusual the version number will be more complex:<br />
-<&#47;blockquote></p>
-<p>This command takes a little while to run, because it runs against the remote repository as well. It gives more detailed results also such as whether or not you have local modifications or if the repository has been changed since your last update. These details can be interesting in certain cases. But sometimes all you want to know is what revision you currently have checked out...<&#47;p></p>
+</blockquote></p>
+<p>This command takes a little while to run, because it runs against the remote repository as well. It gives more detailed results also such as whether or not you have local modifications or if the repository has been changed since your last update. These details can be interesting in certain cases. But sometimes all you want to know is what revision you currently have checked out...</p></p>
 <p>If all you want to do is check on the current revision of your local working copy you can use some Unix magic to do that.<br />
-<code lang="bash">grep revision .svn&#47;entries |  awk -F\" '{print $2}'<&#47;code><&#47;p></p>
+<code lang="bash">grep revision .svn/entries |  awk -F\" '{print $2}'</code></p></p>
 <p>Redirect this output to a file or use it as an argument to a build script and you can have the revision number put into your application.<br />
-<code lang="bash">ant -Drevision=<code>grep revision .svn&#47;entries | awk -F\" '{print $2}'<&#47;code><&#47;code><br />
-<small>(notice the backticks ` and this needs to be on one line)<&#47;small><&#47;p></p>
-<p>A little Unix scripting and voila!<&#47;p></p>
-<p><small>(Thanks to Ross Greinke for this little snippet)<&#47;small><&#47;p></p>
-<p>[ad name="image-banner"]<&#47;p></p>
+<code lang="bash">ant -Drevision=<code>grep revision .svn/entries | awk -F\" '{print $2}'</code></code><br />
+<small>(notice the backticks ` and this needs to be on one line)</small></p></p>
+<p>A little Unix scripting and voila!</p></p>
+<p><small>(Thanks to Ross Greinke for this little snippet)</small></p></p>
+<p>[ad name="image-banner"]</p></p>

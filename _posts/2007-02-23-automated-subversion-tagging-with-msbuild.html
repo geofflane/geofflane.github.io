@@ -41,56 +41,56 @@ comments:
   content: "Hi !\r\n\r\nI am trying to use SvnInfo task in msbuild, but unfortunately
     is not working with remote directory.\r\n\r\nCan you help me to resolve this thing.\r\n\r\nDhaval."
 ---
-<p>I've written previously about using <a href="http:&#47;&#47;www.zorched.net&#47;2006&#47;11&#47;28&#47;msbuild-with-nunit&#47;">MSBuild With Nunit<&#47;a> as well as a bit of a Manifesto on <a href="http:&#47;&#47;www.zorched.net&#47;2006&#47;08&#47;19&#47;relentless-build-automation&#47;">Relentless Build Automation<&#47;a>. I believe that automating the build and deployment process is a necessary step to ensure the reliable delivery of quality software. </p>
-<h2>Release Management<&#47;h2><br />
+<p>I've written previously about using <a href="http://www.zorched.net/2006/11/28/msbuild-with-nunit/">MSBuild With Nunit</a> as well as a bit of a Manifesto on <a href="http://www.zorched.net/2006/08/19/relentless-build-automation/">Relentless Build Automation</a>. I believe that automating the build and deployment process is a necessary step to ensure the reliable delivery of quality software. </p>
+<h2>Release Management</h2><br />
 One of the things that we as software developers have to do is regularly make releases, either to QA or to a customer. When we make releases we need to be able to continue to develop the software to add new features and fix bugs. Tagging is a safety process that we use in a version control system to allow us to easily get to the code that we used to build a specific release. When you Tag, you can always rebuild that release. So, if weeks or months down the road you need to fix a critical bug, but don't want to release new features, you can get back to the Tag, create a Branch, fix the bug and release the new build to your users.</p>
-<h2> How Do We Ensure We Can Recreate Releases<&#47;h2><br />
+<h2> How Do We Ensure We Can Recreate Releases</h2><br />
 How can we ensure that we will be able to recreate a release that we make to either QA or a customer? Use Automation to Tag your builds when you create them of course.</p>
-<p>I've contributed a new SvnCopy Task to the <a href="http:&#47;&#47;msbuildtasks.tigris.org&#47;">MSBuild Community Tasks<&#47;a> project which was just accepted and committed. It is currently in the Subversion repository for the project but should be available shortly in an official build. This will allow you to easily automate the process of Tagging or Branching your builds when your release. Subversion uses the Copy metaphor for both Branching and Tagging operations which is different from some other version control systems.</p>
+<p>I've contributed a new SvnCopy Task to the <a href="http://msbuildtasks.tigris.org/">MSBuild Community Tasks</a> project which was just accepted and committed. It is currently in the Subversion repository for the project but should be available shortly in an official build. This will allow you to easily automate the process of Tagging or Branching your builds when your release. Subversion uses the Copy metaphor for both Branching and Tagging operations which is different from some other version control systems.</p>
 <p>Example:<br />
 <code lang="xml"><br />
 <Target Name="GetRemoteRevisionNumber"><br />
     <SvnInfo RepositoryPath="$(SvnRemoteRoot)"><br />
         <Output TaskParameter="LastChangedRevision"<br />
-             PropertyName="RemoteSvnRevisionNumber"  &#47;><br />
-    <&#47;SvnInfo><br />
-    <Message Text="Revision: $(RemoteSvnRevisionNumber)"&#47;><br />
-<&#47;Target></p>
+             PropertyName="RemoteSvnRevisionNumber"  /><br />
+    </SvnInfo><br />
+    <Message Text="Revision: $(RemoteSvnRevisionNumber)"/><br />
+</Target></p>
 <p><Target Name="Tag" DependsOnTargets="GetRemoteRevisionNumber"><br />
     <Error Condition="$(SvnUserName)==''"<br />
-        Text="You must set your Subversion Username."&#47;><br />
-    <Error Condition="$(SvnPassword)==''" Text="You must set your Subversion Password."&#47;><br />
-    <SvnCopy RepositoryPath="$(SvnRemoteRoot)&#47;trunk"<br />
-        DestinationPath="$(SvnRemoteRoot)&#47;tags&#47;REV-$(RemoteSvnRevisionNumber)"<br />
+        Text="You must set your Subversion Username."/><br />
+    <Error Condition="$(SvnPassword)==''" Text="You must set your Subversion Password."/><br />
+    <SvnCopy RepositoryPath="$(SvnRemoteRoot)/trunk"<br />
+        DestinationPath="$(SvnRemoteRoot)/tags/REV-$(RemoteSvnRevisionNumber)"<br />
         Message="Auto-tagging Revision: $(RemoteSvnRevisionNumber)"<br />
-        Username="$(SvnUserName)" password="$(SvnPassword)"&#47;><br />
-    <Message Text="Tagged: REV-$(RemoteSvnRevisionNumber)"&#47;><br />
-<&#47;Target><br />
-<&#47;code></p>
-<p>You can then integrate the process of creating a Tag every time you generate a build by tying together Tasks with dependencies. In the example below, the <strong>GenerateTestBuild<&#47;strong> calls <strong>GenerateCabFiles<&#47;strong> and <strong>Tag<&#47;strong>  to automatically build the installer and Tag Subversion with the current revisions number.</p>
+        Username="$(SvnUserName)" password="$(SvnPassword)"/><br />
+    <Message Text="Tagged: REV-$(RemoteSvnRevisionNumber)"/><br />
+</Target><br />
+</code></p>
+<p>You can then integrate the process of creating a Tag every time you generate a build by tying together Tasks with dependencies. In the example below, the <strong>GenerateTestBuild</strong> calls <strong>GenerateCabFiles</strong> and <strong>Tag</strong>  to automatically build the installer and Tag Subversion with the current revisions number.</p>
 <p><code lang="xml"><br />
 <Target Name="GenerateCabFiles" DependsOnTargets="Build"><br />
     <Exec WorkingDirectory="."<br />
-        Command="devenv "$(SolutionFileName)" &#47;build $(Configuration) &#47;project  $(ConfigCabFileProject)"&#47;><br />
+        Command="devenv "$(SolutionFileName)" /build $(Configuration) /project  $(ConfigCabFileProject)"/><br />
     <Exec WorkingDirectory="."<br />
-        Command="devenv "$(SolutionFileName)" &#47;build $(Configuration) &#47;project  $(UiCabFileProject)"&#47;><br />
-<&#47;Target></p>
+        Command="devenv "$(SolutionFileName)" /build $(Configuration) /project  $(UiCabFileProject)"/><br />
+</Target></p>
 <p><Target Name="DeployCabFiles" DependsOnTargets="GenerateCabFiles"><br />
-    <MakeDir Directories="$(DestRoot)\$(BuildFolderPrefix)$(SvnRevisionNumber)"&#47;><br />
-    <MakeDir Directories="$(DestRoot)\$(BuildFolderPrefix)$(SvnRevisionNumber)\FormXmls"&#47;><br />
+    <MakeDir Directories="$(DestRoot)\$(BuildFolderPrefix)$(SvnRevisionNumber)"/><br />
+    <MakeDir Directories="$(DestRoot)\$(BuildFolderPrefix)$(SvnRevisionNumber)\FormXmls"/><br />
     <Copy SourceFiles="@(CabFiles)"<br />
-        DestinationFolder="$(DestRoot)\Build$(SvnRevisionNumber)"&#47;><br />
+        DestinationFolder="$(DestRoot)\Build$(SvnRevisionNumber)"/><br />
     <Copy SourceFiles="$(AutoUpdaterConfigFile)"<br />
-        DestinationFolder="$(DestRoot)\Build$(SvnRevisionNumber)"&#47;><br />
-    <Copy SourceFiles="$(AutoUpdaterConfigFile)" DestinationFolder="$(DestRoot);"&#47;><br />
+        DestinationFolder="$(DestRoot)\Build$(SvnRevisionNumber)"/><br />
+    <Copy SourceFiles="$(AutoUpdaterConfigFile)" DestinationFolder="$(DestRoot);"/><br />
     <Copy SourceFiles="@(FormXmlFiles)"<br />
-        DestinationFolder="$(DestRoot)\$(BuildFolderPrefix)$(SvnRevisionNumber)\FormXmls"&#47;><br />
-<&#47;Target><br />
-<Target Name="GenerateTestBuild" DependsOnTargets="DeployCabFiles;Tag"&#47;><br />
-<&#47;code></p>
+        DestinationFolder="$(DestRoot)\$(BuildFolderPrefix)$(SvnRevisionNumber)\FormXmls"/><br />
+</Target><br />
+<Target Name="GenerateTestBuild" DependsOnTargets="DeployCabFiles;Tag"/><br />
+</code></p>
 <p>Hopefully this will help you  get started on some more automation.</p>
-<p><strong><em>Update:<&#47;em><&#47;strong><br />
-MSBuild Community Tasks version 1.2 has been released containing this code. You can get it <a href="http:&#47;&#47;msbuildtasks.tigris.org&#47;servlets&#47;ProjectDocumentList">here<&#47;a>.</p>
-<h3>Resources<&#47;h3><br />
-<a href="http:&#47;&#47;msbuildtasks.tigris.org&#47;">MSBuild Community Tasks<&#47;a><br />
-<a href="http:&#47;&#47;subversion.tigris.org&#47;">Subversion<&#47;a></p>
+<p><strong><em>Update:</em></strong><br />
+MSBuild Community Tasks version 1.2 has been released containing this code. You can get it <a href="http://msbuildtasks.tigris.org/servlets/ProjectDocumentList">here</a>.</p>
+<h3>Resources</h3><br />
+<a href="http://msbuildtasks.tigris.org/">MSBuild Community Tasks</a><br />
+<a href="http://subversion.tigris.org/">Subversion</a></p>
