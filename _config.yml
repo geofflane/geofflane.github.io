@@ -62,3 +62,4 @@ plugins:
   - jemoji
 paginate_path: /posts/page/:num/
 permalink: /:year/:month/:day/:slug/
+highlighter: rouge

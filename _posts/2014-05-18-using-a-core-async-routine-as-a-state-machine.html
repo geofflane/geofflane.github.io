@@ -37,84 +37,84 @@ comments:
 <p>A simple state machine might only have a couple of states and transform from one to the next.</p></p>
 <p><img src="//www.zorched.net/wp-content/uploads/2014/04/simple.png" alt="simple state machine" width="407" height="140" class="aligncenter size-full wp-image-629" /></p></p>
 <p>Below you can see a go block that implements those three states: starting, playing, and done. It does so by starting in the ":starting" state and then transforming to ":playing" state when it recurs in the loop. The ":playing" state is run over and over until "some-condition" is met that makes it go to ":done".</p></p>
-<p><code lang="clojure"><br />
-(go-loop<br />
-   [state :starting]<br />
-   (let [[new-state]<br />
-        (case state<br />
-              :starting (let [init-value (<! ch)]<br />
-                         (some-work init-value)<br />
-                         :playing)<br />
-              :playing (let [round (<! ch)]<br />
-                         (if some-condition<br />
-                           :done<br />
-                           (do<br />
-                             (some-other-work round)<br />
-                             state)))<br />
-              :done (do<br />
-                      (maybe-do-some-cleanup)<br />
-                      (close! ch)<br />
-                      :done))]<br />
-       (if-not (= :done new-state)<br />
-          (recur new-state))))<br />
-</code></p>
+  {% highlight clojure %}
+(go-loop
+   [state :starting]
+   (let [[new-state]
+        (case state
+              :starting (let [init-value (<! ch)]
+                         (some-work init-value)
+                         :playing)
+              :playing (let [round (<! ch)]
+                         (if some-condition
+                           :done
+                           (do
+                             (some-other-work round)
+                             state)))
+              :done (do
+                      (maybe-do-some-cleanup)
+                      (close! ch)
+                      :done))]
+       (if-not (= :done new-state)
+          (recur new-state))))
+ {% endhighlight %}
 <h2>Using Data to Determine State Transitions</h2></p>
 <p>A slightly more complex state machine might have multiple states to step through to process a series of messages. Think of an ATM as an example (a really simple ATM that is).</p></p>
 <p><img src="//www.zorched.net/wp-content/uploads/2014/04/atm.png" alt="atm state machine" width="1001" height="268" class="aligncenter size-full wp-image-628" /></p></p>
 <p>The ATM has multiple user interactions and must communicate with other services to actually authorize the transaction. When the ATM is done with a given user, it goes back into a waiting state until someone swipes their card again.</p></p>
 <p>Instead of passing an explicit state through the loop, our implementation passes data around. This accumulator pattern allows for the state machine to collect data at each step and then to pass that data on to later states. The data itself is used to determine what state the state machine is in. If there's card information, but then the process expects a pin, if there's a pin it expects an amount, etc. Once it's accumulated the data it can process the transaction. It then transitions back to the waiting state by setting the transaction data back to empty so that the next iteration puts it back in the waiting state. Each of those states is a fairly simple process, but you can easily layer on more rules to implement more complex state transitions.</p></p>
-<p><code lang="clojure"><br />
-(def host (chan))<br />
-(def from-host (chan))<br />
-(def atm (chan))</p>
-<p>(defn run<br />
-  []</p>
-<p>  ;; The State machine for the ATM<br />
-  (go-loop<br />
-    [data {}]<br />
-    (let [new-txn-data<br />
-      (cond<br />
-        (:error data)<br />
-          (do<br />
-            (println "Got an error. No monies for you.")<br />
-            {})<br />
-        (:dispense data)<br />
-          (do<br />
-            (println "You've withdrawn: " (:amount data))<br />
-            {})<br />
-        (:host-response data)<br />
-          (let [resp (<! from-host)<br />
-                data (dissoc data :host-response)]<br />
-            (case resp<br />
-              :success (assoc data :dispense true)<br />
-              (assoc data :error true)))<br />
-        (:pin data)<br />
-          (let [amount (<! atm)<br />
-                txn (assoc data :amount amount)]<br />
-            (>! host txn)<br />
-            (assoc txn :host-response true))<br />
-        (:card data)<br />
-          (let [pin (<! atm)]<br />
-            (assoc data :pin pin))<br />
-        (empty? data)<br />
-          (let [card-info (<! atm)]<br />
-            (assoc data :card card-info)))]<br />
-      (recur new-txn-data)))</p>
-<p>  ;; Simulator for the Host that the ATM talks to<br />
-  (go-loop<br />
-    []<br />
-    (let [txn (<! host)]<br />
-      (if (= 1111 (:pin txn))<br />
-        (>! from-host :success)<br />
-        (>! from-host :error))<br />
-      (recur)))</p>
-<p>  ;; Simulated hardware events from the ATM machine<br />
-  (>!! atm 411111111111)<br />
-  (>!! atm 1111)<br />
-  (>!! atm 200)</p>
-<p>  (>!! atm 411111111111)<br />
-  (>!! atm 112)<br />
-  (>!! atm 200)<br />
-)<br />
-</code></p>
+  {% highlight clojure %}
+(def host (chan))
+(def from-host (chan))
+(def atm (chan))
+(defn run
+  []
+  ;; The State machine for the ATM
+  (go-loop
+    [data {}]
+    (let [new-txn-data
+      (cond
+        (:error data)
+          (do
+            (println "Got an error. No monies for you.")
+            {})
+        (:dispense data)
+          (do
+            (println "You've withdrawn: " (:amount data))
+            {})
+        (:host-response data)
+          (let [resp (<! from-host)
+                data (dissoc data :host-response)]
+            (case resp
+              :success (assoc data :dispense true)
+              (assoc data :error true)))
+        (:pin data)
+          (let [amount (<! atm)
+                txn (assoc data :amount amount)]
+            (>! host txn)
+            (assoc txn :host-response true))
+        (:card data)
+          (let [pin (<! atm)]
+            (assoc data :pin pin))
+        (empty? data)
+          (let [card-info (<! atm)]
+            (assoc data :card card-info)))]
+      (recur new-txn-data)))
+  ;; Simulator for the Host that the ATM talks to
+  (go-loop
+    []
+    (let [txn (<! host)]
+      (if (= 1111 (:pin txn))
+        (>! from-host :success)
+        (>! from-host :error))
+      (recur)))
+  ;; Simulated hardware events from the ATM machine
+  (>!! atm 411111111111)
+  (>!! atm 1111)
+  (>!! atm 200)
+  (>!! atm 411111111111)
+  (>!! atm 112)
+  (>!! atm 200)
+)
+{% endhighlight %}
 <p>Sets of independent processes managing their own state, doing their own work, communicating by sending messages to other independent processes. Welcome to the world of simple asynchronous programs!</p></p>
