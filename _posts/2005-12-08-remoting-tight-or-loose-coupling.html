@@ -1,0 +1,54 @@
+---
+layout: post
+status: publish
+published: true
+title: 'Remoting: Tight or Loose Coupling?'
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+excerpt: 'There are many ways to do remoting these days. In general you have 2 choices
+  between techniques that offer tight coupling and techniques that offer loose coupling. '
+wordpress_id: 13
+wordpress_url: http://www.zorched.net/?p=13
+date: '2005-12-08 22:17:54 -0500'
+date_gmt: '2005-12-09 03:17:54 -0500'
+categories:
+- Code
+- Java
+- ".NET"
+tags: []
+comments:
+- id: 12
+  author: Vibhu Srinivasan &raquo; Blog Archive &raquo; Excellent write up on tight
+    vs loose coupling
+  author_email: ''
+  author_url: http://vibhu.info/?p=33
+  date: '2005-12-29 14:42:37 -0500'
+  date_gmt: '2005-12-29 19:42:37 -0500'
+  content: "[...] I just read an excellent write up by Geoff a fellow Spider about
+    tight and loose coupling. . I totally agree that loosely coupled systems are better
+    than tightly coupled systems any day. (I don&acirc;&euro;&trade;t care Microsoft
+    says on this matter). [...]"
+- id: 13
+  author: Vibhu
+  author_email: vibhu_s@yahoo.com
+  author_url: http://vibhu.info
+  date: '2005-12-29 14:44:29 -0500'
+  date_gmt: '2005-12-29 19:44:29 -0500'
+  content: http://vibhu.info/?p=33
+---
+<p>Martin Fowler once said &acirc;&euro;&oelig;First Law of Distributed Object Design: Don&acirc;&euro;&trade;t distribute your objects!&acirc;&euro; This somewhat tongue-in-cheek comment captures the understanding that distributed design is more technically complex than non-distributed designs. Given two solutions that both fulfill a system&acirc;&euro;&trade;s design requirements, I strongly encourage you to pick the least complex. Your life will be much easier if you avoid unneeded complexity. Of course there are some problems that require remote communication between different systems and sometimes distributed object systems is the right choice.</p>
+<p>There are many ways to do remoting these days. In general you have 2 choices between techniques that offer tight coupling and techniques that offer loose coupling. Tight-coupling is generally done using a technology specific solution such as RMI or .NET Remoting. These solutions often are implemented using dynamically generated remoting proxies. These proxies handle the complexities of moving objects and calling methods on remote systems. These tightly-coupled systems normally use an Interface based technique for defining the interaction with the objects.</p>
+<p>The benefit of these tightly-coupled systems is that they are generally faster than other remoting techniques. They can transfer data and objects in binary formats that are specifically optimized for the specific implementation language. They can also be easy to use because you are only working with a programming language with which you are already familiar.</p>
+<p>But . . .<br />
+They are a terrible idea. Fast and easy and you say they&acirc;&euro;&trade;re a bad idea? I must be crazy right?</p>
+<p>The changes that happen on the client objects have to be reflected in the same changes on the server. This coordination can be difficult at best. Add in the fact that the dynamically generated remoting proxies are cached in the GAC when you are using .NET and you run into versioning problems that are hard to debug.</p>
+<p>Today we have standards such as WSDL and XML Schema (XSD) that can be used to describe rich and descriptive interfaces about interacting with remote systems. These descriptions are programming language independent. (WSDL 2.0 even promise to support services bindings other than SOAP, such as REST). XSD includes techniques for defining optional parameters and versioning. Optional parameters and additional methods allow you to incrementally change a service without effecting backwards compatibility. XML Schema versioning allows for you to radically change a service for new clients while still responding to service requests from older clients.</p>
+<p>WSDL and SOAP allow you to create loosely-coupled systems with both systems able to evolve over time on their own. Your object model can change on the client side to support new functionality, while the server side can be completely rewritten in a new language. Neither end needs to know or care. WSDL and SOAP are standards that are supported by many languages and tools. They offer easier testing and validation because you can create much simpler, independent test harnesses to prove their functionality works.</p>
+<p>SOAP Services offer this flexibility and loose-coupling at the expense of processing efficiency. XML can be expensive to parse and is often a larger representation of the data compared to a binary format, so is larger to send over a network.</p>
+<p>Just like the first rule of distributed computing is: don&acirc;&euro;&trade;t do distributed computing, I think I will add that the first rule of tightly-coupled remoting is: Don&acirc;&euro;&trade;t to do tightly-coupled remoting. Of course there will be exceptions to this rule, as there are with most rules, but I would favor the flexibility and the adaptability of loosely-coupled systems. </p>

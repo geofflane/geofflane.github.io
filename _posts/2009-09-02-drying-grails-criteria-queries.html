@@ -1,0 +1,278 @@
+---
+layout: post
+status: publish
+published: true
+title: DRYing Grails Criteria Queries
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 364
+wordpress_url: http://www.zorched.net/?p=364
+date: '2009-09-02 10:47:59 -0400'
+date_gmt: '2009-09-02 16:47:59 -0400'
+categories:
+- Code
+- Web
+- Groovy
+tags:
+- groovy
+- meta-programming
+- grails
+- DRY
+comments:
+- id: 15619
+  author: Lucas Teixeira
+  author_email: lucastex@gmail.com
+  author_url: http://blog.lucastex.com
+  date: '2009-09-07 08:29:49 -0400'
+  date_gmt: '2009-09-07 14:29:49 -0400'
+  content: "That's a great post.\r\n\r\nIn Grails 1.2-m2, we've got named queries
+    introduced in grails core giving named queries 'methods' in domain classes. \r\n\r\nThanks
+    a lot.\r\n\r\n[]s,"
+- id: 15639
+  author: Gregg Bolinger
+  author_email: gdboling@gmail.com
+  author_url: ''
+  date: '2009-09-14 10:03:06 -0400'
+  date_gmt: '2009-09-14 16:03:06 -0400'
+  content: Good info.  But what happens if you need to execute a query that doesn't
+    need the eq('published', true) ?  All withCriteria calls are monkey patched at
+    this point.
+- id: 15640
+  author: Tom
+  author_email: springmethods@gmail.comq
+  author_url: http://www.workflowspace.com
+  date: '2009-09-14 10:25:49 -0400'
+  date_gmt: '2009-09-14 16:25:49 -0400'
+  content: "Good idea.\r\n\r\nThere are many ways to skin a cat.  Here's another one
+    that's good for wildcard queries ('%').  Of course you should validate the data
+    first.\r\n\r\n<code lang=\"groovy\">\r\ndef user_params = ['slug', 'category']\r\n\r\ndef
+    articles = Article.withCriteria {\r\n  for (e in params) {\r\n    if (e.key in
+    user_params) {\r\n        ilike(e.key, '%' + e.value + '%')\r\n    }\r\n  }\r\n}\r\n<&#47;code>"
+- id: 15641
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2009-09-14 11:45:09 -0400'
+  date_gmt: '2009-09-14 17:45:09 -0400'
+  content: "@Gregg, Monkeypatching it like that makes it available to be used, but
+    doesn't automatically apply it to all criteria. So if you want to find all approved
+    and not approved you just do something like:\r\n<code lang=\"groovy\">\r\nstatic
+    findAllByCategory(String category) {\r\n        withCriteria {\r\n                eq('category',
+    category)\r\n        }\r\n    }\r\n<&#47;code>\r\n\r\nWithout the approved {}
+    block."
+- id: 15642
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2009-09-14 11:46:05 -0400'
+  date_gmt: '2009-09-14 17:46:05 -0400'
+  content: "@Tom,\r\nNice example, thanks for sharing."
+- id: 15643
+  author: Gregg Bolinger
+  author_email: gdboling@gmail.com
+  author_url: ''
+  date: '2009-09-14 13:34:04 -0400'
+  date_gmt: '2009-09-14 19:34:04 -0400'
+  content: Ahh, I missed the published closure.  Excellent.  Thanks.
+- id: 15869
+  author: urgo
+  author_email: urgo@aqris.com
+  author_url: http://www.aqris.com
+  date: '2009-10-20 01:54:19 -0400'
+  date_gmt: '2009-10-20 07:54:19 -0400'
+  content: "Hi Geoff,\r\n\r\nOne other thing that can be done to Hibernate Criteria
+    Builder is adding some methods that will add the actual restriction only if searched
+    value is not null&#47;empty.\r\n\r\nYou can check the code from my post here:
+    http:&#47;&#47;www.aqris.com&#47;x&#47;NoBx"
+- id: 15890
+  author: Kyle Dickerson
+  author_email: kbdjunk@gmail.com
+  author_url: ''
+  date: '2009-10-26 12:46:59 -0400'
+  date_gmt: '2009-10-26 18:46:59 -0400'
+  content: 'I came up with a more flexible way that doesn''t require monkey-patching
+    the metaclass.  It involves currying the CriteriaBuilder object to separate closures
+    that you want to combine into a single query.  I wrote it up on my blog, you can
+    read it there: http:&#47;&#47;dickersonshypotheticalblog.blogspot.com&#47;2009&#47;10&#47;grails-dynamically-building-criteria.html'
+- id: 16034
+  author: Peter Willis
+  author_email: willispeter.willis@gmail.com
+  author_url: ''
+  date: '2010-01-10 12:30:40 -0500'
+  date_gmt: '2010-01-10 18:30:40 -0500'
+  content: "<code lang=\"groovy\">\r\ndef c = Domain.createCriteria()\r\n\r\ndef q0
+    = {\r\n eq 'name', 'peter'\r\n}\r\n\r\ndef q1 = {\r\n eq 'approved', true\r\n}\r\n\r\ndef
+    q2 = {\r\n le 'time', new Date() - 7\r\n}\r\n\r\nClosure join(Object[] queries)
+    {    \r\n    return {\r\n        for(q in queries) {\r\n            q.delegate
+    = delegate\r\n            q()\r\n        }\r\n    }\r\n}\r\n\r\nc.list( join(q0,
+    q1, q2) )\r\n<&#47;code>"
+- id: 16054
+  author: Martin
+  author_email: martin@thegoodvibe.de
+  author_url: http://www.thegoodvibe.de
+  date: '2010-03-05 05:50:11 -0500'
+  date_gmt: '2010-03-05 11:50:11 -0500'
+  content: Thanks man, you saved my ass bigtime :)
+- id: 16149
+  author: Simpler Hibernate Criteria Builder in Grails &laquo; Urgo&#39;s blob
+  author_email: ''
+  author_url: http://urgoringo.wordpress.com/2009/10/20/simpler-hibernate-criteria-builder-in-grails/
+  date: '2010-05-17 11:22:58 -0400'
+  date_gmt: '2010-05-17 17:22:58 -0400'
+  content: "[...] if-not-null check needs to be repeated for every search field. Inspired
+    by this blog  you can implement some additional methods for HibernateCriteriaBuilder
+    which simplify [...]"
+- id: 16288
+  author: DRYing Grails Criteria Queries - Grails queries
+  author_email: ''
+  author_url: http://grailsqueries.grailstutorial.org/drying-grails-criteria-queries/
+  date: '2010-09-20 21:37:13 -0400'
+  date_gmt: '2010-09-21 03:37:13 -0400'
+  content: "[...] Click here for Detail          &nbsp; [...]"
+- id: 18125
+  author: Francis
+  author_email: info@hkwebentrepreneurs.com
+  author_url: http://www.hkwebentrepreneurs.com
+  date: '2012-11-22 22:00:12 -0500'
+  date_gmt: '2012-11-23 04:00:12 -0500'
+  content: "This is a really useful technique! I've submitted a <a href=\"https:&#47;&#47;github.com&#47;grails&#47;grails-doc&#47;pull&#47;101\"
+    rel=\"nofollow\">pull request<&#47;a> to get it added to the grails core docs.\r\n\r\nAlso
+    take a look at Grails 2 <a href=\"http:&#47;&#47;grails.org&#47;doc&#47;latest&#47;guide&#47;single.html#detachedCriteria\"
+    rel=\"nofollow\">Detached Criteria<&#47;a>, which can be used to achieve similar
+    results and are arguably more flexible."
+- id: 68722
+  author: timo
+  author_email: timo@klarshift.de
+  author_url: ''
+  date: '2014-09-01 10:05:59 -0400'
+  date_gmt: '2014-09-01 16:05:59 -0400'
+  content: |
+    what about grails named queries. is much simpler and without patching the builder.
+
+    Article.published.list()
+
+    Usually I would use Hibernate Filters for that use- case. Hibernate will apply the filter to all your queries automatically. There is also the grails hibernate-filter plugin.
+
+    Great post though!
+---
+<p>When you're writing code, Don't Repeat Yourself. Now say that 5 times. <em>*rimshot*<&#47;em> </p>
+<p>One of the things that I find myself repeating a lot of in many business apps is queries. It's common to have a rule or filter that applies to many different cases. I came across such a situation recently and wanted to figure out a way to share that filter across many different queries. This is what I came up with for keeping those Criteria DRY.</p>
+<p>To start with, I'll use an example of an Article. This could be a blog post or a newspaper article. One of the rules of the system is that Articles need to be published before they are visible by end users. Because of this seemingly simple rule, every time we query for Articles, we will need to check the published flag. If you get a lot of queries, that ends up being a lot of repetition.</p>
+<p>Here's our example domain class:<br />
+<code lang="groovy"><br />
+package net.zorched.domain<br />
+class Article {<br />
+    String name<br />
+    String slug<br />
+    String category</p>
+<p>    boolean published</p>
+<p>    static constraints = {<br />
+        name(blank: false)<br />
+        slug(nullable: true)<br />
+    }<br />
+}<br />
+<&#47;code></p>
+<p>Now we need to add a query that will retrieve our domain instance by its <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Slug_(production)">slug<&#47;a> (a slug is a publishing term for a short name given to an article, in the web world it has become a term often used for a search engine optimization technique that uses the title instead of an artificial ID). To perform that query we might write something like this on the Article class:<br />
+<code lang="groovy"><br />
+    static getBySlug(String slug) {<br />
+        withCriteria(uniqueResult:true) {<br />
+            and {<br />
+                eq('approved', true)<br />
+                eq(' slug',  slug)<br />
+            }<br />
+        }<br />
+    }<br />
+<&#47;code></p>
+<p>We want to query based on the slug, but we also want to only allow a published Article to be shown. This would allow us to unpublish an article if necessary. Without the approved filter, if the link had gotten out, people could still view the article.</p>
+<p>Next we decide we want to list all of the Articles in a particular category so we write something like this, again filtering by the approved flag.<br />
+<code lang="groovy"><br />
+    static findAllByCategory(String category) {<br />
+        withCriteria() {<br />
+            and {<br />
+                eq('approved', true)<br />
+                eq('category',  category)<br />
+            }<br />
+        }<br />
+    }<br />
+<&#47;code></p>
+<p>Two simple examples like this might not be that big of a deal. But you can easily see how this would grow if you added more custom queries or if you had some more complicated filtering logic.  Another common case would be if you had the same filter across many different domain objects. (What if the Article had attachments and comments all of which needed their own approval?) What you need is a way to share that logic among multiple withCriteria calls.</p>
+<p>The trick to this is understanding how <em>withCriteria<&#47;em> and <em>createCriteria<&#47;em> work in GORM. They are both implemented using a custom class called <em>HibernateCriteriaBuilder<&#47;em>. That class invokes the closures that you pass to it on itself. Sounds confusing. Basically the elements in the closure of your criteria queries get executed as if the were called on an instance of HibernateCriteriaBuilder.</p>
+<p>e.g.<br />
+<code lang="groovy"><br />
+withCriteria {<br />
+     eq('a', 1)<br />
+     like('b', '%foo%')<br />
+}<br />
+<&#47;code></p>
+<p>would be the equivalent of calling something like:</p>
+<p><code lang="groovy"><br />
+def builder = new HibernateCriteriaBuilder(...)<br />
+builder.eq('a', 1)<br />
+builder.like('b', '%foo%')<br />
+<&#47;code></p>
+<p>That little bit of knowledge allow you to reach into your meta programming bag of tricks and add new calls to the HibernateCriteriaBuilder. Every Class in groovy has a <em>metaClass<&#47;em> that is used to extend types of that Class. In this case we'll add a Closure that will combine our criteria with other criteria like so:<br />
+<code lang="groovy"><br />
+HibernateCriteriaBuilder.metaClass.published = { Closure c -><br />
+    and {<br />
+        eq('published', true)<br />
+        c()<br />
+    }<br />
+}<br />
+<&#47;code></p>
+<p>This <em>ands<&#47;em> together our eq call with all of the other parts of the passed in closure.<br />
+Now we can put the whole thing together into a domain class with a reusable filter.</p>
+<p><code lang="groovy"><br />
+package net.zorched.domain</p>
+<p>import grails.orm.HibernateCriteriaBuilder</p>
+<p>class Article {</p>
+<p>    static {<br />
+        &#47;&#47; monkey patch HibernateCriteriaBuilder to have a reusable 'published' filter<br />
+        HibernateCriteriaBuilder.metaClass.published = { Closure c -><br />
+            and {<br />
+                eq('published', true)<br />
+                c()<br />
+            }<br />
+        }<br />
+    }</p>
+<p>    String name<br />
+    String slug<br />
+    String category</p>
+<p>    boolean published<br />
+    Date datePublished</p>
+<p>    def publish() {<br />
+        published = true<br />
+        datePublished = new Date()<br />
+    }</p>
+<p>    static def createSlug(n) {<br />
+        return n.replaceAll('[^A-Za-z0-9\\s]','')<br />
+                 .replaceAll('\\s','-')<br />
+                 .toLowerCase()<br />
+    }</p>
+<p>    static findAllApprovedByCategory(String category) {<br />
+        withCriteria {<br />
+            published {<br />
+                eq('category', category)<br />
+            }<br />
+        }<br />
+    }</p>
+<p>    static getBySlug(String slug) {<br />
+        withCriteria(uniqueResult:true) {<br />
+            published {<br />
+                eq(' slug',  slug)<br />
+            }<br />
+        }<br />
+    }</p>
+<p>    static constraints = {<br />
+        name(blank: false)<br />
+        datePublished(nullable: true)<br />
+        slug(nullable: true)<br />
+    }<br />
+}<br />
+<&#47;code></p>
+<p>And there you have it. Do you have any other techniques that can be used to DRY criteria?</p>

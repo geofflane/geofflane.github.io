@@ -1,0 +1,92 @@
+---
+layout: post
+status: publish
+published: true
+title: Mongrel Cluster and Apache Need Memory
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 83
+wordpress_url: http://www.zorched.net/2007/08/22/mongrel-cluster-and-apache-need-memory/
+date: '2007-08-22 13:19:26 -0400'
+date_gmt: '2007-08-22 19:19:26 -0400'
+categories:
+- Web
+- Ruby
+tags:
+- ruby-on-rails
+- mongrel
+- apache
+- VPS
+comments:
+- id: 10898
+  author: slicematt
+  author_email: matt@slicehost.com
+  author_url: http://www.slicehost.com
+  date: '2007-08-22 20:55:13 -0400'
+  date_gmt: '2007-08-23 02:55:13 -0400'
+  content: Thanks for the write up. A 512slice will definitely help alleviate memory
+    crunches. One thing worth considering if you are on a 256slice and don't want
+    to upgrade is switching to Lighttpd or Nginx. Both perform very well proxying
+    for mongrels and serving static content. The plus is a smaller memory footprint,
+    when compared to Apache. A 256 can typically run 3 mongrel and Nginx&#47;Lightty
+    without problems.
+- id: 10899
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2007-08-22 20:58:09 -0400'
+  date_gmt: '2007-08-23 02:58:09 -0400'
+  content: "Thanks for the tip.\r\nI'm also running WordPress and subversion - using
+    PHP and mod_dav_svn - so in this case the flexibility of Apache is going to be
+    hard to beat. Do Lightty support PHP?"
+- id: 10902
+  author: slicematt
+  author_email: matt@slicehost.com
+  author_url: http://www.slicehost.com
+  date: '2007-08-23 21:37:04 -0400'
+  date_gmt: '2007-08-24 03:37:04 -0400'
+  content: Yeah, PHP is no prob w&#47; Lighty.
+- id: 11061
+  author: Mike
+  author_email: mbrashed@gmail.com
+  author_url: ''
+  date: '2007-11-16 19:33:19 -0500'
+  date_gmt: '2007-11-17 01:33:19 -0500'
+  content: "Hi there,\r\n\r\nThanks for the info mate...Is it possible by any chance
+    to have some SliceHost employee fix that setup for me if I signup for a slice?\r\n\r\nThanks,"
+- id: 11067
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2007-11-19 09:30:04 -0500'
+  date_gmt: '2007-11-19 15:30:04 -0500'
+  content: "Mike,\r\nI think SliceHost is a bit more of a DIY (do it yourself) setup,
+    but you might want to contact them and see if they're setup for those kinds of
+    services. Short answer, I don't know if they would."
+---
+<p>I use a <acronym title="Virtual Private Server">VPS<&#47;acronym> hosted by <a href="http:&#47;&#47;www.slicehost.com">SliceHost<&#47;a> as my personal server. SliceHost uses Xen to host multiple instances of Linux on a single machine. The performance of this setup has been very good.</p>
+<p>I have been running:</p>
+<ul>
+<li>Apache 2.2 with PHP<&#47;li>
+<li>MySQL 5<&#47;li>
+<li>Postfix Mail Server<&#47;li>
+<li>Courier IMAP Server<&#47;li>
+<li>ssh for remote access of course<&#47;li><br />
+<&#47;ul></p>
+<p>I recently started playing with a site built using <a href="http:&#47;&#47;radiantcms.org">Radiant CMS<&#47;a> which is itself built on top of <a href="http:&#47;&#47;www.rubyonrails.org">Ruby on Rails<&#47;a>. So, I've added to the mix:</p>
+<ul>
+<li>3 Mongrel instances running under mongrel_cluster<&#47;li><br />
+<&#47;ul></p>
+<p>These mongrel instances are proxied behind <a href="http:&#47;&#47;blog.codahale.com&#47;2006&#47;06&#47;19&#47;time-for-a-grown-up-server-rails-mongrel-apache-capistrano-and-you&#47;">Apache using mod_proxy_balance as described here<&#47;a>. This setup works very well and is more and more becoming the defacto standard for deploying Rails applications. Even the Ruby on Rails sites are deployed with this setup now. It allows you to serve all of your dynamic content through Rails and all of your static content through Apache. This gives you all of the speed and robustness that Apache has to offer (afterall it runs over 50% of all the hosts on the internet) for serving static content without burdening Mongrel with this task.</p>
+<p>I was noticing that the site was pretty slow though. I tracked it down to the fact that I had started using too much memory. I was running the site on a VPS with 256M of RAM, but with the new Mongrel instances I had just pushed my server into swap space. Web applications in general are happier with more RAM. In this case it is definitely born out. I upped the VPS to have 512M of RAM and things became VERY SNAPPY! While I didn't do a scientific before and after. The page loads prior to the upgrade were taking about 5-10s. After the memory increase you can't tell if the application is static or dynamic.</p>
+<p>So, if you're running into performance issues with Mongrel behind an Apache mod_proxy_balance setup, check your memory. If you are running into swap space then you are likely to see serious performance issues. Let me know of any other simple tweaks to get more performance out of this setup if you have them.</p>
+<p><strong><em>As an aside:<&#47;em><&#47;strong><br />
+Big kudos to <a href="http:&#47;&#47;www.slicehost.com">SliceHost<&#47;a> on their VPS upgrade capabilities. I clicked 2 buttons on my web-based management console and about 10 minutes later I was running on a bigger VPS. You can't ask for much better than that if you need to scale up a server!</p>
+<p><strong><em>Update:<&#47;em><&#47;strong><br />
+I guess Lighttpd and Nginx do both support running PHP applications under fast_cgi. You might want to try this kind of setup if you are so inclined. I'm still an Apache partisan.</p>

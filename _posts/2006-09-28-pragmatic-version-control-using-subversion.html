@@ -1,0 +1,67 @@
+---
+layout: post
+status: publish
+published: true
+title: Pragmatic Version Control Using Subversion
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+excerpt: My first book review. I've recently read Pragmatic Version Control using
+  Subversion by Mike Mason. It's not a comprehensive Subversion reference but more
+  of a manual about how to use Subversion in the real world.
+wordpress_id: 43
+wordpress_url: http://www.zorched.net/2006/09/28/pragmatic-version-control-using-subversion/
+date: '2006-09-28 20:41:35 -0400'
+date_gmt: '2006-09-29 02:41:35 -0400'
+categories:
+- Automation
+- Book Review
+tags:
+- subversion
+- version-control
+comments:
+- id: 985
+  author: Zorched &#47; One Line Fix &raquo; Pragmatic Project Automation
+  author_email: ''
+  author_url: http://www.zorched.net/2006/11/12/pragmatic-project-automation/
+  date: '2006-11-12 20:48:46 -0500'
+  date_gmt: '2006-11-13 02:48:46 -0500'
+  content: "[...] This entry covers another book by the Pragmatic Programmers in their
+    Pragmatic Starter Series.\r\nPragmatic Project Automation: How to Build, Deploy,
+    and Monitor Java Apps [...]"
+---
+<p>When I was in grade school I had to do a biographical book review every year. Probably 5 years, from 2nd grade to 7th grade we would be required to do book reviews and inevitably we'd have to do a biography. We'll, I hated biographies, so every year I would do the same person: <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Jacques-Yves_Cousteau">Jacque Cousteau<&#47;a>. So, I'm not going to do any biographies, but I will review some technical books that I read.</p>
+<h2>Pragmatic Version Control Using Subversion<&#47;h2><br />
+<a href="http:&#47;&#47;www.pragmaticprogrammer.com&#47;titles&#47;svn2&#47;index.html">Pragmatic Version Control Using Subversion<&#47;a> by Mike Mason</p>
+<p>Index:</p>
+<ol title="Pragmatic Version Control Index">
+<li>Introduction<&#47;li>
+<li>What is Version Control?<&#47;li>
+<li>Getting Started with Subversion<&#47;li>
+<li>How To...<&#47;li>
+<li>Common Subversion Commands<&#47;li>
+<li>File Locking and Binary Files<&#47;li>
+<li>Organizing Your Repository<&#47;li>
+<li>Using Tags and Branches<&#47;li>
+<li>Creating a Project<&#47;li>
+<li>Third-Party Code<&#47;li><br />
+<&#47;ol></p>
+<p>This book is not written as an exhaustive reference of of all of the Subversion commands. For that you can use the <a href="http:&#47;&#47;svnbook.red-bean.com&#47;">Subversion Red Bean<&#47;a> book. Instead, this book is written as a series of scripts and best practices that you can use on your project. It's more of a manual on how to use Subversion on an average project. I found this very helpful because it tackled the problems from a solution-oriented "why" approach, as opposed to merely a how approach.</p>
+<h3>Chapters 1 - 3<&#47;h3><br />
+As would be expected, the early chapters offer a general introduction to the topic of the book. In the style of many of the Extreme Programming and Pragmatic Programmers books, these introduction include stories to illustrate the reasons and techniques that are outlined in more detail throughout the book. I find these stories to be very helpful because I think many people can identify with them.</p>
+<h3>Chapters 4 - 6<&#47;h3><br />
+These chapters do a good job of covering the basics of source control. If you've been using source control such as Subversion or CVS, these chapters will likely not offer you a lot of new information. If you are new to using version control systems, then these chapters will give you a great overview of the basic day-to-day operations that you need to be an effective version control user.</p>
+<h3>Chapter 7<&#47;h3><br />
+Chapter 7 is entirely devoted to file locking and binary files. While file locking is interesting in certain situations, I've never personally found the need for it. I guess this is a good chapter to skim just to know the possibilities in case you ever run across a situation where you need to lock binary files. If you're in a hurry, skip this one I guess. </p>
+<h3>Chapters 8 - 10<&#47;h3><br />
+These chapters constituted some of the more interesting information in the book for me. They deal with the aspects of of source control that make it truly powerful. Branching, tagging and general project organization. Often people avoid using branching and tagging because it can be confusing. But this book lays out some really good strategies for leveraging these features.</p>
+<p>I really liked the covering of using branching and tagging. In Subversion both of these operations are are performed using the same "svn copy" command. If both of these logical operations are performed using the same actual Subversion command, then why would you need to use both? Well these chapters answer this question well, for example, by laying out the use of tags to demarcate longer-running bug fix session for easy merging into the trunk or a release branch. I found these chapters to be the most interesting by far to someone who has used Subversion for a long time, but maybe hasn't utilized it to it's fullest extent (*ahem* that would be me probably).</p>
+<h3>Conclusion<&#47;h3><br />
+Pragmatic Version Control does a great job of walking through the day-to-day tasks of using Subversion on a project. It covers the basics of updating, merging, committing, etc. It also offers some really good advice on branching and tagging (and the reasons to use both) for releases as well as for development reasons such as bug fixing. It also covers things such as dealing with vendor branches and dealing with shared projects by using svn:externals references to import other projects into your main subversion project.</p>
+<p>There is also a version of this book written for CVS users. I'm a big fan of Subversion and so I would recommend any CVS users to seriously consider moving to Subversion. There is a great script <a href="http:&#47;&#47;cvs2svn.tigris.org">cvs2svn<&#47;a> that handles converting a CVS repository into a Subversion repository. It does a great job of collecting individual CVS file revisions into Subversion atomic commits. It also handles creating branches and tags for you so you won't lose any of your version history.</p>
+<p><strong><em><a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;redirect.html?ie=UTF8&location=http%3A%2F%2Fwww.amazon.com%2FPragmatic-Version-Control-Subversion-Starter%2Fdp%2F0977616657%3Fie%3DUTF8&tag=zorchednet-20&linkCode=ur2&camp=1789&creative=9325">Pragmatic Version Control using Subversion - Mike Mason - ISBN: 0-9776166-5-7<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&amp;l=ur2&amp;o=1" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;><&#47;em><&#47;strong></p>

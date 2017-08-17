@@ -1,0 +1,29 @@
+---
+layout: post
+status: publish
+published: true
+title: FastSOA Discussion
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+excerpt: Frank Cohen talks about an attempt to improve the speed of SOA in certain
+  scenarios.
+wordpress_id: 9
+wordpress_url: http://www.zorched.net/?p=9
+date: '2005-10-21 16:55:52 -0400'
+date_gmt: '2005-10-21 21:55:52 -0400'
+categories:
+- Code
+tags: []
+comments: []
+---
+<p>Frank Cohen (founder of <a href="http://www.pushtotest.com">PushToTest</a>, who I helped for a while on <a href="http://www.pushtotest.com/Downloads/features.html">TestMaker</a>) has been blogging about a system he's calling FastSOA. It's an attempt to help build a more scalable SOA architecture by avoiding the some high cost operations like marshalling XML data into native objects. As I understand it, it's basically a proxy that takes incoming SOAP requests and tries to optimize the SOAP response by avoiding (as much as possible) the costs of marshalling to objects by going directly to datasources and only going to application servers if absolutely required (by business rules for complex data manipulation). I responded to his initial post with some comments off the cuff and he posted them on his blog, so I thought I'd link to it:</p>
+<p><a href="http://www.xquerynow.com/cohensxblog/geoffonfastsoa.html">http://www.xquerynow.com/cohensxblog/geoffonfastsoa.html</a></p>
+<p>There's a response from William Martinez Pomares, an engineer working with him, and a bit of a follow on from me. It might be a good read, because I didn't understand the whole thing at first, but I think I might get it better now.</p>
+<p>Looks like Frank is also writing a book on FastSOA, check it out:<br />
+<a href="http://www.xquerynow.com/thebook/view?searchterm=fastsoa">http://www.xquerynow.com/thebook/view?searchterm=fastsoa</a></p>

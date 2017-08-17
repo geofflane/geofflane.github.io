@@ -1,0 +1,137 @@
+---
+layout: post
+status: publish
+published: true
+title: 'Erlang Examples: Talk with Sockets'
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 111
+wordpress_url: http://www.zorched.net/?p=111
+date: '2008-05-29 19:52:58 -0400'
+date_gmt: '2008-05-30 01:52:58 -0400'
+categories:
+- Erlang
+tags:
+- erlang exercises
+comments:
+- id: 11885
+  author: 'Erlang Examples: Talk with Erlang'
+  author_email: ''
+  author_url: http://www.zorched.net/2008/05/30/erlang-examples-talk-with-erlang/
+  date: '2008-05-30 14:55:07 -0400'
+  date_gmt: '2008-05-30 20:55:07 -0400'
+  content: "[...] is functionally similar to Erlang Talk with Sockets. The difference
+    is that it is doing Erlang-to-Erlang only communication taking advantage of [...]"
+- id: 14367
+  author: safari
+  author_email: auf.safari@gmx.de
+  author_url: ''
+  date: '2008-12-19 17:22:24 -0500'
+  date_gmt: '2008-12-19 23:22:24 -0500'
+  content: Many thanks for your listing :-) Line 10 should end with a ';'
+- id: 14370
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2008-12-19 22:14:51 -0500'
+  date_gmt: '2008-12-20 04:14:51 -0500'
+  content: safari, thanks for pointing out the typo. It's fixed now.
+---
+<p>This is part of a series on the <a href="http:&#47;&#47;www.erlang.org&#47;course&#47;exercises.html">Erlang Exercises<&#47;a> which is a great set of programming problems that challenge you to implement solutions to some common Erlang problems. I'm going to share some of my solutions to these problems.</p>
+<h2>Erlang using UNIX sockets<&#47;h2><br />
+Do you want to talk with a friend on another machine? Shouldn't it be nice to have a shell connected to your friend and transfer messages in between?<br />
+This can be implemented using the client&#47;server concept with a process on each side listening to a socket for messages.</p>
+<p><code lang="erlang"><br />
+-module(talk).<br />
+-compile(export_all).<br />
+start(LocalPort, RemotePort) -><br />
+    ServerPid = spawn(?MODULE, start_server, [LocalPort]),<br />
+    cli(RemotePort, ServerPid).<br />
+cli(RemotePort, ServerPid) -><br />
+    Data = clean(io:get_line('Message: ')),<br />
+    case should_stop(Data) of<br />
+        true -><br />
+            ServerPid ! done;<br />
+        false -><br />
+            spawn(?MODULE, send, [RemotePort, Data]),<br />
+            cli(RemotePort, ServerPid)<br />
+    end.<br />
+clean(Data) -><br />
+    string:strip(Data, both, $\n).<br />
+should_stop(Str) -><br />
+    0 =:= string:len(Str).<br />
+start_server(Port) -><br />
+    case gen_tcp:listen(Port, [binary, {packet, 4},<br />
+                               {reuseaddr, true},<br />
+                               {active, true}]) of<br />
+        {ok, Listen} -><br />
+            server(Listen);<br />
+        {error, Reason} -><br />
+            {error, Reason}<br />
+    end.<br />
+server(Listen) -><br />
+    case gen_tcp:accept(Listen) of<br />
+        {ok, Socket} -><br />
+            server_loop(Socket),<br />
+            server(Listen);<br />
+        _ -><br />
+            ok<br />
+    end.<br />
+server_loop(Socket) -><br />
+    receive<br />
+        done -><br />
+            gen_tcp:close(Socket),<br />
+            io:format("Server socket closed~n");<br />
+        {tcp, Socket, Bin} -><br />
+            Str = clean(binary_to_term(Bin)),<br />
+            io:format("~p~n", [Str]),<br />
+            case should_stop(Str) of<br />
+                true -><br />
+                    void;<br />
+                false -><br />
+                    server_loop(Socket)<br />
+            end;<br />
+        {tcp_closed, _Socket} -><br />
+            ok<br />
+    end.<br />
+send(Port, Data) -><br />
+    case gen_tcp:connect("localhost", Port, [binary, {packet, 4}]) of<br />
+        {ok, Socket} -><br />
+            gen_tcp:send(Socket, term_to_binary(Data)),<br />
+            gen_tcp:close(Socket);<br />
+        {error, Reason} -><br />
+            {error, Reason}<br />
+    end.<br />
+<&#47;code></p>
+<h3>Explanation<&#47;h3><br />
+<strong>start(LocalPort, RemotePort) -><&#47;strong><br />
+The entry point to the talk program. This spawns a new start_server process that will handle opening a socket and listening for messages from a remote client. It then runs the command line interface and waits for data from the user to send to the remote port.</p>
+<p><strong>cli(RemotePort, ServerPid) -><&#47;strong><br />
+This is the loop that will get the data from the user and send it to the remote port.</p>
+<p><strong>clean(Data)<&#47;strong><br />
+This is a simple function that removes the newlines from the end of the data sent to the client.</p>
+<p><strong>should_stop(Str)<&#47;strong><br />
+This is a simple function that determines whether the client and server should shut down. The rule is that if it's an empty string then the processes should stop.</p>
+<p><strong>start_server(Port) -><&#47;strong><br />
+This function gets run in a process and opens a Listening socket. It then hands off to <strong>server(Listen) -><&#47;strong> to handle dealing with new incoming socket connections.</p>
+<p><strong>server(Listen) -><&#47;strong><br />
+The server gets a new Socket when an incoming connection connects to the Listening port. It then goes into a receive state and waits for an incoming connection to send it data. The receive state is handled in the <strong>server_loop<&#47;strong>.</p>
+<p><strong>send(Port, Data) -><&#47;strong><br />
+This is the client side of the application. It connects to a remote port and sends the data to that port.</p>
+<p><strong>case ... of<&#47;strong><br />
+In a number of these functions you see a common idiom:<br />
+<code lang="erlang"><br />
+case fun() of<br />
+    SomeMatch -><br />
+        Do something;<br />
+    AnotherMatch -><br />
+        Do something else<br />
+end<br />
+<&#47;code></p>
+<p>With socket connections and many others it is common to return a tuple like <strong>{ok, Val}<&#47;strong> when the function call is successful and will return <strong>{error, Reason}<&#47;strong> or a similar tuple when there is an error in the function. The case statement is just an easy way to handle these differences.</p>

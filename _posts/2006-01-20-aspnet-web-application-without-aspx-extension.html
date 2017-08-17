@@ -1,0 +1,339 @@
+---
+layout: post
+status: publish
+published: true
+title: ASP.NET Web Application Without .ASPX Extension
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 19
+wordpress_url: http://www.zorched.net/2006/01/20/aspnet-web-application-without-aspx-extension/
+date: '2006-01-20 21:17:31 -0500'
+date_gmt: '2006-01-21 03:17:31 -0500'
+categories:
+- Code
+- ".NET"
+- WebDAV
+tags:
+- IIS
+- WebDAV
+comments:
+- id: 27
+  author: Zorched.Net &raquo; Blog Archive &raquo; Custom WebDAV Server Using .NET
+  author_email: ''
+  author_url: http://www.zorched.net/2006/02/02/custom-webdav-server-using-net/
+  date: '2006-02-02 21:43:20 -0500'
+  date_gmt: '2006-02-03 03:43:20 -0500'
+  content: '[...] As I discussed in a previous post "ASP.NET Web Application without
+    ASPX Extension", I&#8217;ve been working on a custom WebDAV server for a client.
+    The initial proof-of-concept was just to see if we could get some .NET code that
+    would respond to all paths for a given web application. From there I had to make
+    WebDAV work. [...]'
+- id: 10678
+  author: Vishvesh Raiter
+  author_email: vishvesh888@hotmail.com
+  author_url: ''
+  date: '2007-04-17 23:33:18 -0400'
+  date_gmt: '2007-04-18 05:33:18 -0400'
+  content: "Hi,\r\n          For the past half an hour i was struggling with IIS6
+    trying to force all incoming requests to be handled \r\nby asp.net (aspnet_isapi.dll).
+    In IIS5, you had to open IIS manager and from website properties select \"Home
+    directory/Configuration/Mapping\" add a new extension * and point to :
+    C:\\WINDOWS\\Microsoft.NET\\Framework\\v1.1.4322\\aspnet_isapi.dll\r\n\r\nAccording
+    to help topic it should be the same for IIS6, but when i tried to put * or .*
+    it didn't accept it , and \r\nall what i was getting is an error \"Wrong extension
+    format\". After almost half an hour i finally figured out that it shoud be added
+    in a bit different way:        from website properties select \"Home directory/Configuration/Mapping\"
+    and choose Insert instead of Add, under \"Executable\" enter path to aspnet_isapi.dll
+    and uncheck \"Verify that file exists\", otherwise it wont work for folders. Unfortunately
+    this also doesnt help.\r\n\r\nIn Microsoft's support site (http://support.microsoft.com/kb/326965/en-us)
+    they say to update the existing list of MIME types. I did that also, but unfortunately
+    this also does not solve the problem.\r\n\r\nPlease help me out if you have any
+    solution.\r\n\r\nYou can reach me at vishvesh888@hotmail.com or vishveshraiter@gmail.com\r\n\r\n\r\nThanks\r\nVishvesh
+    Raiter"
+- id: 10843
+  author: UK
+  author_email: uwe@magerquark.de
+  author_url: http://magerquark.de
+  date: '2007-07-05 23:23:09 -0400'
+  date_gmt: '2007-07-06 05:23:09 -0400'
+  content: Any news whether you succeeded in building your virtual WebDAV server?
+    I'm currently planning the same for a customer and would even buy the code if
+    it's appropriate.
+- id: 10844
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2007-07-05 23:32:08 -0400'
+  date_gmt: '2007-07-06 05:32:08 -0400'
+  content: "UK,\r\nYes, please see my other posts on WebDAV. The code was written
+    for a client so I can't sell it to you unfortunately. Get in touch if you're interested
+    in hiring a consultant though. :)"
+- id: 10845
+  author: UK
+  author_email: uwe@magerquark.de
+  author_url: http://magerquark.de
+  date: '2007-07-06 00:25:30 -0400'
+  date_gmt: '2007-07-06 06:25:30 -0400'
+  content: "Thank you, Geoff\r\n\r\nI searched your Weblog with the \"WebDAV\" keyword
+    and only found this article. Any hints which articles you are refering to?\r\n\r\nCheers
+    from Germany\r\nUwe"
+- id: 10846
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2007-07-06 09:34:43 -0400'
+  date_gmt: '2007-07-06 15:34:43 -0400'
+  content: "UK,\r\nSorry, it looks like one of my WordPress plugins was breaking search.
+    Try again or browse the WebDAV category found at the bottom of the page."
+- id: 10881
+  author: Mikael
+  author_email: wmmihaa@hotmail.com
+  author_url: ''
+  date: '2007-08-11 14:57:48 -0400'
+  date_gmt: '2007-08-11 20:57:48 -0400'
+  content: "Congratulations, you have the only page decent on WebDav information on
+    the entire internet (Yes, I have searched them all&acirc;&euro;&brvbar;)  \r\nLet
+    just cut to the chase &acirc;&euro;&ldquo; I&acirc;&euro;&trade;m desperate! I
+    really need this to work. I feel I&acirc;&euro;&trade;m close, but I&acirc;&euro;&trade;m
+    stuck.\r\n\r\nI have successfully&acirc;&euro;&brvbar;\r\n&acirc;&euro;&cent;\tCreated
+    a HttpModule/HttpHandler which can be accessed by DavExplorer.\r\n&acirc;&euro;&cent;\tOnce
+    been able to connect to the server using Windows Explorer, but only once&acirc;&euro;&brvbar;
+    \r\n&acirc;&euro;&cent;\tUsing Windows Explorer (my only one), I can do directory
+    listing (OPTION &amp; PROPFIND)\r\n&acirc;&euro;&cent;\t Through DavExplorer I
+    can receive all verbs from the client\r\n However&acirc;&euro;&brvbar;\r\n&acirc;&euro;&cent;\tI
+    can&acirc;&euro;&trade;t make new connections with Windows Explorer.  I either
+    get &acirc;&euro;&oelig;The folder you entered does not seem to be valid&acirc;&euro;\x9D,
+    or I get so far as naming the Web Folder. But when finishing, there are no folder
+    there (-yes, this one is my favorite)\r\n&acirc;&euro;&cent;\tUsing Windows Explorer,
+    I can&acirc;&euro;&trade;t receive any other verbs but OPTION and PROPFIND. Using
+    TcpTrace, it seems like IIS overrides ,  and throws a &acirc;&euro;&oelig;HTTP/1.1
+    404 Not Found&acirc;&euro;\x9D messages (in my face).\r\n\r\nI have read both
+    your articles and got loads of help, but I can&acirc;&euro;&trade;t get this to
+    work. I&acirc;&euro;&trade;ve also tried HttpHandler instead of module, but with
+    the same result. I&acirc;&euro;&trade;ve follows your recommendations of IIS configuration
+    and removed all mappings and added aspnet_isapi.dll to the list of wildcards applications.
+    I get the same problems on XP as on 2003 Server.\r\n\r\nI&acirc;&euro;&trade;m
+    a desperate man mr Lane&acirc;&euro;&brvbar;.PLEASE HELP!  \r\n\r\n//Mikael"
+- id: 10882
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2007-08-11 15:25:10 -0400'
+  date_gmt: '2007-08-11 21:25:10 -0400'
+  content: "Mikael,\r\nFirst thing you should do is go and download <a href=\"http://www.webdav.org/neon/litmus/\"
+    rel=\"nofollow\">litmus</a> which is a functional test suite for WebDAV. If
+    you're not passing most of those tests, then anything that works is luck.\r\n\r\nSecond
+    thing to realize is that Windows Explorer barely follows the WebDAV spec, so getting
+    it to work takes quite some effort. Double check the section called 'Server Discovery'
+    on my article with <a href=\"http://www.zorched.net/2006/03/01/more-webdav-tips-tricks-and-bugs/\"
+    rel=\"nofollow\">WebDAV tips and tricks</a>. It sounds like the proper OPTIONS
+    might not be being returned from the root of the Web Server. When you create a
+    folder in Explorer using WebDAV the MKCOL command does not get sent until after
+    you name the folder. So, in this case I'm not surprised by what you're seeing.\r\n\r\nPut
+    some logging code very early in your request handler (like the first line).  Although
+    this seems unlikely if you're getting DavExplorer to work, If you are not getting
+    the request through from IIS then there's probably one of a few things going on:\r\n-
+    The mapping is not correct to get all requests handled by your .NET code\r\n-
+    IIS Request filtering is enabled with something like <a href=\"http://support.microsoft.com/kb/326444\"
+    rel=\"nofollow\">UrlScan</a>. Look at the IIS logs for something like 'invalid
+    Verb'.\r\n\r\nHope that helps."
+- id: 10884
+  author: Mikael
+  author_email: wmmihaa@hotmail.com
+  author_url: ''
+  date: '2007-08-13 05:42:32 -0400'
+  date_gmt: '2007-08-13 11:42:32 -0400'
+  content: "I&acirc;&euro;&trade;m not comfortable with shell script&acirc;&euro;&brvbar;Is
+    there a way to run litmus in a windows environment? If so, how do I compile it?
+    \r\n\r\nThanks"
+- id: 10885
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2007-08-13 07:27:10 -0400'
+  date_gmt: '2007-08-13 13:27:10 -0400'
+  content: "Mikael,\r\nYou should be able to compile litmus on Windows using <a href=\"http://www.cygwin.com\"
+    rel=\"nofollow\">Cygwin</a>. You'll need to lear a bit about the Unix shell
+    or get help from someone who knows Unix well."
+- id: 11143
+  author: Mortaza Doulaty
+  author_email: mrt_doulaty@yahoo.com
+  author_url: http://www.mrt-web.com
+  date: '2008-01-29 10:45:52 -0500'
+  date_gmt: '2008-01-29 16:45:52 -0500'
+  content: "Thanks! \r\nWhat's your opinion about using UNICODE characters in page
+    names?"
+- id: 11144
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2008-01-29 10:55:46 -0500'
+  date_gmt: '2008-01-29 16:55:46 -0500'
+  content: "Mortaza,\r\nCurrently non-ASCII letters in URLs are not widely supported.
+    They are also the source of some current security problems with how browsers handle
+    the Unicode conversion. So, in general, I wouldn't recommend it yet. I have heard
+    (although I don't know much about it to be honest) that people are trying to push
+    Unicode URLs which makes sense for non-western languages that need the larger
+    character set.\r\n\r\nSo, in principle, I'm not opposed to the idea. In practice,
+    it's currently probably not practical."
+- id: 11190
+  author: Mortaza Doulaty
+  author_email: mrt_doulaty@yahoo.com
+  author_url: http://www.mrt-web.com
+  date: '2008-03-13 01:55:18 -0400'
+  date_gmt: '2008-03-13 07:55:18 -0400'
+  content: "Goeff,\r\n\r\nThanks for your comment."
+- id: 11191
+  author: Mortaza Doulaty
+  author_email: mrt_doulaty@yahoo.com
+  author_url: http://www.mrt-web.com
+  date: '2008-03-15 02:20:41 -0400'
+  date_gmt: '2008-03-15 08:20:41 -0400'
+  content: And how can we configure this in IIS 7?
+- id: 11202
+  author: DamionKutaeff
+  author_email: smoonment@mail.ru
+  author_url: ''
+  date: '2008-03-22 15:40:40 -0400'
+  date_gmt: '2008-03-22 21:40:40 -0400'
+  content: "Hello everybody, my name is Damion, and I'm glad to join your conmunity,
+    \r\nand wish to assit as far as possible."
+- id: 11208
+  author: Gershom
+  author_email: gerel5@yahoo.co.in
+  author_url: ''
+  date: '2008-03-27 12:17:48 -0400'
+  date_gmt: '2008-03-27 18:17:48 -0400'
+  content: Hii...recently one of my friends had attended an interview and he was asked
+    like "What is the difference between c#.net and asp.net".and "What are the contents
+    that make up asp.net technology".Could any one answer me.
+- id: 11209
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2008-03-27 12:58:42 -0400'
+  date_gmt: '2008-03-27 18:58:42 -0400'
+  content: "Gershom,\r\nC#.NET is a programming language - really just C#. ASP.NET
+    is web development framework for the .NET platform. .NET supports multiple languages,
+    so you could do ASP.NET programming in C# or VB.NET (among others I assume)."
+- id: 11210
+  author: Gershom
+  author_email: gerel5@yahoo.co.in
+  author_url: ''
+  date: '2008-03-28 10:14:13 -0400'
+  date_gmt: '2008-03-28 16:14:13 -0400'
+  content: "thnx for ur reply.and one more thing \"why do we use virtual directory
+    \" and \"what is the basic purpose of an IIS\"?plz don't get irritated with my
+    questions.I am having trouble with .NET though i am learning it since 2 months
+    ,i couldn't be able to figure out like how exactly an application works(i mean
+    'right from the request to response,what exactly happens internally').I get many
+    doubts like why IIS,why \"virtual directory\",what is like \"finding the path\"
+    ,If u can provide a pdf file where the basics are covered clearly(a diagram view
+    would me more better), i would be thankful to you.\r\nand in ur reply i couldnt
+    be able to convince myself with the definition of asp.net.i mean what contents
+    make up an asp.net other than programming languages and IDEs.\r\nMy ID:- gerel5@yahoo.co.in"
+- id: 14512
+  author: Mikhail Veselov
+  author_email: mikhail.veselov@gmail.com
+  author_url: ''
+  date: '2009-01-15 07:02:10 -0500'
+  date_gmt: '2009-01-15 13:02:10 -0500'
+  content: "Under Windows Server 2003: .* is not allowed in the mapping , there is
+    an extra &acirc;&euro;&tilde;all extensions&acirc;&euro;&trade; section where
+    you can add the aspnet_isapi.dll.\r\n\r\nCan you say, how exactly you did this?
+    Some screens or something?"
+- id: 15622
+  author: Serg
+  author_email: komandin@rambler.ru
+  author_url: ''
+  date: '2009-09-08 09:21:21 -0400'
+  date_gmt: '2009-09-08 15:21:21 -0400'
+  content: "I want to make RewritePath. In IIS 6.0 - OK.\r\nWhen run IIS 7.0 - problem
+    ! Why ? I did all chenges in web.config. HELP !!!"
+- id: 16052
+  author: Sandro
+  author_email: sandrowjw@gmail.com
+  author_url: ''
+  date: '2010-03-01 03:54:04 -0500'
+  date_gmt: '2010-03-01 09:54:04 -0500'
+  content: "Hi,\nI've been doing something similar recently: my target is to capture
+    the WebDAV request and write a log into the database (something like an auditlogging
+    feature).\nI've been following the steps and in my HttpModule I hooked BeginRequest
+    event to write some text log into a local folder (for experimental purpose). However,
+    when I try to upload a file I got 'Access Denied' and there is no log written.
+    \nAny advice on what may be wrong?"
+- id: 18338
+  author: Ankit
+  author_email: ankit5216796@gmail.com
+  author_url: ''
+  date: '2013-03-19 08:13:57 -0400'
+  date_gmt: '2013-03-19 14:13:57 -0400'
+  content: "Hi, \r\nI am trying to Configure the WebDav in IIS7 but not able Configure.
+    The same thing is wokring in IIS6 but dont know how it is configured..??\r\nAny
+    \ Idea how to set up ?"
+---
+<h3>The Problem</h3><br />
+Ok, let's say you want to create an application in ASP.NET. That application should be able to execute .NET code regardless of the path that is requested. You don't want to map the .NET execution to a specific extension and you want handle all requests in a simple manner. Well, I think I figured out how.</p>
+<p>In the Java Servlet world, you can easily map arbitrary paths to a servlet handler, such that all request to '/somedirectory' are handled by your 'SomeDirectoryServlet'. <a href="http://www.rubyonrails.com">Ruby on Rails</a> uses a controller as well and you can do URL rewriting with that controller very easily to support arbitrary path schemes. But in the .NET/IIS world, all of the configuration for handling is based solely on file extensions.</p>
+<h3>An Actual Project That Needs This</h3><br />
+At <a href="http://www.spiderlogic.com">SpiderLogic</a> (where I work), we are working on a client project where their current infrastructure is all .NET. Their current application is entirely web based. It allows users to (among other things) upload files and share them among a group of users. Now they want to allow users to access files on a Windows desktop and interact with them in a much more natural way, by dragging and dropping, etc. Windows Explorer has the ability to mount <a href="http://www.webdav.org">WebDAV</a> paths the same as it can with windows file sharing. So, basically we wanted to see if we could build a virtual WebDAV server that would allow us to read file meta-data from a Database and then expose that over the web as a WebDAV share.</p>
+<p>WebDAV is an extension to HTTP that allows for Distributed Authoring and Versioning. Basically it looks a lot like HTTP, where it has verbs and requests files.</p>
+<p>A WebDAV header might look something like:</p>
+<p>PROPFIND /some/path/<br />
+HOST www.example.com</p>
+<h3>The Solution</h3><br />
+As I said above, IIS exclusively uses file extensions to map files to code to execute the file. .NET provides HTTP Handlers and HTTP Modules that allow you to handle requests that should not be handled by a traditional Page. A Module registers itself when it is loaded to respond to specific events in the HTTP Request life-cycle. Sometimes this is called an <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dnpatterns/html/DesInterceptingFilter.asp">Intercepting Filter</a>. Modules listen to events and can respond to that event. They can do many things, check security, add content to the response, transform an XML response into an appropriate form based on the calling device, etc. They can also take over the entire request-response and handle it in its entirety.</p>
+<p>For our example, we want to respond to a very early event - BeginRequest and fulfill the request ourselves. </p>
+<p><code lang="csharp"><br />
+using System;<br />
+using System.Web;</p>
+<p>public class DavModule : IHttpModule {</p>
+<p>    private HttpApplication context = null;</p>
+<p>    public void Dispose() {<br />
+        context.BeginRequest -= new EventHandler(context_BeginRequest);<br />
+    }</p>
+<p>    public void Init(HttpApplication context) {<br />
+        this.context = context;<br />
+        this.context.BeginRequest += new EventHandler(context_BeginRequest);<br />
+    }</p>
+<p>    void context_BeginRequest(object sender, EventArgs e) {<br />
+        HttpApplication app = (HttpApplication) sender;<br />
+        app.Response.ContentType = "text/plain";</p>
+<p>        if (app.Request.Path.EndsWith("Help"))<br />
+            app.Server.Transfer("Help.aspx");<br />
+        else {<br />
+            app.Response.Write("Path: " + app.Request.Path);<br />
+            app.Response.End();<br />
+        }<br />
+    }<br />
+}<br />
+</code></p>
+<p>The IHttpModule responds to begin request events and takes over handling the fulfillment of the HTTP response. The example demonstrates that you can get the request path and then parse it to handle different cases. One use would be for doing internal URL rewriting (although I suspect that this kind of URL rewriting would break the post-back of .aspx files). As I said at the start, we plan on trying to implement a virtual directory using WebDAV. The possibilities are limited only by your imagination.</p>
+<p>The handler itself is made available to a web application by registering it in the Web.config file for the application.</p>
+<p>Web.config configuration:<br />
+<code lang="xml"><br />
+    <system.web><br />
+      <httpModules><br />
+        <add name="DavModule" type="DavModule"/><br />
+      </httpModules><br />
+    </system.web><br />
+</code></p>
+<p>Of course if that was all there was too it, this would be a much less interesting article. The trick to making this all work is to properly configure IIS. We want to handle all requests to our application using the .NET code that we have written. We don't want IIS to return 404s (Not Found) for files that don't exist since we want to implement a dynamic, virtual directory and not just deal with files on the file system.</p>
+<p>To do this, you have to remove all of the existing handlers under the Application Configuration. Then you want to map all extensions (.*) and in our case all Verbs (GET, POST, PROPFIND, MKCOL - which allows us to hopefully respond to WebDAV verbs as well) to the aspnet_isapi.dll.<br />
+<br /><br /><br />
+<img src="http://www.zorched.net/wp-content/uploads/2006/01/iis_config1.png" alt="Overview of ISS configuration."/><br />
+<br /><br /><br />
+Here's the editing screen that you will see:<br />
+<br /><br /><br />
+<img src="http://www.zorched.net/wp-content/uploads/2006/01/iis_config2.png" alt="Details of ISS configuration."/></p>
+<p>This was Step 1 of the proof of concept to see if we can make the WebDAV system work. Hopefully a future posting will be about the success of the implementation.</p>
+<p>This is a very non-obvious thing to do in IIS/ASP.NET, but for some applications it is a necessary thing. Of course if you have more control over the tools and language you use to implement it, then maybe you could choose something that was better suited for this application. Maybe someone else will find this useful? What do you think?</p>
+<p>Thanks to <a href="http://brennan.offwhite.net/blog/">Brennan</a> and <a href="http://www.devspot.com">Oliver</a> who work at SpiderLogic for their help with this. </p>
+<p><em>Update</em><br />
+Under Windows Server 2003: .* is not allowed in the mapping , there is an extra &acirc;&euro;&tilde;all extensions&acirc;&euro;&trade; section where you can add the aspnet_isapi.dll.</p>

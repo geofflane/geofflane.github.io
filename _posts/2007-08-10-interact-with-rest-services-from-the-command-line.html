@@ -1,0 +1,155 @@
+---
+layout: post
+status: publish
+published: true
+title: Interact with REST Services from the Command Line
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 82
+wordpress_url: http://www.zorched.net/2007/08/10/interact-with-rest-services-from-the-command-line/
+date: '2007-08-10 21:32:32 -0400'
+date_gmt: '2007-08-11 03:32:32 -0400'
+categories:
+- Web
+- Ruby
+tags:
+- rails
+- rest
+comments:
+- id: 10895
+  author: Tristen
+  author_email: stevetravolta@aol.com
+  author_url: http://
+  date: '2007-08-18 18:57:58 -0400'
+  date_gmt: '2007-08-19 00:57:58 -0400'
+  content: hi i enjoyed the read
+- id: 11092
+  author: Jarrod
+  author_email: asdfqe@asdfffasdwerwer.com
+  author_url: http://jarrodspillers.com
+  date: '2007-12-07 10:52:14 -0500'
+  date_gmt: '2007-12-07 16:52:14 -0500'
+  content: this was extremely helpful - thanks for writing this!
+- id: 15598
+  author: Tristan
+  author_email: tristan@tknetwork.de
+  author_url: http://netzrauschen.tknetwork.de
+  date: '2009-08-26 03:50:11 -0400'
+  date_gmt: '2009-08-26 09:50:11 -0400'
+  content: "Thanks for the writeup!\r\n\r\nOne should note that Rails (since June
+    27, 2008) ignores the Accept header, see: http:&#47;&#47;github.com&#47;rails&#47;rails&#47;commit&#47;2f4aaed7b3feb3be787a316fab3144c06bb21a27"
+---
+<p><a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Representational_State_Transfer">REST<&#47;a> is becoming more popular as a means of implementing <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Service-oriented_architecture">Service Oriented Architectures<&#47;a> (SOA) as well as merely providing simple remote APIs for interacting with systems. The main reason for this is that it provides a very simple means of creating and consuming Services. Contrasted to SOA implementations like SOAP and REST can be a relief of simplicity.</p>
+<p>One of the main advantages of REST is that it requires no tooling to use. Unlike <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;SOAP">SOAP<&#47;a>, it is very easy to construct ad-hoc clients to consume a RESTful service. These examples use <a href="http:&#47;&#47;curl.haxx.se&#47;">curl<&#47;a> a command-line utility available on Unix systems or using <a href="http:&#47;&#47;www.cygwin.com&#47;">Cygwin<&#47;a> on Windows. The same concepts can be translated to anything that can send HTTP requests.</p>
+<h2>Example REST Service with Ruby on Rails<&#47;h2><br />
+As the example implementation, I'll use a Ruby on Rails controller. Rails has very good support for implementing RESTful services so is easy to show.</p>
+<p>To get started with this example you can generate a Rails project and the Order object with the following commands:<br />
+<code><br />
+rails order_example<br />
+cd order_example<br />
+.&#47;script generate resource order name:string<br />
+<&#47;code></p>
+<p>Then you can implement a RESTful controller with the following code:<br />
+<code lang="ruby"><br />
+class OrdersController < ApplicationController<br />
+  # GET &#47;orders<br />
+  # GET &#47;orders.xml<br />
+  def index<br />
+    @orders = Order.find(:all)<br />
+    respond_to do |format|<br />
+      format.html # index.rhtml<br />
+      format.xml  { render :xml => @orders.to_xml }<br />
+    end<br />
+  end</p>
+<p>  # GET &#47;orders&#47;1<br />
+  # GET &#47;orders&#47;1.xml<br />
+  def show<br />
+    @order = Order.find(params[:id])<br />
+    respond_to do |format|<br />
+      format.html # index.rhtml<br />
+      format.xml  { render :xml => @order.to_xml }<br />
+    end<br />
+  end</p>
+<p>  # POST &#47;orders<br />
+  # POST &#47;orders.xml<br />
+  def create<br />
+    @order = Order.new(params[:order])<br />
+    respond_to do |format|<br />
+      if @order.save<br />
+        flash[:notice] = 'Order was successfully created.'<br />
+        format.html { redirect_to order_url(@order) }<br />
+        format.xml  { head :created, :location => order_url(@order) }<br />
+      else<br />
+        format.html { render :action => "new" }<br />
+        format.xml  { render :xml => @order.errors.to_xml }<br />
+      end<br />
+    end<br />
+  end</p>
+<p>  # PUT &#47;orders&#47;1<br />
+  # PUT &#47;orders&#47;1.xml<br />
+  def update<br />
+    @order = Order.find(params[:id])<br />
+    respond_to do |format|<br />
+      if @order.update_attributes(params[:order])<br />
+        flash[:notice] = 'Order was successfully updated.'<br />
+        format.html { redirect_to order_url(@order) }<br />
+        format.xml  { head :ok }<br />
+      else<br />
+        format.html { render :action => "edit" }<br />
+        format.xml  { render :xml => @order.errors.to_xml }<br />
+      end<br />
+    end<br />
+  end</p>
+<p>  # DELETE &#47;orders&#47;1<br />
+  # DELETE &#47;orders&#47;1.xml<br />
+  def destroy<br />
+    @order = Order.find(params[:id])<br />
+    @order.destroy<br />
+    respond_to do |format|<br />
+      format.html { redirect_to orders_url }<br />
+      format.xml  { head :ok }<br />
+    end<br />
+  end<br />
+end<br />
+<&#47;code></p>
+<p>This controller allows you respond to all of the Actions that can be taken on a Resource: GET, POST, PUT and DELETE.</p>
+<h2>Command Line Interaction with the Service<&#47;h2><br />
+Start our Rails application and then you can see the following commands at work.<br />
+<code><br />
+.&#47;script&#47;server<br />
+<&#47;code></p>
+<h3>Get a list of all of the Orders<&#47;h3><br />
+The first thing you want to do is get a list of all of the orders in the system. To do this we perform a GET command  asking for an XML response. The URI in this case represents a list of all the Orders in the system.<br />
+<code><br />
+curl -X GET -H 'Accept: application&#47;xml' http:&#47;&#47;localhost:3000&#47;orders<br />
+<&#47;code></p>
+<h3>Get a single Order<&#47;h3><br />
+If we want to get the XML representation of a single order then we can ask for a specific Order by changing the ID to a URI that represents just one Order.<br />
+<code><br />
+curl -X GET -H 'Accept: application&#47;xml' http:&#47;&#47;localhost:3000&#47;orders&#47;15<br />
+<&#47;code></p>
+<h3>Delete an Order<&#47;h3><br />
+REST keeps things simple by having consistent Resource URIs. The URI that represents Order number 15 can also be used to Delete or Modify that Order. In this case the URI for the GET is the same, but we ask it to delete the Order instead.<br />
+<code><br />
+curl -X DELETE -H 'Accept: application&#47;xml' http:&#47;&#47;localhost:3000&#47;orders&#47;15<br />
+<&#47;code></p>
+<h3>Modify an existing Order<&#47;h3><br />
+Just as with delete, if we want to modify an Order we use the URI that represents that specific Order. The only difference is that we have to tell the server that we are sending it XML, and then actually send the XML.<br />
+<code><br />
+curl -i -X PUT -H 'Content-Type: application&#47;xml' -H 'Accept: application&#47;xml' \<br />
+-d '<order><name>Foo<&#47;name><&#47;order>'  http:&#47;&#47;localhost:3000&#47;orders&#47;15<br />
+<&#47;code></p>
+<h3>Create a new Order<&#47;h3><br />
+Creating an Order looks very similar to modifying an Order but the URI changes to the Resource URI for the collection of all Orders. The response to this command will be an HTTP 302 Redirect that gives you the URI of the newly created Order Resource.<br />
+<code><br />
+curl -i -X POST -H 'Content-Type: application&#47;xml' -H 'Accept: application&#47;xml' \<br />
+-d '<order><name>Foo<&#47;name><&#47;order>'  http:&#47;&#47;localhost:3000&#47;orders&#47;<br />
+<&#47;code></p>
+<h2>Conclusion<&#47;h2><br />
+I think you can see how easily you can interact with a REST service using only the most basic tools available, namely simple Unix command line utilities. This simplicity offers a lot of power, flexibility and interoperability that you lose when you implement services with more complicated implementations such as SOAP. That's not to say that SOAP and all of the WS-* specifications don't have have their place, because they do. When you can implement a simple solution and meet your needs you will often find that solution to have a surprising amount of added benefits such as flexibility.</p>

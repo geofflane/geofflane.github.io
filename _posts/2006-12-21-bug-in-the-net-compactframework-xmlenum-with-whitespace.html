@@ -1,0 +1,127 @@
+---
+layout: post
+status: publish
+published: true
+title: Bug In the .NET CompactFramework XmlEnum with Whitespace
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 63
+wordpress_url: http://www.zorched.net/2006/12/21/bug-in-the-net-compactframework-xmlenum-with-whitespace/
+date: '2006-12-21 21:59:46 -0500'
+date_gmt: '2006-12-22 03:59:46 -0500'
+categories:
+- ".NET"
+tags: []
+comments:
+- id: 6259
+  author: Zorched &#47; One Line Fix &raquo; More .NET Compact Framework Woes
+  author_email: ''
+  author_url: http://www.zorched.net/2007/02/04/more-net-compact-framework-woes/
+  date: '2007-02-04 00:32:28 -0500'
+  date_gmt: '2007-02-04 06:32:28 -0500'
+  content: "[...] Bug In the .NET CompactFramework XmlEnum with Whitespace [...]"
+- id: 9387
+  author: ".NET Compact Framework Serialization Bugs"
+  author_email: ''
+  author_url: http://www.zorched.net/2007/02/27/net-compact-framework-serialization-bugs/
+  date: '2007-02-27 10:05:02 -0500'
+  date_gmt: '2007-02-27 16:05:02 -0500'
+  content: "[...] wrote previously about Problems with Enum Serialization on the .NET
+    compact framework. To summarize: The XmlEnum attribute allows you to change the
+    value [...]"
+---
+<p>In .NET you can use Attributes to mark up properties in a class to tell the XmlSerializer how to marshal that class to and from XML. There are a number of different attributes you can use. You can use enums for restricted lists of values.</p>
+<p>E.g:</p>
+<p><code><br />
+public enum Foo {<br />
+    [XmlEnum("Some Value")<br />
+    Some,<br />
+    [XmlEnum("Another")]<br />
+    Other</p>
+<p>}<br />
+<&#47;code></p>
+<p>To represent something like <element>Some Value<&#47;element></p>
+<p>At least that's the idea...<br />
+It seems like XmlEnum marked values with whitespace in their names will not be deserialized on the .NET CF 2.0. It throws an InvalidOperationException saying it can't find the enum with value of the part of the string before the space.</p>
+<p>I would expect it to deserialize into the enum Foo.Some. All of this works on the Full Framework.</p>
+<h3>Workaround<&#47;h3></p>
+<p>If you control the schema you can workaround this issue by changing the allowed values not to have spaces in them. But in many cases you might be trying to integrate with an existing service or schema that you do not control and as such, you won't have  the ability to change it. If that's the case what do you do?</p>
+<p>Luckily I found some code to help me <a href="http:&#47;&#47;www.wackylabs.net&#47;2006&#47;06&#47;getting-the-xmlenumattribute-value-for-an-enum-field&#47;">get the XmlEnumAttribute value for an Enum field<&#47;a> (thanks for sharing).</p>
+<p>I made some slight modifications to it, so that it was a little safer (I think).<br />
+<code><br />
+&#47;&#47;&#47;<br />
+<summary>
+&#47;&#47;&#47; Convert an Enum value to a string representation using the XmlEnum value if<br />
+&#47;&#47;&#47; it is appropriate.<br />
+&#47;&#47;&#47; <&#47;summary><br />
+public static string ConvertToString(Enum e)<br />
+{<br />
+    if (null == e)<br />
+        throw new ArgumentNullException("Enum type can not be null.");</p>
+<p>    &#47;&#47; Get the Type of the enum<br />
+    Type t = e.GetType();</p>
+<p>    &#47;&#47; Get the FieldInfo for the member field with the enums name<br />
+    FieldInfo info = t.GetField(e.ToString("G"));</p>
+<p>    &#47;&#47; Check to see if the XmlEnumAttribute is defined on this field<br />
+    if (null != info && info.IsDefined(typeof(XmlEnumAttribute), false))<br />
+    {<br />
+        &#47;&#47; Get the XmlEnumAttribute<br />
+        object[] attrs = info.GetCustomAttributes(typeof(XmlEnumAttribute), false);<br />
+        if (attrs.Length > 0)<br />
+        {<br />
+            XmlEnumAttribute att = (XmlEnumAttribute)attrs[0];<br />
+            return att.Name;<br />
+        }<br />
+    }</p>
+<p>    &#47;&#47; If no XmlEnumAttribute was found then return the string version of the enum.<br />
+    return e.ToString("G");<br />
+}<br />
+<&#47;code></p>
+<p>I also needed to go the other way then, and convert a String back into an Enum so that I can support deserializing from XML into the object model.<br />
+<code><br />
+&#47;&#47;&#47;<br />
+<summary>
+&#47;&#47;&#47; Get an Enum value for a given type of Enum based on the String name of the Enum<br />
+&#47;&#47;&#47; itself or the XmlEnum element that it has.<br />
+&#47;&#47;&#47; <&#47;summary><br />
+public static Enum ConvertToEnum(Type enumType, string name)<br />
+{<br />
+    &#47;&#47; Look for an XmlEnumAttribute with the given name<br />
+    foreach (FieldInfo fi in enumType.GetFields())<br />
+    {<br />
+        object[] attrs = fi.GetCustomAttributes(typeof(XmlEnumAttribute), false);<br />
+        if ((attrs.Length > 0 && ((XmlEnumAttribute)attrs[0]).Name == name )<br />
+            || fi.Name == name)<br />
+            return (Enum) Enum.Parse(enumType, fi.Name, false);<br />
+    }</p>
+<p>    return null;<br />
+}<br />
+<&#47;code></p>
+<p>Using this code, you can offer an API to client code that uses the strongly-typed Enum, but does a manual conversion for the serialization process.<br />
+<code><br />
+class Bar {</p>
+<p>    private Foo fooType;</p>
+<p>    &#47;&#47; The code called by the application<br />
+    [XmlIgnore]<br />
+    public Foo FooType {<br />
+        get { return fooType; }<br />
+        set { fooType = value; }<br />
+    }</p>
+<p>    &#47;&#47; The code used to manage serialization<br />
+    &#47;&#47; Ideally this could be private, but that doesn't work with the serializer<br />
+    [XmlElement("baz")]<br />
+    public string FooTypeForSerializer {<br />
+        get { return ConvertToString(fooType); }<br />
+        set { fooType = (Foo) ConvertToEnum(typeof(Foo), value);<br />
+    }<br />
+}<br />
+<&#47;code></p>
+<h3>Conclusion<&#47;h3><br />
+One big workaround for what seems to me to be a bug. But it works, and I can continue to get work done. It should also be easy to refactor this workaround out if the bug ever gets fixed. Just change the [XmlIgnore] tag and delete the ForSerializer methods.</p>
+<p>I hope that helps if you run into a similar problem.</p>

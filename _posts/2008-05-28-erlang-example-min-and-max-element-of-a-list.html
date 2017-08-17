@@ -1,0 +1,111 @@
+---
+layout: post
+status: publish
+published: true
+title: 'Erlang Example: Min and Max Element of a List'
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 108
+wordpress_url: http://www.zorched.net/?p=108
+date: '2008-05-28 20:05:17 -0400'
+date_gmt: '2008-05-29 02:05:17 -0400'
+categories:
+- Erlang
+tags:
+- erlang exercises
+comments:
+- id: 16008
+  author: wearetherock
+  author_email: wearetherock@gmail.com
+  author_url: ''
+  date: '2009-11-23 10:39:40 -0500'
+  date_gmt: '2009-11-23 16:39:40 -0500'
+  content: "Good snippet.\r\nThank you"
+- id: 18339
+  author: faisal
+  author_email: dilawar_3000@hotmail.com
+  author_url: ''
+  date: '2013-03-21 06:35:32 -0400'
+  date_gmt: '2013-03-21 12:35:32 -0400'
+  content: not working..
+- id: 18340
+  author: faisal
+  author_email: dilawar_3000@hotmail.com
+  author_url: ''
+  date: '2013-03-21 06:42:52 -0400'
+  date_gmt: '2013-03-21 12:42:52 -0400'
+  content: "Error is coming while compiling your code which is given below..\r\ni
+    know this error is due to using bif name max..\r\n\r\nmylists.erl:4: Warning:
+    ambiguous call of overridden auto-imported BIF max&#47;2\r\n - use erlang:max&#47;2
+    or \"-compile({no_auto_import,[max&#47;2]}).\" to resolve name clash\r\nmylists.erl:8:
+    Warning: ambiguous call of overridden auto-imported BIF max&#47;2\r\n - use erlang:max&#47;2
+    or \"-compile({no_auto_import,[max&#47;2]}).\" to resolve name clash\r\nmylists.erl:10:
+    Warning: ambiguous call of overridden auto-imported BIF max&#47;2\r\n - use erlang:max&#47;2
+    or \"-compile({no_auto_import,[max&#47;2]}).\" to resolve name clash\r\n{ok,mylists}\r\n\r\nif
+    i change the function name to maxi it shows another error..which is given below..\r\nWarning:
+    function maxi&#47;2 is unused\r\n:-) :-)"
+- id: 18341
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2013-03-21 07:14:29 -0400'
+  date_gmt: '2013-03-21 13:14:29 -0400'
+  content: "@faisal, This post was written 5 years ago. Erlang might have made changes
+    since then...\r\nI think they've added core min&#47;max functions and so what
+    you're seeing is the compiler complaining that it can't tell which one you want
+    to use. You need to export min&#47;2, max&#47;2 and call them as lists1:max and
+    lists1:min (qualified function names)."
+- id: 162975
+  author: Harit
+  author_email: harit@mailinator.com
+  author_url: ''
+  date: '2014-12-16 16:43:22 -0500'
+  date_gmt: '2014-12-16 22:43:22 -0500'
+  content: |
+    This is another one, not using standard libraries
+    https:&#47;&#47;gist.github.com&#47;hhimanshu&#47;311232844dc3a4c764e3
+---
+<p>This is part of a series on the <a href="http:&#47;&#47;www.erlang.org&#47;course&#47;exercises.html">Erlang Exercises<&#47;a> which is a great set of programming problems that challenge you to implement solutions to some common Erlang problems. I'm going to share some of my solutions to these problems.</p>
+<h2>Simple recursive programs<&#47;h2><br />
+1. Write a function lists1:min(L) which returns the mini- mum element of the list L.<br />
+2. Write a function lists1:max(L) which returns the maximum element of the list L.</p>
+<p><em>(I'm only showing the max version since the min is basically just the change of the guard clause.)<&#47;em></p>
+<p><code lang="erlang"><br />
+-module(mylists).<br />
+-export([max&#47;1]).<br />
+max([H|T]) -><br />
+    max(H, T).<br />
+max(M, []) -><br />
+    M;<br />
+max(M, [H|L]) when M > H -><br />
+    max(M, L);<br />
+max(_M, [H|L]) -><br />
+    max(H,L).<br />
+<&#47;code></p>
+<h3>Explanation<&#47;h3><br />
+<strong>max([H|T])<&#47;strong><br />
+This code is composed of a public, exported function and a private function. <strong>max([H|T])<&#47;strong> defines a function that takes a list. The slightly funny notation <strong>[H|T]<&#47;strong> is an operation that removes the head value (the zeroth element] from a list and assigns the head value to H and the remainder of the list to T. Think of the list as a stack, and you've just popped the stack. This method then delegates the remainder of the work to the internal, 2 value max function.</p>
+<p><strong>max(M, [H|L]) when M > H -><&#47;strong><br />
+This method is the main part of the internal, 2 value max function. The interesting piece here is <strong>when M > H<&#47;strong which in Erlang is known as a guard clause. This has to do with the pattern matching style of matching Erlang functions. It says "when M is less than H, call this function". It work in concert with <strong>max(_M, [H|L]) -><&#47;strong> which acts as a fall-through because the ones that don't match the first will call this. You can see those two functions take either M or H and pass that as the current Max value.</p>
+<p><strong>max(M, []) -><&#47;strong><br />
+The final piece of the internal max function is <strong>max(M, []) -><&#47;strong>. This is the end state of the function. The <em>[]<&#47;em> clause in the function arguments pattern matches an empty list. Based on those previous 2 parts of the function definition this is fulfilling the final case where the current max value has been compared to the last element in the list.</p>
+<h3>Example<&#47;h3><br />
+<code lang="erlang"><br />
+List = [1,2,4,6,5].<br />
+mylists:max(List).<br />
+<&#47;code></p>
+<p>So what happens is:</p>
+<ol>
+<li>max([1 | [2,4,6,5]])<&#47;li>
+<li>max(1, [2 | [4,6,5]])<&#47;li>
+<li>max(2, [4 | [6,5]])<&#47;li>
+<li>max(4, [6 | [5]])<&#47;li>
+<li>max(6, [5 | []]) when M > H<&#47;li>
+<li>max(6, [])<&#47;li><br />
+<&#47;ol></p>

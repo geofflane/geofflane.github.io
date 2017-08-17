@@ -1,0 +1,91 @@
+---
+layout: post
+status: publish
+published: true
+title: Grails Philosophy
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 103
+wordpress_url: http://www.zorched.net/?p=103
+date: '2008-05-01 13:56:00 -0400'
+date_gmt: '2008-05-01 19:56:00 -0400'
+categories:
+- Code
+- Groovy
+tags:
+- grails
+comments:
+- id: 11230
+  author: Marc Palmer
+  author_email: marc@anyware.co.uk
+  author_url: http://www.anyware.co.uk
+  date: '2008-05-03 11:43:13 -0400'
+  date_gmt: '2008-05-03 17:43:13 -0400'
+  content: "Hiya... I disagree with your views on services. Services are great for
+    all non-view preparation functionality. You should make controllers very thin
+    like you say, but pushing too much functionality into domain classes is bad news,
+    because even with logic related to a single domain class you may need to expose
+    this functionality later as a SOAP, REST, XMLRPC or other service technology.
+    \r\n\r\nOur domain classes are not anaemic - we put functionality related to the
+    class in there in our apps, but typically this is very minimal on the basis that
+    anything that is not just for preparing&#47;managing the domain model is functionality
+    and that may be exposed via many different outlets."
+- id: 11231
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2008-05-03 12:31:21 -0400'
+  date_gmt: '2008-05-03 18:31:21 -0400'
+  content: "Marc,\r\nThanks for the comment. I don't mean to disparage using Services
+    at all. It is of course a great way to share functionality. But whether logic
+    is implemented in a Domain class or a Service, it can still be shared and exposed
+    through multiple means.A Controller will most likely be used to expose those Services.
+    Rendering an HTML page, XML for a REST service or other content is a content negotiation
+    issue best managed by Controllers. That controller can interact with Domain objects
+    or Services, whichever makes the most sense.\r\n\r\nI'm fighting the idea that
+    everything needs to be encapsulated in a Service. In this mindset, Services often
+    become simple pass-through objects that just add extra layers and more work without
+    adding much value. Use Services when they make sense, but have a reason.\r\n\r\nEither
+    way, thanks for the different perspective."
+- id: 14318
+  author: blaxter
+  author_email: blaxter@gmail.com
+  author_url: http://bicosyes.com
+  date: '2008-11-28 05:17:06 -0500'
+  date_gmt: '2008-11-28 11:17:06 -0500'
+  content: "services, adding a layer that does nothing, just expose funcionality already
+    implemented. I'm with Geoff, logic to the model. Do you wanna foo service? Use
+    the controller for making simple calls to the model layer, the same model could
+    be use for rendering anything.\r\n\r\n(I guess Marc cames from java world, and
+    he hasn't try frameworks like grails or similar stuff that makes things so much
+    easier)."
+---
+<p>There was a post on the Grails Mailing list today asking about the philosophy of Grails. This is my response:</p>
+<p>I think I might have ripped this off from somewhere, but fundamentally there are 4 questions to answer for a basic application like this:</p>
+<ol>
+<li>How do you display data to a User?<&#47;li>
+<li>How do you implement business logic?<&#47;li>
+<li>How do you encapsulate complex business logic (Domain) interactions?<&#47;li>
+<li>How do you implement data access?<&#47;li><br />
+<&#47;ol></p>
+<p>Most of the time when there is a layered approach one of 2 things happen. You've implemented a Transaction Script pattern where your business logic is implemented in the Service layer, or your Services are thin wrappers around a Data Access layer. Transaction Script is fine, but doesn't handle complexity as well as a more Domain Driven, OO approach. The thin-wrapper thing is mostly just busy work and annoying to me.</p>
+<p>In Grails:</p>
+<ol>
+<li>Controllers gather Data and hand it to GSPs for rendering<&#47;li>
+<li>Business Logic goes in Domain Objects<&#47;li>
+<li>Data Access goes in Domain Objects<&#47;li>
+<li>Complex Interaction are encapsulated in Services<&#47;li><br />
+<&#47;ol></p>
+<h3>Thin Controllers<&#47;h3><br />
+Keep your controllers thin so they just mediate between views and Domains.</p>
+<h3>Active Record<&#47;h3><br />
+2&3 happen in the same Domain objects because Grails implements the Active Record pattern. So, implement any extra queries in the Domain objects themselves.</p>
+<h3>Services for Encapsulation<&#47;h3><br />
+Only introduce a Service when you have complex interactions (multiple objects being constructed or working together to answer a question) among multiple Domain objects that need to be encapsulated.</p>
+<p>This is a Domain Driven framework. The complexity should be encapsulated in your Domain Objects so you can use Polymorphism to manage complexity.</p>

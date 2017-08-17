@@ -1,0 +1,203 @@
+---
+layout: post
+status: publish
+published: true
+title: High Performance and Parallelism With the Feel of a Scripting Language
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 591
+wordpress_url: http://www.zorched.net/?p=591
+date: '2013-10-21 18:24:11 -0400'
+date_gmt: '2013-10-22 00:24:11 -0400'
+categories:
+- Code
+- Go
+tags:
+- performance
+- testing
+- golang
+comments: []
+---
+<p>Sometimes you need a quick-and-dirty tool to get something done. You're not looking for a long-term solution, but rather just have a simple job to do. As a programmer when you have those thoughts you naturally migrate toward scripting languages. But sometimes that throw away tool also needs to do highly parallel operations with good performance characteristics. Until recently it seemed like you only got to choose one or the other though. And then came <a href="http:&#47;&#47;golang.org&#47;">Go<&#47;a>.<&#47;p></p>
+<h2>A Use Case<&#47;h2></p>
+<p>We've been working on an application that provides APIs for other apps. Those APIs are required to be fast and to scale up to many concurrent users. We needed a way to push a lot of traffic to this API while ensuring that the API would access a wide swath of the data in the database. We didn't want to run into the case where the same request was being made over and over allowing the database to end up with an unrealistic scenario where it had all the data cached. There are a number of existing tools for this kind of performance testing, but seeing some of the tests run didn't give us much confidence that they were really running these requests in parallel like we needed. We also wanted to be able to easily run these tests from many different clients computers at once so that we could ensure that the client computers and internet connections were not the bottleneck.<&#47;p></p>
+<h2>How Does Go Fit That Use Case?<&#47;h2></p>
+<h3>Write-Once (Compile a Few Times) and Run Anywhere<&#47;h3></p>
+<p>One of the advantages of Go is that it is easy to cross-compile it to other architectures and operating systems. This property made it easy to write a little application that we could run at the same time on Mac OS and Linux. Just like a scripting language it was write-once and run anywhere. Of course we had to compile it for each of the different operating systems but that is incredibly easy with Go. Unlike most scripting languages, once a Go binary is compiled for an OS, nothing else needs to be installed to run it. There's no management of different versions or libraries. A Go binary is entirely self-contained so no extra Go runtime is needed to be installed for the application to be run and all of the depencies are statically linked in. Simply copy the binary to the appropriate machine and execute it. You can't get much simpler than that.<&#47;p></p>
+<pre>
+$ brew install go --cross-compile-common<br />
+$ GOOS=linux go build myapp.go<br />
+<&#47;pre></p>
+<h3>Libraries for All The Things<&#47;h3></p>
+<p>Go has a large number of <a href="http:&#47;&#47;golang.org&#47;pkg&#47;">good libraries<&#47;a> that come standard. These libraries include support for making HTTP clients and servers. There's support for accessing databases (although the drivers themselves are not included). It includes support for parsing command line arguments, encoding and decoding JSON, for doing cryptography, and for using regular expressions. Basically it includes a lot of libraries that you need for creating applications whether it's something you want to maintain forever or whether it's a throw away app.<&#47;p></p>
+<p><code lang="go"><br />
+flag.BoolVar(&help, "h", false, "help")<br />
+resp, err := http.Get("http:&#47;&#47;example.com&#47;")</p>
+<p>var exampleResp MyJsonResponse<br />
+decoder := json.NewDecoder(resp.Body)<br />
+err = decoder.Decode(&exampleResp)<br />
+<&#47;code></p>
+<h3>Concurrent Design and Parallel Execution<&#47;h3></p>
+<p>Goroutines allow a program to execute a function concurrently with other running code. Channels allow for different goroutines to communicate by passing messages to each other. Those two things together allow for a simple means of structuring code with a concurrent design.<&#47;p></p>
+<p><code lang="go"><br />
+ch := make(chan int)<br />
+go func() {<br />
+  for {<br />
+    val := <-ch<br />
+    fmt.Printf("Got an int: %v", val)<br />
+  }<br />
+}()<br />
+ch <- 1<br />
+ch <- 2<br />
+<&#47;code></p>
+<p>In addition to having easy mechanisms to implement a concurrent design, your program also needs to be able to do actual work in parallel. Go can run many different goroutines in parallel and gives you control over how many run at the same time with a simple function call.<&#47;p></p>
+<pre><code>runtime.GOMAXPROCS(25)<br />
+<&#47;code><&#47;pre></p>
+<h2>Put The Pieces Together<&#47;h2></p>
+<p>Bringing together those libraries and a concurrent design allows us to easily create a program that meets our needs for testing these APIs.<&#47;p></p>
+<p>This is a simple application that does GET requests to a specific URL. The program allows you to specify the URL, the number of requests to make, and the number to run concurrently. It uses many of the libraries I mentioned above for handling HTTP, for parsing command line arguments, for calcuating the duration of requests, etc. It also uses goroutines to allow for multiple simultaneous requests to be made while using a channel to communicate the results back to the main program.<&#47;p></p>
+<p><code lang="go"><br />
+package main</p>
+<p>import (<br />
+  "flag"<br />
+  "fmt"<br />
+  "io&#47;ioutil"<br />
+  "net&#47;http"<br />
+  "runtime"<br />
+  "sync"<br />
+  "time"<br />
+)</p>
+<p>var help bool<br />
+var count int<br />
+var concurrent int<br />
+var url string</p>
+<p>var client *http.Client</p>
+<p>func init() {<br />
+  client = &http.Client{}</p>
+<p>  flag.BoolVar(&help, "h", false, "help")<br />
+  flag.IntVar(&count, "n", 1000, "number of requests")<br />
+  flag.IntVar(&concurrent, "c", runtime.NumCPU() + 1, "number of concurrent requests")<br />
+  flag.StringVar(&url, "u", "http:&#47;&#47;127.0.0.1:5000&#47;", "url")<br />
+  flag.Parse()<br />
+}</p>
+<p>func main() {<br />
+  if help {<br />
+    flag.Usage()<br />
+    return<br />
+  }</p>
+<p>  fmt.Printf("Concurrent: %v\n", concurrent)<br />
+  runtime.GOMAXPROCS(concurrent + 2)</p>
+<p>  runChan := make(chan int, concurrent)<br />
+  resultChan := make(chan Result)</p>
+<p>  var wg sync.WaitGroup</p>
+<p>  success_cnt := 0<br />
+  failure_cnt := 0<br />
+  var durations []time.Duration<br />
+  var min_dur time.Duration<br />
+  var max_dur time.Duration</p>
+<p>  &#47;&#47; Run the stuff<br />
+  dur := duration(func() {</p>
+<p>    &#47;&#47; setup to handle responses<br />
+    go func() {<br />
+      for {<br />
+        r := <-resultChan<br />
+        durations = append(durations, r.Duration)<br />
+        min_dur = min(min_dur, r.Duration)<br />
+        max_dur = max(max_dur, r.Duration)</p>
+<p>        &#47;&#47; 200s and 300s are success in HTTP<br />
+        if r.StatusCode < 400 {<br />
+          success_cnt += 1<br />
+        } else {<br />
+          fmt.Printf("Error: %v; %v\n", r.StatusCode, r.ErrOrBody())<br />
+          failure_cnt += 1<br />
+        }<br />
+        wg.Done()<br />
+      }<br />
+    }()</p>
+<p>    &#47;&#47; setup to handle running requests<br />
+    wg.Add(count)<br />
+    go func() {<br />
+      for i:=0; i < count; i++ {<br />
+        <-runChan<br />
+        fmt.Printf(".")<br />
+        go func() {<br />
+          resultChan <- Execute()<br />
+          runChan <- 1<br />
+        }()<br />
+      }<br />
+    }()</p>
+<p>    &#47;&#47; tell N number of requests to run, but this limits the concurrency<br />
+    for i := 0; i < concurrent; i ++ {<br />
+      runChan <- 1<br />
+    }</p>
+<p>    wg.Wait()<br />
+  })</p>
+<p>  fmt.Printf("\n")<br />
+  fmt.Printf("Success: %v\nFailure: %v\n", success_cnt, failure_cnt)<br />
+  fmt.Printf("Min: %v\nMax: %v\n", min_dur, max_dur)<br />
+  fmt.Printf("Mean: %v\n", avg(durations))<br />
+  fmt.Printf("Elapsed time: %v\n", dur.Seconds())</p>
+<p>}</p>
+<p>func avg(durs []time.Duration) time.Duration {<br />
+  total := float64(0)<br />
+  for _, d := range durs {<br />
+    total += d.Seconds()<br />
+  }<br />
+  return time.Duration((total &#47; float64(len(durs))) * float64(time.Second))<br />
+}</p>
+<p>func min(a time.Duration, b time.Duration) time.Duration {<br />
+  if a != 0 && a < b {<br />
+    return a<br />
+  }<br />
+  return b<br />
+}</p>
+<p>func max(a time.Duration, b time.Duration) time.Duration {<br />
+  if a > b {<br />
+    return a<br />
+  }<br />
+  return b<br />
+}</p>
+<p>func Execute() Result {<br />
+  var resp *http.Response<br />
+  var err error<br />
+  dur := duration(func() {<br />
+    resp, err = http.Get(url)<br />
+  })</p>
+<p>  if err != nil {<br />
+    return Result{dur, -1, err, ""}<br />
+  }<br />
+  defer resp.Body.Close()<br />
+  var body string<br />
+  if b, err := ioutil.ReadAll(resp.Body); err == nil {<br />
+    body = string(b)<br />
+  } else {<br />
+    body = ""<br />
+  }</p>
+<p>  return Result{dur, resp.StatusCode, nil, body}<br />
+}</p>
+<p>type Result struct {<br />
+  Duration time.Duration<br />
+  StatusCode int<br />
+  Err error<br />
+  Body string<br />
+}<br />
+func (r *Result) ErrOrBody() string {<br />
+  if nil != r.Err {<br />
+    return r.Err.Error()<br />
+  } else {<br />
+    return r.Body<br />
+  }<br />
+}</p>
+<p>func duration(f func()) time.Duration {<br />
+  start := time.Now()<br />
+  f()<br />
+  return time.Now().Sub(start)<br />
+}<br />
+<&#47;code></p>
+<p>The app we wrote started out a lot like this; easy and straightforward. As we needed to add more tests we stated refactoring out types to allow me to separate the core of the load testing and calculation of times from the actual requests run. Go provides function type aliases, higher order functions and a lot of other abstractions which make those refactorings quite elegant. But that's for a different post...<&#47;p></p>

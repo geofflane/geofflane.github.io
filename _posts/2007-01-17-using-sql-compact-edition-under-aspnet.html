@@ -1,0 +1,57 @@
+---
+layout: post
+status: publish
+published: true
+title: Using SQL Compact Edition Under ASP.NET
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 64
+wordpress_url: http://www.zorched.net/2007/01/17/using-sql-compact-edition-under-aspnet/
+date: '2007-01-17 16:47:34 -0500'
+date_gmt: '2007-01-17 22:47:34 -0500'
+categories:
+- ".NET"
+- Web
+tags:
+- sql
+- compact framework
+- database
+comments:
+- id: 10679
+  author: David
+  author_email: info@vidmar.net
+  author_url: http://www.vidmar.net/weblog
+  date: '2007-04-19 07:34:22 -0400'
+  date_gmt: '2007-04-19 13:34:22 -0400'
+  content: "I almost picked up Reflector myself in order to clarify if it's \"Compact\",
+    \"Everywhere\", \"Mobile\" or \"CompactEdition\", but I found MSDN page with right
+    settings.\r\n\r\nhttp:&#47;&#47;www.vidmar.net&#47;weblog&#47;archive&#47;2007&#47;04&#47;19&#47;SQL-Server-2005-Compact-Edition-and-ASP.NET.aspx"
+- id: 18056
+  author: JotaBe
+  author_email: palurdito@gmail.com
+  author_url: ''
+  date: '2012-05-07 08:53:24 -0400'
+  date_gmt: '2012-05-07 14:53:24 -0400'
+  content: 'Good news: the CE 4.0 edition can be safely used in ASP.NET!!'
+---
+<h2>What is SQLCE?<&#47;h2><br />
+SQL Compact Edition is the "low end" version of a SQL database solution from Microsoft. It is a single-file, application managed, database implementation. It doesn't have all of the bells and whistles of the high end database solutions. This is great when you realize the next lowest version, SQL Express is over a 100MB install.</p>
+<p>The beta of this software was called SQL Everywhere Edition (SQLEV). Microsoft decided that they didn't like the name so they went with SQL Compact Edition (SQLCE ). The name Compact Edition is a bit of a misnomer. It can be used on the Compact Framework, but it can also be used on the full-framework anywhere a single-file, zero-install database might be needed. Well almost Everywhere at least. There is an explicit check when running on the Full Framework to make sure that you are not using it in an ASP.NET application. SQLCE is not a very scalable solution. It has some inherent limitations with concurrent connections for example. This is fine though if you go back to "what are you using this for"? An embedded, single-file database. Well I ran into a case where I need a small web-service to be running where an embedded database makes a lot of sense. I'm using the HttpListener class to run my own Http.sys server without using IIS. This still counts as ASP.NET to the SQLCE code though.</p>
+<h2>Force SQLCE to run under ASP.NET<&#47;h2><br />
+Steve Lasker posted blog entry <a href="http:&#47;&#47;blogs.msdn.com&#47;stevelasker&#47;archive&#47;2006&#47;11&#47;27&#47;sql-server-compact-edition-under-asp-net-and-iis.aspx">on how to use SQLCE under ASP.NET<&#47;a> using the pre-release version of the SQLEV. Under SQLEV you set a flag that would tell the SQL Connection, "yes I know this isn't supported, but let me do it anyway":<br />
+<code><br />
+AppDomain.CurrentDomain.SetData("SQLServerEverywhereUnderWebHosting", true)<br />
+<&#47;code></p>
+<p>As you can see the name of the product is right there in the key. Well they changed the name of the product and so they changed the name of the key. So, if you were using the beta for development and are now switching over to the release version of SQLCE , you will need to change the key:<br />
+<code><br />
+AppDomain.CurrentDomain.SetData("SQLServerCompactEditionUnderWebHosting", true)<br />
+<&#47;code></p>
+<p>That should allow you to use the database under ASP.NET. Now you can revel in the fact that you are swimming in unsupported waters!</p>
+<p><strong><em>Special Thanks<&#47;em><&#47;strong><br />
+I found this using the great .NET disassembler <a href="http:&#47;&#47;www.aisto.com&#47;roeder&#47;dotnet&#47;">Lutz Roeder's .NET Reflector<&#47;a>. You should check it out. It can be a great way to track down details of an API implementation when the abstraction is a bit leaky.</p>

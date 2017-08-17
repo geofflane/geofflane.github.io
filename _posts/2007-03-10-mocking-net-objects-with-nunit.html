@@ -1,0 +1,542 @@
+---
+layout: post
+status: publish
+published: true
+title: Mocking .NET Objects with NUnit
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 75
+wordpress_url: http://www.zorched.net/2007/03/10/mocking-net-objects-with-nunit/
+date: '2007-03-10 20:33:27 -0500'
+date_gmt: '2007-03-11 03:33:27 -0400'
+categories:
+- Code
+- ".NET"
+- Unit Testing
+tags:
+- software-development
+- nunit
+- mock-objects
+- csharp
+comments:
+- id: 11131
+  author: hitesh
+  author_email: hiteshkumargupta@hotmail.com
+  author_url: ''
+  date: '2008-01-15 10:09:38 -0500'
+  date_gmt: '2008-01-15 16:09:38 -0500'
+  content: Very good sample...it helps me to understand the creation of mock object
+    and use them for unit testing
+- id: 11178
+  author: Christopher Piggott
+  author_email: chrisp@rochester.rr.com
+  author_url: ''
+  date: '2008-02-28 20:14:21 -0500'
+  date_gmt: '2008-02-29 02:14:21 -0500'
+  content: "I tried the above example using my own classes, but I get this:\r\n\r\nat
+    System.Runtime.Remoting.Proxies.RealProxy..ctor(Type classToProxy, IntPtr stub,
+    Object stubData)\r\nat NUnit.Mocks.DynamicMock.get_MockInstance()\r\nat SerialWidgetTest_Test.SSHStreamTest.Test1()
+    in C:\\WORK\\firmware\\Helpers\\C#\\trunk\\TestWidgets\\TestWidget_NUnit\\SSHStreamTest.cs:line
+    27\r\n\r\nI'm not even sure what that means.  Is the type of object I'm trying
+    to mock too complex?"
+- id: 11179
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2008-02-28 20:31:51 -0500'
+  date_gmt: '2008-02-29 02:31:51 -0500'
+  content: "Christopher,\r\nWas that an ArgumentException? Using this technique and
+    NMock you can only mock things based on an Interface, not a concrete types. Using
+    an interface is a good practice anyway because it leads to a looser coupling of
+    your objects.\r\n\r\nIf your really must mock concrete classes (you want to give
+    up loose coupling, or are dealing with dependencies that were not written by you),
+    you might want to look at another Mocking framework like <a href=\"http:&#47;&#47;www.ayende.com&#47;projects&#47;rhino-mocks.aspx\"
+    rel=\"nofollow\">Rhino Mocks<&#47;a>.\r\n\r\nHope that helps."
+- id: 11386
+  author: Chad
+  author_email: chad_raper@hotmail.com
+  author_url: ''
+  date: '2008-05-21 22:00:04 -0400'
+  date_gmt: '2008-05-22 04:00:04 -0400'
+  content: "Hi Geoff\r\n\r\nIm wading my way through loose coupling using interfaces.
+    Forcing me to think about my dependencis before I code. What would be a quick
+    example of your classes using asp.net as a GUI using the above example?\r\n\r\nRegards\r\nChad"
+- id: 11410
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2008-05-22 08:15:58 -0400'
+  date_gmt: '2008-05-22 14:15:58 -0400'
+  content: "Chad,\r\nIn a Real application the Service would likely implement an Interface
+    as well. You could then call the Service from UI code. Using ASP.NET, you would
+    likely need to use a framework like <a href=\"http:&#47;&#47;www.springframework.net&#47;\"
+    rel=\"nofollow\">Spring .NET<&#47;a> to wire together your dependencies. If you
+    do that though, you can then inject those dependencies into your Pages.\r\n\r\n<code>\r\npublic
+    class ViewPerson : Page {\r\n    private IPersonService personService;\r\n    protected
+    void Page_Load(object sender, EventArgs e)\r\n    {\r\n        Person person =
+    personService.GetPerson(Request.QueryString[\"personId\"]);\r\n        &#47;&#47;
+    ... do something with person\r\n    }\r\n}\r\n<&#47;code>\r\n\r\nThat doesn't
+    necessarily help a lot with Unit Testing though. Web&#47;UI code is hard to unit
+    test. Your best bet is to keep your UIs very thin, with very little code, and
+    use it merely as a translation layer to get things out of the Web context and
+    into \"plain code\" context. Then you can Unit Test all of the other code and
+    leave testing of UIs to functional tests."
+- id: 13427
+  author: Dave Paulino
+  author_email: davepaulino@yahoo.com
+  author_url: ''
+  date: '2008-07-01 21:23:17 -0400'
+  date_gmt: '2008-07-02 03:23:17 -0400'
+  content: "@Chad\r\nVery good article and very well explained. This will help developers
+    to understand mock object.\r\n\r\n@Geoff\r\nUsing the scenario above I agree it
+    is very hard to unit test, but we can use to MVP design pattern to unit test our
+    code."
+- id: 13429
+  author: Deva
+  author_email: Deivarayan_s@infosys.com
+  author_url: ''
+  date: '2008-07-02 05:18:04 -0400'
+  date_gmt: '2008-07-02 11:18:04 -0400'
+  content: "Hi,\r\n      Do you have a documentation for the NMock Example Project
+    given"
+- id: 14224
+  author: Mocking With NUnit &laquo; bloggersfun
+  author_email: ''
+  author_url: http://l3dblog.wordpress.com/2008/09/26/mocking-with-nunit/
+  date: '2008-09-25 21:03:20 -0400'
+  date_gmt: '2008-09-26 03:03:20 -0400'
+  content: "[...] Mocking With&nbsp;NUnit  If you choose Nunit for you Unit Testing
+    and with Mock object for isolating classes from their dependencies for testing
+    purposes.You can go through this tutorial:http:&#47;&#47;www.zorched.net&#47;2007&#47;03&#47;10&#47;mocking-net-objects-with-nunit&#47;
+    [...]"
+- id: 15538
+  author: links for 2009-06-28 &laquo; Praveen&#8217;s Blog
+  author_email: ''
+  author_url: http://dotnetwitter.wordpress.com/2009/06/28/links-for-2009-06-28/
+  date: '2009-06-28 18:08:23 -0400'
+  date_gmt: '2009-06-29 00:08:23 -0400'
+  content: "[...] Mocking .NET Objects with NUnit &Acirc;&laquo; Zorched &#47; One
+    Line Fix (tags: programming development .net unittesting nunit mocking mocks mock
+    unittest) [...]"
+- id: 15539
+  author: Kristofer Krause
+  author_email: kris.krause@gmail.com
+  author_url: http://www.kriskrause.com
+  date: '2009-06-29 13:21:36 -0400'
+  date_gmt: '2009-06-29 19:21:36 -0400'
+  content: "Here is a \"concrete\" example of the above classes (no Spring).  Please
+    let me know what you guys think.  Thanks.\r\n\r\nhttp:&#47;&#47;www.kriskrause.com&#47;2009&#47;06&#47;concrete-example-mocking-net-objects.html"
+- id: 15544
+  author: Tom Linge
+  author_email: egnil.mot@gmail.com
+  author_url: ''
+  date: '2009-07-06 21:49:31 -0400'
+  date_gmt: '2009-07-07 03:49:31 -0400'
+  content: Nice example, although you should be calling verify() on the mock, to make
+    sure all expected behaviour&#47;calls were performed by the mock
+- id: 16031
+  author: Ragnar
+  author_email: sweragnar@gmail.com
+  author_url: ''
+  date: '2010-01-05 03:54:00 -0500'
+  date_gmt: '2010-01-05 09:54:00 -0500'
+  content: "Thanks for the post. But I can't get this to work. I constantly get the
+    following error:\r\nCould not load type 'NUnit.Framework.Constraints.IResolveConstraint'
+    from assembly 'nunit.framework\r\n\r\nI have tested both NUnit 2.4.x and NUnint
+    2.5.x Does anyone have a clue?"
+- id: 16033
+  author: Zak
+  author_email: mrrichmond2003@yahoo.co.uk
+  author_url: http://www.fuzzelogicsolutions.com/wordpress
+  date: '2010-01-07 06:52:05 -0500'
+  date_gmt: '2010-01-07 12:52:05 -0500'
+  content: "Hi!\r\nYou should try Rhino Mocks. The latest version supports AAA style
+    and the other advantage is you don't have to use string to identify methods. A
+    big plus during auto-refactoring (using resharper etc).\r\n\r\nThanx"
+- id: 16045
+  author: Shantha D
+  author_email: owgitt_shan@yahoo.com
+  author_url: ''
+  date: '2010-02-21 23:04:04 -0500'
+  date_gmt: '2010-02-22 05:04:04 -0500'
+  content: "Hi\r\n\r\nThanks a lot. Very good example. And so simple to understand
+    for the beginners. I tried execute this example. But I got stucked \"private DynamicMock
+    personRepositoryMock;\" in this statement. Here what actualy 'DynamicMock' stands
+    for? Whether its a class or interface? I'm getting this Error:\r\n\"The type or
+    namespace name 'DynamicMock' could not be found (are you missing a using directive
+    or an assembly reference?)\" . Please help me to resolve this problem."
+- id: 16046
+  author: Shantha D
+  author_email: owgitt_shan@yahoo.com
+  author_url: ''
+  date: '2010-02-21 23:04:04 -0500'
+  date_gmt: '2010-02-22 05:04:04 -0500'
+  content: "Hi\r\n\r\nThanks a lot. Very good example. And so simple to understand
+    for the beginners. I tried execute this example. But I got stucked \"private DynamicMock
+    personRepositoryMock;\" in this statement. Here what actualy 'DynamicMock' stands
+    for? Whether its a class or interface? I'm getting this Error:\r\n\"The type or
+    namespace name 'DynamicMock' could not be found (are you missing a using directive
+    or an assembly reference?)\" . Please help me to resolve this problem."
+- id: 16048
+  author: Blake
+  author_email: blaketheiss@gmail.com
+  author_url: ''
+  date: '2010-02-26 09:50:47 -0500'
+  date_gmt: '2010-02-26 15:50:47 -0500'
+  content: Hey great article.  I have been searching several posts trying to understand
+    the concept of mock testing, and you made me understand it...   Thank very much!
+- id: 16153
+  author: Tyler Breisacher
+  author_email: matrixfrog@gmail.com
+  author_url: http://trojansax.blogspot.com
+  date: '2010-06-09 14:21:04 -0400'
+  date_gmt: '2010-06-09 20:21:04 -0400'
+  content: "I'm trying to learn how to use the NUnit testing framework and mocking
+    framework with VB.NET. This is a great example of how to use DynamicMock so I
+    tried to \"translate\" it into VB. When I got to this line:\r\n\r\npersonRepositoryMock
+    = new DynamicMock(typeof (IPersonRepository));\r\n\r\nit was not obvious what
+    the \"equivalent\" VB code would be because \"typeof\" is used a little differently
+    in that language. The answer turns out to be:\r\n\r\npersonRepositoryMock = New
+    DynamicMock(GetType(IPersonRepository))\r\n\r\nwhich perhaps would have been obvious
+    to experienced VB developers but was not to me."
+- id: 17840
+  author: Kim Olsen
+  author_email: kio1986@gmail.com
+  author_url: ''
+  date: '2011-01-27 12:31:54 -0500'
+  date_gmt: '2011-01-27 18:31:54 -0500'
+  content: Would I make any sense to define an interface IPerson for the Person class
+    and the mock that object?
+- id: 17841
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2011-01-27 12:37:27 -0500'
+  date_gmt: '2011-01-27 18:37:27 -0500'
+  content: "@Kim,\r\nYou could mock Person if you were testing the PersonRepository,
+    but Person has no real behavior (it's just a data transfer object) in this example,
+    so it probably wouldn't provide any value to mock it out."
+- id: 17842
+  author: Kim Olsen
+  author_email: kio1986@gmail.com
+  author_url: ''
+  date: '2011-01-27 16:24:38 -0500'
+  date_gmt: '2011-01-27 22:24:38 -0500'
+  content: "I think I get your point Jeff. \r\n\r\nI'm pretty new to this whole testing&#47;mocking
+    thing and I'm kinda stuck right now.  I understand the example above, but how
+    do we test that the actual implementation of the repository works? \r\n\r\nI've
+    build a small application using the MVVM pattern. The model is build with the
+    Entity Framework. I've got a repository that performs crud operations on the model.
+    any ideas of how to test that repository?\r\n\r\ncheers"
+- id: 17843
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2011-01-27 20:40:28 -0500'
+  date_gmt: '2011-01-28 02:40:28 -0500'
+  content: "@Kim,\r\nMocking is used to isolate pieces of code from other dependencies
+    (either code or external systems). If you want to test code that connects to a
+    database, for example, then you are doing integration testing. Just make sure
+    to keep the integration tests separate from the unit tests because they will run
+    slower and have dependencies on the setup, structure and contents of the database.
+    With database integration tests you'll probably want to run against a blank database
+    and run the tests in transactions that are rolled back so that you can run them
+    repeatedly.\r\n\r\nHope that helps."
+- id: 17844
+  author: Kim Olsen
+  author_email: kio1986@gmail.com
+  author_url: ''
+  date: '2011-01-27 21:01:13 -0500'
+  date_gmt: '2011-01-28 03:01:13 -0500'
+  content: "@Geoff, \r\nthx for the quick response.\r\nI'm starting to get I think.
+    Let me see if I get this right. The reason for mocking the repository is that
+    it properly has dependencies to a database or some other kind of storage. And
+    the personRepositoryMock.ExpectAndReturn(\"GetPeople\", peopleList); is not actual
+    testing if the repository works just the GetPeople() method from the repository
+    gets called..right?"
+- id: 17845
+  author: Kim Olsen
+  author_email: kio1986@gmail.com
+  author_url: ''
+  date: '2011-01-27 21:03:09 -0500'
+  date_gmt: '2011-01-28 03:03:09 -0500'
+  content: And If I wanted to test the actual implementation it would be integration
+    tests?
+- id: 17846
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2011-01-27 21:04:25 -0500'
+  date_gmt: '2011-01-28 03:04:25 -0500'
+  content: "@Kim,\r\nRight. We're testing the logic of the repository itself and not
+    the data access portions of it. Mocking is not only used for databases and storage
+    though, it's used for isolating a class from any of its dependencies so you can
+    test just that single class and not the interaction of a lot of classes."
+- id: 17847
+  author: Kim Olsen
+  author_email: kio1986@gmail.com
+  author_url: ''
+  date: '2011-01-27 21:11:59 -0500'
+  date_gmt: '2011-01-28 03:11:59 -0500'
+  content: "@Geoff,\r\nthanks, I appreciate your help!  So if I wanted to perform
+    unit tests on Entity Framework generated entities I would have to find some way
+    to mock those entities?"
+- id: 17875
+  author: Julien
+  author_email: julien.plee@live.fr
+  author_url: ''
+  date: '2011-03-23 00:32:47 -0400'
+  date_gmt: '2011-03-23 06:32:47 -0400'
+  content: "I have an odd question... \r\n\r\nWhy are we using mocking in this case
+    ? \r\nPersonService service = new PersonService(\r\n             (IPersonRepository)
+    personRepositoryMock.MockInstance);\r\nWhy don't we use just a new concrete implementation
+    of IPersonRepository ?\r\n\r\nIn fact, I use Microsoft Moles in order to mock
+    my objects. Here I see that we just can mock interfaces so we can do concrete
+    implementation rather than mocking, isn't it?"
+- id: 17876
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2011-03-23 08:43:45 -0400'
+  date_gmt: '2011-03-23 14:43:45 -0400'
+  content: |-
+    @Julien,
+    You could use a test instance of the IPersonRepository. That technique is generally called "Stubbing" you're providing a fixed implementation of a dependency to test against. The advantage of Mocking is that you can generally more easily express different behaviors without writing a bunch of concrete stubs. For example, if you want to test both a successful and an exceptional condition, it's very easy to mock that out where with Stubs you might have to write two different stub classes.
+
+    Either technique can be used to isolate code for testing though.
+- id: 17877
+  author: Julien
+  author_email: julien.plee@live.fr
+  author_url: ''
+  date: '2011-03-23 11:53:31 -0400'
+  date_gmt: '2011-03-23 17:53:31 -0400'
+  content: "@Geoff\r\nThanks for your answer, I can now see why it is useful :)\r\n\r\n(PS:
+    It's really great that you answer every question that way)"
+- id: 17883
+  author: Aaronontheweb
+  author_email: aaron@aaronstannard.com
+  author_url: http://www.aaronstannard.com/
+  date: '2011-04-01 02:55:34 -0400'
+  date_gmt: '2011-04-01 08:55:34 -0400'
+  content: I really appreciate this tutorial - it made it much easier for me to learn
+    how to use mocks in NUnit and I was able to simplify some tests that depended
+    upon access to a live database using this technique. Thanks!
+- id: 17940
+  author: Using NUnit Mocking the.net object
+  author_email: ''
+  author_url: http://unknownerror.net/2011-09/70048-using-nunit-mocking-the-net-object.html
+  date: '2011-09-18 20:36:19 -0400'
+  date_gmt: '2011-09-19 02:36:19 -0400'
+  content: "[...] Mocking the.net object       The original name: Mocking the.net
+    NUnit with it The original address:http:&#47;&#47;www.zorched.net&#47;2007&#47;03&#47;10&#47;mocking-net-objects-with-nunit&#47;
+    \ NUnit is I the.net development unit testing tool, Microsoft also provides a
+    test framework, but [...]"
+- id: 18057
+  author: trangnguyen
+  author_email: trangwasnguyen@gmail.com
+  author_url: ''
+  date: '2012-05-17 20:35:51 -0400'
+  date_gmt: '2012-05-18 02:35:51 -0400'
+  content: Thank you very much! your article is very helpful for me.
+- id: 18077
+  author: Ebrima comma
+  author_email: ecomma@pristineconsulting.com
+  author_url: ''
+  date: '2012-08-16 05:17:04 -0400'
+  date_gmt: '2012-08-16 11:17:04 -0400'
+  content: "Hi Geoff Lane, i fined this post very useful as a newbie to testing.\r\nFor
+    the pass two month i have been struggling to test my class the connect to a database
+    to read data.\r\nIs this possible, if yes please give a sample demo.\r\nThank
+    you so much for the help you a doing."
+- id: 18335
+  author: Chris
+  author_email: Chris@myonlineaddress.co.uk
+  author_url: ''
+  date: '2013-02-18 19:15:26 -0500'
+  date_gmt: '2013-02-19 01:15:26 -0500'
+  content: "Thanks for the very informative article. Even after all these years it's
+    still useful. \r\n\r\nI'm just exploring NUnit with some old .Net 1.1 code. Though
+    NUnit keeps telling me that they now use NSubstitute I can't use it because of
+    the old .Net framework. When I use DynamicMock there's a warning message about
+    the object being superseded but I'm hoping I can ignore that and carry on. \r\n\r\nDoes
+    anyone know of any better mocking frameworks that can be used with VB.Net 1.1?"
+- id: 18370
+  author: Pete
+  author_email: p15tol@yahoo.com
+  author_url: ''
+  date: '2013-06-21 07:07:17 -0400'
+  date_gmt: '2013-06-21 13:07:17 -0400'
+  content: Another Thank You here. Still a great introductory article after all these
+    years. Nice one!
+---
+<p>NUnit is my Unit Testing tool of choice for .NET development. Microsoft provides a unit testing framework but it only works with some higher-end versions of Visual Studio. They're so similar that it's almost ridiculous that Microsoft created their own version.<br />
+(See one of my previous posts for more information on <a href="http:&#47;&#47;www.zorched.net&#47;2006&#47;11&#47;28&#47;msbuild-with-nunit&#47;">Automating NUnit with MSBuild<&#47;a>.) In the Java world it's fairly common to do Mocking to help make unit testing easier. I've written about <a href="http:&#47;&#47;www.zorched.net&#47;2006&#47;09&#47;24&#47;jmock-for-mocking-unit-tests&#47;">using JMock for Unit Tesing<&#47;a> in Java. In this post, I'd like to talk about a relatively new feature of NUnit which now supports Mocks out of the box.<&#47;p></p>
+<h3>What Are Mock Objects<&#47;h3></p>
+<p>Mock Objects are a technique that allow you to isolate classes from their dependencies for testing purposes. This isolation allows for fine-grained testing of single methods in a single class, possibly even before the dependent classes are fully implemented. This isolation allows your tests to run quickly and it makes testing small pieces of functionality much easier. When you've tested individual pieces of code in isolation you can have much higher confidence in larger-grained tests. This isolation becomes even more interesting when you are dealing with dependencies such as a data layer or a web service layer. External calls like that can be very time consuming or could fail if the remote system is down for maintenance.<&#47;p></p>
+<p>One of the great things about using Mock Objects is that they force you to think about the dependencies that your classes and methods have. It forces you to think about the coupling between your classes. If you have high coupling then your code is often harder to test. If you have a loosely coupled design then testing and using Mock Objects is very much easier. Thinking about those design notions early can help you more easily manage change over time.<&#47;p></p>
+<p>Maxims:<&#47;p></p>
+<ul>
+<li>Good design is better than bad design<&#47;li>
+<li>Loosely coupled objects are usually a better design than tightly coupled objects<&#47;li>
+<li>Testing improves code quality and developer efficiency over time<&#47;li>
+<li>Testing is easier with a loosely coupled designs<&#47;li><br />
+<&#47;ul></p>
+<h3>A Sample Project<&#47;h3></p>
+<p>We're going to start with some simple code. We create a Domain object called Person and an interface for a Data Access object called IPersonRepository. Pretty simple at this point.<br />
+<code lang="csharp"><br />
+public class Person<br />
+{<br />
+    public string Id;<br />
+    public string FirstName;<br />
+    public string LastName;<br />
+    public Person(string newId, string fn, string ln)<br />
+    {<br />
+        Id = newId;<br />
+        FirstName = fn;<br />
+        LastName = ln;<br />
+    }<br />
+}<br />
+<&#47;code><&#47;p></p>
+<p><code lang="csharp"><br />
+public interface IPersonRepository<br />
+{<br />
+    List<Person> GetPeople();<br />
+    Person GetPersonById(string id);<br />
+}<br />
+<&#47;code><&#47;p></p>
+<p>Next we create a PersonService object. This would represent all of the business logic in our application. It would interact with the Data Access tier and return information to the UI layer for display.<&#47;p></p>
+<p>We wire together our objects using Constructor based <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Dependency_injection">Dependency Injection<&#47;a>. All of the dependent Objects are sent in through the constructor. This allows for the loose coupling since the PersonService doesn't know about the Implementing class, but only the interface. Since it's done in the constructor we can also never have an invalid PersonService as would be the case if there was a setter for the IPersonRepository implementation.<&#47;p></p>
+<p>This is again a fairly straightforward implementation, but I hope enough to display the issue at hand.<br />
+<code lang="csharp"><br />
+public class PersonService<br />
+{<br />
+    private IPersonRepository personRepos;<br />
+    public PersonService(IPersonRepository repos)<br />
+    {<br />
+        personRepos = repos;<br />
+    }<br />
+    public List<Person> GetAllPeople()<br />
+    {<br />
+        return personRepos.GetPeople();<br />
+    }<br />
+    public List<Person> GetAllPeopleSorted()<br />
+    {<br />
+        List<Person> people = personRepos.GetPeople();<br />
+        people.Sort(delegate(Person lhp, Person rhp) {<br />
+            return lhp.LastName.CompareTo(rhp.LastName);<br />
+        });<br />
+        return people;<br />
+    }<br />
+    public Person GetPerson(string id)<br />
+    {<br />
+        try<br />
+        {<br />
+            return personRepos.GetPersonById(id);<br />
+        }<br />
+        catch (ArgumentException)<br />
+        {<br />
+            return null; &#47;&#47; no person with that id was found<br />
+        }<br />
+    }<br />
+}<br />
+<&#47;code><&#47;p></p>
+<h3>Using Mocks with NUnit<&#47;h3></p>
+<p>Now we can start testing our PersonService. Notice that we haven't even implemented the IPersonRepository yet. That way we can make sure that everything in our PersonService class works as expected without having to think about other layers of the application.<&#47;p></p>
+<p><code lang="csharp"><br />
+using System;<br />
+using System.Collections.Generic;<br />
+using NUnit.Framework;<br />
+using NUnit.Mocks;<br />
+[TestFixture]<br />
+public class PersonServiceTest<br />
+{<br />
+    &#47;&#47; The dynamic mock proxy that we will use to implement IPersonRepository<br />
+    private DynamicMock personRepositoryMock;<br />
+    &#47;&#47; Set up some testing data<br />
+    private Person onePerson = new Person("1", "Wendy", "Whiner");<br />
+    private Person secondPerson = new Person("2", "Aaron", "Adams");<br />
+    private List<Person> peopleList;<br />
+    [SetUp]<br />
+    public void TestInit()<br />
+    {<br />
+        peopleList = new List<Person>();<br />
+        peopleList.Add(onePerson);<br />
+        peopleList.Add(secondPerson);<br />
+        &#47;&#47; Construct a Mock Object of the IPersonRepository Interface<br />
+        personRepositoryMock = new DynamicMock(typeof (IPersonRepository));<br />
+    }<br />
+    [Test]<br />
+    public void TestGetAllPeople()<br />
+    {<br />
+        &#47;&#47; Tell that mock object when the "GetPeople" method is<br />
+        &#47;&#47; called to return a predefined list of people<br />
+        personRepositoryMock.ExpectAndReturn("GetPeople", peopleList);<br />
+        &#47;&#47; Construct a Person service with the Mock IPersonRepository<br />
+        PersonService service = new PersonService(<br />
+             (IPersonRepository) personRepositoryMock.MockInstance);<br />
+        &#47;&#47; Call methods and assert tests<br />
+        Assert.AreEqual(2, service.GetAllPeople().Count);<br />
+    }<br />
+    [Test]<br />
+    public void TestGetAllPeopleSorted()<br />
+    {<br />
+        &#47;&#47; Tell that mock object when the "GetPeople" method is called to<br />
+        &#47;&#47; return a predefined list of people<br />
+        personRepositoryMock.ExpectAndReturn("GetPeople", peopleList);<br />
+        PersonService service = new PersonService(<br />
+                (IPersonRepository) personRepositoryMock.MockInstance);<br />
+        &#47;&#47; This method really has "business logic" in it - the sorting of people<br />
+        List<Person> people = service.GetAllPeopleSorted();<br />
+        Assert.IsNotNull(people);<br />
+        Assert.AreEqual(2, people.Count);<br />
+        &#47;&#47; Make sure the first person returned is the correct one<br />
+        Person p = people[0];<br />
+        Assert.AreEqual("Adams", p.LastName);<br />
+    }<br />
+    [Test]<br />
+    public void TestGetSinglePersonWithValidId()<br />
+    {<br />
+        &#47;&#47; Tell that mock object when the "GetPerson" method is called to<br />
+        &#47;&#47; return a predefined Person<br />
+        personRepositoryMock.ExpectAndReturn("GetPersonById", onePerson, "1");<br />
+        PersonService service = new PersonService(<br />
+            (IPersonRepository) personRepositoryMock.MockInstance);<br />
+        Person p = service.GetPerson("1");<br />
+        Assert.IsNotNull(p);<br />
+        Assert.AreEqual(p.Id, "1");<br />
+    }<br />
+    [Test]<br />
+    public void TestGetSinglePersonWithInalidId()<br />
+    {<br />
+        &#47;&#47; Tell that mock object when the "GetPersonById" is called with a null<br />
+        &#47;&#47; value to throw an ArgumentException<br />
+        personRepositoryMock.ExpectAndThrow("GetPersonById",<br />
+             new ArgumentException("Invalid person id."), null);<br />
+        PersonService service = new PersonService(<br />
+                 (IPersonRepository) personRepositoryMock.MockInstance);<br />
+        &#47;&#47; The only way to get null is if the underlying IPersonRepository<br />
+        &#47;&#47; threw an ArgumentException<br />
+        Assert.IsNull(service.GetPerson(null));<br />
+    }<br />
+}<br />
+<&#47;code><&#47;p></p>
+<p>The PersonService doesn't have a lot of logic in it, but I hope this illustrates how you easily can test various conditions using Mock objects. It also illustrates the idea of testing early by allowing you to test some code before all of the dependent objects are implemented.<&#47;p></p>
+<p>While the Mocks built into NUnit might not be the most powerful or complete Mocking library out there, it should be sufficient for most uses. I'm sure they will continue to improve them over time as well, so I look forward to them becoming more powerful (and having better documentation) in the future.<&#47;p></p>
+<p>Download Code Example:<br />
+<a href='http:&#47;&#47;www.zorched.net&#47;wp-content&#47;uploads&#47;2007&#47;03&#47;nmock-example.zip' title='NMock C# Example Project'>NMock C# Example Project<&#47;a><&#47;p></p>
+<p>For more on NUnit you might like to check out:<&#47;p></p>
+<ul>
+<li>
+<a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;product&#47;0974514020?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0974514020">Pragmatic Unit Testing in C# with Nunit (Pragmatic Programmers)<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&l=as2&o=1&a=0974514020" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;><br />
+<&#47;li></p>
+<li>
+<a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;product&#47;0596007396?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0596007396">NUnit Pocket Reference (Pocket Reference (O'Reilly))<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&l=as2&o=1&a=0596007396" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;><br />
+<&#47;li><br />
+<&#47;ul></p>
+<p>[ad name="image-banner"]<&#47;p></p>

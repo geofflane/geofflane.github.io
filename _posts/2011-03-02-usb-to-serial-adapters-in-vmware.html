@@ -1,0 +1,99 @@
+---
+layout: post
+status: publish
+published: true
+title: USB to Serial Adapters in VMWare
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 473
+wordpress_url: http://www.zorched.net/?p=473
+date: '2011-03-02 21:39:29 -0500'
+date_gmt: '2011-03-03 03:39:29 -0500'
+categories:
+- Code
+tags:
+- vmware
+- usb3
+- serial
+comments:
+- id: 17909
+  author: Miguel Ferreira
+  author_email: mif.ferreira@gmail.com
+  author_url: ''
+  date: '2011-07-18 09:46:05 -0400'
+  date_gmt: '2011-07-18 15:46:05 -0400'
+  content: "Hi Geoff,\r\n\r\nI had the same issue with a DELL Latitude E5520.\r\nMy
+    problem was I did not configure the correct port.\r\nMy laptop also has that \"special
+    port\" you mentioned, although I don't have any idea how to connect a usb to a
+    usb&#47;eSATA port, because the plug does not go in.\r\n\r\nAnyway, the reason
+    I left this message was to inform that the PROLIFIC usb to serial converter came
+    with a CD with the drive to Windows 7 and the drive to XP.\r\nI have installed
+    both and the converter works fine in the real and in the virtual XP machine.\r\n\r\nRegards,\r\nMifPT"
+- id: 17918
+  author: Dan Parsonson
+  author_email: big_mr_ed@hotmail.com
+  author_url: ''
+  date: '2011-07-29 16:16:12 -0400'
+  date_gmt: '2011-07-29 22:16:12 -0400'
+  content: "Just wanted to say thanks a lot for this post - I had exactly the same
+    problem with a W510 and using the eSata port worked a treat :-)\r\n\r\nCheers,\r\n\r\nDan"
+- id: 17977
+  author: Iamfrankenstein
+  author_email: junk@gb.getmyip.com
+  author_url: ''
+  date: '2011-11-21 08:57:43 -0500'
+  date_gmt: '2011-11-21 14:57:43 -0500'
+  content: "THANK YOU,\r\n\r\nThis post saved me ALLOT of time!!!\r\n\r\nI have USB3
+    on my laptop and because of it suffered the same ailment. \r\nBut your solution
+    worked perfectly.\r\n\r\nTHX from Holland!"
+- id: 17978
+  author: Iamfrankenstein
+  author_email: junk@gb.getmyip.com
+  author_url: ''
+  date: '2011-11-21 09:01:27 -0500'
+  date_gmt: '2011-11-21 15:01:27 -0500'
+  content: "@MifPT,\r\n\r\nNo kidding. You don't even have usb3. (as fare as google
+    allowed me to find)\r\nIts a bit hard for usb3 to screw something up if you don't
+    even have it.\r\n\r\n;)\r\n\r\nGreetings from The Neterlands"
+- id: 18017
+  author: Usman
+  author_email: usman.anjum@gmail.com
+  author_url: ''
+  date: '2012-02-24 06:08:39 -0500'
+  date_gmt: '2012-02-24 12:08:39 -0500'
+  content: "Hello\r\n I am using HP Probook 4530s  i have windows 7 . I want to use
+    USB to serial convertor cable but i came to know that cable is not working in
+    Windows7 . Can any one tell me how can i use it in windows 7 can VMware be helpful"
+- id: 18343
+  author: Hernan
+  author_email: hernan_eche@yahoo.com.ar
+  author_url: ''
+  date: '2013-04-03 05:53:58 -0400'
+  date_gmt: '2013-04-03 11:53:58 -0400'
+  content: Thanks!! a simple advice in the right moment
+- id: 18361
+  author: AaronG
+  author_email: agelfand@austin.rr.com
+  author_url: ''
+  date: '2013-05-22 19:43:09 -0400'
+  date_gmt: '2013-05-23 01:43:09 -0400'
+  content: Thanks. This solved my problem as well. Dell Precision 4600 with NI USB-232.
+- id: 18367
+  author: KSOVIVO
+  author_email: keith.serjeant@glv.com
+  author_url: ''
+  date: '2013-06-06 05:35:27 -0400'
+  date_gmt: '2013-06-06 11:35:27 -0400'
+  content: "Thankyouuuuuuuuuuuuuuuuuu\r\nAfter hours of frustration !"
+---
+<p>I needed to do some work using a pin pad (a device that allows you to enter a numeric code at a point-of-sale or other system) and needed to test it in a 32bit Windows environment. The pin pad uses a serial port to communicate to a computer. Of course no portable computers (maybe no desktops either, it's been years since I've had one) have serial ports anymore, so you have to use a USB to Serial adapter. It seems like many brands of these converters use  a chip by a company called <a href="http:&#47;&#47;www.prolific.com.tw&#47;eng&#47;downloads.asp?id=31">Prolific<&#47;a>. Prolific makes the chip that lives in the converter that does the translation from serial to USB and back. I found the drivers from prolific and the device loaded just fine on Windows 7. I then created a Windows XP image in VMWare. </p>
+<p>This is where the fun started.</p>
+<p>I loaded the driver in Windows XP but no matter what I tried I couldn't get VMWare to take control of the adapter. Every time I chose <em>Virtual Machine -> Removable Devices -> Prolific USB device -> Connect<&#47;em> it would give me an error: "Driver error". Nice and specific and helpful right? I rebooted the host and the guest, tried without the driver installed on the host and rebooted again. Try as I might nothing worked.</p>
+<p>Long story short, I was plugging the adapter into a USB3 port and either VMWare or the driver didn't like USB3. So If you are seeing a similar problem, try and find out what kind of USB port it is. I was using Windows 7 on a <a href="http:&#47;&#47;shop.lenovo.com&#47;us&#47;notebooks&#47;thinkpad&#47;w-series&#47;w510">Lenovo W510<&#47;a>. This machine has USB2 and USB3 ports. The 2 obvious USB ports on the left hand side are USB3. There is a USB2 port on the back, but I keep another device plugged into that one so I didn't even think to try it. It turns out though that the W510 has dual ESATA&#47;USB2 port next to the USB3 ports. That dual port looks physically different than a normal USB port so I assumed it was just ESATA. I plugged the usb to serial adapter into this dual port and everything worked flawlessly.</p>
+<p>Hopefully that will helps someone save a bunch of time that I wasted trying to get it to work.</p>

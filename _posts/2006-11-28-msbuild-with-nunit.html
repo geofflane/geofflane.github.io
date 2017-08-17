@@ -1,0 +1,138 @@
+---
+layout: post
+status: publish
+published: true
+title: MSBuild with NUnit
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 59
+wordpress_url: http://www.zorched.net/2006/11/28/msbuild-with-nunit/
+date: '2006-11-28 21:45:41 -0500'
+date_gmt: '2006-11-29 03:45:41 -0500'
+categories:
+- Code
+- ".NET"
+- Unit Testing
+- Automation
+tags:
+- xml
+- nunit
+- msbuild
+comments:
+- id: 1550
+  author: Zorched &#47; One Line Fix &raquo; More On MSBuild
+  author_email: ''
+  author_url: http://www.zorched.net/2006/11/30/more-on-msbuild/
+  date: '2006-11-30 19:22:13 -0500'
+  date_gmt: '2006-12-01 01:22:13 -0500'
+  content: "[...] MSBuild with NUnit [...]"
+- id: 9273
+  author: Zorched &#47; One Line Fix &raquo; Automated Subversion Tagging With MSBuild
+  author_email: ''
+  author_url: http://www.zorched.net/2007/02/23/automated-subversion-tagging-with-msbuild/
+  date: '2007-02-23 11:44:10 -0500'
+  date_gmt: '2007-02-23 17:44:10 -0500'
+  content: "[...] tagged posts More On MSBuildMSBuild with NUnitPragmatic Version
+    Control Using SubversionSubversion Maintenance ScriptsMore .NET Compact Framework
+    [...]"
+- id: 9920
+  author: Mocking .NET Objects with NUnit
+  author_email: ''
+  author_url: http://www.zorched.net/2007/03/10/mocking-net-objects-with-nunit/
+  date: '2007-03-10 20:33:30 -0500'
+  date_gmt: '2007-03-11 03:33:30 -0400'
+  content: "[...] that Microsoft created their own version. (See one of my previous
+    posts for more information on Automating NUnit with MSBuild.) In the Java world
+    it&#8217;s fairly common to do Mocking to help make unit testing easier. [...]"
+- id: 13880
+  author: randy
+  author_email: randy_kibbe@picis.com
+  author_url: http://www.picis.com
+  date: '2008-08-22 07:58:05 -0400'
+  date_gmt: '2008-08-22 13:58:05 -0400'
+  content: "I added the above text to my build.proj file. When I try to run it I get
+    this error. Any ideas ?\r\n\r\nTarget Test:\r\n    Unhandled Exception:\r\n    System.IO.FileLoadException:
+    Could not load file or assembly 'nunit.framework, Version=2.4.6.0, Culture=neutral,
+    PublicKeyToken=96d09a1eb7f44a77' or one of its dependencies. The located assembly's
+    manifest definition does not match the assembly reference. (Exception from HRESULT:
+    0x80131040)\r\n    File name: 'nunit.framework, Version=2.4.6.0, Culture=neutral,
+    PublicKeyToken=96d09a1eb7f44a77'\r\n    \r\n    Server stack trace: \r\n       at
+    System.ModuleHandle.ResolveType(Int32 typeToken, RuntimeTypeHandle* typeInstArgs,
+    Int32 typeInstCount, RuntimeTypeHandle* methodInstArgs, Int32 methodInstCount)"
+- id: 13883
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2008-08-22 08:50:02 -0400'
+  date_gmt: '2008-08-22 14:50:02 -0400'
+  content: "randy,\r\nYou probably are missing a reference to the NUnit.Framework.dll
+    in your Test project?"
+- id: 14255
+  author: Jirapong
+  author_email: jirapong.nanta@gmail.com
+  author_url: http://www.bananacoding.com
+  date: '2008-10-24 00:06:28 -0400'
+  date_gmt: '2008-10-24 06:06:28 -0400'
+  content: "I believe you also have to set ToolPath to the nunit-console.exe\r\n\r\n\r\n\r\nHope
+    this help."
+- id: 18060
+  author: Pawe&Aring;&sbquo;
+  author_email: truebzyq@gmail.com
+  author_url: ''
+  date: '2012-05-21 07:34:11 -0400'
+  date_gmt: '2012-05-21 13:34:11 -0400'
+  content: i found a solution, i had the same problem in my project, if you are using
+    msbuild to compile your solution, check if the nunit.framework that you are using
+    in your project cames from Nunit 2.5 or 2.6, if you are using 2.6 just change
+    it to 2.5 version.
+---
+<p>I've written about <a href="http:&#47;&#47;www.zorched.net&#47;category&#47;code&#47;unit-testing&#47;">Unit Testing<&#47;a> and <a href="http:&#47;&#47;www.zorched.net&#47;category&#47;code&#47;automation&#47;">Build Automation<&#47;a> in the past, but mostly dealing with Java projects and tools (because I usually write about things I'm working on at the time). Well, I've started a .NET project for the first time in a while so I want to solve some of the samde problems in this environment.</p>
+<h2>Why MSBuild?<&#47;h2><br />
+In the Java world, the natural choice for automation is usually <a href="http:&#47;&#47;ant.apache.org">Ant<&#47;a>. <a href="http:&#47;&#47;nant.sourceforge.net&#47;">NAnt<&#47;a> was created for the as a work alike for the .NET platform and is a very good tool. I've build custom extensions for <a href="http:&#47;&#47;www.zorched.net&#47;nant-sqlschematask&#47;">database automation<&#47;a> in the past and used it successfully. So why would I consider MSBuild? With the advent of <a href="http:&#47;&#47;msdn2.microsoft.com&#47;en-us&#47;vstudio&#47;default.aspx">Visual Studio 2005<&#47;a>, Microsoft included MSBuild as the build tool for its projects. All of the project files generated by Visual Studio are MSBuild files in disguise. This makes it really easy to leverage the project files to chain together a nice automated build.</p>
+<h2>Why NUnit?<&#47;h2><br />
+Microsoft is a true believer in <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Not_Invented_Here">Not Invented Here<&#47;a> and as such they created their own Unit Testing framework that looks and acts exactly the same as <a href="http:&#47;&#47;nunit.org">NUnit<&#47;a>. The MS XUnit framework only comes with the higher-end Team System versions of Visual Studio. In addition it is very hard to deploy the DLLs to build systems. The only way to get the proper DLLs installed is to install the full Visual Studio. That seems like a really big problem to me. With NUnit you can include the needed DLLs in your version control system and reference them in the project which makes it very easy to build and test code and use a Continuous Integration process.</p>
+<h2>How to Integrate MSBuild and NUnit<&#47;h2><br />
+Here's the good news, all of the work has been done for you. The good people at <a href="http:&#47;&#47;www.tigris.org">Tigris.org<&#47;a> (the creators of <a href="http:&#47;&#47;subversion.tigris.org">Subversion<&#47;a>) have created a series of <a href="http:&#47;&#47;msbuildtasks.tigris.org">MSBuild Tasks<&#47;a> filling in the gaps that MSBuild was missing. One of the included Tasks is an NUnit task. Their hard work and the simple script below should get ou started with a build that can run your tests as well.</p>
+<h2>Example Build File<&#47;h2><br />
+<code lang="xml"><br />
+<?xml version="1.0" encoding="utf-8"?><br />
+<Project DefaultTargets="Build" xmlns="http:&#47;&#47;schemas.microsoft.com&#47;developer&#47;msbuild&#47;2003"><br />
+     <!-- Import the MSBuild Tasks --><br />
+	<Import Project="$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets" &#47;><br />
+	<PropertyGroup><br />
+		<Configuration Condition=" '$(Configuration)' == '' ">Debug<&#47;Configuration><br />
+		<ClassLibraryOutputDirectory>bin\$(Configuration)<&#47;ClassLibraryOutputDirectory><br />
+		<ProjectDir>ProjectName<&#47;ProjectDir ><br />
+		<ProjectTestDir>ProjectNameTest<&#47;ProjectTestDir ><br />
+		<ProjectFile>$(ProjectDir)\ProjectName.csproj<&#47;ProjectFile ><br />
+		<TestProjectFile>$(ProjectTestDir)\ProjectNameTest.csproj<&#47;TestProjectFile ><br />
+	<&#47;PropertyGroup></p>
+<p>	<!-- Build projects by calling the Project files generated by VS --><br />
+	<Target Name="Build"><br />
+		<MSBuild Projects="$(ProjectFile)" &#47;><br />
+		<MSBuild Projects="$(TestProjectFile)" &#47;><br />
+	<&#47;Target></p>
+<p>	<!-- Run Unit tests --><br />
+	<Target Name="Test" DependsOnTargets="Build"><br />
+		<CreateItem Include="$(ProjectTestDir)\$(ClassLibraryOutputDirectory)\*.Tests.dll"><br />
+			<Output TaskParameter="Include" ItemName="TestAssembly" &#47;><br />
+		<&#47;CreateItem><br />
+		<NUnit Assemblies="@(TestAssembly)" &#47;><br />
+	<&#47;Target><br />
+<&#47;Project></p>
+<p><&#47;code></p>
+<p>The "Test" target above uses the NUnit task to run all of the NUnit Tests found in the DLL. There are a number of different ways to create ItemGroups ins MSBuild, all of which are odd and confusing. If anyone has any ideas on what the best practices in this regard, let me know.</p>
+<p>One final plug for my favorite Visual Studio plugin, <a href="http:&#47;&#47;www.jetbrains.com&#47;resharper&#47;">ReSharper<&#47;a>. It includes support for NUnit. It will help you create NUnit Tests and then lets you run them and debug them from within your IDE. It's almost like you have a real IDE all of a sudden!</p>
+<h2>References<&#47;h2><br />
+<a href="http:&#47;&#47;nunit.org">NUnit<&#47;a><br />
+<a href="http:&#47;&#47;msbuildtasks.tigris.org">MSBuild Tasks<&#47;a><br />
+<a href="http:&#47;&#47;dougrohm.com&#47;cs&#47;articles&#47;56.aspx">Integrating MSBuild with CruiseControl.NET<&#47;a></p>
+<p><a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;redirect.html?ie=UTF8&location=http%3A%2F%2Fwww.amazon.com%2FPragmatic-Unit-Testing-NUnit-Programmers%2Fdp%2F0974514020%2Fsr%3D8-1%2Fqid%3D1164768532%3Fie%3DUTF8%26s%3Dbooks&tag=zorchednet-20&linkCode=ur2&camp=1789&creative=9325">Pragmatic Unit Testing in C# with NUnit<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&amp;l=ur2&amp;o=1" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;><br />
+<a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;redirect.html?ie=UTF8&location=http%3A%2F%2Fwww.amazon.com%2FNUnit-Pocket-Reference-OReilly%2Fdp%2F0596007396%2Fsr%3D8-4%2Fqid%3D1164768532%3Fie%3DUTF8%26s%3Dbooks&tag=zorchednet-20&linkCode=ur2&camp=1789&creative=9325">NUnit Pocket Reference<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&amp;l=ur2&amp;o=1" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;><br />
+<a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;redirect.html?ie=UTF8&location=http%3A%2F%2Fwww.amazon.com%2FDeploying-NET-Applications-Learning-ClickOnce%2Fdp%2F1590596528%2Fsr%3D8-1%2Fqid%3D1164768649%3Fie%3DUTF8%26s%3Dbooks&tag=zorchednet-20&linkCode=ur2&camp=1789&creative=9325">Deploying .NET Applications: Learning MSBuild and ClickOnce<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&amp;l=ur2&amp;o=1" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;></p>

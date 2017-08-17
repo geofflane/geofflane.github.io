@@ -1,0 +1,44 @@
+---
+layout: post
+status: publish
+published: true
+title: Testing and Internal Implementation in .NET
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 497
+wordpress_url: http://www.zorched.net/?p=497
+date: '2012-02-06 13:47:20 -0500'
+date_gmt: '2012-02-06 19:47:20 -0500'
+categories:
+- ".NET"
+tags:
+- meta-programming
+- Unit Testing
+- csharp
+comments:
+- id: 18081
+  author: tcmaster
+  author_email: monstercorp@gmail.com
+  author_url: ''
+  date: '2012-09-14 16:11:08 -0400'
+  date_gmt: '2012-09-14 22:11:08 -0400'
+  content: why make test code another assembly? put them together, rooted from different
+    folder  but share the same folder layout, like in Java. Use conditional compilation
+    to exclude the test codes from release version of assembly.
+---
+<p>Switching back and forth between Java and .NET lets you see some of the differences between the two platforms more easily. This happened to me the other day when I switched from Java to .NET and was writing Unit Tests. In Java, the access modifiers include public, private, protected and <em>default<&#47;em>. In C# they are public, private, protected and internal. In general, the public, private access modifiers are very similar. Protected is slightly different in that Java allows both derived classes as well as classes in the same package to access those elements where C# only allows derived classes to access them. Where things diverge more is in the default&#47;internal differences. <em>Default<&#47;em> in java restricts access to the same package while internal in C# restricts access to the same Assembly (generally a single DLL).</p>
+<p>What does this have to do with testing you might ask?</p>
+<p>It's a good OO design principle to expose only those things that are part of the contract to a class or package and to leave the implementation hidden as much as possible. This is called <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Encapsulation_(object-oriented_programming)">encapsulation<&#47;a>. You can make methods private or default&#47;internal. You can make entire classes default&#47;internal and only publicly expose an interface that clients need to use.</p>
+<p>A common practice in the Java world is to mimic the package layout of your main source code in your test code. When you mimic that layout then your test classes and implementation classes end up being in the same packages. Because of this your test classes can access all those default members to test them. In C# because it's not based on a namespace, but rather an Assembly this doesn't work.</p>
+<p>Luckily there's an easy workaround.</p>
+<p>In the AssemblyInfo.cs of your main project add:<br />
+<code lang="csharp"><br />
+[assembly: InternalsVisibleTo("someOther.AssemblyName.Test")]<br />
+<&#47;code></p>
+<p>Where <strong>SomeOther.AssemblyName.Test<&#47;strong> is the name of the Assembly that contains your tests for the target assembly. Then the test code can access internal details of the assembly. And you can easily test the things that other calling code might not have access to.</p>

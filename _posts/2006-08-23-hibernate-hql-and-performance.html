@@ -1,0 +1,296 @@
+---
+layout: post
+status: publish
+published: true
+title: Hibernate HQL And Performance
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 41
+wordpress_url: http://www.zorched.net/2006/08/23/hibernate-hql-and-performance/
+date: '2006-08-23 21:43:37 -0400'
+date_gmt: '2006-08-24 03:43:37 -0400'
+categories:
+- Code
+- Java
+tags:
+- hibernate
+- orm
+- performance
+- hql
+- database
+comments:
+- id: 10794
+  author: hughughqlhug
+  author_email: hql@isbetterthanyou.com
+  author_url: ''
+  date: '2007-05-30 09:04:11 -0400'
+  date_gmt: '2007-05-30 15:04:11 -0400'
+  content: "Good lord, I hope God almighty smites you down for your treacherous lies.
+    HQL is friking amazing, and only a billion times better than the poor alternative
+    of the criteria API; which is dooooooooooooooog slow.\r\nI suggest you get some
+    experience using HQL in a production environment before you tarnish the internet
+    with lowly \"opinions\"."
+- id: 10795
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2007-05-30 09:13:47 -0400'
+  date_gmt: '2007-05-30 15:13:47 -0400'
+  content: "That's funny... I didn't mention the Criteria API at all.\r\n\r\nThe point,
+    for those who obviously don't get it, is that you can misuse and abuse HQL and
+    give up a lot of the power of mapping objects, and thus Level 1 caching that Hibernate
+    provides."
+- id: 10839
+  author: hqlrocks
+  author_email: hqlrocks@hql.org
+  author_url: http://www.hql.org
+  date: '2007-07-04 19:02:26 -0400'
+  date_gmt: '2007-07-05 01:02:26 -0400'
+  content: "\"If you specify a fetch=&acirc;&euro;\x9Djoin&acirc;&euro;\x9D in your
+    mapping to do a left join and load a dependent object, that doesn&acirc;&euro;&trade;t
+    get used when you use HQL to load the object, so you will be doing more queries
+    than you need.\"\r\n\r\nWith HQL, one can just do the following to get the object
+    and the dependent object in one DB trip: \"from parent as p left join fetch p.dependentObject\"
+    - important keyword \"fetch\" on the join.  I believe this would be equivalent
+    to using the explicit config of fetch=\"join\" which gets ignored with HQL as
+    you state.\r\n\r\nFrom hibernate.org: In addition, a \"fetch\" join allows associations
+    or collections of values to be initialized along with their parent objects, using
+    a single select. This is particularly useful in the case of a collection. It effectively
+    overrides the outer join and lazy declarations of the mapping file for associations
+    and collections.   http:&#47;&#47;www.hibernate.org&#47;hib_docs&#47;v3&#47;reference&#47;en&#47;html&#47;queryhql.html#queryhql-joins-forms"
+- id: 10841
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2007-07-05 09:40:58 -0400'
+  date_gmt: '2007-07-05 15:40:58 -0400'
+  content: "You of course can make all kinds of modifications to HQL sprinkled all
+    over your data access layer. But that knowledge is already represented in your
+    mapping file, so this is repeating that knowledge in many places. And it doesn't
+    \"override\" the declarations in the mappings, because those declarations aren't
+    ever used by HQL in the first place.\r\n\r\nThe main problem is when going back
+    and running the same query that could have been expressed as an object relationship.
+    The natural object relationships are where hibernate shines. HQL should be reserved
+    for very special situations."
+- id: 11008
+  author: Rob
+  author_email: none@none.com
+  author_url: ''
+  date: '2007-10-26 09:32:50 -0400'
+  date_gmt: '2007-10-26 15:32:50 -0400'
+  content: I've been using NHibernate HQL and Criteria in a production environment
+    for years and when used properly Criteria is a LOT faster than HQL. I'm guessing
+    this is not the case with Hibernate Criteria
+- id: 11009
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2007-10-26 10:30:42 -0400'
+  date_gmt: '2007-10-26 16:30:42 -0400'
+  content: "Rob,\r\nThat's exactly what I was trying to say. Use natural relationships
+    and criteria queries to load objects in a domain driven way. Do not do a transaction
+    script pattern of a bunch of HQL queries buried in an application un-aware data
+    access layer."
+- id: 11085
+  author: Rajesh Patel
+  author_email: rpatel@harpoontech.com
+  author_url: http://harpoontech.com
+  date: '2007-11-30 07:45:02 -0500'
+  date_gmt: '2007-11-30 13:45:02 -0500'
+  content: The criteria API has the same "limitations" in regard to the cache that
+    you are pointing out with HQL.
+- id: 11104
+  author: Matt Brock
+  author_email: brockmatt@gmail.com
+  author_url: ''
+  date: '2007-12-15 15:39:47 -0500'
+  date_gmt: '2007-12-15 21:39:47 -0500'
+  content: "There's virtually no performance difference between HQL and Criteria.
+    \ The principal benefit of the Criteria API is that the code is cleaner and more
+    abstracted from the final generated SQL.  However, the more complex your queries
+    become, the deeper you must delve into the inner workings of Hibernate--which
+    kind-of defeats the purpose.\r\n\r\nI find I still end up using HQL for most of
+    my DAOs, however, because HQL can return scaler results which are far more performant
+    than fully-hydrated objects.  Sometimes I don't need a whole domain object--I
+    just want a couple of properties.  For instance: let's say I have a Customer class
+    that has dozens of simple properties (id, name, account number, etc.), as well
+    as a bunch of associated collections (Addresses, Bank Accounts, Transactions,
+    etc.).  If I do a criteria query on the Customer.class, I'll get a bunch of Customer
+    objects back with all the simple (non-lazy) properties, and PersistentCollection
+    placeholders for my (lazy-loaded) collections.\r\n\r\nBut what if I only need
+    a list of names and ids?  I don't need placeholder objects taking up space in
+    my JVM if they're never used.  A good example of this is drop-down auto-complete
+    forms: you type something in, a list of partially matched Customers comes back.
+    \ You're not interested in the Customer's addresses, or their lastModified date,
+    or any of that stuff.  You really just want an array of strings.\r\n\r\n> But
+    that knowledge is already represented in your mapping file, so this\r\n> is repeating
+    that knowledge in many places\r\n\r\nThe Hibernate docs actually recommend *against*
+    specifying fetching strategies in the mappings. From the docs (19.1.2. - Tuning
+    fetch strategies): \"Usually, we don't use the mapping document to customize fetching.
+    Instead, we keep the default behavior, and override it for a particular transaction...\""
+- id: 11119
+  author: Ben Ketteridge
+  author_email: ben.ketteridge@gmail.com
+  author_url: ''
+  date: '2008-01-08 09:45:10 -0500'
+  date_gmt: '2008-01-08 15:45:10 -0500'
+  content: "I'd have to agree with the HIbernate Docs on fetch strategies -- if you
+    specify the fetch strategy in the domain mapping (whether by annotation or the
+    xml), then you're committing all uses of that strategy for the given relationship
+    to use that same strategy, whether that is appropriate or not.\r\n\r\nEg. you
+    have a Brokerage that contains many Brokers, when you fetch a list of Brokerages,
+    you do not want the child relationship brokers to be eagerly fetched - it should
+    be allowed to remain in the normal lazy mode. However, when you're fetching a
+    specific Brokerage for display, in a context that wants to also display a table
+    of the Brokers within the Brokerage, then you want the Brokers to be fetched eagerly
+    (perhaps with a &acirc;&euro;&oelig;from parent as p left join fetch p.dependentObject&acirc;&euro;\x9D
+    DAO method)  as part of the Brokerage fetch to avoid an N+1 fetch scenario.\r\n\r\n(If
+    Brokers and Brokerages are not your bag, you can substitute Brokerage with Order,
+    and Broker with OrderLine for the same effect)\r\n\r\nProviding the DAO layer
+    is the primary method for fetching objects (and you never pollute the service&#47;UI
+    layers with hibernate manipulations of the persisted object graph) then it is
+    quite reasonable to have transaction specific logic - it's still only in one place,
+    just not enforced at a POJO domain object level, where there is no knowledge of
+    the transactional context of an operation."
+- id: 11128
+  author: Dan
+  author_email: dlr137@gmail.com
+  author_url: ''
+  date: '2008-01-13 20:03:43 -0500'
+  date_gmt: '2008-01-14 02:03:43 -0500'
+  content: "Matt,\r\n\r\n>But what if I only need a list of names and ids? I don&acirc;&euro;&trade;t
+    need placeholder\r\n>objects taking up space in my JVM if they&acirc;&euro;&trade;re
+    never used.\r\n\r\nSo how can one achieve such a query which does not pull in
+    all the properties?\r\n\r\n\r\nThanks,\r\nDan"
+- id: 11140
+  author: Florian
+  author_email: pearl_jam@gmx.net
+  author_url: ''
+  date: '2008-01-27 06:37:39 -0500'
+  date_gmt: '2008-01-27 12:37:39 -0500'
+  content: "Matt,\r\n\r\nyou can easily load scalar values with the criteria API,
+    you do not need HQL for this.\r\n\r\nExample:\r\nYou have a Company with an one-2-one
+    relation to an Address.\r\nYou just want to query id and name of the Company and
+    the countryCode of its related Address.\r\n\r\nmyCompanyCriteria.createAlias(\"address\",
+    \"joinedAddress\");\r\n\r\nmyCompanyCriteria.setProjection(\r\n   Projections.projectionList()\r\n
+    \     .add( Projections.id(), \"id\" )\r\n      .add( Projections.property(\"name\"),
+    \"name\" )\r\n      .add( Projections.property(\"joinedAddress.countryCode\"),
+    \"countryCode\" )\r\n   );\r\n\r\nmyCompanyCriteria.setResultTransformer( new
+    AliasToBeanResultTransformer(CompanyVO.class) );\r\n\r\nThe Class CompanyVO just
+    needs setter for id, name and countryCode.\r\n\r\n\r\nRegards"
+- id: 11166
+  author: Hibernate , rich clients and long running sessions &laquo; Blog
+  author_email: ''
+  author_url: http://suryagaddipati.wordpress.com/2008/02/15/hibernate-rich-clients-and-long-running-sessions/
+  date: '2008-02-14 21:45:48 -0500'
+  date_gmt: '2008-02-15 03:45:48 -0500'
+  content: "[...] http:&#47;&#47;www.zorched.net&#47;2006&#47;08&#47;23&#47;hibernate-hql-and-performance&#47;
+    [...]"
+- id: 14222
+  author: mooritze
+  author_email: regjunk1@gmail.com
+  author_url: ''
+  date: '2008-09-24 21:42:01 -0400'
+  date_gmt: '2008-09-25 03:42:01 -0400'
+  content: "Dude,\r\nThis a completely stupid article. Don't use SQL eh?? Have you
+    ever built a real app? I wish google didn't index your post!!!"
+- id: 15606
+  author: Hibernate HQL And Performance &raquo; Agile Techno Solutions ., JSC
+  author_email: ''
+  author_url: http://www.agile.vn:90/blog/2009/09/03/hibernate-hql-and-performance/
+  date: '2009-09-03 08:02:14 -0400'
+  date_gmt: '2009-09-03 14:02:14 -0400'
+  content: "[...] From : http:&#47;&#47;www.zorched.net&#47;2006&#47;08&#47;23&#47;hibernate-hql-and-performance&#47;
+    [...]"
+- id: 17898
+  author: vivmenon
+  author_email: vivmenon@yahoo.com
+  author_url: http://www.8thphenomenon.com
+  date: '2011-05-25 03:19:04 -0400'
+  date_gmt: '2011-05-25 09:19:04 -0400'
+  content: I agree, HQL can turn around and bite you. Even a simple update HQL query
+    starts searching the collections and causes a performance issue.
+- id: 17938
+  author: James
+  author_email: numl_ravian@yahoo.com
+  author_url: ''
+  date: '2011-09-16 03:47:24 -0400'
+  date_gmt: '2011-09-16 09:47:24 -0400'
+  content: "Basically second level cache is used to share load with database, for
+    huge databases you need to have second level cache in order to enhance performance
+    and remove bottlenecks . Usually distributed caching handles this type of issues
+    and provides concurrency support. NCache is a distributed cache which provides
+    a second level or process level distributed cache for <a href=\"http:&#47;&#47;www.alachisoft.com&#47;&#47;ncache&#47;nhibernate-l2cache-index.html\"
+    rel=\"nofollow\"> NHibernate <&#47;a>\r\n by implementing ICacheProvider and ICache
+    interfaces. Furthermore you can plug-in NCache to your existing NHibernate application
+    without any code change. You just need to change your \"app.config\" file to specify
+    NCache as your \"hibernate.cache.provider_class\" and you're all set to start
+    using distributed caching."
+---
+<p>The <a href="http:&#47;&#47;www.hibernate.org&#47;">Hibernate<&#47;a> <acronym title="Object Relational Mapper">ORM<&#47;acronym> tool give you the ability to write SQL-esque queries using <a href="http:&#47;&#47;www.hibernate.org&#47;hib_docs&#47;reference&#47;en&#47;html&#47;queryhql.html">HQL<&#47;a> to do custom joining, filtering, etc. to pull Objects from your database. The documentation gives you a lot of examples of the things you can do, but I haven't seen any caveats or warnings.<&#47;p></p>
+<h3>Database Performance<&#47;h3></p>
+<p>As far as database performance goes there are two major things to start with when you want to understand your database performance:<&#47;p></p>
+<ul title="Basic Database Performance">
+<li>How many queries are run?<&#47;li>
+<li>How expensive are the individual queries?<&#47;li><br />
+<&#47;ul></p>
+<p>Not too earth shattering is it? Basically if you run fewer queries of the same cost you're better off. Likewise, if you make the queries themselves cost less (by optimizing the queries themselves, creating the proper indexes, etc) then they will run faster. So of course the best is to do both. Identify you to run fewer, faster queries. <small>(Yes, I'm still waiting on my Nobel prize.)<&#47;small><&#47;p></p>
+<p>I'll talk more about fewer queries later...<&#47;p></p>
+<p>To make queries faster, you mostly are working in the database. You depend on good tools and good statistics. If the size and kind of data changes, you might have to redo this stuff.<&#47;p></p>
+<p>To Optimize your database queries:<&#47;p></p>
+<ol title="Optimizing database queries">
+<li>Run some queries examining their execution plans<&#47;li>
+<li>Find some possible columns to index<&#47;li>
+<li>Create an index<&#47;li>
+<li>Re-run the queries and examine the execution plans again<&#47;li>
+<li>Keep it if it's faster, get rid of it if it's not<&#47;li>
+<li>Goto 1<&#47;li><br />
+<&#47;ol></p>
+<h3>Hibernate and Caches<&#47;h3></p>
+<p>Hibernate does one thing: It maps Objects to a Relational database. Hibernate is really pretty good at that mapping and can support all kinds of schemas. So you should be able to (relatively) easily map your objects to your schema.<&#47;p></p>
+<p>Hibernate also has two potential caching schemes. What it calls Level-1 and Level-2 caching. Level-1 caching is done through the Hibernate session. As long as the Hibernate session is open, any object that you have loaded will be pulled from the session if you query for it again.<&#47;p></p>
+<p>The Level-2 cache is a longer-running, more advanced caching scheme. It allows you to store objects across Hibernate sessions. You're often discouraged against using Level-2 caching, but it is very nice for read-only objects that you don't expect to change in the database (think of pre-defined type information and the like). Again, if you query or one of these objects using Hibernate, then you'll get an object from the Level-2 cache.<&#47;p></p>
+<p>Notice how the Level-1 and Level-2 cache prevent Hibernate from having to re-query the database for a lot of objects. This of course can be a huge performance benefit. Likewise, Hibernate supports Lazy Loading of collections, so if your object is related to a collection of other objects, Hibernate will wait to load them until you need them. Once they've been loaded though, they are in the Object graph, so accessing them a second time does not require another round-trip to the database.<&#47;p></p>
+<p>All of this lazy loading and caching is about reducing the number of queries you need to run against the database. You can also tweak your Hibernate mapping files to implement things like batching (loading children of multiple parents in one query) to greatly reduce the number of queries that need to be run. You can also specify to pre-load a related object using a left join if you will always need the object and want to get both in the same query. Most of the decisions are dependent on your application and what you are doing, but they are very easy to play with in your configuration and see if they improve your application performance.<&#47;p></p>
+<h3>Why the hard time for HQL?<&#47;h3></p>
+<p>All of the Caching and tweaking you can do in your Hibernate mappings (or using Annotations) is totally wasted if you using HQL queries to load your objects.<&#47;p></p>
+<p>If you specify a fetch="join" in your mapping to do a left join and load a dependent object, that doesn't get used when you use HQL to load the object, so you will be doing more queries than you need.<&#47;p></p>
+<p>If you have natural mappings of parent&#47;child relationships then the following code will only generate a single query to load the Person and a single query to get the Addresses.<br />
+<code><br />
+Person p = session.get(Person.class, 1);<br />
+List<Address> address = p.getAddresses();<br />
+List<Address> address2 = p.getAddresses();<br />
+<&#47;code><&#47;p></p>
+<p>This code still only generates two queries:<br />
+<code><br />
+Person p = session.createQuery("from Person where id=:id")<br />
+                       .setParameter("id", 1).uniqueResult();<br />
+List<Address> address = p.getAddresses();<br />
+List<Address> address = p.getAddresses();<br />
+<&#47;code><&#47;p></p>
+<p>But the following code generates twice as many queries to load the addresses.<br />
+<code><br />
+Person p = session.createQuery("from Person where id=:id")<br />
+                       .setParameter("id", 1).uniqueResult();<br />
+List<Address> address = session<br />
+                       .createQuery("from Addresses where person_id=:id")<br />
+                       .setParameter("id", 1).list();<br />
+List<Address> address2 = session<br />
+                       .createQuery("from Addresses where person_id=:id")<br />
+                       .setParameter("id", 1).list();<br />
+<&#47;code><&#47;p></p>
+<p>Of course this is a totally contrived example, but if you've built out a large system with a <a href="http:&#47;&#47;www.corej2eepatterns.com&#47;Patterns2ndEd&#47;ServiceFacade.htm">Service Facade<&#47;a> and <a href="http:&#47;&#47;www.corej2eepatterns.com&#47;Patterns2ndEd&#47;DataAccessObject.htm">DAOs<&#47;a> these kinds of things can easily be hidden deep in the application where it would be hard to know whether a call would trigger a database call or not. So be very conscious of using HQL queries and the consequences of using them.<&#47;p></p>
+<p>Hibernate rewards you for using natural relationships in your Objects. It rewards you with performance for building a POJO based Object Oriented system.<&#47;p></p>
+<h3>Hibernate HQL Rules<&#47;h3></p>
+<p>Rule #1: Don't use HQL.<br />
+Rule #2: If you really need to use HQL, see Rule #1.<br />
+Rule #3: If you really, really need HQL and you know what you're doing, then carefully use HQL.<&#47;p></p>
+<p>Ok, so if I'm right about this, why is this not at the top of the HQL documentation? Don't you think they should talk about this as a method of last resort?<&#47;p></p>
+<p>Time to start reading <a href="http:&#47;&#47;www.manning.com&#47;crichardson&#47;">POJOs in Action<&#47;a> again.<&#47;p></p>
+<p>[ad name="image-banner"]<&#47;p></p>

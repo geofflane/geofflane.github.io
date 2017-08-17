@@ -1,0 +1,96 @@
+---
+layout: post
+status: publish
+published: true
+title: CruiseControl With a Specific Version of Grails
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 98
+wordpress_url: http://www.zorched.net/2008/03/27/cruisecontrol-with-a-specific-version-of-grails/
+date: '2008-03-27 09:42:31 -0400'
+date_gmt: '2008-03-27 15:42:31 -0400'
+categories:
+- Code
+- Web
+- Automation
+- Groovy
+tags:
+- cruisecontrol
+- ant
+- grails
+comments: []
+---
+<p><a href="http:&#47;&#47;martinfowler.com&#47;articles&#47;continuousIntegration.html">Continuous Integration<&#47;a> is a good practice in software development. It helps catch problems early to prevent them from becoming bigger problems later. It helps to reinforce other practices like frequent checkins and unit testing as well. I'm using <a href="http:&#47;&#47;cruisecontrol.sourceforge.net&#47;">CruiseControl<&#47;a> (CC) for Continuous Integration at the moment.</p>
+<p>One of the things about <a href="http:&#47;&#47;grails.org">Grails<&#47;a> is that it is really run through a series of scripts and classes that set up the environment. The <a href="http:&#47;&#47;ant.apache.org">Ant<&#47;a> scripts really just delegate the work to those grails scripts. To run properly, the GRAILS_HOME environment needs to be set so that it can find the proper classes, etc. This is not a problem if you are running a single Grails application in Continuous Integration. The issue arises when you want to run multiple against different version of Grails. A project I'm working on uncovered a bug in the 1.0.2 release of Grails. The code worked fine on 1.0.1 so I wanted to run against that specific version of Grails.</p>
+<p>It ends up this is not to hard with a few small changes to your Ant build.xml file.</p>
+<p>First you can declares some properties that have the paths to the Grails directory and the grails executable (the .bat version if your CC server is on Windows).<br />
+<code lang="xml"></p>
+<property name="cc-grails.home" value="C:\grails-1.0.1" &#47;>
+<property name="cc-grails" value="${cc-grails.home}\bin\grails.bat" &#47;>
+<&#47;code></p>
+<p>Next you can declare a custom target to execute on the CC server. You reference the 'cc-grails' property declared. The key is that you must override the GRAILS_HOME when you execute the grails script.</p>
+<p><code lang="xml"><br />
+<target name="cc-test" description="--> Run a Grails applications unit tests"><br />
+    <exec executable="${cc-grails}" failonerror="true"><br />
+        <env key="GRAILS_HOME" value="${cc-grails.home}"&#47;><br />
+	<arg value="test-app"&#47;><br />
+    <&#47;exec><br />
+<&#47;target><br />
+<&#47;code></p>
+<p>Now the Continuous Integration of your Grails app runs against a specific version of Grails.</p>
+<h3>The Full build.xml<&#47;h3><br />
+<code lang="xml"></p>
+<project name="project" default="test">
+<p>    <condition property="grails" value="grails.bat"><br />
+        <os family="windows"&#47;><br />
+    <&#47;condition></p>
+<property name="grails" value="grails" &#47;>
+<property name="cc-grails.home" value="C:\grails-1.0.1" &#47;>
+<property name="cc-grails" value="${cc-grails.home}\bin\grails.bat" &#47;>
+<p>	<!-- =================================<br />
+          target: clean<br />
+         ================================= --><br />
+    <target name="clean" description="--> Cleans a Grails application"><br />
+		<exec executable="${grails}" failonerror="true"><br />
+			<arg value="clean"&#47;><br />
+		<&#47;exec><br />
+    <&#47;target></p>
+<p>	<!-- =================================<br />
+          target: war<br />
+         ================================= --><br />
+    <target name="war" description="--> Creates a WAR of a Grails application"><br />
+		<exec executable="${grails}" failonerror="true"><br />
+			<arg value="war"&#47;><br />
+		<&#47;exec><br />
+    <&#47;target></p>
+<p>	<!-- =================================<br />
+          target: test<br />
+         ================================= --><br />
+    <target name="test" description="--> Run a Grails applications unit tests"><br />
+		<exec executable="${grails}" failonerror="true"><br />
+			<arg value="test-app"&#47;><br />
+		<&#47;exec><br />
+    <&#47;target></p>
+<p>    <!-- =================================<br />
+      target: cc-test<br />
+     ================================= --><br />
+    <target name="cc-test" description="--> Run a Grails applications unit tests in Continuous Integration mode"><br />
+		<exec executable="${cc-grails}" failonerror="true"><br />
+            <env key="GRAILS_HOME" value="${cc-grails.home}"&#47;><br />
+			<arg value="test-app"&#47;><br />
+		<&#47;exec><br />
+    <&#47;target></p>
+<p>	<!-- =================================<br />
+          target: deploy<br />
+         ================================= --><br />
+    <target name="deploy" depends="war" description="--> The deploy target (initially empty)"><br />
+        <!-- TODO --><br />
+    <&#47;target><br />
+<&#47;project><br />
+<&#47;code></p>

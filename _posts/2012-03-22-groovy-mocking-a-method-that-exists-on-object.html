@@ -1,0 +1,50 @@
+---
+layout: post
+status: publish
+published: true
+title: Groovy Mocking a Method That Exists on Object
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 503
+wordpress_url: http://www.zorched.net/?p=503
+date: '2012-03-22 13:26:51 -0400'
+date_gmt: '2012-03-22 19:26:51 -0400'
+categories:
+- Code
+- Unit Testing
+- Groovy
+tags:
+- orm
+- groovy
+- mock-objects
+- jpa
+comments: []
+---
+<p>In Groovy, the find method exists on Object. The find method is also an instance method on EntityManager which is commonly used in JPA to get an instance based on a database id. I was trying to create a Mock of EntityManager like:<br />
+<code lang="groovy"><br />
+def emMock = new MockFor(EntityManager)<br />
+emMock.demand.find { Class clazz, Object rquid -> return new Request(rqUID: rquid) }<br />
+def em = emMock.proxyDelegateInstance()<br />
+<&#47;code></p>
+<p>This gave me an error though:<br />
+<code><br />
+groovy.lang.MissingMethodException: No signature of method: com.onelinefix.services.RequestRepositoryImplTest$_2_get_closure1.doCall() is applicable for argument types: (groovy.mock.interceptor.Demand) values: [groovy.mock.interceptor.Demand@a27ebd9]<br />
+Possible solutions: doCall(java.lang.Class, java.lang.Object), findAll(), findAll(), isCase(java.lang.Object), isCase(java.lang.Object)<br />
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:264) ~[groovy-all-1.8.6.jar:1.8.6]<br />
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:877) ~[groovy-all-1.8.6.jar:1.8.6]<br />
+	at groovy.lang.Closure.call(Closure.java:412) ~[groovy-all-1.8.6.jar:1.8.6]<br />
+	at groovy.lang.Closure.call(Closure.java:425) ~[groovy-all-1.8.6.jar:1.8.6]<br />
+<&#47;code><br />
+It ends up that <em>find<&#47;em> is a DefaultGroovyMethod that's added to all Objects and this was causing the mock.demand to get confused because it thought I was trying to call the Object.find.</p>
+<p>Luckily there is a workaround and that's to use the ordinal argument for find.</p>
+<p><code lang="groovy"><br />
+emMock.demand.find(1) { Class clazz, Object rquid -> return new Request(rqUID: rquid) }<br />
+<&#47;code></p>
+<p>That's enough of a change to invoke mock version instead of the DefaultGroovyMethod version.<br />
+Now if I only knew why....</p>

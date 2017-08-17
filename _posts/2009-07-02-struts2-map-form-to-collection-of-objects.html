@@ -1,0 +1,173 @@
+---
+layout: post
+status: publish
+published: true
+title: Struts2 Map Form to Collection of Objects
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 352
+wordpress_url: http://www.zorched.net/?p=352
+date: '2009-07-02 19:38:35 -0400'
+date_gmt: '2009-07-03 01:38:35 -0400'
+categories:
+- Code
+- Java
+tags:
+- orm
+- Java
+- struts2
+- jsp
+- OGNL
+comments:
+- id: 15562
+  author: DreamerCoder
+  author_email: moiaz.jiwani@gmail.com
+  author_url: ''
+  date: '2009-07-20 12:28:54 -0400'
+  date_gmt: '2009-07-20 18:28:54 -0400'
+  content: "hi buddy this is exactly what i was looking for..thanx for this wonderful
+    informative post..\r\ni have an issue something related to this..\r\ni am using
+    struts2 framework and Hibernate annotations..\r\n\r\ni have a Product.java model
+    and Inventory.java model..One Product can be in many inventories..\r\n\r\ni am
+    displaying the product list in a table. i have given  in front of every row which
+    contains product information.\r\n\r\nnow when user checks 3 or 4 (or whatever
+    he likes) checkboxes and clicks on 'add to inventory' button, those products should
+    be updated with inventory objects...m currently using @ManytoOne in Inventory.java\r\ndo
+    u have any idea how should i do this task..\r\n\r\nwaiting for ur reply"
+- id: 15563
+  author: DreamerCoder
+  author_email: moiaz.jiwani@gmail.com
+  author_url: ''
+  date: '2009-07-20 12:30:27 -0400'
+  date_gmt: '2009-07-20 18:30:27 -0400'
+  content: "@correction - \r\n\r\ni have given s:checkbox in front of every row which
+    contains product information"
+- id: 15564
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2009-07-20 18:19:37 -0400'
+  date_gmt: '2009-07-21 00:19:37 -0400'
+  content: "@DreamCoder,\r\nYou can't bind directly to the Hibernate objects in that
+    case because you'll just end up binding to something like Inventory.id which will
+    eventually cause you trouble. \r\n\r\nThe best way to do that is to have something
+    like public void setInventoryIds(Integer[] inventoryIds) in your Action and handle
+    loading the instances through Hibernate yourself."
+- id: 16041
+  author: nobilet
+  author_email: stephane.nobilet@sib.fr
+  author_url: ''
+  date: '2010-02-04 06:52:17 -0500'
+  date_gmt: '2010-02-04 12:52:17 -0500'
+  content: Thanks for this tips !!!!! You help me a lot !
+- id: 16152
+  author: Asif Karedia
+  author_email: asif@t5c.co.uk
+  author_url: ''
+  date: '2010-06-01 09:14:07 -0400'
+  date_gmt: '2010-06-01 15:14:07 -0400'
+  content: "Hi Geoff,\r\n\r\nMight be a bit irrelevant but I am trying to access a
+    form bean like name=\"user.roles.id\" in my form. Can access the bean but when
+    I press submit the user.roles is null in Action class. I have a private property
+    user in Action class which is a DTO (i.e. all properties are public). Any help
+    would be appreciated.\r\n\r\nThanks."
+- id: 17910
+  author: Jonathan
+  author_email: jsammy@gmail.com
+  author_url: ''
+  date: '2011-07-20 20:28:00 -0400'
+  date_gmt: '2011-07-21 02:28:00 -0400'
+  content: Thanks for this, Geoff!  I found myself in the same exact predicament,
+    having everything but the checkbox pre-selection figured out.
+- id: 17913
+  author: edsave
+  author_email: edsave@gmail.com
+  author_url: http://twitter.com/edsave
+  date: '2011-07-26 13:06:30 -0400'
+  date_gmt: '2011-07-26 19:06:30 -0400'
+  content: "OMG! Thank you so much for this!!! \r\nI was breaking my head exactly
+    for this very same issue. I even added a method to preselect in the action but
+    nothing would work. \r\n\r\nYou can't imagine how happy you've made me! I really
+    appreciate it."
+---
+<p>The Struts2 documentation contains examples that are often basic at best which can make it challenging to figure out how to do things sometimes. I was working on creating a form that would allow me to select values from a list to connect 2 objects in a <em>One-to-Many<&#47;em> relationship. This is a common relationship for many things. In this example, I'll use a <em>User and Role<&#47;em> class to demonstrate the concept.</p>
+<p>For background, here's a JPA mapped User and Role class.<br />
+<code lang="java"><br />
+import java.util.List;<br />
+import javax.persistence.*;</p>
+<p>@Entity<br />
+public class User {</p>
+<p>    private Long id;<br />
+    &#47;&#47; ... other member variables<br />
+    private List<Role> roles;</p>
+<p>    @Id<br />
+    @GeneratedValue(strategy = GenerationType.AUTO)<br />
+    public Long getId() {<br />
+        return id;<br />
+    }</p>
+<p>    public void setId(Long id) {<br />
+        this.id = id;<br />
+    }</p>
+<p>    @OneToMany<br />
+    @JoinTable(name = "UserRoles",<br />
+            joinColumns = @JoinColumn(name = "user_Id"),<br />
+            inverseJoinColumns = @JoinColumn(name = "role_Id"),<br />
+            uniqueConstraints = @UniqueConstraint(columnNames = {"user_Id", "role_Id"})<br />
+    )<br />
+    public List<Role> getRoles() {<br />
+        return roles;<br />
+    }</p>
+<p>    public void setRoles(List<Role> roles) {<br />
+        this.roles = roles;<br />
+    }</p>
+<p>    &#47;&#47; ... other properties<br />
+}</p>
+<p>@Entity<br />
+public class Role {</p>
+<p>    private Long id;</p>
+<p>    @Id<br />
+    @GeneratedValue(strategy = GenerationType.AUTO)<br />
+    public Long getId() {<br />
+        return id;<br />
+    }</p>
+<p>    public void setId(Long id) {<br />
+        this.id = id;<br />
+    }</p>
+<p>    &#47;&#47; ... other properties<br />
+}<br />
+<&#47;code></p>
+<p>A list of Roles exists in the database. When a User is created, they are assigned one or more Roles. The User and Roles are connected in the Database through a join table as defined in the mapping.  At this point I created some DAO Repository classes to manage the persistence and an Action to handle the form values. (The details of JPA, setting up Persistence and Actions are beyond the scope of this post.)</p>
+<p>The part that caused me the most grief ended up being the form. I wanted to add a checkbox list that contained all of the Roles. The example on the Struts site for <a href="http:&#47;&#47;struts.apache.org&#47;2.x&#47;docs&#47;checkboxlist.html">checkboxlist<&#47;a>, a control with 43 documented properties is:<br />
+<code lang="html"><br />
+<s:checkboxlist name="foo" list="bar"&#47;><br />
+<&#47;code><br />
+Needless to say, there was some 'figuring out' to be done.</p>
+<p>The form itself is pretty vanilla for the most part. The <em>checkboxlist<&#47;em> is the interesting part because it's what allows us to map the User to the Roles.  I knew that I was looking for something to put into the <em>value<&#47;em> property of the control that would tell it to pre-select the Role values that were already associated with the User. </p>
+<p>I started out with something like:<br />
+<code lang="html"><br />
+<s:checkboxlist name="user.roles.id"<br />
+                    list="roles"<br />
+                    listKey="id"<br />
+                    listValue="name"<br />
+                    label="%{getText('label.roles')}"<br />
+                    value="user.roles"&#47;><br />
+<&#47;code></p>
+<p>That didn't work. When you think about it, that makes sense because the keys in the list are ids and the values supplied are Role objects. So I needed to figure out how to get the Ids from the Roles. I could have done that in the Action class, but it seemed like there should be a better way. A way that would allow me to continue in more of a Domain fashion.</p>
+<p>Doing some research into <a href="http:&#47;&#47;www.opensymphony.com&#47;ognl&#47;">OGNL<&#47;a>, I came upon the <a href="http:&#47;&#47;www.opensymphony.com&#47;ognl&#47;html&#47;LanguageGuide&#47;projection.html">list projections<&#47;a> section which was the key...</p>
+<p>The OGNL projection syntax gives us <em>user.roles.{id}<&#47;em>. Basically that is a list comprehension that takes of list of Role objects and turns it into a list of Role Ids. That list of Ids becomes the list of values that will be preselected.</p>
+<p>Knowing that I can now create a select box that will include the pre-selected values on an edit form:<br />
+<code lang="html"><br />
+<s:checkboxlist name="user.roles.id"<br />
+                    list="roles"<br />
+                    listKey="id"<br />
+                    listValue="name"<br />
+                    label="%{getText('label.roles')}"<br />
+                    value="user.roles.{id}"&#47;><br />
+<&#47;code></p>
+<p>Enjoy.</p>

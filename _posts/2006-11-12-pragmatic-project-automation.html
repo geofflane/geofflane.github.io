@@ -1,0 +1,68 @@
+---
+layout: post
+status: publish
+published: true
+title: Pragmatic Project Automation
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 55
+wordpress_url: http://www.zorched.net/2006/11/12/pragmatic-project-automation/
+date: '2006-11-12 20:48:27 -0500'
+date_gmt: '2006-11-13 02:48:27 -0500'
+categories:
+- Automation
+- Book Review
+tags:
+- continuous integration
+- cruisecontrol
+- version-control
+- ant
+comments: []
+---
+<p>In a previous post, I wrote a review of <a href="http:&#47;&#47;www.zorched.net&#47;2006&#47;09&#47;28&#47;pragmatic-version-control-using-subversion&#47;">Pragmatic Version Control Using Subversion<&#47;a> which covers effectively using version control systems on software development projects. This entry covers another book by the Pragmatic Programmers in their Pragmatic Starter Series.</p>
+<h2>Pragmatic Project Automation: How to Build, Deploy, and Monitor Java Apps<&#47;h2><br />
+<a href="http:&#47;&#47;www.pragmaticprogrammer.com&#47;starter_kit&#47;au&#47;index.html">Pragmatic Project Automation<&#47;a> by Mike Clark</p>
+<p>Index:</p>
+<ol title="Pragmatic Project Automation Index">
+<li>Introduction<&#47;li>
+<li>One-Step Builds<&#47;li>
+<li>Scheduled Builds<&#47;li>
+<li>Push-Button Releases<&#47;li>
+<li>Installation and Deployment<&#47;li>
+<li>Monitoring<&#47;li><br />
+<&#47;ol></p>
+<p>Pragmatic Project Automation shares a lot with the rest of the Pragmatic Starter Series. As the name implies these books are intended to get you started down the path without necessarily showing you the entire way. The book is relatively short coming in at a slim 152 pages. This makes it a quick read and allows it to cover the topic from a high level. It sells the idea of automation and shows how to do automation in all aspects of software development. It shows examples everything from the simplest scripts using Unix shell and Windows tools all the way up to purpose-build programs that will make automation very easy for larger and more complex projects.</p>
+<h2>Chapter 1 - Introduction<&#47;h2><br />
+The introduction lays the groundwork for automation. It categorizes automation into 3 types:</p>
+<ul title="types of automation">
+<li>Scheduled Automation<&#47;li>
+<li>Triggered Automation<&#47;li>
+<li>Commanded Automation<&#47;li><br />
+<&#47;ul></p>
+<p>Commanded Automation is probably the most familiar to most Java developers. This is the idea that you run a small script or an <a href="http:&#47;&#47;ant.apache.org">Ant<&#47;a> build. This kind of automation is user driven and run when they want to do a certain task. Scheduled Automation, as it's name implies, is something that is run based on time while Triggered Automation is automation that happens in response to a change in environment such as checking in code to a version control system. This groudwork is built upon during the rest of the book.</p>
+<h2>Chapter 2 - One-Step Builds<&#47;h2><br />
+This is the most common kind of automation from what I've seen. This chapter covers building source code using a script. Being a Pragmatic book, it starts with a simple example using a shell script. It then does a good job of building a good template for an Ant build. One of the interesting things in this chapter is that it discusses using <a href="http:&#47;&#47;groovy.codehaus.org&#47;">Groovy<&#47;a>, a Java based scripting language, that has built-in support for <a href="http:&#47;&#47;groovy.codehaus.org&#47;Ant+Scripting">Ant scripting<&#47;a>. In many ways this Groovy example is very interesting because it's a real scripting language so you can easily create your own custom code without the overhead of creating an Ant task. Maybe JRuby will catch on here (hint, hint JRuby folks) as I like the Ruby syntax a lot more than Groovy.</p>
+<h2>Chapter 3 - Scheduled Builds<&#47;h2><br />
+Chapter 3 starts with the easiest way of doing a scheduled build, using <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Crontab">cron<&#47;a> on Unix or <a href="http:&#47;&#47;www.microsoft.com&#47;resources&#47;documentation&#47;windows&#47;xp&#47;all&#47;proddocs&#47;en-us&#47;at.mspx?mfr=true">at<&#47;a> on Windows to periodically run a build script. I really like the fact that the authors mentioned this because I really think it lowers the barrier to people getting into automation. There's no need to over engineer a solution if you have simple needs. Of course this simple technique is fairly limited so they don't stop there.</p>
+<p>This chapter also covers using <a href="http:&#47;&#47;cruisecontrol.sourceforge.net&#47;">CruiseControl<&#47;a> for doing both Scheduled and Triggered builds. It walks through the setup of your first project in CruiseControl. I'm a huge fan of Continuous Integration because it's an always on backup for the processes that your team wants to enforce.</p>
+<h2>Chapter 4 - Push-Button Releases<&#47;h2><br />
+Doing a build which you do everyday, hopefully multiple times a day, is one thing, but how do you move code from source control to QA, a staging server or a production server?  Well you automate it of course! This chapter covers creating a script that you can use to turn your code into a form you can send to a customer. The simple examples are just creating the proper artifacts and creating archives like Zip or Tar files. It also talks about a number of processes including using automation to manage branching and tagging in your version control system. The branching and tagging automation not only makes the "release manager's" life easier, it really helps to create a consistent process that means you'll always be able to find and recreate any version in the future.</p>
+<h2>Chapter 5 - Installation and Deployment<&#47;h2><br />
+This chapter covers 2 slightly unrelated (to me) but interesting ideas. The most obvious based on the name is creating an installer. It discusses everything from a simple Zip file "install" to using a full-blown installation system. The book uses the Open Source <a href="http:&#47;&#47;nsis.sourceforge.net&#47;Main_Page">Nullsoft Scripted Installer (NSIS)<&#47;a> as an example of building a Windows install. I've never used NSIS before so I can't speak for its strengths or weaknesses, but it is used in a lot of Open Source projects. The introduction is very brief, so plan on doing some other reading if you want to use Nullsoft.</p>
+<h2>Chapter 6 - Monitoring<&#47;h2><br />
+To wrap the book up, we get the <a href="http:&#47;&#47;www.makezine.com&#47;">Make<&#47;a> chapter of the book. Now that you have triggered and scheduled builds running and applications in production, how do you know when there is a problem? This chapter talks about a number of good ideas starting with the easy ones of email and cell phones but taking some unanticipated turns into things like RSS feeds as well.</p>
+<p>Some of the more interesting ideas where using custom applications to drive visual feedback monitors. Two of the more interesting examples where using Lava Lamps and <a href="http:&#47;&#47;www.ambientdevices.com&#47;cat&#47;index.html">Ambient Orbs<&#47;a> to signal when a build is broken. The Lava Lamps would sit in the office and turn on&#47;off red or green Lava Lamps based on the build status. Even more interesting is the Ambient Orb. It can glow in multiple colors. It communicates over a national wireless network like the pager network. So now you can take your magic orb with you and it will notify you when there's a problem with the build.</p>
+<p>The only problem with this chapter is that it really doesn't have any implementations for these cool ideas. It leaves a lot up to the imagination.</p>
+<h2>Conclusion<&#47;h2><br />
+The book is 152 pages, as I said above, which means that it is by no means a comprehensive reference to any of the topics covered. If you are already sold on the idea of automation, this would be good ammunition to convince other people on a team or in management to support the idea. If you are completely unfamiliar with the topic, then this book will offer you a good basis for getting started. If you are already familiar with the topic and are looking to expand on what you know or get ideas for more ways to automate then you probably won't get a lot out of this book and should probably look elsewhere.</p>
+<p><strong><em><a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;redirect.html?ie=UTF8&location=http%3A%2F%2Fwww.amazon.com%2FPragmatic-Project-Automation-Deploy-Monitor%2Fdp%2F0974514039%2Fsr%3D8-1%2Fqid%3D1163379998%3Fie%3DUTF8%26s%3Dbooks&tag=zorchednet-20&linkCode=ur2&camp=1789&creative=9325">Pragmatic Project Automation: How to Build, Deploy, and Monitor Java Apps<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&amp;l=ur2&amp;o=1" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;><&#47;em><&#47;strong></p>
+<h3>Other Related<&#47;h3><br />
+<a href="http:&#47;&#47;ant.apache.org">Ant<&#47;a><br />
+<a href="http:&#47;&#47;cruisecontrol.sourceforge.net&#47;">Cruise Control<&#47;a><br />
+<a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;redirect.html?ie=UTF8&location=http%3A%2F%2Fwww.amazon.com%2FJava-Development-Ant-Erik-Hatcher%2Fdp%2F1930110588%2Fsr%3D1-2%2Fqid%3D1163380878%3Fie%3DUTF8%26s%3Dbooks&tag=zorchednet-20&linkCode=ur2&camp=1789&creative=9325">Java Development with Ant<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&amp;l=ur2&amp;o=1" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;></p>

@@ -1,0 +1,70 @@
+---
+layout: post
+status: publish
+published: true
+title: Scheme&#47;HtDP Unit Testing Functions
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 188
+wordpress_url: http://www.zorched.net/?p=188
+date: '2008-10-19 17:16:52 -0400'
+date_gmt: '2008-10-19 23:16:52 -0400'
+categories:
+- Scheme
+tags:
+- functional programming
+- Unit Testing
+- HTDP
+comments: []
+---
+<p><a href="http:&#47;&#47;www.htdp.org&#47;">How to Design Programs (HtDP)<&#47;a> provides a series of unit testing functions that allow you to test the output of any kind of function. The current version talks about testing your code, but doesn't offer a lot of guidance into how to do that. Everything you need is there though, so in case you are doing this on your own and don't have a teacher to tell you to do this, here's some explanation that I hope helps.</p>
+<h3>check-expect<&#47;h3><br />
+<em>check-expect<&#47;em> takes the results of a function and the expected value. This is the simplest of the testing constructs which answers the question "Does the expected result of a function call equal the result returned by the function?". It handles all of the details about types of values returned, so it can work with a simple value like a number, a complex value like a structure or a list, or even a picture.</p>
+<p><code><br />
+;; add: number number -> number<br />
+;; add two numbers together<br />
+(define (add n m)<br />
+  (+ n m))</p>
+<p>;; Tests<br />
+(check-expect (add 1 1) 2)<br />
+<&#47;code></p>
+<h3>check-within<&#47;h3><br />
+<em>check-within<&#47;em> is similar to check-expect, but it allows for a third argument to tell wether or not the result is within a certain difference of the actual answer. This is good for certain functions that might produce random results, but the most common case is when dealing with floating point numbers. Floating point numbers are not always represented precisely, so there needs to be some "room for error" so to speak.</p>
+<p><code><br />
+(define PI 3.14)<br />
+(check-within (&#47; 22 7) PI .003)</p>
+<p>(check-within (random 10) 0 9)<br />
+<&#47;code></p>
+<h3>check-error<&#47;h3><br />
+Finally, you can use <em>check-error<&#47;em> to test cases where your function throws an error. Those error conditions are an important part of a function contract, so testing them should be done just like any other possible conditions.</p>
+<p>One of the things that threw me at first was what to use as the expected value of a <em>check-error<&#47;em> test.</p>
+<p>An error is HtDP is "throw" by a function like:<br />
+<code><br />
+(error 'function-name "some message")<br />
+<&#47;code></p>
+<p>After a bit of trial and error, I found out the expected result is a string like:<br />
+<code><br />
+; "function-name: some message"<br />
+(check-error (error 'list-pick "list too short")  "list-pick: list too short")<br />
+<&#47;code></p>
+<h3>More Realistic Example<&#47;h3><br />
+<code><br />
+;; list-pick : list-of-symbols N[>= 0]  ->  symbol<br />
+;; to determine the nth symbol from alos, counting from 0;<br />
+;; signals an error if there is no nth item<br />
+(define (list-pick alos n)<br />
+  (cond<br />
+    [(empty? alos) (error 'list-pick "list too short")]<br />
+    [(= n 0) (first alos)]<br />
+    [(> n 0) (list-pick (rest alos) (sub1 n))]))</p>
+<p>;; Tests<br />
+(check-error (list-pick empty 1)  "list-pick: list too short")<br />
+(check-expect (list-pick (list 'a 'b 'c 'd) 3) 'd)<br />
+(check-error (list-pick (list 'a 'b 'c 'd) 4) "list-pick: list too short")<br />
+<&#47;code></p>

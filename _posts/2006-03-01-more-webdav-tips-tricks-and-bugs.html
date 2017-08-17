@@ -1,0 +1,244 @@
+---
+layout: post
+status: publish
+published: true
+title: More WebDAV Tips, Tricks and Bugs
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 25
+wordpress_url: http://www.zorched.net/2006/03/01/more-webdav-tips-tricks-and-bugs/
+date: '2006-03-01 21:13:53 -0500'
+date_gmt: '2006-03-02 03:13:53 -0500'
+categories:
+- Code
+- WebDAV
+tags:
+- WebDAV
+comments:
+- id: 98
+  author: Alex
+  author_email: alex@ubudesign.com
+  author_url: http://i2drive.com
+  date: '2006-05-10 14:35:38 -0400'
+  date_gmt: '2006-05-10 20:35:38 -0400'
+  content: "Yes, It all sounds like the same set of problems when I was trying to
+    have support for windows odd behavors. in addition to the problems you said I
+    also found problems with authentication. Mini redirector only sends user info
+    via digest it also sends username along with domain user/domain. Also for
+    the OPTIONS method it will not send authentication information and yes requests
+    for the root / url. \r\n\r\nI wish they would follow the standards better.
+    I think they could but do this by design.  Every time I download an update from
+    windows I cross my fingers hoping that I don't have to make more changes to accomidate
+    for their poor implementation"
+- id: 119
+  author: Jim Weller
+  author_email: jim@jimweller.net
+  author_url: http://www.jimweller.net
+  date: '2006-06-30 16:04:56 -0400'
+  date_gmt: '2006-06-30 22:04:56 -0400'
+  content: "This article is a nice synopsis of a lot of limititions and idiosyncrasies
+    that are not clearly and explicitly stated by MS or the google-able pros on the
+    web.\r\n\r\nIt pains me that I cannot map a network drive over HTTPS. I can open
+    a network place, but not map it to a drive. If I use plain HTTP, then I can both
+    do a network place and map a drive.\r\n\r\nVery frustrating!\r\n\r\nThanks for
+    the information."
+- id: 201
+  author: roberto
+  author_email: roberto@orson.it
+  author_url: ''
+  date: '2006-08-17 15:26:20 -0400'
+  date_gmt: '2006-08-17 21:26:20 -0400'
+  content: "Can WebDav over Plone, made the lock file for MS Word during editing of
+    .doc via NetDrive/Morgul DAV client ?\r\n\r\nRoberto\r\n\r\nps: If this comment
+    is inappropriate, remove it...but answer me, plese :)"
+- id: 202
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2006-08-17 16:46:02 -0400'
+  date_gmt: '2006-08-17 22:46:02 -0400'
+  content: "Roberto,\r\nI don't know anything specifically about NetDrive or Morgul,
+    but I assume they are similar to something like <a href=\"http://www.webdrive.com/\"
+    rel=\"nofollow\" rel=\"nofollow\">Webdrive</a>.\r\n\r\nWebdrive completely
+    hides WebDAV from Microsoft Office products, so the Office WebFolders implementation
+    never gets involved. Everything looks like a local file. This is good in many
+    ways, because the WebDAV implementation in Office has a lot of limitations. Because
+    the Office WebDAV redirector is not involved, it of course can not send LOCK commands.
+    All of this locking would have to be done through Webdrive. So, that's something
+    that you would have to configure on your Webdrive client (or NetDrive or Morgul).\r\n\r\nHope
+    that helps."
+- id: 1492
+  author: Vinay
+  author_email: vinay@picorp.com
+  author_url: ''
+  date: '2006-11-29 01:55:54 -0500'
+  date_gmt: '2006-11-29 07:55:54 -0500'
+  content: "Hi,\r\nYou mention about not auth-protecting OPTIONS to make WebFolders
+    work. Does the same trick work for mini-redirector too? Because, it isn't working
+    for me on a fully updated Windows XP SP2 box. I see that mini-redirector does
+    PROPFIND instead of OPTIONS. And it ends throwing up a LANMAN login prompt (it
+    is surely not digest auth dialog as it doesn't display the Realm Name). Any idea
+    how to get it working? I have MS-Author-via headers set and the same setup works
+    well with Office clients. Without auth protection it works well with all MS clients.\r\n\r\nThanks,\r\nVinay"
+- id: 1500
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2006-11-29 09:16:46 -0500'
+  date_gmt: '2006-11-29 15:16:46 -0500'
+  content: "Vinay,\r\nWhen I was working on my WebDAV server, I had to open a number
+    of support tickets with Microsoft to figure out these things. There was no way
+    for me to find these things out on my own (no documentation or anything about
+    non-standard behavior). So, you might have to call them?\r\n\r\nI think the mini-redirector
+    might have the same problem with OPTIONS. Also understand that it often requests
+    OPTIONS from the root of the web path (http://www.example.com/) regardless
+    of the path where the DAV server is mapped.\r\n\r\nHere are some things to try:\r\nMake
+    sure that only Anonymous authentication is enabled in IIS (not Windows or any
+    others).\r\n\r\nTry taking a look at the 'resources' links to the Greenbytes.de
+    pages. They have a lot of useful information about bugs in various WebDAV implementations
+    on Windows.\r\n\r\nHope that helps."
+- id: 3254
+  author: ingbabic
+  author_email: ingbabic@yahoo.com
+  author_url: ''
+  date: '2006-12-29 06:45:59 -0500'
+  date_gmt: '2006-12-29 12:45:59 -0500'
+  content: "Hello \r\nI'm having problem with mapping drive to WebDAV location on
+    my XP SP2 box. When I type something like this:\r\nnet use z: http://srv1/budget/\r\nI
+    get this:\r\nSystem error 67 has occurred.\r\nThe network name cannot be found.\r\nSrv1
+    is 2003 server with enabled read, write, browsing, log and index capabilities,
+    execute permission is set to script only, and directory security is set to anonimous
+    access only. Does not help if I click integrated windows authentication. \r\nIs
+    it possible to map a drive to WebDav location, am I missing something?"
+- id: 3255
+  author: ingbabic
+  author_email: ingbabic@yahoo.com
+  author_url: ''
+  date: '2006-12-29 06:48:13 -0500'
+  date_gmt: '2006-12-29 12:48:13 -0500'
+  content: uups, sorry I forgot to mention that using this folder (http://srv1/budget/)
+    from network locations works without a problem!
+- id: 10394
+  author: Berend Engelbrecht
+  author_email: b.engelbrecht@gmail.com
+  author_url: ''
+  date: '2007-03-22 14:03:05 -0400'
+  date_gmt: '2007-03-22 20:03:05 -0400'
+  content: THANK YOU!!!  We searched for ages for the reason why MS Word 2003 would
+    always insist on opening Word documents read-only from our webdav server software.
+    It was driving me nuts. Just added the "MS-Author-Via" header to the OPTIONS response
+    block and as if by magic IT STARTED WORKING. No more read-only documents, no more
+    incorrect document updates, truly a terrific fix. I can't thank you enough!!
+- id: 14257
+  author: Wayne Glover
+  author_email: wglover@technicalmedia.net
+  author_url: ''
+  date: '2008-10-24 16:40:45 -0400'
+  date_gmt: '2008-10-24 22:40:45 -0400'
+  content: "hi,  i found this site and it looks like it will solve my problem; however,
+    it is for an older version of Zope.  \r\n   i am using Zope 2.10.5-final.  \r\n
+    \   i found another site https://bugs.launchpad.net/zope2/+bug/143725\r\n
+    \    this deals with the newer version; however, his patch doesn't work for me.
+    \ \r\n     i have added to the bug report at the above link.  i am posting here
+    just in case you have kept up on this issue and know how to solve it.\r\n      thanks
+    for having this post - without experts like you newbies like me would never get
+    anything done"
+- id: 16282
+  author: 'SharePoint: Synchronisation von Dateien automatisieren | LX networking
+    GbR'
+  author_email: ''
+  author_url: http://www.lx-networking.de/news/sharepoint-dateien-automatisiert-synchronisieren/404
+  date: '2010-09-05 11:10:11 -0400'
+  date_gmt: '2010-09-05 17:10:11 -0400'
+  content: "[...] das Kommando sind jedoch einige Fehler bekannt. Daher k&Atilde;&para;nnen
+    Sie auch andere Werkzeuge nutzen, wie etwa das kostenlose WebDrive. Die Einrichtung
+    [...]"
+- id: 17927
+  author: DigitalWorld
+  author_email: sunilghelawat@gmail.com
+  author_url: ''
+  date: '2011-08-28 21:14:11 -0400'
+  date_gmt: '2011-08-29 03:14:11 -0400'
+  content: "Hi ,\r\n\r\nI have a very interesting question. \r\n\r\nWe have in-house
+    webdav application designed on .NET platform.  This is hosted on Win 2008 server.
+    The situation is when we open a word document using Word 2007 it is opening in
+    editable mode in XP OS however this is opening as READ ONLY using 2007 in Win
+    7. \r\n\r\nSo this is clear that this is not problem with Office 2007 but there
+    is something wrong happening with OS settings. When I used the Fiddler to capture
+    the request and reponse then I found that in Win 7, it is not calling the LOCK
+    method. \r\nThe second difference is in Win XP it is using User-Agent: Microsoft
+    Data Access Internet Publishing Provider DAV\r\nHowever, in Win 7 it is using
+    User-Agent: Microsoft-WebDAV-MiniRedir/6.1.7601\r\n. \r\nThe other difference
+    I noticed that In Win 7, the following registry setting for BASICAUTH is set to
+    1 (Basic authentication enabled for SSL shares only \r\n)HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\WebClient\\Parameters\\BasicAuthLevel.\r\n\r\nDo
+    you think , if we changed the BASICAUTH to 2 then would it correct the problem
+    OR Do we need to change the type of USER AGENT. \r\n\r\nI truly appreciate any
+    help\r\nThanks"
+- id: 17962
+  author: Alex
+  author_email: rp.tina@gmail.com
+  author_url: ''
+  date: '2011-11-11 20:14:26 -0500'
+  date_gmt: '2011-11-12 02:14:26 -0500'
+  content: "HAVING TOUGH TIME. NEED HELP.\r\nI hosted webdav .net solution on IIS
+    5.1 (windowsxp). It worked when I run from VS 2010. But when deployed to IIS,
+    The document opens in readonly mode. Using log statements I found that it is not
+    receiving options command from WEBDAV client. I made sure that .xls/.xlsx
+    extensions (The ones that I need) are mapped to aspnet_isapi.dll for all verbs.
+    What else should I check."
+- id: 17963
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2011-11-12 10:04:19 -0500'
+  date_gmt: '2011-11-12 16:04:19 -0500'
+  content: Alex, Using the Microsoft redirectors, the OPTIONS command get sent to
+    the root of the web application / and so you need to make sure that your web
+    server responds with the proper HTTP verbs for WebDAV from that location.
+- id: 362132
+  author: Rahul M
+  author_email: zorched.net@rmxco.com
+  author_url: ''
+  date: '2016-03-10 14:55:27 -0500'
+  date_gmt: '2016-03-10 20:55:27 -0500'
+  content: Hi, I know this is a very old post, but I thought I'd ask because I've
+    Googled high and low without avail. Something on my Windows 8.1 Pro system is
+    making WebDAV requests to a nonexistent server (it was retired years ago) once
+    every 8 hours or so. I can't for the life of me figure out where the request is
+    originating, I just happened to notice it while running Fiddler for something
+    else. NET USE is empty, I haven't mapped any drives, and nothing else I can think
+    of. I searched the registry for the URL, but nothing. Is there a client-side config
+    file or task that I'm not aware of that's doing this?
+---
+<p><em>My WebDAV with ASP.NET post has proved to be very popular and gets me emails, so I figured I'd share some more tidbits that I've picked up along the way.</em></p>
+<p>What do you learn when you write your own server to implement a standard protocol? Well you learn that protocols share a lot in common with legal contracts. People interpret them in different ways, often in the way that is most advantageous to what they are doing.  In writing a WebDAV server, I've found out a lot more about Windows than I think I ever wanted to know. I figured I'd write down some of that stuff so that I could remember it, and maybe someone out there on the internet will find it useful as well.</p>
+<h3>There is not 1 WebDAV for Windows</h3><br />
+You can't really say Microsoft Windows supports WebDAV and think of a monolithic chunk of code that everything uses to talk WebDAV. Windows Explorer uses what's called the Mini-Redirector. The min-redirector allows you to map a WebDAV location to a Drive letter the same as if you were using a Windows File Sharing/<a href="http://www.samba.com">SMB</a>/CIFS share. The mini-redirector has some limitations though.</p>
+<p>The Mini-Redirector:</p>
+<ul>
+<li>No support for HTTPS</li>
+<li>No support for declared ports <em>(http://example.com:8080/path)</em></li>
+<li>No support for LOCK and UNLOCK commands</li><br />
+</ul></p>
+<p>There is also a system called Web Folders. Web Folders is the WebDAV implementation for Microsoft Office products. Web Folders supports all of the things that the Mini-Redirector doesn't, including SSL, file locking, etc.</p>
+<p><em>Right now, you might find yourself asking: "If there are two implementations and one is really limited and one is more featured, then why not just replace the worse version with the better?". Yeah, I asked the same question and don't know the answer.</em></p>
+<p>When you map a WebDAV drive in Windows and want to open a Microsoft Office document, you get the distinct pleasure of using both WebDAV implementations. The Mini-Redirector asks the server for the file and once it gets it it opens Office and then Office re-asks the server for the same file again after doing some server discovery and file locking. The hand-off means that Office has to re-authenticate if your WebDAV server uses Digest Authentication, so you get to see a login dialog again. What fun!?</p>
+<h3>Server Discovery</h3><br />
+Office uses the OPTIONS command do to Server discovery. Server discovery is basically the process of trying to figure out what kind of server it is and what protocols it supports.</p>
+<p>The Office Web Folders always requests OPTIONS from the root (/) of the web server making a horrible assumption that any any server that supports WebDAV must support all the way to the root of the server.</p>
+<p>Often when you are allowing users to manipulate files and folders across the internet you might want to use some form of authentication. Digest Authentication is more secure than Basic Authentication which sends the user name and password in plain-text form, so it is a good choice for authentication if you are not going to use a secure (HTTPS) connection. There's only one small problem with this. There is a bug in the Web Folders implementation so it will not send Authentication headers on OPTIONS requests. That means you have to return an OPTIONS response regardless of what lives at a URL or whether a user is authenticated or they can't properly open Office documents.</p>
+<p>The Office Web Folders support does not just do WebDAV, it can also use Front Page Extensions. Since Front Page is a Microsoft proprietary product, Office prefers to use Front Page over WebDAV. In fact, it prefers it so much, that one of the only ways to get Office to use WebDAV is to use a custom header in OPTIONS requests: <strong>MS-Author-Via: DAV</strong><br />
+The MS-Author-Via header tells Office that you don't care how bad it wants to try Front Page, just use WebDAV.</p>
+<h3>Some Other Resources</h3><br />
+Mini-Redirector Issues:<br />
+<a href="http://greenbytes.de/tech/webdav/webdav-redirector-list.html">http://greenbytes.de/tech/webdav/webdav-redirector-list.html</a></p>
+<p>Web Folder Client Issues:<br />
+<a href="http://greenbytes.de/tech/webdav/webfolder-client-list.html">http://greenbytes.de/tech/webdav/webfolder-client-list.html</a></p>
+<p>WebDAV Reference Book:<br />
+<a href="http://www.amazon.com/gp/redirect.html?ie=UTF8&location=http%3A%2F%2Fwww.amazon.com%2FWebDAV-Next-Generation-Collaborative-Web-Authoring%2Fdp%2F0130652083%3Fie%3DUTF8%26s%3Dbooks%26qid%3D1178055436%26sr%3D8-1&tag=zorchednet-20&linkCode=ur2&camp=1789&creative=9325">WebDAV: Next-Generation Collaborative Web Authoring</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&amp;l=ur2&amp;o=1" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /> by Lisa Dusseault</p>

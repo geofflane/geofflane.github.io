@@ -1,0 +1,256 @@
+---
+layout: post
+status: publish
+published: true
+title: Implementing Mixins with C# Extension Methods
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 91
+wordpress_url: http://www.zorched.net/2008/01/03/implementing-mixins-with-c-extension-methods/
+date: '2008-01-03 16:11:12 -0500'
+date_gmt: '2008-01-03 22:11:12 -0500'
+categories:
+- Code
+- ".NET"
+tags:
+- mixin
+- oop
+- extension methods
+- csharp
+comments:
+- id: 11112
+  author: Grant Rettke
+  author_email: grettke@acm.org
+  author_url: http://www.wisdomandwonder.com/
+  date: '2008-01-04 12:13:28 -0500'
+  date_gmt: '2008-01-04 18:13:28 -0500'
+  content: "> So now you can avoid some limitations of Single Inheritance \r\n\r\nIt
+    is no secret that language limits both what we can think and express. When you
+    can only think in terms of single inheritance, it deeply changes how you structure
+    your object model. The reason is that when folks perform OOAD, they pretty much
+    never look at the implementation language as a \"runtime\" on which to implement
+    and deploy, instead they look at it as \"how you can think\". Sure you can model
+    a system with multiple inheritance, but you never do, because you know you will
+    end up using a single inheritance language. \r\n\r\n> This is probably officially
+    a &acirc;&euro;&trade;sharp knife&acirc;&euro;&trade; so be careful with this
+    kind of programming. It can be non-intuitive \r\n> to people and can probably
+    be greatly overused but it is a very valuable tool in many cases.\r\n\r\nYou should
+    try this out and go overboard. How else could you really get a good feel for how
+    well it lets you grow the language into something powerful and useful? The mistakes
+    made using this approach would be infinitely more valuable than the small-ish
+    examples of its application."
+- id: 16293
+  author: alberto ferreiro
+  author_email: a.ferreiro7@gmail.com
+  author_url: ''
+  date: '2010-10-04 14:26:41 -0400'
+  date_gmt: '2010-10-04 20:26:41 -0400'
+  content: "Great article!\r\nIn fact this way of doing mixings through interfaces
+    is a keystone in\r\nthe impementacion of Linq and the Reactive Framework."
+- id: 16299
+  author: Does it matter?
+  author_email: comeon@givemeabreak.now
+  author_url: ''
+  date: '2010-10-07 10:38:18 -0400'
+  date_gmt: '2010-10-07 16:38:18 -0400'
+  content: "user generics. i.e.:\r\n\r\nclass YourClass  : TMixClass where TMixClass
+    : YourBaseClass\r\n\r\nha?!"
+- id: 16300
+  author: Does it matter?
+  author_email: comeon@givemeabreak.now
+  author_url: ''
+  date: '2010-10-07 10:40:33 -0400'
+  date_gmt: '2010-10-07 16:40:33 -0400'
+  content: in my example above - this post does not allow special chars so consider
+    "YourClass" to be generic parameter
+- id: 16319
+  author: Onderweg Blog &raquo; Blog Archive &raquo; C# alternative for Ruby&#8217;s
+    acts_as_tree, part 1
+  author_email: ''
+  author_url: http://blog.onderweg.eu/2010/11/acts_as_tree-in-csharp-part1/
+  date: '2010-10-31 19:16:42 -0400'
+  date_gmt: '2010-11-01 01:16:42 -0400'
+  content: "[...] Implementing Mixins with C# Extension Methods    Share:&nbsp;  Tweet
+    This!     Filed in C# .NET, Theory  Tags: C#, IQueryable, language features, ORMs,
+    ruby  No Comments &#187; [...]"
+- id: 16321
+  author: Onderweg Blog &raquo; Blog Archive &raquo; C# alternative for Ruby&#8217;s
+    acts_as_tree, part 2
+  author_email: ''
+  author_url: http://blog.onderweg.eu/2010/11/acts_as_tree-in-csharp-part2/
+  date: '2010-11-03 15:01:55 -0400'
+  date_gmt: '2010-11-03 21:01:55 -0400'
+  content: "[...] Implementing Mixins with C# Extension Methods [...]"
+- id: 18058
+  author: Agus Suhartono
+  author_email: agus.suhartono@gmail.com
+  author_url: http://www.theenterprisephp.com
+  date: '2012-05-20 08:14:22 -0400'
+  date_gmt: '2012-05-20 14:14:22 -0400'
+  content: "Hi Geoff Lane,\r\non your example, \r\nyou never use \"ComparableExtension\"
+    class on instant object. your example about mixin not yet clear.\r\n\r\nAgus Suhartono"
+- id: 18064
+  author: Jonathon
+  author_email: jonathon.reinhart@gmail.com
+  author_url: ''
+  date: '2012-06-08 08:15:53 -0400'
+  date_gmt: '2012-06-08 14:15:53 -0400'
+  content: "@Agus - that's how extension methods work, you never explicitly \"use\"
+    the class. It's static, so you can't instantiate it, and you don't call the methods
+    directly.  Instead, the compiler knows to look through all static classes for
+    extension methods when matching up method calls on an object.\r\n\r\nSee the MSDN
+    entry on <a href=\"http:&#47;&#47;msdn.microsoft.com&#47;en-us&#47;library&#47;bb383977.aspx\"
+    rel=\"nofollow\">Extension Methods<&#47;a>."
+- id: 18069
+  author: Extension Methods as a Form of Multiple Inheritance &#8211; Pros and Cons
+    | Microsoft Enterprise Technologies
+  author_email: ''
+  author_url: http://blogs.perficient.com/microsoft/2010/04/extension-methods-as-a-form-of-multiple-inheritance-pros-and-cons/
+  date: '2012-07-24 09:31:07 -0400'
+  date_gmt: '2012-07-24 15:31:07 -0400'
+  content: "[...] Implementing Mixins With C# Extension Methods [...]"
+- id: 18380
+  author: Bob Dylan
+  author_email: neutrino_sunset@hotmaiil.com
+  author_url: ''
+  date: '2013-07-31 05:03:17 -0400'
+  date_gmt: '2013-07-31 11:03:17 -0400'
+  content: "I think what Asus means is that you never use the GreaterThan or LessThan
+    extension methods on an instance of the Account class.\r\n\r\nIn this example
+    use of a mixin would constitute the Account class exposing the interface of the
+    Money class but delegating implementation of that interface to a composed instance
+    of the Money class.\r\n\r\nThis example does that by implementing the IComparable
+    interface on the Account class and manually forwarding the IComparable implementation
+    to the currentBalance instance of the Money class. What's not clear is what's
+    the point of the extension methods in this example."
+- id: 155947
+  author: implement mixins in C# | Coding and Programing
+  author_email: ''
+  author_url: http://program.0zed.com/implement-mixins-in-c/
+  date: '2014-12-09 02:38:28 -0500'
+  date_gmt: '2014-12-09 08:38:28 -0500'
+  content: "[&#8230;] Implementing Mixins with C# Extension Methods [&#8230;]\n"
+- id: 229609
+  author: Patterns Literature | Insight&#039;s Delight
+  author_email: ''
+  author_url: https://insightsdelight.wordpress.com/2011/10/12/patterns-literature/
+  date: '2015-03-14 11:45:58 -0400'
+  date_gmt: '2015-03-14 17:45:58 -0400'
+  content: "[&#8230;] Basics: Cohesion and Coupling, Cohesion And Coupling, Introduction
+    to Mixins For the C# Developer, Implementing Mixins with C# Extension Methods,How
+    to create mixin using C# 4.0, C# Mixins With State, Mixins with C# 4.0, Mixins,
+    C#, and [&#8230;]\n"
+- id: 298110
+  author: Is it possible to implement mixins in C#? - DexPage
+  author_email: ''
+  author_url: http://dexpage.com/is-it-possible-to-implement-mixins-in-c/
+  date: '2015-07-05 22:27:25 -0400'
+  date_gmt: '2015-07-06 04:27:25 -0400'
+  content: "[&#8230;] Implementing Mixins with C# Extension Methods [&#8230;]\n"
+- id: 357063
+  author: Is it possible to implement mixins in C#? | ASK AND ANSWER
+  author_email: ''
+  author_url: http://askandans.cloverink.com/is-it-possible-to-implement-mixins-in-c/
+  date: '2015-12-19 19:48:33 -0500'
+  date_gmt: '2015-12-20 01:48:33 -0500'
+  content: "[&#8230;] Implementing Mixins with C# Extension Methods [&#8230;]"
+- id: 360936
+  author: Marvin Ede
+  author_email: marvin.ede@bankmedia.de
+  author_url: ''
+  date: '2016-02-19 04:04:07 -0500'
+  date_gmt: '2016-02-19 10:04:07 -0500'
+  content: "This is a nice pattern indeed.\r\n\r\nBe aware though, that the method
+    is not really a member of the type therefore this are not _real_ traits. :) Two
+    examples:\r\n1) As with any extension method, you cannot access private and protected
+    members\r\n2) If you work on a Webforms project with AutoEventWireup active, your
+    Page class is scanned for method that look like Page_Init etc. Your kind of trait
+    methods wont be detected though as they are \"only\" extension methods.\r\n\r\nIt's
+    still really nice to have something close to traits as we wait for the real thing.
+    :)"
+---
+<p><a href="http:&#47;&#47;en.wikipedia.org&#47;">Wikipedia<&#47;a> defines a <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Mixin">mixin<&#47;a> as "a class that provides a certain functionality to be inherited by a subclass, but is not meant to stand alone. Inheriting from a mixin is not a form of specialization but is rather a means to collect functionality. A subclass may even choose to inherit most or all of its functionality by inheriting from one or more mixins through multiple inheritance. A mixin can also be viewed as an interface with implemented methods."</p>
+<p>Inheritance defines an "is a" relationship between classes. A car "is a" vehicle &mdash; a car is a specialization of a vehicle. A mixin, on the otherhand, is a means of sharing functionality among a series of related classes that do not inherit from the same base class. A mixin allows you to reuse code without implying a relationship among the classes. It also allows you to get around the Single Inheritance model a bit to do this.</p>
+<p>An <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Extension_method">extension method<&#47;a> is a new feature of C# 3.0. It is essentially a way of providing methods on existing classes that you may or may not have access to. This is similar in many ways to "open classes" that allow you to add methods to existing classes in languages such as Ruby. The interesting things is that you can add domain specific methods to framework classes like String or Int.</p>
+<p>e.g.:<br />
+3.Days().FromNow()</p>
+<p><code lang="csharp"><br />
+public static class TimeMixin {<br />
+    public static TimeSpan Days(this int days)<br />
+    {<br />
+        return new TimeSpan(days, 0, 0, 0);<br />
+    }</p>
+<p>    public static DateTime FromNow(this TimeSpan timeSpan)<br />
+    {<br />
+        return DateTime.Now.Add(timeSpan);<br />
+    }<br />
+}<br />
+<&#47;code></p>
+<p>This is a great way to keep code looking and feeling like Object Oriented code and avoiding a whole bunch of Utility classes with static methods. Avoiding these Utility methods keeps the power of OO for dealing with complexity through polymorphism and avoids the often more complex structures that come out of procedural code.</p>
+<p>So, how do you use Extension Methods as Mixins?</p>
+<h3>Define an Interface (or use an existing one)<&#47;h3><br />
+This could be anything from a <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Marker_interface">marker interface<&#47;a> to a full interface that defines a contract. In this simple example, I'll make use of an existing interface.<br />
+<code lang="csharp"><br />
+public interface IComparable {<br />
+    int CompareTo(object other);<br />
+}<br />
+<&#47;code></p>
+<h3>Create Extension Methods for the Interface<&#47;h3><br />
+<code lang="csharp"><br />
+namespace Mixins {<br />
+    public static class ComparableExtension {<br />
+        public static bool GreaterThan(this IComparable leftHand, object other) {<br />
+            return leftHand.CompareTo(other) > 0;<br />
+        }</p>
+<p>        public static bool LessThan(this IComparable leftHand, object other) {<br />
+            return leftHand.CompareTo(other) < 0;<br />
+        }<br />
+    }<br />
+}<br />
+<&#47;code></p>
+<p>Notice the 'this' in the method declaration before the first parameter. The 'this' denotes an extension method. It defines the types of objects that will have this method available to be called on them. </p>
+<h3>Implement the interface in a Concrete class<&#47;h3><br />
+<code lang="csharp"><br />
+namespace Domain {<br />
+    public class Money : IComparable {<br />
+        private double amount;<br />
+        private string currency;<br />
+        private CurrencyConverter converter;</p>
+<p>        public Money(CurrencyConverter converter, double amount, string currency) {<br />
+            this.amount = amount;<br />
+            this.currency = currency;<br />
+            this.converter = converter;<br />
+        }</p>
+<p>        public int CompareTo(object other) {<br />
+            double otherAmount = converter.ConvertAmount(this.currency, (Money) other);<br />
+            return this.amount.CompareTo(otherAmount);<br />
+        }<br />
+    }<br />
+}<br />
+<&#47;code></p>
+<h3>Use the Code<&#47;h3><br />
+<code lang="csharp"><br />
+namespace Domain {<br />
+    using Mixin;</p>
+<p>    public class Account : IComparable {<br />
+        private Money currentBalance;</p>
+<p>        public void Withdrawl(Money amount) {<br />
+            if (currentBalance.LessThan(amount)) {<br />
+                 throw new BalanceExceededException(currentBalance);<br />
+            }<br />
+            &#47;&#47; ... implement the rest of the method<br />
+        }</p>
+<p>        public int CompareTo(object other) {<br />
+            return currentBalance.CompareTo(((Account) other).currentBalance);<br />
+        }<br />
+    }<br />
+}<br />
+<&#47;code></p>
+<p>Now the LessThan and GreaterThan methods implementations are reusable on both the Money and the Account classes. They are of course available on any class that implements IComparable.</p>
+<p>So now you can avoid some limitations of Single Inheritance and increase the amount of code reuse that is available to you with the concept of a Mixin. This is probably officially a 'sharp knife' so be careful with this kind of programming. It can be non-intuitive to people and can probably be greatly overused but it is a very valuable tool in many cases.</p>

@@ -1,0 +1,86 @@
+---
+layout: post
+status: publish
+published: true
+title: Continuous Integration Revisited
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 39
+wordpress_url: http://www.zorched.net/2006/08/10/continuous-integration-revisited/
+date: '2006-08-10 16:23:14 -0400'
+date_gmt: '2006-08-10 22:23:14 -0400'
+categories:
+- Code
+- Java
+tags:
+- software-development
+- team_city
+- continuous integration
+- cruisecontrol
+comments:
+- id: 197
+  author: Elizaveta Revyakina
+  author_email: Elizaveta.Revyakina@jetbrains.com
+  author_url: http://www.jetbrains.com
+  date: '2006-08-11 03:54:57 -0400'
+  date_gmt: '2006-08-11 09:54:57 -0400'
+  content: "Thank you for such a positive feedback on TeamCity. We are very glad that
+    your jump-start with TeamCity was so quick and easy. \r\n\r\nAs for TeamCity'
+    licensing and pricing. If you already have an IntelliJ IDEA license, you can upgrade
+    to IntelliJ IDEA 6.0 and get a TeamCity license for free. The same is true for
+    those who get IntelliJ IDEA 6.0 license.\r\n\r\nAs usual, we have very attractive
+    introductory price (until December, 01, 2006) which is $199. See http:&#47;&#47;www.jetbrains.com&#47;teamcity&#47;buy&#47;index.html
+    for details."
+- id: 198
+  author: Allan Wick
+  author_email: alwick@gmail.com
+  author_url: http://wickidcool.com/blog
+  date: '2006-08-11 09:21:37 -0400'
+  date_gmt: '2006-08-11 15:21:37 -0400'
+  content: "Thanks for the write-up.  I am really curious about these tools.\r\n\r\nOne
+    correction, you don't have to only use XML to configure Cruisecontrol.  There
+    is the cc-config tool at http:&#47;&#47;cc-config.sf.net that I have written...\r\n\r\n-Al"
+- id: 199
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2006-08-11 09:28:19 -0400'
+  date_gmt: '2006-08-11 15:28:19 -0400'
+  content: "Al,\r\nThanks for the link to your CruiseControl configuration tool, I'll
+    definitely check it out."
+- id: 17924
+  author: Continuous Integration Tool&#8211;TeamCity &laquo; harrychinese
+  author_email: ''
+  author_url: http://harrychinese.wordpress.com/2008/07/29/continuous-integration-tool-teamcity/
+  date: '2011-08-28 04:22:33 -0400'
+  date_gmt: '2011-08-28 10:22:33 -0400'
+  content: "[...] Integration Revisited(http:&#47;&#47;www.zorched.net&#47;2006&#47;08&#47;10&#47;continuous-integration-revisited&#47;)
+    \ Share this:TwitterFacebookLike this:LikeBe the first to like this [...]"
+---
+<p>I had a chance to install and play with JetBrain's new <a href="http:&#47;&#47;www.jetbrains.com&#47;teamcity&#47;">Team City<&#47;a> beta today. Team City at its most basic is a <a href="http:&#47;&#47;www.martinfowler.com&#47;articles&#47;continuousIntegration.html">Continuous Integration<&#47;a> server. Continuous Integration (CI) systems are used to help manage a team's software development process. Every time a developer checks in code, the CI server will check out the code from the <a href="http:&#47;&#47;subversion.tigris.org">source control system<&#47;a>, compile the code, run unit test and perform static analysis and code coverage. This is a great way to back up your development process to ensure that you always have a working source tree and development is never held up because of mistakes.</p>
+<p>There are other CI systems available, for example, in the past, I've used and liked <a href="http:&#47;&#47;cruisecontrol.sourceforge.net&#47;">CruiseControl<&#47;a>. It is a very capable system that uses <a href="http:&#47;&#47;ant.apache.org&#47;">Ant<&#47;a> build files to compile and test your code. It's also Open Source and free. </p>
+<p>I want to look at a couple of things that I really liked about Team City that make it shine.</p>
+<h3>Team City Configuration<&#47;h3><br />
+The first part is the installation and configuration. It's dead simple. </p>
+<p>Team City is distributed as a <acronym title="Web Archive">WAR<&#47;acronym> file, so if you already have a Servlet container like Tomcat up and running it's as easy as dropping the WAR file into the webapps directory and deploying it through the management interface.</p>
+<p>After the installation all of the configuration of a project can be done directly through the web interface, which is very nice compared to hand editing XML files that is often the case in other CI systems like CruiseControl.</p>
+<p>The only gotcha is that in addition to the Team City itself, you have to install one or more Build Agents (this is really a feature, more on that later). I skipped this step at first and of course nothing would compile. Directly from the web application you can run either a Java Web Start or a Windows Installer application that will install a Build Agent on the computer. In my case I used the same computer where I was installing Team City - in a more intensive environment, it might make sense to install it on a different machine.</p>
+<h3>Multiple Build Agents<&#47;h3><br />
+While it's an extra step at the beginning, having multiple Build Agents is a really great idea. You can use many machines to build your projects spreading the load around to different machines. This is especially great if you have big project with lots of unit tests (you do have lots of unit tests right?) or just a bunch of projects and configurations that you would like to build. As software developers know, compiling code and running tests is a pretty intensive activity. Spreading the load around means that you can do more concurrent builds. This is a great way to decouple where things get compiled and tested from the centralized management application. This way you don't have to have multiple instances of the CI system running on different machines if you want to load balance them.</p>
+<h3>Multi-Platform<&#47;h3><br />
+Not only is the server itself multi-platform, thanks to it being written in Java, but Team City can compile and test both Java and .NET code. It can use a number of different configurations for compiling and testing. In Java, it can currently use Ant, <a href="http:&#47;&#47;maven.apache.org&#47;">Maven<&#47;a> and <a href="http:&#47;&#47;www.jetbrains.com&#47;idea&#47;">Idea<&#47;a> build files. On the .NET side of things, it can use MSBuild files and Visual Studio 2005 Solution files.</p>
+<p>In addition to compiling code for these platforms, it can use either <a href="http:&#47;&#47;www.junit.org">JUnit<&#47;a> or NUnit for running Unit Tests as well. I really like this aspect of it because it offers shops that do more than one language a way to use the same systems for all of their development. At <a href="http:&#47;&#47;www.spiderlogic.com">work<&#47;a> we do both .NET development and Java development for our clients, so this makes a lot of sense for us. At least in the consulting world, this is a big win.</p>
+<h3>Delayed Commits<&#47;h3><br />
+Team City has IDE integration built in. Currently it only supports Idea (why would you need anything else?) but they have already announced that for the 1.5 release they will support Eclipse, Netbeans and Visual Studio. There are a number of features that you need to have the Plugin installed to use, so for the short term Team City will be an OK solution, but not a great solution for non-Idea users.</p>
+<p>Delayed Commits is quite possibly the best idea in Team City. It basically allows you to "commit" your changes to the server, but only have them checked into the source control repository if they compile and test correctly. No longer do you have to wait around for the CI server to report back that your checkin was successful before going to lunch or going home for the night. You can now Delay Commit your code and if everything works out it will be checked in for all the other developers to pull down, if not no one will be the wiser and you will fix any issues when you get back to your workstation.</p>
+<h3>Buttery<&#47;h3><br />
+The UI is also very nice. They effectively use AJAX techniques to have a really nice user experience.</p>
+<p>While this product is in Beta still and I haven't had a chance to use it in anger yet, I think it's a very promising tool. JetBrains has a great track record in delivering excellent products. I'm a huge fan of Idea and I can't do .NET development without ReSharper. I think they have another hit on their hands with Team City. I haven't heard anything about pricing yet, but the JetBrains stuff seems to usually be affordable.</p>
+<p>As an aside, I have no intention of taking anything away from CruiseControl. It is still a great application as well (did I mention it was free).</p>
+<p><small>(Jet Brains people, Yes, I'm willing to take paid endorsements :))<&#47;small></p>

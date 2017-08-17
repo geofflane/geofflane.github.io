@@ -1,0 +1,66 @@
+---
+layout: post
+status: publish
+published: true
+title: ObjectBuilder Can Inject to UserControls As Well
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 86
+wordpress_url: http://www.zorched.net/2007/10/05/objectbuilder-can-inject-to-usercontrols-as-well/
+date: '2007-10-05 19:50:00 -0400'
+date_gmt: '2007-10-06 01:50:00 -0400'
+categories:
+- ".NET"
+tags:
+- ObjectBuilder
+- asp.net
+- dependency injection
+- csharp
+comments: []
+---
+<p>This is a followup to my previous post on <a href="http:&#47;&#47;www.zorched.net&#47;2007&#47;09&#47;10&#47;integrating-objectbuilder-with-aspnet&#47;">integrating ObjectBuilder and ASP.NET<&#47;a>. As I was playing around with the solution I hit on the fact that I was only injecting at the Page level. As ASP.NET is a component model, you can end up with custom User Controls that would need injected properties as well. There is a relatively simple, if not entirely obvious way to do that as well.</p>
+<p>Building on the previous example, you can hook into the lifecycle of a page that you are injecting. You can not access the controls directly in the PreRequestHandlerExecute of the IHttpModule because they have not been instantiated yet. Instead, you can create a callback event handler for the Page.InitComplete event and inject properties at that point.</p>
+<p><code lang="csharp"><br />
+void InjectProperties(object sender, EventArgs e)<br />
+{<br />
+    IHttpHandler h = app.Context.CurrentHandler;<br />
+    if (h is DefaultHttpHandler)<br />
+        return;<br />
+    chain.Head.BuildUp(builderContext, h.GetType(), h, null);<br />
+    if (h is Page)<br />
+    {<br />
+        &#47;&#47; Register a page lifecycle event handler to inject<br />
+        &#47;&#47; user controls on the page itself<br />
+        page = (Page) h;<br />
+        page.InitComplete += InjectControls;<br />
+    }<br />
+}</p>
+<p>private void InjectControls(object sender, EventArgs e)<br />
+{<br />
+    InjectControls(page);<br />
+    if (null != page.Form)<br />
+        InjectControls(page.Form);<br />
+}</p>
+<p>private void InjectControls(Control mainControl)<br />
+{<br />
+    if (mainControl.Controls != null && mainControl.Controls.Count > 0)<br />
+    {<br />
+        foreach (Control c in mainControl.Controls)<br />
+        {<br />
+            if (c is UserControl)<br />
+            {<br />
+                chain.Head.BuildUp(builderContext, c.GetType(), c, null);<br />
+                InjectControls(c);<br />
+            }<br />
+        }<br />
+    }<br />
+}<br />
+<&#47;code></p>
+<p>As you see with this example, you need to recursively inject the objects into all of the controls. That's in case there are any nested controls that might need injecting. The other thing to notice is that the controls in the top-level Page doe not contain all of the controls that are also declared in a Form on the page, so you need to handle both of those paths.</p>
+<p>Hopefully this will get you further along the path to being able to do dependency injection in your ASP.NET application.</p>

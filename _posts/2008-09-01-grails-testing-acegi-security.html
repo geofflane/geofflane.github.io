@@ -1,0 +1,124 @@
+---
+layout: post
+status: publish
+published: true
+title: Grails Testing Acegi Security
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 179
+wordpress_url: http://www.zorched.net/?p=179
+date: '2008-09-01 17:46:31 -0400'
+date_gmt: '2008-09-01 23:46:31 -0400'
+categories:
+- Groovy
+tags:
+- mock-objects
+- grails
+- security
+- acegi
+- Unit Testing
+comments:
+- id: 14245
+  author: Josh
+  author_email: joshua@9ci.com
+  author_url: http://www.9ci.com
+  date: '2008-10-17 19:06:12 -0400'
+  date_gmt: '2008-10-18 01:06:12 -0400'
+  content: "Awesome. This is just what I was looking for. I removed the credential
+    from the method as its not uses anywhere.\r\nThank you for posting this. It would
+    be great to have a link or this quick olverview on the acegi plug-in page. I finally
+    found this after searching but only after hacking for a good 2 hours."
+- id: 14290
+  author: Przemyslaw
+  author_email: Przemyslaw.Dul@interrogare.de
+  author_url: ''
+  date: '2008-11-20 03:24:51 -0500'
+  date_gmt: '2008-11-20 09:24:51 -0500'
+  content: "Awesome. I changed it a little to use all information in user:\r\n\r\n<code
+    lang=\"groovy\">\r\nprotected Authentication authenticate(user) {\r\n        def
+    principal = new Expando()\r\n        principal.domainClass = user\r\n\r\n        GrantedAuthority[]
+    grantedAuthorities = user.authorities?.toArray()?.collect{new GrantedAuthorityImpl(it.authority)}.toArray()\r\n\r\n
+    \       Authentication authentication = new TestingAuthenticationToken(principal,user.passwd,grantedAuthorities)\r\n\r\n
+    \       authentication.authenticated = true\r\n        SCH.context.authentication
+    = authentication\r\n        return authentication\r\n    }\r\n<&#47;code>"
+- id: 16037
+  author: Brian
+  author_email: brianbroe@gmail.com
+  author_url: ''
+  date: '2010-01-20 02:30:32 -0500'
+  date_gmt: '2010-01-20 08:30:32 -0500'
+  content: "Any idea why TestingAuthenticationToken is not located in providers in
+    version 0.5.2 of this plugin?\r\n\r\nAnd is there another way to login in an integration
+    test?"
+- id: 16059
+  author: olikaf
+  author_email: ofresse@4cad.fr
+  author_url: ''
+  date: '2010-03-16 10:20:50 -0400'
+  date_gmt: '2010-03-16 16:20:50 -0400'
+  content: "TestingAuthenticationToken was removed from spring security core, but
+    is back in the latest version . \r\nsee http:&#47;&#47;forum.springsource.org&#47;showthread.php?t=61373\r\n\r\nsadly,
+    the version used in grails 1.2.0 is the one without this class\r\n\r\nI used the
+    following code to solve this issue.\r\n\r\n\r\n<code lang=\"groovy\">\r\n protected
+    Authentication authenticate(User user, String credentials) {\r\n    \r\n    def
+    authorities = user.authorities.collect { new GrantedAuthorityImpl(it.authority)
+    }\r\n\r\n    def userDetails = new GrailsUserImpl(user.username, user.passwd,
+    user.enabled, user.enabled, user.enabled, user.enabled, authorities as GrantedAuthority[],
+    user)\r\n\r\n    SCH.context.authentication = new UsernamePasswordAuthenticationToken(userDetails,
+    user.passwd, userDetails.authorities)\r\n\r\n  }\r\n<&#47;code>"
+- id: 17853
+  author: Testing and mocking in Grails | Silex Consulting
+  author_email: ''
+  author_url: http://www.silex-consulting.com/2011/02/05/testing-and-mocking-in-grails/
+  date: '2011-02-06 12:07:08 -0500'
+  date_gmt: '2011-02-06 18:07:08 -0500'
+  content: "[...] it returned. I decided that was far too much like hard work. I looked
+    at approaches such as the one here and again it didn&#8217;t really work out for
+    me. The best resource I&#8217;ve found for writing [...]"
+- id: 17896
+  author: Testing Acegi Security with mock objects in Grails | Noel Sharpe
+  author_email: ''
+  author_url: http://radnetwork.co.uk/blog/2011/02/testing-and-mocking-acegi-security-in-grails/
+  date: '2011-05-18 09:19:39 -0400'
+  date_gmt: '2011-05-18 15:19:39 -0400'
+  content: "[...] it returned. I decided that was far too much like hard work. I looked
+    at approaches such as the one here and again it didn&#8217;t really work out for
+    me. The best resource I&#8217;ve found for writing [...]"
+---
+<p>Almost every web application I create needs some form of user authentication and authorization. Grails provides a great plugin system that allows you to extend the base framework to provide these kinds of features. My current favorite security plugin for Grails is the <a href="http:&#47;&#47;www.grails.org&#47;AcegiSecurity+Plugin">Acegi Security Plugin<&#47;a>. It's built using the Spring Security framework and the robust and widely used Acegi framework. I like the fact that it is built on top of existing, well-known frameworks which is the philosophy of Grails itself. It is also a flexible plugin that has a good default object model.</p>
+<p>One of the situations that inevitably arises is how to unit test code that depends on your security framework. Either you will want to test that basic authorization is working, or you might have code that makes decisions based upon who is logged in or what roles they might have. To run those test you have to setup your test cases so that the code that works when the system is running normally is tested.</p>
+<h3>Unit Testing Setup for Testing Acegi Security Code<&#47;h3><br />
+This situation arose for me the other day and so I thought I would share the solution that I came up with.</p>
+<p><code lang="groovy"><br />
+import org.springframework.security.context.SecurityContextHolder as SCH<br />
+import org.springframework.security.providers.TestingAuthenticationToken<br />
+import org.springframework.security.GrantedAuthority<br />
+import org.springframework.security.Authentication<br />
+import org.springframework.security.GrantedAuthorityImpl</p>
+<p>class AuthenticationBaseTests extends GroovyTestCase {<br />
+def setUp() {<br />
+    def user = User.get(1)    &#47;&#47; or create a new one if one doesn't exist<br />
+    authenticate(user, "abc123", [new GrantedAuthorityImpl('ROLE_ADMIN')])<br />
+}</p>
+<p>protected Authentication authenticate(user, credentials, authorities) {<br />
+    def principal = new Expando()<br />
+    principal.domainClass = user</p>
+<p>    Authentication authentication = new TestingAuthenticationToken(principal, null, authorities as GrantedAuthority[])<br />
+    authentication.authenticated = true<br />
+    SCH.context.authentication = authentication<br />
+    return authentication<br />
+}<br />
+}<br />
+<&#47;code></p>
+<h4>setUp()<&#47;h4><br />
+The <em>setUp()<&#47;em> method will get executed prior to your tests being run. So if you want to do different things for each test you would want to move this code to a more appropriate place. In the setup method we are creating our Principle class, in this case, the User. Next we pass the user along with all of the roles we want the user to have for the given test case.</p>
+<h4>authenticate(user, credentials, authorities)<&#47;h4><br />
+The real setup work is done in the <em>authenticate()<&#47;em> method. This method does the real work of setting up the Authentication Token and setting it in the static context, which is a thread local variable I think, that is used by the framework to determine who is making the request and what rights they have.</p>
+<p>The fun thing about this message is the use of the Expando class. Expando allows you to create a class on the fly. This is a really interesting way to do a Mock object on-the-fly in Groovy. In this case we're creating a Mock authentication principle. We know, by looking at the Acegi Security code, that the security framework expects an object that will call <em>domainClass<&#47;em> to get the underlying implementation of the User (or Principle) implemented in the application. That will return us the <em>User<&#47;em> object that we are setting.</p>
+<p>This simple method can be added to a base class and then inherited from any tests that need user authentication to run successfully.</p>

@@ -1,0 +1,85 @@
+---
+layout: post
+status: publish
+published: true
+title: Package Grails DBMigrations in your WAR File
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 112
+wordpress_url: http://www.zorched.net/?p=112
+date: '2008-06-10 11:35:13 -0400'
+date_gmt: '2008-06-10 17:35:13 -0400'
+categories:
+- Groovy
+tags:
+- grails
+- Automation
+comments:
+- id: 12721
+  author: Shawn Hartsock
+  author_email: hartsock@acm.org
+  author_url: http://hartsock.blogspot.com/2008/04/inside-hibernate-events-and-audit.html
+  date: '2008-06-11 14:48:01 -0400'
+  date_gmt: '2008-06-11 20:48:01 -0400'
+  content: "Actually, I started researching Hibernate Events because I saw that stored
+    procedures were not well represented in some circumstances. I am currently of
+    the mind that if you can \"package\" your \"triggers\" inside the domain object
+    that's probably a good thing for the most part. It does mean that you have more
+    complicated domain classes, but, you keep all your work in Groovy&#47;Java which
+    is portable and centralized instead of spreading the trigger into the Database.
+    In short you work your data model from inside the Grails domain classes and try
+    to put all data model related things there.\r\n\r\nThere are drawbacks to that
+    approach but if your shop is mostly Java&#47;Groovy coders and resource constrained
+    on DBA and PL&#47;SQL development then you could actually save a context switch
+    for your development team."
+- id: 12723
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2008-06-11 15:00:10 -0400'
+  date_gmt: '2008-06-11 21:00:10 -0400'
+  content: "Shawn,\r\nHibernate events can definitely work well. And the post you
+    link to is a great example! I've used that technique in the past (in pure Java&#47;Hibernate)
+    for keeping historical records as well.\r\n\r\nWhere stored procedures and other
+    database objects shine when you want to get out of your Groovy&#47;Java code though.
+    If everything is running through that code then no problem. But get into reporting
+    using an external tool and all of a sudden accessing those domain classes and
+    Hibernate events becomes non-trivial.\r\n\r\nI also believe that databases are
+    fundamentally better at some tasks and we should leverage them when we can.\r\n\r\nThanks
+    for the comment."
+- id: 16302
+  author: J Liu
+  author_email: jie.liu8@hp.com
+  author_url: ''
+  date: '2010-10-11 13:09:59 -0400'
+  date_gmt: '2010-10-11 19:09:59 -0400'
+  content: "Do you know of other tools that create&#47;update store procedures, functions,
+    and&#47;or views for Grails?\r\n\r\nThanks!\r\n\r\n--J"
+- id: 16303
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2010-10-11 14:55:37 -0400'
+  date_gmt: '2010-10-11 20:55:37 -0400'
+  content: "@J Liu,\r\nCheck out http:&#47;&#47;grails.org&#47;plugin&#47;home for
+    all of the plugins. There are a number of others including Liquibase and Autobase."
+---
+<p>The <a href="http:&#47;&#47;code.google.com&#47;p&#47;dbmigrate&#47;wiki&#47;Grails">Grails DBMigrate Plugin<&#47;a> is a handy way to give you control over the generation of your database if you don't want Grails to auto-munge your schema. It works fine in development, but when you create a WAR for deployment on another machine the Migrations are not packaged in the WAR so the database can't be created or updated.</p>
+<h3>Packaging DBMigrate Scripts for Deployment<&#47;h3><br />
+Here's the quick solution to package your DBMigrations in your WAR file.</p>
+<p>Just add this to your <strong>Config.groovy<&#47;strong> file and when you generate the WAR the migrations will be included and found by the Plugin.<br />
+<code lang="groovy"><br />
+grails.war.resources = {stagingDir -><br />
+    copy(todir: "${stagingDir}&#47;WEB-INF&#47;classes&#47;grails-app&#47;migrations") {<br />
+        fileset(dir:"grails-app&#47;migrations")<br />
+    }<br />
+}<br />
+<&#47;code></p>
+<h3>Aside<&#47;h3><br />
+The only problem with DBMigrate is that it doesn't handle creating or updating Stored Procedures and Functions which means if you want to use those - for Reporting purposes lets say - you're out of luck currently. </p>

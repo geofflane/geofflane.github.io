@@ -1,0 +1,41 @@
+---
+layout: post
+status: publish
+published: true
+title: When Do DSLs Make Sense?
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 93
+wordpress_url: http://www.zorched.net/2008/01/05/when-do-dsls-make-sense/
+date: '2008-01-05 14:05:10 -0500'
+date_gmt: '2008-01-05 20:05:10 -0500'
+categories:
+- Code
+tags:
+- dsl
+comments:
+- id: 11120
+  author: Grant Rettke
+  author_email: grettke@acm.org
+  author_url: http://www.wisdomandwonder.com/
+  date: '2008-01-09 11:17:14 -0500'
+  date_gmt: '2008-01-09 17:17:14 -0500'
+  content: It would be interesting to hear why folks call DSLs "just another form
+    of abstraction". That adverb conveys mediocrity.
+---
+<p>Domain Specific Languages (DSLs) are discussed all the time. There is a lot of <a href="http:&#47;&#47;www.wisdomandwonder.com&#47;article&#47;17&#47;code-generation-and-dsls-in-scheme">writing<&#47;a> about <a href= "http:&#47;&#47;martinfowler.com&#47;articles&#47;languageWorkbench.html">implementing DSLs<&#47;a> and many dynamic languages like <a href="http:&#47;&#47;www.ruby-lang.org">Ruby<&#47;a> and <a href="http:&#47;&#47;groovy.codehaus.org">Groovy<&#47;a> make it really fairly easy to do it. But rarely do I see it discussed how you figure out when it makes sense to implement a DSL.</p>
+<p>Some people would say that DSLs are just another form of abstraction. Like a framework to help solve a specific technical problem, a DSL is a "framework" for solving a specific Domain problem. There is often a general discussion about the trade-off of cost vs. benefits of implementing a DSL. This cost&#47;benefit discussion would be appropriate to a general-purpose framework as well. For the vast majority of applications, taken by themselves, the answer is it is never cost effective or appropriate to write a framework for one application. </p>
+<p>The cost of creating a generalized solution could be appropriate when you have multiple (lets say at least three) applications that can utilize it. In addition to this rule is some sort of high volume of rules or highly-volatile changes. If you have different rules, behaviors or data that needs to happen on a per state and per product basis in an insurance company? If you need to be able to quickly change rules or variables based on financial market data? When one of these exceptions comes into play then there is a high benefit to the extra work of creating a DSL so the cost becomes one that is more acceptable. Additionally there are some dynamic languages, Ruby, Groovy, and Lisp variants for example that make implementing DSLs much easier to do. When you use those languages often the cost is reduced, because it's easier to implement, so that the benefit doesn't need to be as great for the payoff to work.</p>
+<h4>Rules for when to consider a DSL<&#47;h4></p>
+<ul>
+<li>You have more than two applications that could use the same DSL<&#47;li>
+<li>Highly-Volatile changes are expected - multiple times a day perhaps<&#47;li>
+<li>You have a very large number of cases that could grow exponentially as business or product lines grow<&#47;li>
+<li>You are using a dynamic language that makes it easy to implement<&#47;li><br />
+<&#47;ul></p>

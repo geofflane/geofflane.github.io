@@ -1,0 +1,68 @@
+---
+layout: post
+status: publish
+published: true
+title: Ruby REXML - Another Take on XML Parsing
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 16
+wordpress_url: http://www.zorched.net/2006/01/25/ruby-rexml-another-take-on-xml-parsing/
+date: '2006-01-25 20:30:51 -0500'
+date_gmt: '2006-01-26 02:30:51 -0500'
+categories:
+- Code
+- Ruby
+tags: []
+comments:
+- id: 11240
+  author: Blog bookmarks 05/16/2008 &laquo; My Diigo bookmarks
+  author_email: ''
+  author_url: http://lubospdiigo.wordpress.com/2008/05/16/blog-bookmarks-05162008/
+  date: '2008-05-15 23:24:39 -0400'
+  date_gmt: '2008-05-16 05:24:39 -0400'
+  content: "[...] Ruby REXML - Another Take on XML Parsing [...]"
+---
+<p>If you are a programmer and have not been living under a rock, you've heard of <a href="http://www.ruby-lang.org">Ruby</a>. There's been a lot of hype built up around the language recently. Its even more hyped progeny <a href="http://www.rubyonrails.com">Ruby on Rails</a> highlight the strengths of this dynamic language. A seemingly large number of thought leaders in the software development space have also taken to the language as a primary tool in their toolkit.</p>
+<p>Curious about the hype, and looking for something interesting to learn, I've recently started playing around with the Ruby programming language and Rails. I hope to write some more in detail about it at some point, but thought I would share some thoughts on one of the available Ruby XML parsers.</p>
+<p><a href="http://www.germane-software.com/software/rexml/">REXML</a> is a pure Ruby implementation of an XML parser. It was inspired by an Open Source Java XML parser called Electric XML. Basically the whole point of REXML is to make an XML parser that feels like a Ruby library. It is a reaction to the SAX and the DOM parsers that exist. SAX and DOM parsers are generally available in all kinds of languages, but they are really tightly coupled to the demands of XML. </p>
+<p>As a bit of background: SAX is an event-based model that parses a document in a single pass triggering event callbacks when specific elements are reached. The programmer is then responsible for deciphering the context and calling the appropriate functions. DOM on the other hand is a heirarchical, in-memory representation of an XML document. It allows for ad-hoc traversal of the XML structure. DOM also allows for the use of things like XPath for querying elements (attributes too) of an XML structure.</p>
+<p>REXML on the other hand aims to feel like Ruby.</p>
+<p>Creating a document:<br />
+<code lang="ruby"><br />
+doc = REXML::Document.new(atom_feed)<br />
+root = doc.root()<br />
+</code></p>
+<p>Getting a single text node:<br />
+<code lang="ruby"><br />
+linkNode = root.elements['link']<br />
+linkValue = linkNode.text if linkNode<br />
+</code></p>
+<p>REXML also uses the standard Enumerable features found by other collections classes so that it feels very natural to use. In Ruby it is common to use "blocks" to handle each of the items in a method. Rather than having to itterate over a collection of items, you let the collection do the itterating for you.</p>
+<p>For each of the elements called "author" call the add_author method:<br />
+<code  lang="ruby"><br />
+root.elements.each('author') { |a| add_author(a) }<br />
+</code></p>
+<p>You can also use XPath:<br />
+<code  lang="ruby"><br />
+XPath.each(doc, "//entry") { |e| add_entry(e) }<br />
+</code></p>
+<p>Of course you can create and/or modify documents as well in a Ruby-esque way.<br />
+<code lang="ruby"><br />
+entry = Element.new("entry")<br />
+id = Element.new("id")<br />
+id.add_element(Text.new("_some_unique_id"))<br />
+entry.add_element(id)<br />
+['Geoff', 'Bob', 'Sam'].each do |author|<br />
+    a = Element.new("author")<br />
+    name = Element.new("name")<br />
+    name.add_element(Text.new(author))<br />
+    entry.elements << a<br />
+end<br />
+</code></p>
+<p>It's nice to see a slightly different take on XML manipulation.</p>

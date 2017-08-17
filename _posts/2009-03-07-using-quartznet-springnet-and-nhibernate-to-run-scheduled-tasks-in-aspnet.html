@@ -1,0 +1,231 @@
+---
+layout: post
+status: publish
+published: true
+title: Using Quartz.NET, Spring.NET and NHibernate to run Scheduled Tasks in ASP.NET
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 293
+wordpress_url: http://www.zorched.net/?p=293
+date: '2009-03-07 17:02:15 -0500'
+date_gmt: '2009-03-07 23:02:15 -0500'
+categories:
+- ".NET"
+- Web
+tags:
+- hibernate
+- orm
+- software-development
+- csharp
+- scheduled tasks
+comments:
+- id: 15078
+  author: Marko Lahma
+  author_email: marko.lahma@gmail.com
+  author_url: ''
+  date: '2009-05-12 21:45:08 -0400'
+  date_gmt: '2009-05-13 03:45:08 -0400'
+  content: "Actually the preferred way to configure the locking mechanism is to define
+    semaphore implementation:\r\n\r\nproperties[\"quartz.jobStore.lockHandler.type\"]
+    = \"Quartz.Impl.AdoJobStore.UpdateLockRowSemaphore, Quartz\";\r\n\r\nThis hides
+    the SQL details.\r\n\r\nYou have a good point there about not being able to run
+    out of the box with SQL Server. Maybe there should be at least a warning issued
+    about not having the correct row locking implementation. SQLite actually needs
+    this configuration also."
+- id: 15888
+  author: nur kan
+  author_email: ilknurcapkan@gmail.com
+  author_url: ''
+  date: '2009-10-26 01:37:14 -0400'
+  date_gmt: '2009-10-26 07:37:14 -0400'
+  content: can we use this solution with sybase database ? do you have any idea ?
+- id: 15889
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2009-10-26 08:44:32 -0400'
+  date_gmt: '2009-10-26 14:44:32 -0400'
+  content: "@nur kan,\r\nI haven't tried it with Sybase and it does not seem that
+    the Quartz.net distribution distributes Sybase SQL files. Behind the scenes Quartz
+    uses ADO.NET so, assuming you have a Sybase provider, you should be able to get
+    it to work.\r\n\r\nInternally they have some DB specific Delegates for dealing
+    with differences. I'm sure they would love for someone to contribute a Sybase
+    specific implementation..."
+- id: 16030
+  author: J&Atilde;&copy;r&Atilde;&acute;me De Cuyper
+  author_email: jerome.decuyper@gmail.com
+  author_url: http://www.jdecuyper.com/
+  date: '2010-01-04 17:44:11 -0500'
+  date_gmt: '2010-01-04 23:44:11 -0500'
+  content: Excellent post, thanks a lot for sharing!
+- id: 16039
+  author: Steve Edward
+  author_email: steve.repp@gmail.com
+  author_url: ''
+  date: '2010-01-26 12:12:33 -0500'
+  date_gmt: '2010-01-26 18:12:33 -0500'
+  content: Do you happen to have the working code example available for this. I am
+    new to Spring&#47;NHibernate and that would really help me fill in some blanks.
+- id: 16226
+  author: "&ETH;&scaron;&ETH;&deg;&ETH;&ordm; &Ntilde;&euro;&ETH;&micro;&ETH;&deg;&ETH;&raquo;&ETH;&cedil;&ETH;&middot;&ETH;&frac34;&ETH;&sup2;&ETH;&deg;&Ntilde;&sbquo;&Ntilde;&OElig;
+    daemon-&ETH;&iquest;&Ntilde;&euro;&ETH;&frac34;&Ntilde;&dagger;&ETH;&micro;&Ntilde;\x81&Ntilde;\x81&Ntilde;&lsaquo;
+    &ETH;&acute;&ETH;&raquo;&Ntilde;\x8F ASP.NET &ETH;&iquest;&Ntilde;&euro;&ETH;&cedil;&ETH;&raquo;&ETH;&frac34;&ETH;&para;&ETH;&micro;&ETH;&frac12;&ETH;&cedil;&Ntilde;\x8F?
+    - CodeHelper"
+  author_email: ''
+  author_url: http://codehelper.ru/questions/100/new/find-answer-151
+  date: '2010-07-15 13:52:12 -0400'
+  date_gmt: '2010-07-15 19:52:12 -0400'
+  content: "[...] &ETH;&cedil; &Ntilde;&sbquo;&Ntilde;&euro;&ETH;&cedil;&ETH;&sup3;&ETH;&sup3;&ETH;&micro;&Ntilde;&euro;&Ntilde;&lsaquo;
+    &ETH;&sup2; &ETH;&ordm;&ETH;&frac34;&ETH;&frac12;&Ntilde;&sbquo;&ETH;&micro;&ETH;&sup1;&ETH;&frac12;&ETH;&micro;&Ntilde;&euro;&ETH;&micro;.
+    &ETH;&rsquo;&ETH;&frac34;&Ntilde;&sbquo; &Ntilde;\x81&Ntilde;&sbquo;&ETH;&deg;&Ntilde;&sbquo;&Ntilde;&OElig;&Ntilde;\x8F
+    &ETH;&iquest;&ETH;&frac34; &Ntilde;\x8D&Ntilde;&sbquo;&ETH;&frac34;&ETH;&frac14;&Ntilde;&fnof;
+    &ETH;&iquest;&ETH;&frac34;&ETH;&sup2;&ETH;&frac34;&ETH;&acute;&Ntilde;&fnof;:
+    Using Quartz.NET, Spring.NET and NHibernate to run Scheduled Tasks in ASP.NET
+    \   &ETH;&scaron;&ETH;&frac34;&ETH;&frac14;&ETH;&frac14;&ETH;&micro;&ETH;&frac12;&Ntilde;&sbquo;&ETH;&cedil;&Ntilde;&euro;&ETH;&frac34;&ETH;&sup2;&ETH;&deg;&Ntilde;&sbquo;&Ntilde;&OElig;
+    &Ntilde;\x81&Ntilde;\x81&Ntilde;&lsaquo;&ETH;&raquo;&ETH;&ordm;&ETH;&deg;  &ETH;ž&Ntilde;&sbquo;&ETH;&sup2;&ETH;&micro;&Ntilde;&sbquo;&ETH;&cedil;&ETH;&raquo;
+    \ admax    262 &ETH;&acute;&ETH;&frac12;., 4 &Ntilde;&Dagger;&ETH;&deg;&Ntilde;\x81.,
+    30 [...]"
+- id: 17868
+  author: Robert Delahoz
+  author_email: robertdelahoz@yahoo.com
+  author_url: ''
+  date: '2011-03-11 09:29:46 -0500'
+  date_gmt: '2011-03-11 15:29:46 -0500'
+  content: Excellent post!. It saved my day.
+- id: 17946
+  author: Ehe
+  author_email: eric.leihe@gmail.com
+  author_url: ''
+  date: '2011-09-26 23:59:59 -0400'
+  date_gmt: '2011-09-27 05:59:59 -0400'
+  content: "Excellent guide, thank you very much!\r\n\r\nBy the way, I met the problem
+    when try to change the cron table to a new setting.\r\n\r\nNot matter how many
+    times I restart the web application, the Cron setting is keeping as the same as
+    the first time setting, never change in the db table CRON_TRIGGER and the job
+    frequency also never change.\r\n\r\nSo I just think, the Spring framework did
+    not tell the Quartz.NET that there is a change in the crontable setting. Till
+    now I am still looking for a solution to this problem.\r\n\r\n\r\nThanks &amp;
+    Best Regards!\r\nDo you have any advice or hint on dynamically change the Crontab?"
+- id: 18111
+  author: Viv
+  author_email: v.farrell@gmail.com
+  author_url: ''
+  date: '2012-10-14 20:58:24 -0400'
+  date_gmt: '2012-10-15 02:58:24 -0400'
+  content: 5 star article. Gave me exactly what I was looking for in a clear and concise
+    way. Thanks.
+---
+<p>Running scheduled tasks in web applications is not normally a straightforward thing to do. Web applications are built to respond to requests from users and respond to that request. This request&#47;response lifecycle doesn't always match well to a long running thread that wakes up to run a task every 10 minutes or at 2 AM every day.</p>
+<h3>ASP.NET Scheduled Task Options<&#47;h3><br />
+Using ASP.NET running on Windows, there are a number of different options that you could choose to implement this. Windows built in Scheduled Tasks can be run to periodically perform execute a program. A Windows Service could be constructed that used a Timer or a Thread to periodically do the work. Scheduled Tasks and Windows Service require you to write a standalone program. You can share DLLs from your Web application but in the end it is a separate app that needs to be maintained. Another option if you go this route is to turn the Scheduled Task or Service being run into a simple Web Service or REST client that can call your Web application but doesn't need any knowledge of the jobs themselves.</p>
+<p>Another option is an Open Source tool called <a href="http:&#47;&#47;quartznet.sourceforge.net&#47;">Quartz.NET<&#47;a>. Quartz.NET is based on the popular Java scheduled task runner called (not surprisingly) Quartz. Quartz.NET is a full-featured system that manages Jobs that do the work and Triggers that allow you to specify when you want those jobs run. It can run in your web application itself or as an external service.</p>
+<p>The simplest approach to get started is to run directly in your Web application as a process in IIS. The downside to this is that IIS will periodically recycle it's processes and won't necessarily start a new one until a new web request is made. Assuming you can deal with this indeterministic behavior then in an IIS process will be fine. It also creates a relatively easy path that will allow you to migrate to the external service process at a later point if need be.</p>
+<p>I'm an <a href="http:&#47;&#47;altdotnet.org">ALT.NET<&#47;a> kind of .NET developer, so I like to use tools like <a href="http:&#47;&#47;www.hibernate.org&#47;343.html">NHibernate<&#47;a> for ORM and <a href="http:&#47;&#47;springframework.net&#47;">Spring.NET<&#47;a> for Dependency Injection, AOP and generally wiring everything together. The good news is that Spring.NET supports Quartz.NET through its <a href="http:&#47;&#47;springframework.net&#47;docs&#47;1.2.0&#47;reference&#47;html&#47;scheduling.html">Scheduling API<&#47;a>. Start with that for some basic information on using Quartz.NET with Spring. The bad news is that the documentation is a bit thin and the examples basic. I attempt to remedy that in part here.</p>
+<h3>Using Quartz.NET, NHibernate and Spring.NET to run Scheduled Tasks<&#47;h3><br />
+The goal is to integrate an existing Spring managed object like a Service or a DAL that uses NHibernate with a Quartz Job that will run on a periodic basis.</p>
+<p>To start with you need to create an interface for your service and then implement that interface. The implementation I'll leave to you and your problem, but the example below you can image uses one or more NHibernate DALs to lookup Users, find their email preferences, etc.</p>
+<h4>Implementing Services and Jobs<&#47;h4><br />
+<code lang="csharp"><br />
+public interface IEmailService<br />
+{<br />
+    void SendEveryoneEmails();<br />
+}<br />
+<&#47;code></p>
+<p>When implementing your Job you need to know a few details about how Quartz works:</p>
+<ol>
+<li>The first thing to understand is that if you are going to use the <em>AdoJobScheduler<&#47;em> to store your Jobs and triggers in the database the Job needs to be <em>Serializable<&#47;em>. Generally speaking your DAL classes and NHibernate sessions and the like are not going to be serializable. To get around that, we make the properties <strong>set-only<&#47;strong> so that they will not be serialized when they are stored in the database.<&#47;li>
+<li>The second thing to understand is that your Job will not be running in the context of the Web application or a request so anything you have to set up connections (such as an OpenSessionInView filter) will not apply to Jobs run by Quartz. This means that you will need to setup your own NHibernate session for all of the dependent objects to use. Luckily Spring provides some help with this in the <em>SessionScope<&#47;em> class. This is the same base class as is used by the OpenSessionInView filter.<&#47;li><br />
+<&#47;ol></p>
+<p>Using the Service interface you created, you then create a Job that Quartz.NET can run. Quartz.NET provides the <em>IJob<&#47;em> interface that you can implement. Spring.NET provides a base class that implements that interface called <em>QuartzJobObject<&#47;em> helps deal with injecting dependencies.</p>
+<p><code lang="csharp"><br />
+using NHibernate;<br />
+using Quartz;<br />
+using Spring.Data.NHibernate.Support;<br />
+using Spring.Scheduling.Quartz;</p>
+<p>public class CustomJob : QuartzJobObject<br />
+{<br />
+    private ISessionFactory sessionFactory;<br />
+    private IEmailService emailService;</p>
+<p>    &#47;&#47; Set only so they don't get serialized<br />
+    public ISessionFactory SessionFactory { set { sessionFactory = value; } }<br />
+    public IEmailService EmailService { set { emailService = value; } }</p>
+<p>    protected override void ExecuteInternal(JobExecutionContext ctx)<br />
+    {<br />
+        &#47;&#47; Session scope is the same thing as used by OpenSessionInView<br />
+        using (var ss = new SessionScope(sessionFactory, true))<br />
+        {<br />
+            emailService.SendEveryoneEmails();<br />
+            ss.Close();<br />
+        }<br />
+    }<br />
+}<br />
+<&#47;code></p>
+<h4>Wiring Services and Jobs Together with Spring<&#47;h4><br />
+Now that you have your classes created you need to wire everything together using Spring.</p>
+<p>First we have our DALs and Services wired in to Spring with something like the following:<br />
+<code lang="xml"><br />
+<object id="UserDAL" type="MyApp.DAL.UserDAL, MyApp.Data"></p>
+<property name="SessionFactory" ref="NHibernateSessionFactory" &#47;>
+<&#47;object><br />
+<object id="EmailService" type="MyApp.Service.EmailService, MyApp.Service"></p>
+<property name="UserDAL" ref="UserDAL" &#47;>
+<&#47;object><br />
+<&#47;code></p>
+<p>Next you create a Job that references the <em>Type<&#47;em> of the Job that you just created. The type is referenced instead of the instance because the lifecycle of the Job is managed by Quartz itself. It deals with instantiation, serialization and deserialization of the object itself. This is a bit different than what you might expect from a Spring service normally.<br />
+<code lang="xml"><br />
+<object id="CustomJob" type="Spring.Scheduling.Quartz.JobDetailObject, Spring.Scheduling.Quartz"></p>
+<property name="JobType" value="MyApp.Jobs.CustomJob, MyApp.Jobs" &#47;>
+<&#47;object><br />
+<&#47;code></p>
+<p>Once your Job is created, you create a Trigger that will run the Job based on your rules. Quartz (and Spring) offer two types of Jobs <em>SimpleTriggers<&#47;em> and <em>CronTriggers<&#47;em>. SimpleTriggers allow you to specify things like "Run this task every 30 minutes". CronTriggers follow a <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Cron">crontab<&#47;a> format for specifying when Jobs should run. The CronTrigger is very flexible but could be a little confusing if you aren't familiar with cron. It's worth getting to know for that flexibility though.</p>
+<p><code lang="xml"><br />
+<object id="CustomJobTrigger" type="Spring.Scheduling.Quartz.CronTriggerObject, Spring.Scheduling.Quartz"></p>
+<property name="JobDetail" ref="CustomJob"&#47;>
+<property name="CronExpressionString" value="0 0 2 * * ?" &#47;> <!-- run every morning at 2 AM --></p>
+<property name="MisfireInstructionName" value="FireOnceNow" &#47;>
+<&#47;object><br />
+<&#47;code></p>
+<p>The last piece that needs to be done is the integration of the <em>SchedulerFactory<&#47;em>. The SchedulerFactory brings together Jobs and Triggers with all of the other configuration needed to run Quartz.NET jobs.</p>
+<p>A couple of things to understand about configuring the SchedulerFactory:</p>
+<ol>
+<li>Specifying <em>
+<property name="DbProvider" ref="DbProvider"&#47;><&#47;em> (where DbProvider is the db:provider setup used by your Nhibernate configuration) tells the SchedulerFactory to use the AdoJobProvider and store the Jobs and Trigger information in the database. The tables will need to exist already and Quartz provides a script for this task.<&#47;li></p>
+<li>Running on SQL Server requires a slight change to Quartz. It uses a locking mechanism to prevent Jobs from running concurrently. For some reason the default configuration uses a <strong>FOR UPDATE<&#47;strong> query that is not supported by SQL Server. (I don't understand exactly why a .NET utility wouldn't work with SQL Server out of the box?)<br />
+To fix the locking a QuartzProperty needs to be set:<br />
+<em><entry key="quartz.jobStore.selectWithLockSQL" value="SELECT * FROM {0}LOCKS WHERE LOCK_NAME=@lockName"&#47;><&#47;em><&#47;li></p>
+<li>The JobFactory is set to the <em>SpringObjectJobFactory<&#47;em> because it handles the injection of dependencies into QuartzJobObject like the one we created above.<&#47;li>
+<li>SchedulerContextAsMap is a property on the SchedulerFactory that allows you to set properties that will be passed to your Jobs when they are created by the SpringObjectJobFactory. This is where you set all of the Property names and the corresponding instance references to Spring configured objects. Those objects will be set into your Job instances whenever they are deserialized and run by Quartz.<&#47;li><br />
+<&#47;ol></p>
+<p>Here's the whole ScheduleFactory configuration put together:<br />
+<code lang="xml"><br />
+<object id="SchedulerFactory" type="Spring.Scheduling.Quartz.SchedulerFactoryObject, Spring.Scheduling.Quartz"></p>
+<property name="JobFactory">
+        <object type="Spring.Scheduling.Quartz.SpringObjectJobFactory, Spring.Scheduling.Quartz"&#47;><br />
+    <&#47;property></p>
+<property name="SchedulerContextAsMap">
+        <dictionary><br />
+            <entry key="EmailService" value-ref="EmailService" &#47;><br />
+            <entry key="SessionFactory" value-ref="NHibernateSessionFactory" &#47;><br />
+        <&#47;dictionary><br />
+    <&#47;property></p>
+<property name="DbProvider" ref="DbProvider"&#47;>
+<property name="QuartzProperties">
+        <dictionary><br />
+            <entry key="quartz.jobStore.selectWithLockSQL" value="SELECT * FROM {0}LOCKS WHERE LOCK_NAME=@lockName"&#47;><br />
+        <&#47;dictionary><br />
+    <&#47;property></p>
+<property name="triggers">
+<list>
+            <ref object="CustomJobTrigger" &#47;><br />
+        <&#47;list><br />
+    <&#47;property><br />
+<&#47;object><br />
+<&#47;code></p>
+<h3>Conclusion<&#47;h3><br />
+Scheduled tasks in ASP.NET applications shouldn't be too much trouble anymore. Reusing existing Service and DAL classes allows you to easily create scheduled tasks using existing, tested code. Quartz.NET looks to be a good solution for these situations.</p>

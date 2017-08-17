@@ -1,0 +1,172 @@
+---
+layout: post
+status: publish
+published: true
+title: More .NET Compact Framework Woes
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 67
+wordpress_url: http://www.zorched.net/2007/02/04/more-net-compact-framework-woes/
+date: '2007-02-04 00:32:24 -0500'
+date_gmt: '2007-02-04 06:32:24 -0500'
+categories:
+- ".NET"
+tags:
+- compact framework
+- csharp
+comments:
+- id: 8685
+  author: Grant
+  author_email: blah@blah.com
+  author_url: ''
+  date: '2007-02-18 19:25:57 -0500'
+  date_gmt: '2007-02-19 01:25:57 -0500'
+  content: "Geoff your post raises two points.\r\n\r\nThe first is a question. What
+    was a fundamental design flaw in the C# language implementation that resulted
+    in the manifestation of the error that occurred?\r\n\r\nThe second is a comment.
+    What you've encountered, or more spefically how you had to deal with it, is a
+    development taboo. I will talk to you about that part sometime at work."
+- id: 10987
+  author: alex
+  author_email: hatespam@mail.com
+  author_url: http://www.dotnetremoting.com
+  date: '2007-10-05 02:56:55 -0400'
+  date_gmt: '2007-10-05 08:56:55 -0400'
+  content: "The above solution solution does offer some workaround the problem, however\r\ngenerally
+    XMLSerializer is the least useful thing for the object exchange systems.\r\nHave
+    a look www.dotnetremoting.com there are some solutions (and some free)"
+- id: 10988
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2007-10-05 08:46:44 -0400'
+  date_gmt: '2007-10-05 14:46:44 -0400'
+  content: "Alex,\r\nCalling Dotnetremoting platform neutral is a bit of a stretch.
+    If you can run .NET or Mono then you can use .NET Remoting? Different OSes are
+    not different platforms. When you're trying to integrate a .NET CF handheld application
+    with an existing Java service  implemented as SOAP (XML), .NET Remoting is pretty
+    useless. Integration is really only an interesting discussion when you don't have
+    control over both the client and the server. If you have control over both, it's
+    usually not a very difficult endeavor."
+- id: 11054
+  author: Alex
+  author_email: meduzy@gmail.com
+  author_url: http://www.dotnetremoting.com
+  date: '2007-11-14 21:10:55 -0500'
+  date_gmt: '2007-11-15 03:10:55 -0500'
+  content: "Geoff,\r\nRunning remoting on different platforms using standard MS Remoting
+    is impossible for the simple reason: the serialization will fail. SOAP is so slow
+    that sometimes it is unusable. Also all SOAP based \r\nsystems are unidirectional.
+    Generally we are talking about very different systems.\r\nYou are focusing on
+    the XML type systems that are platform neutral but they are useless when you need
+    a performance and duplex. \r\nAlso everybody is missing the point that XML style
+    communication  is a result  of inabilty of the software (and hardware) vendors
+    to come to some reasonable binary standard. It is a miracle that they agreed on
+    ASCII code and that enables to use XML based comms now."
+- id: 11098
+  author: Tim
+  author_email: noone@nowhere.com
+  author_url: ''
+  date: '2007-12-13 07:46:27 -0500'
+  date_gmt: '2007-12-13 13:46:27 -0500'
+  content: "Here's an alternative work-around which works now, but is easy to remove
+    if the CF ever serializes generic lists properly:\r\n<code>\r\n        &#47;&#47;&#47;
+    \r\n        &#47;&#47;&#47; This property is just a work-around for a bug in CF
+    serialization. Never use it from \r\n        &#47;&#47;&#47; your own code.\r\n
+    \       &#47;&#47;&#47; \r\n        public string[] SerializeResults\r\n        {\r\n
+    \           get{return _results.ToArray();}\r\n            set{_results = new
+    List(value);}\r\n        }\r\n\r\n        [XmlIgnore]\r\n        public List Results\r\n
+    \       {\r\n            get{return _results;}\r\n            set { _results =
+    value; }\r\n        }\r\n<&#47;code>"
+---
+<p>I posted previously on a <a href="http:&#47;&#47;www.zorched.net&#47;2006&#47;12&#47;21&#47;bug-in-the-net-compactframework-xmlenum-with-whitespace&#47;">Bug in the .NET Compact Framework with the XmlEnum Attribute<&#47;a> with whitespace in the name. Well I've run into some other interesting "features".</p>
+<p>The first thing to realize is that the things that work on the Full framework don't work on the Compact Framework.</p>
+<h2>What Works With Serialization<&#47;h2><br />
+First thing is the good news: Arrays work everywhere. They work on the Compact Framework and the Full Framework. The downside of course is that Arrays are very inconvenient. You have to manually resize them yourself for example.</p>
+<p>The second thing that works are regular <a href="http:&#47;&#47;msdn2.microsoft.com&#47;en-us&#47;library&#47;system.collections.ilist.aspx">ILists<&#47;a>. When you map them a collection will be used. Of course one of the big improvements in .NET 2.0 was the introduction of Generics. Generics allow you to have strongly-typed collections without manually implementing them for each specific type.</p>
+<h2>More Generics Problems<&#47;h2><br />
+Xml Serialization works if you use IList. But there are <a href="http:&#47;&#47;www.srtsolutions.com&#47;public&#47;item&#47;149270?model=user&#47;myst&#47;user-srt-corporate-comments&style=user&#47;myst&#47;srt-corporate&scheme=gray">problems with Generics interfaces<&#47;a>. I guess there are more than problems. Short story is that you can not use IList<T> for XML serialization, it plain just doesn't work.</p>
+<p>Here's where the difference between the Full Framework and the Compact Framework come into play. On the Full Framework, you can map to a concrete collection wether it's generic or not. So List<T> will work. Unfortunately this does not work in the Compact Framework. </p>
+<p><code lang="csharp"><br />
+[XmlElement(Name="foo")]<br />
+public List<string> Foos<br />
+{<br />
+     get { return this.foos }<br />
+     set { this.foos = value; }<br />
+}<br />
+<&#47;code></p>
+<p>You end up with an exception:</p>
+<pre>
+Two mappings for string[].</p>
+<p>Stack Trace:<br />
+at System.Xml.Serialization.TypeContainer.AddType()<br />
+at System.Xml.Serialization.TypeContainer.AddType()<br />
+at System.Xml.Serialization.XmlSerializationReflector.AddIXmlSerializableType()<br />
+at System.Xml.Serialization.XmlSerializationReflector.AddType()<br />
+at System.Xml.Serialization.XmlSerializationReflector.FindType()<br />
+at System.Xml.Serialization.XmlSerializationReflector.FindType()<br />
+.....<br />
+<&#47;pre></p>
+<h2>So What Do You Do About It<&#47;h2><br />
+You basically have 2 options:</p>
+<ol>
+<li>Use Arrays<&#47;li>
+<li>Create your own custom, strongly-typed collections classes<&#47;li><br />
+<&#47;ol></p>
+<h3>Arrays<&#47;h3><br />
+The advantage is that this is very simple and requires no extra code. The downside as I said above is that you have to write code to manually do array resizing.</p>
+<p><code lang="csharp"><br />
+public T[] AppendItem<T>(T[] theArray, T newItem) {<br />
+    T[] newArray = new T[theArray.Length + 1];<br />
+    Array.Copy(theArray, newArray, theArray.Length);<br />
+    newArray[newArray.Length - 1] = newItem;<br />
+    return newArray;<br />
+}<br />
+<&#47;code></p>
+<h3>Custom, Strongly-Typed Collections<&#47;h3><br />
+If you don't want to use Arrays and deal with manually resizing them, you can build your own Collections classes for each of your types.</p>
+<p>Create your strongly-typed collection:<br />
+<code lang="csharp"><br />
+[Serializable]<br />
+[EditorBrowsable(EditorBrowsableState.Advanced)]<br />
+public class EmployeeCollection : ArrayList {<br />
+    public Employee Add(Employee obj) {<br />
+        base.Add(obj);<br />
+       return obj;<br />
+    }</p>
+<p>   public Employee Add() {<br />
+       return Add(new Employee());<br />
+   }</p>
+<p>   public void Insert(int index, Employee obj) {<br />
+       base.Insert(index, obj);<br />
+   }</p>
+<p>   public void Remove(Employee obj) {<br />
+       base.Remove(obj);<br />
+   }</p>
+<p>   new public Employee this[int index] {<br />
+       get { return (Employee) base[index]; }<br />
+       set { base[index] = value; }<br />
+   }<br />
+}<br />
+<&#47;code></p>
+<p>Then use that collection in your class to map:<br />
+<code lang="csharp"><br />
+[XmlRoot("company")]<br />
+class Company {<br />
+    private EmployeeCollection employees;</p>
+<p>    [XmlElement(Type=typeof(Employee),ElementName="employee",IsNullable=false)]<br />
+    [EditorBrowsable(EditorBrowsableState.Advanced)]<br />
+    public EmployeeCollection Employees {<br />
+        get { return this.employees; }<br />
+        set { this.employees = value; }<br />
+    }<br />
+}<br />
+<&#47;code></p>
+<h2>Pick Your Poison<&#47;h2><br />
+The problems with Generics collections in the .NET Compact Framework seem like yet another bug. So, pick your poison and choose a workaround. Whichever seems simpler to you. Hope that helps someone out.</p>

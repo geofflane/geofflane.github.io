@@ -1,0 +1,65 @@
+---
+layout: post
+status: publish
+published: true
+title: Java Return from Finally
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 477
+wordpress_url: http://www.zorched.net/?p=477
+date: '2011-03-18 07:36:24 -0400'
+date_gmt: '2011-03-18 13:36:24 -0400'
+categories:
+- Java
+tags:
+- Java
+- bugs
+- exceptions
+comments:
+- id: 17894
+  author: links for 2011-05-13 &raquo; &iacute;&bull;&oelig;&euml;&sup2;&circ; &euml;&sbquo;&nbsp;&euml;&nbsp;&cedil;&euml;&lsaquo;&curren;;;;
+  author_email: ''
+  author_url: http://arahann.elogin.co.kr/blog/?p=860
+  date: '2011-05-13 18:24:14 -0400'
+  date_gmt: '2011-05-14 00:24:14 -0400'
+  content: "[...] Java Return from Finally | Zorched &#47; One-Line Fix (tags: java
+    exception finally return statement bug)       Posted by arahann at 09:21 [...]"
+- id: 17899
+  author: Grant Rettke
+  author_email: grettke@acm.org
+  author_url: http://wisdomandwonder.com/
+  date: '2011-05-27 11:26:05 -0400'
+  date_gmt: '2011-05-27 17:26:05 -0400'
+  content: Would be interesting to see how try&#47;catch&#47;finally are implemented
+    for Java *in* Java?
+---
+<p>try...catch...finally is the common idiom in Java for exception handling and cleanup. The thing that people may not know is that returning from within a finally block has the unintended consequence of stoping an exception from propagating up the call stack. It "overrides" the throwing of an exception so that the caller will never get to handle it.</p>
+<p><code lang="java"><br />
+public class Main {<br />
+    public static void main(String[] args) throws Throwable {<br />
+        System.out.println("Starting");<br />
+        method();<br />
+        System.out.println("No way to know that an exception was thrown");<br />
+    }</p>
+<p>    public static void method() throws Throwable {<br />
+        try {<br />
+            System.out.println("In method about to throw an exception.");<br />
+            throw new RuntimeException();<br />
+        } catch (Throwable ex) {<br />
+            System.out.println("Caught exception, maybe log it, and then rethrow it.");<br />
+            throw ex;<br />
+        } finally {<br />
+            System.out.println("return in finally prevents an exception from being passed up the call stack.");<br />
+            return; &#47;&#47; remove the return to see the real behavior<br />
+        }<br />
+    }<br />
+}<br />
+<&#47;code></p>
+<p>I recently came across code like this. This is Real Bad. Returning from within finally prevents the propagation of regular exceptions, which is bad enough, but worse, prevents the propagation of runtime exceptions which are generally programmer errors. This one small mistake can hide programmer errors so that you'll never see them and never know why things aren't working as expected. One of the interesting things is that the Java compiler understands this as well. If you return from within a finally block where an exception would otherwise be thrown, the compiler does not force you to declare that exception in the method's throws declaration.</p>
+<p>Long story short. Don't return from with finally. Ever.</p>

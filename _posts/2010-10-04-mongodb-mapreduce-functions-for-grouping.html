@@ -1,0 +1,176 @@
+---
+layout: post
+status: publish
+published: true
+title: 'MongoDB: MapReduce Functions for Grouping'
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 433
+wordpress_url: http://www.zorched.net/?p=433
+date: '2010-10-04 19:34:16 -0400'
+date_gmt: '2010-10-05 01:34:16 -0400'
+categories:
+- Code
+tags:
+- sql
+- functional programming
+- mongodb
+- mapreduce
+comments:
+- id: 16294
+  author: 'Tweets that mention MongoDB: MapReduce Functions for Grouping | Zorched
+    &#47; One-Line Fix -- Topsy.com'
+  author_email: ''
+  author_url: http://topsy.com/www.zorched.net/2010/10/04/mongodb-mapreduce-functions-for-grouping/?utm_source=pingback&amp;utm_campaign=L2
+  date: '2010-10-04 20:14:05 -0400'
+  date_gmt: '2010-10-05 02:14:05 -0400'
+  content: "[...] This post was mentioned on Twitter by Mitch Pirtle and Learn MongoDB,
+    geofflane. geofflane said: MongoDB MapReduce functions for grouping - http:&#47;&#47;bit.ly&#47;cY3jHW
+    [...]"
+- id: 16295
+  author: Shane Reustle
+  author_email: sreustle@gmail.com
+  author_url: http://shanereustle.com
+  date: '2010-10-04 20:19:08 -0400'
+  date_gmt: '2010-10-05 02:19:08 -0400'
+  content: This is a very good explanation, thanks!
+- id: 16296
+  author: Marc Esher
+  author_email: marc.esher@gmail.com
+  author_url: http://blog.mxunit.org
+  date: '2010-10-04 21:28:51 -0400'
+  date_gmt: '2010-10-05 03:28:51 -0400'
+  content: "Geoff,\r\n\r\n  A fine post: thanks!\r\n\r\nIn your last example, you
+    define the reduceNames function but don't use it in your mapReduce. Perhaps it'd
+    be useful to show those results as well.\r\n\r\nI think for me -- as a SQL-lovin'
+    kind of dude, one of the great MongoDB hurdles has been aggregation. SQL makes
+    it so easy to aggregate and especially sort on aggregated values (ORDER BY count(blah)...).\r\n\r\nAnd
+    without really embracing M&#47;R in Mongo, you can't get that. The Gold, for me,
+    with MongoDB's M&#47;R output is that you can get the collection it returns, and
+    then perform the other important cursor operations on that result, especially
+    sort. So if your M&#47;R adds computed fields, you can then sort on those fields.\r\n\r\nSomething
+    I've not investigated fully, but I'm interested in your thoughts&#47;advice on
+    this: using these functions, it's kind of hard to debug. When you're writing,
+    say, javascript, with firebug, you can use console.log() to print results as you
+    go, which can be a real help while you're developing js functions. How do you
+    go about building up &#47; debugging M&#47;R functions in Mongo?"
+- id: 16297
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2010-10-05 07:15:19 -0400'
+  date_gmt: '2010-10-05 13:15:19 -0400'
+  content: "@Marc,\r\nI fixed the typo you found and added in the output for the second
+    example.\r\n\r\nI still find SQL much easier as well. It's partially the familiarity
+    of doing it for 10+ years. M&#47;R, in the end, is more flexible as it's a way
+    of writing your own aggregate functions.\r\n\r\nAs for debugging, I don't have
+    a good answer. I've never really done that much, but you can use <em>print()<&#47;em>
+    to write things to stdout or the log file.\r\n\r\nThanks for the comment!"
+- id: 17906
+  author: jimis nikolopoulos
+  author_email: b1c@in.gr
+  author_url: ''
+  date: '2011-07-14 01:44:05 -0400'
+  date_gmt: '2011-07-14 07:44:05 -0400'
+  content: "Nice piece of work, thanks for posting Geoff. I also think that in later
+    versions (im using 1.8.2) you will need a third arg in the mapReduce method to
+    keep the output. Hence the line:\r\nres = db.factories.mapReduce(mapCity, reduceNames)\r\nshould
+    now be something like\r\nres = db.factories.mapReduce(mapCity, reduceNames, {out
+    : \"OutputCollection\"})\r\nMore info can be found here:\r\nhttp:&#47;&#47;www.mongodb.org&#47;display&#47;DOCS&#47;MapReduce"
+- id: 18333
+  author: MongoDB Reference Site &laquo; threadbuilder
+  author_email: ''
+  author_url: http://threadbuilder.wordpress.com/2013/02/14/mongodb-reference-site/
+  date: '2013-02-14 02:56:26 -0500'
+  date_gmt: '2013-02-14 08:56:26 -0500'
+  content: "[...] http:&#47;&#47;kylebanker.com&#47;blog&#47;2009&#47;11&#47;mongodb-advanced-grouping&#47;
+    http:&#47;&#47;www.zorched.net&#47;2010&#47;10&#47;04&#47;mongodb-mapreduce-functions-for-grouping&#47;
+    [...]"
+---
+<p>SQL GROUP BY allows you to perform aggregate functions on data sets; To count all of the stores in each state, to average a series of related numbers, etc. MongoDB has <a href="http:&#47;&#47;www.mongodb.org&#47;display&#47;DOCS&#47;Aggregation">some aggregate functions<&#47;a> but they are fairly limited in scope. The MongoDB group function also suffers from the fact that it does not work on <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Shard_(database_architecture)">sharded<&#47;a> configurations. So how do you perform grouped queries using MongoDB? By using MapReduce functions of course (you read the title right?)</p>
+<h3>Understanding MapReduce<&#47;h3><br />
+Understanding MapReduce requires, or at least is made much easier by, understanding functional programming concepts. <em>map<&#47;em> and <em>reduce (fold, inject)<&#47;em> are functions that come from Lisp and have been inherited by a lot of languages (Scheme, Smalltalk, Ruby, Python).</p>
+<dl>
+<dt>map<&#47;dt>
+<dd>A higher-order function which transforms a list by applying a function to each of its elements. Its return value is the transformed list. In MongoDB terms, the map is a function that is run for each Document in a collection and can return a value for that row to be included in the transformed list.<&#47;dd></p>
+<dt>reduce<&#47;dt>
+<dd>A higher-order function that iterates an arbitrary function over a data structure and builds up a return value. The reduce function takes the values returned by map and allows you to run a function to manipulate those values in some way.<&#47;dd><br />
+<&#47;dl></p>
+<h3>Some Examples<&#47;h3><br />
+Let's start with some sample data:<br />
+<code lang="javascript"><br />
+db.factories.insert( { name: "Miller", metro: { city: "Milwaukee", state: "WI" } } );<br />
+db.factories.insert( { name: "Lakefront", metro: { city: "Milwaukee", state: "WI" } } );<br />
+db.factories.insert( { name: "Point", metro: { city: "Steven's Point", state: "WI" } } );<br />
+db.factories.insert( { name: "Pabst", metro: { city: "Milwaukee", state: "WI" } } );<br />
+db.factories.insert( { name: "Blatz", metro: { city: "Milwaukee", state: "WI" } } );<br />
+db.factories.insert( { name: "Coors", metro: { city: "Golden Springs", state: "CO" } } );<br />
+db.factories.find()<br />
+<&#47;code></p>
+<p>Lets say I want to count the number of factories in each of the cities (ignore the fact that I could have the same city in more than one state, I don't in my data). For a count, I write a function that "emits" the group by key and a value that you can count. It can be any value, but for simplicity I'll make it 1. <em>emit()<&#47;em> is a MongoDB server-side function that you use to identify a value in a row that should be added to the transformed list. If <em>emit()<&#47;em> is not called then the values for that row will be excluded from the results.<br />
+<code lang="javascript"><br />
+mapCity = function () {<br />
+    emit(this.metro.city, 1);<br />
+}<br />
+<&#47;code></p>
+<p>The next piece is the <em>reduce()<&#47;em> function. The reduce function will be passed a key and an array of values that were collected by the <em>map()<&#47;em> function. I know my map function returns a 1 for each row keyed by city. So the reduce function will be called with a key "Golden Springs" and a single-element array containing a 1. For "Milwaukee" it will be passed an 4-element array of 1s.<br />
+<code lang="javascript"><br />
+reduceCount = function (k, vals) {<br />
+    var sum = 0;<br />
+    for (var i in vals) {<br />
+        sum += vals[i];<br />
+    }<br />
+    return sum;<br />
+}<br />
+<&#47;code></p>
+<p>With those 2 functions I can call the mapReduce function to perform my Query.<br />
+<code lang="javascript"><br />
+res = db.factories.mapReduce(mapCity, reduceCount)<br />
+db[res.result].find()<br />
+<&#47;code></p>
+<p>This results in:<br />
+<code lang="javascript"><br />
+{ "_id" : "Golden Springs", "value" : 1 }<br />
+{ "_id" : "Milwaukee", "value" : 4 }<br />
+{ "_id" : "Steven's Point", "value" : 1 }<br />
+<&#47;code></p>
+<p>Counting is not the only thing I can do of course. Anything can be returned by the map function including complex JSON objects. In this example I combine the names of all of the Factories in a given City into a simple comma-separated list.<br />
+<code lang="javascript"><br />
+mapCity = function () {<br />
+    emit(this.metro.city, this.name);<br />
+}<br />
+reduceNames = function (k, vals) {<br />
+    return vals.join(",");<br />
+}<br />
+res = db.factories.mapReduce(mapCity, reduceNames)<br />
+db[res.result].find()<br />
+<&#47;code></p>
+<p>Give you:<br />
+<code lang="javascript"><br />
+{ "_id" : "Golden Springs", "value" : "Coors" }<br />
+{ "_id" : "Milwaukee", "value" : "Miller,Lakefront,Pabst,Blatz" }<br />
+{ "_id" : "Steven's Point", "value" : "Point" }<br />
+<&#47;code></p>
+<h3>Conclusion<&#47;h3><br />
+These are fairly simple examples, but I think it helps to work through this kind of simple thing to fully understand a new technique before you have to work with harder examples.</p>
+<p>For more on MongoDB check out these books:</p>
+<ul>
+<li>
+<a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;product&#47;1449381561?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1449381561">MongoDB: The Definitive Guide<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&l=as2&o=1&a=1449381561" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;><br />
+<&#47;li></p>
+<li>
+<a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;product&#47;1430230517?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1430230517">The Definitive Guide to MongoDB: The NoSQL Database for Cloud and Desktop Computing<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&l=as2&o=1&a=1430230517" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;><br />
+<&#47;li></p>
+<li>
+<a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;product&#47;0321705335?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0321705335">MongoDB for Web Development (Developer's Library)<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&l=as2&o=1&a=0321705335" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;><br />
+<&#47;li></p>
+<li>
+<a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;product&#47;0262062186?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0262062186">How to Design Programs: An Introduction to Programming and Computing<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&l=as2&o=1&a=0262062186" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;> - If you want to learn more about functional programming I highly recommend this book.<br />
+<&#47;li><br />
+<&#47;ul></p>

@@ -1,0 +1,114 @@
+---
+layout: post
+status: publish
+published: true
+title: Javascript Code Formatting
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 45
+wordpress_url: http://www.zorched.net/2006/09/26/javascript-code-formatting/
+date: '2006-09-26 18:23:58 -0400'
+date_gmt: '2006-09-27 00:23:58 -0400'
+categories:
+- Code
+- Web
+- Javascript
+tags:
+- blogging
+comments:
+- id: 387
+  author: Brennan Stehling
+  author_email: offwhite@gmail.com
+  author_url: http://brennan.offwhite.net/blog/
+  date: '2006-09-27 12:58:58 -0400'
+  date_gmt: '2006-09-27 18:58:58 -0400'
+  content: "Good find, and...\r\n\r\nIt works for me!  Actually I have had the WYSIWYG
+    editor for Wordpress off for a while but it still inserts break tags at the end
+    of each line and encodes special characters, such is the single quote.  That causes
+    some of the inline Javascript to fail when it is in the blog entry.\r\n\r\nI fixed
+    it by placing a PRE tag around the TEXTAREA and then put the Javascript call to
+    HighlightAll in the footer of my Wordpress templates.  The PRE tag disables the
+    HTML encoding and break tag insertions.  I am now prepped to do C# and XML syntax
+    highlighting.\r\n\r\nhttp:&#47;&#47;brennan.offwhite.net&#47;blog&#47;2006&#47;09&#47;25&#47;multiple-site-authentication-with-aspnet-20&#47;\r\nhttp:&#47;&#47;brennan.offwhite.net&#47;blog&#47;2006&#47;09&#47;25&#47;robust-custom-profiles&#47;"
+- id: 388
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2006-09-27 13:51:12 -0400'
+  date_gmt: '2006-09-27 19:51:12 -0400'
+  content: "Pretty slick isn't it.\r\n\r\nYou can fix the PRE issue for CODE blocks
+    as well, check out the Update of my previous post on Wordpress Code Formatting.
+    It's a one-line-fix to remove BR tags from CODE blocks.\r\n\r\nOf course if you're
+    going to use the Javascript syntax highlighting, stick with the TEXTAREA."
+- id: 389
+  author: Brennan Stehling
+  author_email: offwhite@gmail.com
+  author_url: http://brennan.offwhite.net/blog/
+  date: '2006-09-27 14:19:12 -0400'
+  date_gmt: '2006-09-27 20:19:12 -0400'
+  content: Although this a cool way to highlight code, I would be interested in ways
+    to use Javascript to dress up some content.  Perhaps I want autolink certain terms
+    to Wikipedia or another source.  You could wrap a term with a span tag and then
+    use the class and title attributes to pass the data you need to set up the autolinking.  In
+    my blog entries I like to reference source materials whenever possible and this
+    could cut down on some of the time to do that.  The downside is that my blog would
+    not benefit from trackbacks or the association with those sites which Google may
+    use as the context for my pages.
+- id: 432
+  author: Brennan&#8217;s Blog &raquo; Blog Archive &raquo; Colorizing Code in Wordpress
+  author_email: ''
+  author_url: http://brennan.offwhite.net/blog/2006/10/01/colorizing-code-in-wordpress/
+  date: '2006-10-01 20:59:37 -0400'
+  date_gmt: '2006-10-02 02:59:37 -0400'
+  content: "[...] Last week I had an exchange with Geoff over code formating and suggested
+    it could be done with Javascript. We both happen to run Wordpress for our blogs
+    and I have also been looking for a way to insert stylized code into blog entries,
+    so I helped him to put together a solution. Pretty soon we had a solution. Initially
+    I suggested that it could be done with a bit of Javascript. He considered creating
+    his own new script, but like any pragmatic developer, he looked and found an existing
+    solution called dp.SyntaxHighlighter instead of starting from scratch. [...]"
+- id: 11070
+  author: Are you serious?
+  author_email: djflksjdf@gmail.com
+  author_url: ''
+  date: '2007-11-22 08:01:00 -0500'
+  date_gmt: '2007-11-22 14:01:00 -0500'
+  content: "In the download you get:\r\n\r\nscripts&#47;\r\n   one flash for clipboard\r\n
+    \  several language .js files\r\n   a main .js\r\nstyles&#47;\r\n   a css file\r\n\r\nYou
+    get an uncompressed file too.\r\n\r\n<b> WHAT YOU DON'T GET <&#47;b>\r\n\r\nA
+    simple helloworld.html\r\n\r\nI don't care how bloody simple something is. You
+    have to digg down into the comments OF THE USAGE PAGE, for an actual copy and
+    pasteable example.\r\n\r\nWhat the fuck. Do they not want people to use this?\r\n\r\nI
+    am a developer, I know Javascript, that isn't the damn issue. If you release something
+    like this, which isn't a runtime distribution (is has uncompressed files) they
+    should add a &amp;$&amp;#^ example file.\r\n\r\nIdiots."
+- id: 11071
+  author: Are you serious?
+  author_email: djflksjdf@gmail.com
+  author_url: ''
+  date: '2007-11-22 08:07:02 -0500'
+  date_gmt: '2007-11-22 14:07:02 -0500'
+  content: "It is inconceivable that a test.html wasn't included in the download.
+    I repeat, the sheer idiocy of this is overwhelming.\r\n\r\nHere is a base code,
+    place it in the folder where you see the Scripts and Styles folders (what is with
+    the capitalisation? M$ technology programmers? No wonder all their links were
+    screwed up from all over the web pointing to their website with capitals.)\r\n\r\n\r\n\r\n
+    \r\n\r\n\r\n\r\n \r\n\r\n\r\n\r\ndp.SyntaxHighlighter.ClipboardSwf = 'Scripts&#47;clipboard.swf';
+    dp.SyntaxHighlighter.HighlightAll('code'); \r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n
+    \ dp.SyntaxHighlighter.ClipboardSwf = 'Scripts&#47;clipboard.swf';\r\n  dp.SyntaxHighlighter.HighlightAll('code');\r\n\r\n\r\n
+    \ \r\n\r\n\r\n"
+---
+<p>Seek and ye shall find.<br />
+I posted yesterday about the trials and tribulations of <a href="http:&#47;&#47;www.zorched.net&#47;2006&#47;09&#47;25&#47;wordpress-code-formatting&#47;">code formatting<&#47;a>. While I've solved the basic problems of displaying code, we spoiled programmers have gotten really used to syntax highlighting. Syntax highlighting offers a lot of visual differentiation of text which makes it a lot easer to read code.</p>
+<p><a href="http:&#47;&#47;brennan.offwhite.net&#47;blog&#47;">Brennan<&#47;a> posted a comment about adding syntax highlighting, possibly with Javascript. I thought that was a great idea and was all ready to jump in and write the code. As a precursor though (all good programmers are lazy remember) I decided to see if anything already existed.</p>
+<p>And I nearly found perfection in <a href="http:&#47;&#47;www.dreamprojections.com&#47;SyntaxHighlighter&#47;Default.aspx">dp.SyntaxHighlighter<&#47;a>. It's a Javascript library for syntax highlighting code snipits in HTML. It's beautifully written code that takes advantage of cool javascript features like <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Prototype-based_programming">prototyping<&#47;a>. Each language syntax is abstracted out into its own file with it's own keyword definitions and comment definitions. As I said, it's a beautifully engineered piece of code and really shows off the power and elegance of the much maligned Javascript language.</p>
+<p>The only tweak I had to make to the code was that it had been hardcoded to work with <textarea> tags and was referencing the "value" attribute of that tag. I added a parameter to pass to the <code class="inline">dp.sh.HighlightAll<&#47;code> to set the parameter name to something else. That way I could make it work with the more <a href="http:&#47;&#47;brainstormsandraves.com&#47;articles&#47;semantics&#47;structure&#47;">semantically correct<&#47;a> <code> tag.</p>
+<p>Anyway I'm going to start playing with this and see if I can implement it on my blog. Check back soon for an update.</p>
+<p><strong><em>Update<&#47;em><&#47;strong>:<br />
+Well my little change didn't work so well after all. Things like generics don't work well within the <code> block. I think the browsers are trying to turn them into tags. Inside a <textarea> that doesn't happen. So I guess you get to choose between semantic markup and pretty viewing.</p>

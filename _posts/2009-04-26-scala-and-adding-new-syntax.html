@@ -1,0 +1,206 @@
+---
+layout: post
+status: publish
+published: true
+title: Scala and Adding New Syntax
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 333
+wordpress_url: http://www.zorched.net/?p=333
+date: '2009-04-26 16:11:04 -0400'
+date_gmt: '2009-04-26 22:11:04 -0400'
+categories:
+- Code
+- Scala
+tags:
+- dsl
+- functional programming
+- Scala
+- recursion
+comments:
+- id: 15037
+  author: anony
+  author_email: notrealone@boom.com
+  author_url: ''
+  date: '2009-04-26 22:38:11 -0400'
+  date_gmt: '2009-04-27 04:38:11 -0400'
+  content: "\"And when I say Scala is an OO language I really mean it: everything
+    is an Object.\"\r\n\r\nNot true. For a practical example, classes aren't objects
+    (see Smalltalk). Chew on that one."
+- id: 15038
+  author: Grant Rettke
+  author_email: grettke@acm.org
+  author_url: http://www.wisdomandwonder.com
+  date: '2009-04-26 22:40:27 -0400'
+  date_gmt: '2009-04-27 04:40:27 -0400'
+  content: The title "Scala and Adding What Looks Like New Syntax" may not sound as
+    nice; it would more accurately reflect the intent of your post.
+- id: 15039
+  author: Grant Rettke
+  author_email: grettke@acm.org
+  author_url: http://www.wisdomandwonder.com
+  date: '2009-04-26 22:41:58 -0400'
+  date_gmt: '2009-04-27 04:41:58 -0400'
+  content: "Why does the until function have to be made final?\r\n\r\nI bet someone
+    is wondering."
+- id: 15040
+  author: Grant Rettke
+  author_email: grettke@acm.org
+  author_url: http://www.wisdomandwonder.com
+  date: '2009-04-26 22:43:40 -0400'
+  date_gmt: '2009-04-27 04:43:40 -0400'
+  content: "You didn't talk about \"Automatic Type-Dependent Closure Construction\"
+    once in this article! At least by name; a long, confusing name at that :).\r\n\r\nYou
+    did explain it, though."
+- id: 15041
+  author: Grant Rettke
+  author_email: grettke@acm.org
+  author_url: http://www.wisdomandwonder.com
+  date: '2009-04-26 22:54:51 -0400'
+  date_gmt: '2009-04-27 04:54:51 -0400'
+  content: Why can't you create more than 1 of these closures as arguments to a function?
+- id: 15044
+  author: Floyd Gantt
+  author_email: fgantt@gmail.com
+  author_url: http://edansys.com/blog
+  date: '2009-04-27 08:02:52 -0400'
+  date_gmt: '2009-04-27 14:02:52 -0400'
+  content: Using until in the do &#47; while example doesn't quite read right.  It
+    does not loop *until* x < 100000.  If so, it would quit on the first iteration.
+- id: 15045
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2009-04-27 08:30:44 -0400'
+  date_gmt: '2009-04-27 14:30:44 -0400'
+  content: "@Floyd, that is true. The naming was a bit arbitrary. While is taken,
+    I guess something like 'aslongas' would work. The other way to make it 'until'
+    would be to negate the condition in the Repeater and then switch it to <em>until(x
+    >= 10000)<&#47;em>. That would be more semantically appropriate I guess.\r\nThanks
+    for the comment."
+- id: 15046
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2009-04-27 08:32:27 -0400'
+  date_gmt: '2009-04-27 14:32:27 -0400'
+  content: "@Grant, I didn't talk about 'Automatic Type-Dependent Closure Construction'
+    because I don't know what that is. The rest I didn't talk about because I didn't
+    see this as a post on all the details of scala really. Thanks for the comments."
+- id: 15047
+  author: Grant Rettke
+  author_email: grettke@acm.org
+  author_url: http://www.wisdomandwonder.com
+  date: '2009-04-27 08:46:48 -0400'
+  date_gmt: '2009-04-27 14:46:48 -0400'
+  content: "Geoff there is a WordPress plugin that allows people to subscribe to comments.
+    It is really brilliant, you should install it:\r\n\r\nhttp:&#47;&#47;txfx.net&#47;code&#47;wordpress&#47;subscribe-to-comments&#47;"
+- id: 15048
+  author: Grant Rettke
+  author_email: grettke@acm.org
+  author_url: http://www.wisdomandwonder.com
+  date: '2009-04-27 08:47:50 -0400'
+  date_gmt: '2009-04-27 14:47:50 -0400'
+  content: 'Geoff: Regarding the posts focus, understood. I was very focused on Scala,
+    and I wish you had decomposed your code down the details about how closures are
+    created, why you can''t create 2 of them automatically, and so on, in addition
+    to the excellent detail you had already provided.'
+- id: 15049
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2009-04-27 08:50:40 -0400'
+  date_gmt: '2009-04-27 14:50:40 -0400'
+  content: "@anony, Good point, some languages choose to make classes first-class
+    objects so they can be meta-programmed at runtime. You point out Smalltalk, Ruby
+    does the same thing. Generally that's only an interesting thing in dynamically
+    typed languages though because statically typed languages don't give you the tools
+    to manipulate those classes and then call them in any normal way.\r\n\r\nSmalltalk
+    and Ruby are dynamically typed, message passing languages. Scala is a statically
+    typed (and compiled) language, so classes as objects probably wouldn't offer any
+    value.\r\n\r\nThanks for the comment."
+- id: 15050
+  author: Grant Rettke
+  author_email: grettke@acm.org
+  author_url: http://www.wisdomandwonder.com
+  date: '2009-04-27 08:51:21 -0400'
+  date_gmt: '2009-04-27 14:51:21 -0400'
+  content: "Re: Automatic Type-Dependent Closure Construction, I was trying to give
+    you hard time for not including a big, confusing term. Like I said, you did describe
+    it.\r\n\r\nI only found it because I was trying to find out how you create closures
+    (a lambda doesn't evaluate its body) in Scala and came upon this:\r\n\r\nhttp:&#47;&#47;www.scala-lang.org&#47;node&#47;138"
+- id: 15051
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2009-04-27 09:10:18 -0400'
+  date_gmt: '2009-04-27 15:10:18 -0400'
+  content: '@Grant, that link is hilarious. This whole post started with me solving
+    a problem from the <a href="http:&#47;&#47;www.scala-lang.org&#47;node&#47;198"
+    rel="nofollow">Scala by Example<&#47;a> book. Then that page has the exact implementation
+    that I did ... except it took me like 2 hours to figure it out. So much for my
+    original work. :)'
+- id: 15077
+  author: mein Blog &raquo; Blog Archive &raquo; Scala Quick - links
+  author_email: ''
+  author_url: http://chrono.myownworld.de/blog/?p=133
+  date: '2009-05-12 00:36:46 -0400'
+  date_gmt: '2009-05-12 06:36:46 -0400'
+  content: "[...] eigene Kontrollstrukturen link [...]"
+---
+<p>One interesting thing about some languages is their support for adding new syntax. While all languages have the ability to add new functions or types some have specific properties that make it easy to add what looks like new built-in syntax.</p>
+<p>Scala is an Object Oriented language. You can declare classes and objects, do inheritance and composition, and all the other things you might expect from an OO language. Scala is also a Functional language because functions are first-class citizens (also called <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Functor">a functor<&#47;a>). And when I say Scala is an OO language I really mean it: everything is an Object. Even functions are Objects. (Chew on that one for a bit.)</p>
+<p>Scala also supports the idea of optional parenthesis for method calls that only take a single argument (<em><strong>Note:<&#47;strong> This applies to method calls on object only. Not to functions.<&#47;em>). This ends up being for a very practical reason. Take the following example:<br />
+<code lang="scala"><br />
+1 + 2<br />
+<&#47;code></p>
+<p>This is a very nice way to write an addition operation. In reality what's happening is:<br />
+<code lang="scala"><br />
+1.+(2)<br />
+<&#47;code><br />
+1 is an object and + is a method on that object that takes a single parameter. Applying the previous rule we get to remove the dot and the the parenthesis. Which allows us to write our previous example <em>1 + 2<&#47;em>.</p>
+<p>The good news is they bring this consistency to the language as a whole, so any method call can optionally use the dot. Any call to a method that only takes a single parameter can exclude the parenthesis around its arguments. These features make it pretty easy to emulate the built-in syntax of a language.</p>
+<h3>Your Own While Loop<&#47;h3><br />
+Let's say I want to write my own <em>while<&#47;em> loop:<br />
+<code lang="scala"><br />
+def mywhile(condition: => Boolean)(command: => Unit) {<br />
+    if (condition) {<br />
+        command<br />
+        mywhile(condition)(command)<br />
+    }<br />
+}</p>
+<p>var x = 1<br />
+mywhile(x < 100000) {<br />
+    println(x)<br />
+    x += 1<br />
+}<br />
+<&#47;code></p>
+<p>As you can see, I end up calling <em>mywhile<&#47;em> the same as I would call a built-in <em>while<&#47;em>. This is implemented as a tail-recursive function. If the condition is met, the command is executed. The function then recurses, calling itself to continue. <em>x < 100000<&#47;em> is an anonymous function that returns a boolean expression.</p>
+<h3>Your Own Do...While Loop<&#47;h3><br />
+A <em>while<&#47;em> loop can be built using just a single function. What if you want to create a <em>do...while<&#47;em> loop instead? In this case you can make use of the OO&#47;functional hybrid.</p>
+<p><code lang="scala"><br />
+class Repeater(command: => Unit){<br />
+    final def aslongas(condition: => Boolean)  {<br />
+        command<br />
+        if (condition) aslongas(condition)<br />
+    }<br />
+}</p>
+<p>def mydo(command: => Unit): Repeater = {<br />
+    new Repeater(command)<br />
+}</p>
+<p>var x = 0<br />
+mydo {<br />
+    x += 1<br />
+    println(x)<br />
+} aslongas (x < 100000)<br />
+<&#47;code></p>
+<p>In this case I use recursion again to do the looping. But I use an Object to bind the command to and an <em>aslongas<&#47;em> method to run that command and check the looping condition. I use a function <em>mydo<&#47;em> to bootstrap an instance of the <em>Repeater<&#47;em> class. Scala gives us the ability to use functions and objects when they make sense.</p>
+<h3>Why Should You Care?<&#47;h3><br />
+Ok, so you're not going to write your own while loops. The language has them built-in already. But what this allows you to see is how you can add new "syntax". That ability makes it quite convenient and easy to write higher-order syntax to solve application specific problems or to create DSLs.</p>
+<p><em><strong>Update:<&#47;strong> Changed the until name to 'aslongas' since it really wasn't until the condition was met.<&#47;em></p>

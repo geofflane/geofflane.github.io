@@ -1,0 +1,96 @@
+---
+layout: post
+status: publish
+published: true
+title: StringBuilder and my Biggest Pet Peeve
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 271
+wordpress_url: http://www.zorched.net/?p=271
+date: '2009-01-20 19:25:20 -0500'
+date_gmt: '2009-01-21 01:25:20 -0500'
+categories:
+- Code
+tags:
+- csharp
+- Java
+comments:
+- id: 14635
+  author: Chris
+  author_email: chris.erin@gmail.com
+  author_url: ''
+  date: '2009-01-20 20:15:17 -0500'
+  date_gmt: '2009-01-21 02:15:17 -0500'
+  content: 'Cmon Geoff, you have bigger pet peeves than this!  Hey, how does string.Format
+    or sb.Format("Foo: {0} \n", fooValue) work?  Does that create a new string as
+    well?  You like that better right?'
+- id: 14640
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2009-01-20 21:56:29 -0500'
+  date_gmt: '2009-01-21 03:56:29 -0500'
+  content: "Chris,\r\nActually the String formatting is often implemented internally
+    as a StringBuilder, so in the case of a Format method of an existing StringBuilder
+    it passes itself to a helper to do the manipulation."
+- id: 14651
+  author: Grant Rettke
+  author_email: grettke@acm.org
+  author_url: http://www.wisdomandwonder.com/
+  date: '2009-01-21 12:00:19 -0500'
+  date_gmt: '2009-01-21 18:00:19 -0500'
+  content: But Geoff, it compiles, runs, and stops. Plus, the unit tests pass. What
+    is the big deal?! ;)
+- id: 14652
+  author: Grant Rettke
+  author_email: grettke@acm.org
+  author_url: http://www.wisdomandwonder.com/
+  date: '2009-01-21 12:02:23 -0500'
+  date_gmt: '2009-01-21 18:02:23 -0500'
+  content: I would be really interested in seeing you write an article for Java or
+    .NET folks to help reveal to them not only the fact that strings are immutable,
+    but why the language designers were led to this decision or design or approach.
+    It was very intentional; and potentially more educational than relying on edicts
+    that are only learned about in certifications or on web pages. It might give folks
+    a reason not to perfomr string concatenation within a stringbuilder atleast :P
+    hehe.
+- id: 14655
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2009-01-21 12:37:17 -0500'
+  date_gmt: '2009-01-21 18:37:17 -0500'
+  content: "Grant,\r\nI updated the post to add a link that points out many of the
+    advantages of having immutable objects, specifically in the case of Strings."
+---
+<h2>What You Should Know About Strings<&#47;h2><br />
+In both Java and .NET (and other languages) String objects are <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Immutable_object">immutable<&#47;a>. They don't change. Period. If you "change" a String, it creates a new String. That includes String concatenation using a <em>+<&#47;em></p>
+<p><code lang="java"><br />
+&#47;&#47; One string created "foo"<br />
+String foo = "foo";<br />
+&#47;&#47; foo exists, "bar" is created and the combination of foo and "bar" is a third string<br />
+String bar = foo + " bar";<br />
+<&#47;code></p>
+<p>Ok, if you don't know this, fine. But if you don't know this, why would you EVER use a <em>StringBuilder<&#47;em>?</p>
+<h2>Why Does StringBuilder Exist?<&#47;h2><br />
+We know that Strings are immutable. If you need to do a bunch of string modification, concatenation, replacement - you will create a bunch of strings. Ok, great...why do I care? We care because we are told that creating a lot of Objects (and then later having to Garbage Collect them) is inefficient. To start with, I will guarantee right now that concatenating strings WILL NOT be the thing that prevents your application from performing. Guaranteed. Period.</p>
+<p>Ok fine, it's not going to be a problem. But you want to be a responsible coder and not do things that are intentionally inefficient if you can help it.</p>
+<p>So you use a StringBuilder. StringBuilder is implemented internally as an array of characters. The code manages the allocation and copying of data to new arrays if the buffer gets filled. It sometimes over allocates the new buffer so that it has to perform allocations less often. You sacrifice a bit of memory overhead to avoid some Object creation and Garbage Collection later.</p>
+<h2>My Biggest Pet Peeve<&#47;h2><br />
+Your use of StringBuilder is a <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Optimization_(computer_science)">premature optimization<&#47;a> but probably a forgivable one.</p>
+<p>So, WHY, OH WHY do you do this:<br />
+<code lang="java"><br />
+&#47;&#47; One string created "foo"<br />
+StringBuilder sb = new StringBuilder();<br />
+sb.append("Foo: " + fooValue + " \n");<br />
+sb.append("Bar: " + barValue + "\n");<br />
+<&#47;code></p>
+<p>It makes me have violent thoughts. Please stop.</p>
+<p><strong><em>Update:<&#47;em><&#47;strong><br />
+For some of the reasons why Strings are immutable, see <a href="http:&#47;&#47;mindprod.com&#47;jgloss&#47;immutable.html">this post on immutability<&#47;a> and its positive qualities.</p>

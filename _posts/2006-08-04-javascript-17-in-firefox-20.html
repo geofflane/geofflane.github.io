@@ -1,0 +1,109 @@
+---
+layout: post
+status: publish
+published: true
+title: Javascript 1.7 in Firefox 2.0
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 37
+wordpress_url: http://www.zorched.net/2006/08/04/javascript-17-in-firefox-20/
+date: '2006-08-04 15:19:06 -0400'
+date_gmt: '2006-08-04 21:19:06 -0400'
+categories:
+- Code
+- Web
+- Javascript
+tags:
+- HTML
+comments:
+- id: 194
+  author: aNieto2K - &raquo; Lo que nos viene con Firefox 2.0
+  author_email: ''
+  author_url: http://www.anieto2k.com/2006/08/08/lo-que-nos-viene-con-firefox-20/
+  date: '2006-08-08 08:17:21 -0400'
+  date_gmt: '2006-08-08 14:17:21 -0400'
+  content: "[...] Muy buen art&Atilde;&shy;culo con todas las maravillas (para desarrolladores)
+    de las que nos va a deleitar el nuevo Firefox 2.0. Via. [...]"
+- id: 481
+  author: Zorched &#47; One Line Fix &raquo; Firefox 2 Favorite Features
+  author_email: ''
+  author_url: http://www.zorched.net/2006/10/08/firefox-2-favorite-features/
+  date: '2006-10-08 19:29:29 -0400'
+  date_gmt: '2006-10-09 01:29:29 -0400'
+  content: "[...] Similarly tagged posts RJS Templates for RailsJavascript Code FormattingWordpress
+    Code FormattingRails on RailsJavascript 1.7 in Firefox 2.0Site UpdateSite Update
+    NewsJavaScript ToolkitsExcellent Cheat SheetsCongratulations to Safari [...]"
+- id: 4758
+  author: Tom
+  author_email: functorx@yahoo.com
+  author_url: ''
+  date: '2007-01-20 09:47:38 -0500'
+  date_gmt: '2007-01-20 15:47:38 -0500'
+  content: What about, oh, static checking?
+- id: 405352
+  author: Tru-Allure
+  author_email: jannacoane@arcor.de
+  author_url: http://truallurefaceserum.com/
+  date: '2017-05-12 01:26:53 -0400'
+  date_gmt: '2017-05-12 07:26:53 -0400'
+  content: I go to see everyday a few web sites and sites to read articles, except
+    this blog offers quality based writing.
+---
+<p><a href="http:&#47;&#47;brennan.offwhite.net&#47;">Brennan<&#47;a> posted a <a href="http:&#47;&#47;brennan.offwhite.net&#47;blog&#47;2006&#47;07&#47;19&#47;firefox-2-almost-here&#47;">blog entry about the Firefox 2.0 beta release<&#47;a> a couple of days ago that talks about a lot of the new features in the next Firefox release. This version seems to be an evolutionary release and not a revolutionary one. A lot of work has gone on in the internals of the code, and there are quite a few new developer fatures in this release, but there are still some really cool user centric features as well. Brennan talks a lot about the user features, so check them out. For more info, also look at the <a href="http:&#47;&#47;developer.mozilla.org&#47;en&#47;docs&#47;Firefox_2_for_developers#New_features_for_end_users">new features for end users<&#47;a> that Mozilla provides.</p>
+<p>I really want to look at some of the new features of Javascript though.</p>
+<h2>Javascript 1.7<&#47;h2><br />
+Javascript is a great language that people often dislike for a variety of reasons. The main two reasons I've run across is:</p>
+<ol>
+<li>Lack of understanding the features of the Javascript language<&#47;li>
+<li>Frustration with incompatible DOM implementations in browsers<&#47;li><br />
+<&#47;ol><br />
+The incompatible DOMs is not really Javascript's fault of course, but it's where a lot of the complexity comes in when you are writing client-side Javascript code. So I definitely understand that frustration. But Javascript itself is great (IMHO).</p>
+<p>Javascript 1.7 is picking up a lot of new features that more popular scripting langauges have such as Ruby and Python. I've drawn comparison to Javascript and Ruby before and a number of the new features in Javascript 1.7 only give them more feature parity.</p>
+<h3>Generators<&#47;h3><br />
+Javascript 1.7 adds a <code class="inline">yield<&#47;code> keyword. Yield allows you leave a method of code and have the state of the method saved at that point. When the method is called again, the last state of the code is resumed (or continued) from the state of the last time the method was called. This is often used for Iterators (another new feature). It can also be used to implement things like <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Continuation">Continuations<&#47;a> which can be used to create state machines and parsers.</p>
+<p><code>function countdown() {<br />
+    yield 3;<br />
+    yield 2;<br />
+    yield 1;<br />
+}<br />
+<&#47;code></p>
+<h3>Iterators<&#47;h3><br />
+Building the the new Generator functionality, Javascript 1.7 is adding an <code class="inline">Iterator<&#47;code> object.  While previous versions of Javascript have allowed you to iterate over Array's and the like using <code class="inline">for...each<&#47;code>, the Iterator allows you to build your own Iterator to iterate over any object that you create.</p>
+<h3>Array comprehensions<&#47;h3><br />
+Array comprehensions allow you to intialize an array taking advantage of the Generator code. You can iterate over a collection of items inline to the Array definition to populate the Array values.</p>
+<p><code>var myArray = [ "Cool " + i for (i in range(0, 10))];<&#47;code></p>
+<p><code>function names() {<br />
+    yield "Geoff";<br />
+    yield "Bob";<br />
+    yield "Sue";<br />
+}<br />
+var nameArray = [ n + " is a name" for (n in names())];<br />
+<&#47;code></p>
+<h3>Multiple Return Values<&#47;h3><br />
+A method can return multiple values and have those values assigned to individual variables. This is an interesting feature found in Python. While you can always create a wrapper object to return the values, or use a construct like an Array, sometimes it is really handy to be able to just return multiple things from a method. No <a href="http:&#47;&#47;msdn.microsoft.com&#47;library&#47;default.asp?url=&#47;library&#47;en-us&#47;csref&#47;html&#47;vclrfOut.asp">out parameters<&#47;a> needed.</p>
+<p><code>var first, last;<br />
+[first, last] = ["Geoff", "Lane"]<br />
+document.write (first + " " + last + "<br &#47;>\n");<br />
+<&#47;code><br />
+<code><br />
+function getPersonInfo() {<br />
+   return ["Geoff", 29];<br />
+}<br />
+var name, age;<br />
+[name, age] = getPersonInfo();<br />
+<&#47;code></p>
+<h3>let for Explicit Scoping<&#47;h3><br />
+<code class="inline">let<&#47;code> allows you to define an explicit scope of a variable.  Just like <code class="inline">var<&#47;code> makes a variable so that it is not globally scoped, <code class ="inline">let<&#47;code> narrows the scope to a defined block. This allows you to redefine the value of a <code class="inline">var<&#47;code> (or another <code class="inline">let<&#47;code>) variable to a more limited section of code, temporarily changing the value without effecting the value outside of that defined block.</p>
+<p><code>var x = 1;<br />
+for (let x=0; x < 3; x++) {<br />
+    document.write("Value: " + x);<br />
+}<br />
+document.write("Value: " + x);<br />
+<&#47;code></p>
+<p>Lots of fun new features plucked from the best scripting and programming languages out there. The future looks bright for web client-side development. <small>(Of course IE won't support this stuff for 10 years probably.)<&#47;small></p>

@@ -1,0 +1,121 @@
+---
+layout: post
+status: publish
+published: true
+title: Erlang First Post
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 105
+wordpress_url: http://www.zorched.net/?p=105
+date: '2008-05-27 20:13:44 -0400'
+date_gmt: '2008-05-28 02:13:44 -0400'
+categories:
+- Erlang
+tags:
+- functional programming
+comments:
+- id: 11749
+  author: Grant Rettke
+  author_email: grettke@acm.org
+  author_url: http://www.wisdomandwonder.com/
+  date: '2008-05-28 08:43:45 -0400'
+  date_gmt: '2008-05-28 14:43:45 -0400'
+  content: Erlang is purely functional, how do you do imperative coding, for example
+    FFI to C?
+- id: 11752
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2008-05-28 09:06:07 -0400'
+  date_gmt: '2008-05-28 15:06:07 -0400'
+  content: "Grant,\r\nYou're getting beyond my knowledge real fast... but I'll give
+    it a shot. :)\r\nElang has a couple of notions. Ports and Drivers. \r\n\r\nPorts
+    are basically external processes that you interact with very much like other Erlang
+    processes. It has a few special methods that allow you to send bytes to them for
+    example. This can be anything from a manually loaded library to an executable
+    that you run from within Erlang by supplying the command.\r\n\r\nFFI (Foreign
+    Function Interface) is handled by what they call Linked In Drivers. My novice
+    understanding is that Erlang provides some C API that you have to use to integrate
+    existing code. That C code then becomes a shared library that can be loaded into
+    the Erlang runtime and executed.\r\n\r\nErlang does not have an imperative style
+    to \"bridge\" to imperative languages to my knowledge."
+- id: 18332
+  author: Pankaj
+  author_email: me.pankaj786@gmail.com
+  author_url: ''
+  date: '2013-02-08 00:03:30 -0500'
+  date_gmt: '2013-02-08 06:03:30 -0500'
+  content: "Hi Geoff,\r\n\r\nI'm a Software Engineer having 4 years of exp in Java.\r\nI
+    like your posts on Erlang. I am also interested in learning Erlang. I wanted to
+    know What is the future perspective of Erlang as far as jobs are concerned.\r\n\r\nThanks\r\nPankaj"
+---
+<p>Some <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Linguistic_determinism">linguists<&#47;a> and <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Ludwig_Wittgenstein">philosophers<&#47;a> posit the idea that you can not have a thought for which you do not have language. </p>
+<blockquote><p>"The limits of my language mean the limits of my world."<br />
+-- Ludwig Wittgenstein<&#47;blockquote</p>
+<p>I've started looking at <a href="http:&#47;&#47;www.erlang.org">Erlang<&#47;a> a bit. Erlang is a functional programming language that is very unlike the imperative languages which I, and many others, are most familiar. Learning a new programming language and especially a fundamentally new programming paradigm really changes the way you think about solving problems. If the linguists are to be believed, it fundamentally allows you to have no thoughts and ideas. This is what makes it so valuable for software developers to look at new languages. I thought I would share some tidbits.</p>
+<h2>Erlang Variables Aren't Variable<&#47;h2><br />
+Erlang only allows you to set the value of a "variable" once. If you try to set it more than once the language actually throws an error.</p>
+<p><code><br />
+Eshell V5.6.2  (abort with ^G)<br />
+1> X = "foo".<br />
+"foo"<br />
+2> X = "bar".<br />
+** exception error: no match of right hand side value "bar"<br />
+<&#47;code></p>
+<p>At first this sounds like a huge limitation to my imperative mind. In many imperative it probably would be. In Erlang it ends up not being much of an issue. In many ways it's one of the things that forces you do more idiomatic, functional Erlang.</p>
+<h3>Side Effect Free<&#47;h3><br />
+Not being able to modify variables is one of the things that helps keep Erlang programs <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Side_effect_(computer_science)">side effect free<&#47;a>. Side Effects make programs harder to understand and can make them more error prone. A side effect free method is one that is "idempotent", a fancy term that means every time you call it with a given value, it will return the same result.</p>
+<p><em>Thinking of side effects and how they can be reduced or removed from imperative programs can make those programs easier to understand and test.<&#47;em></p>
+<h2>Pattern Matching  as Polymorphism<&#47;h2><br />
+To my imperative brain that grew up mostly on Object Oriented programming languages Polymorphism and related abstraction are notions of classes and types. Erlang changes this abstraction into one of Pattern Matching. Erlang's pattern matching is almost a declarative construct like you would find in <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Extensible_Stylesheet_Language">XSL<&#47;a>. When you find call to a function that matches this pattern, use it, otherwise try the next function until you find one that matches.</p>
+<p>To compute a Factorial, you can use 2 function signatures. The first *fac(0)* is called whenever the function is called with the integer value of zero. If the value is not zero, then that pattern is not matched and the next version is tried. In that case *fac(N)* where N is any value other than 0 is evaluated.<br />
+<code><br />
+fac(0) -><br />
+    1;<br />
+fac(N) -><br />
+   N * fac(N-1).<br />
+<&#47;code></p>
+<p>In a slightly more complex example, you can actually pass a keyed Tuple. The key, in Erlang speak, is an atom, very similar to a Ruby symbol. Those atoms are used as part of the pattern matching to determine which function to execute.<br />
+<code><br />
+area({square, Side}) -><br />
+    Side * Side;<br />
+area({circle, Radius}) -><br />
+    3.14 * Radius * Radius.<br />
+<&#47;code></p>
+<p><code><br />
+area({circle, 10}).<br />
+area({triangle, 2, 2, 2.82}).   %% error, no match<br />
+<&#47;code></p>
+<p><em>Thinking about abstractions beyond types or classes in your Object Oriented programs could open you to some interesting new solutions<&#47;em></p>
+<h2>Distribution Should be Explicit, Not Necessarily Hard<&#47;h2><br />
+Distributed computing takes more work than assuming all your code will be running on a singe machine, in the same process. The <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Fallacies_of_Distributed_Computing">Fallacies of Distributed Computing<&#47;a> are all about the assumptions we make when we try and hide the complexity of distribution from the caller. With Java and .NET, for example, remote calls can become so hidden that they look like just another method call within the local VM. While this is convenient, it also can lead to serious problems when users don't take into account the overhead and the extra things that can go wrong with remote calls.</p>
+<p>Erlang makes concurrent programming and spawning lots of processes to do work a very natural part of the language. Part of the language then is how to deal with the problems that arise when you run into issues talking to a remote process. The language has exception handling, it can be set up to receive a response, only wait for a timeout, etc.</p>
+<p>The biggest thing that Erlang does is not try to hide the fact that you are communicating to a remote process (whether that process is in the same node, a different node, or a different machine). It gives you the programmer the tools to decide what conditions you need to handle based on how your program is built and deployed. All those scenarios are easy, but it's still explicit that you are talking to a different process.</p>
+<p><code><br />
+ping(N, PongPid) -><br />
+    PongPid ! {ping, self()},<br />
+    receive<br />
+        pong -><br />
+            io:format("ping received ~B~n", [N])<br />
+    after 1000 -><br />
+            io:format("I don't think we're gonna get a response~n")<br />
+    end,<br />
+    ping(N - 1, PongPid).<br />
+pong() -><br />
+    receive<br />
+        finished -><br />
+            io:format("pong finished~n", []);<br />
+        {ping, PingPid} -><br />
+            io:format("pong received~n", []),<br />
+            PingPid ! pong,<br />
+            pong()<br />
+    end.<br />
+<&#47;code></p>
+<p><em>Think about how you can make your distribution explicit and not hidden from callers who could make bad assumptions.<&#47;em></p>
+<p>I'm finding Erlang and really trying to think in a functional programming language very interesting right now, so I'll probably post some more about it. I think it will allow me to talk more intelligently to <a href="http:&#47;&#47;www.wisdomandwonder.com">Grant<&#47;a> at least.</p>

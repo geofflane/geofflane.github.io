@@ -1,0 +1,67 @@
+---
+layout: post
+status: publish
+published: true
+title: Custom Validators in Grails in a Single App
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 95
+wordpress_url: http://www.zorched.net/2008/01/26/custom-validators-in-grails-in-a-single-app/
+date: '2008-01-26 11:56:44 -0500'
+date_gmt: '2008-01-26 17:56:44 -0500'
+categories:
+- Code
+- Groovy
+tags:
+- groovy
+- grails
+- validation
+comments:
+- id: 14199
+  author: puran
+  author_email: puran@programmer.net
+  author_url: http://narup.blogspot.com
+  date: '2008-09-11 17:58:56 -0400'
+  date_gmt: '2008-09-11 23:58:56 -0400'
+  content: hey man, this is awesome thanks.
+- id: 15083
+  author: uday
+  author_email: poison_rain_0@yahoo.com
+  author_url: ''
+  date: '2009-05-18 09:16:22 -0400'
+  date_gmt: '2009-05-18 15:16:22 -0400'
+  content: "Hey, i tried to go through your examples but come across this issue:\r\nNo
+    signature of method: static org.codehaus.groovy.grails.validation.ConstrainedProperty.registerNewConstraint()
+    is applicable for argument types\r\n\r\nthis happens when i add:\r\norg.codehaus.groovy.grails.validation.ConstrainedProperty.registerNewConstraint(PhoneNumberConstraint.PHONE_NUMBER_CONSTRAINT,
+    PhoneNumberConstraint.class) to the Config.groovy class. \r\n\r\nAny idea how
+    i could get past it...?\r\nthanks!"
+- id: 16027
+  author: hilderclan.de&#47;blog &raquo; Blog Archive &raquo; custom constraints in
+    grails
+  author_email: ''
+  author_url: http://hilderclan.de/blog/?p=73
+  date: '2009-12-15 02:07:19 -0500'
+  date_gmt: '2009-12-15 08:07:19 -0500'
+  content: "[...] but not least i want to thank and link to http:&#47;&#47;www.zorched.net&#47;2008&#47;01&#47;26&#47;custom-validators-in-grails-in-a-single-app&#47;,
+    cause i dont think i could have done it in so little time without that excellent
+    [...]"
+---
+<p>In my previous post I wrote about <a href="http:&#47;&#47;www.zorched.net&#47;2008&#47;01&#47;25&#47;build-a-custom-validator-in-grails-with-a-plugin&#47;">Building a Custom Validator in Grails using a Plugin<&#47;a>. That's a great way to build a reusable Constraint that will allow you to share your code among multiple projects. But often you only have one application that you are building, or a validator is a very domain specific thing that will only make sense in a single app.</p>
+<h3>Building the Constraint in a Single App<&#47;h3><br />
+<em>Please look at the previous post for the details of the Plugin.<&#47;em><br />
+As I mentioned in that post a plugin looks almost exactly like a Grails App. Just like in the plugin case, your grails app has a <em>src&#47;groovy<&#47;em> and a <em>src&#47;java<&#47;em> directory where you can put general code. In this case I wrote the Constraint in the <em>src&#47;groovy<&#47;em> directory as I wanted to use the Groovy language and some of the fun dynamic techniques it offers.</p>
+<h3>Hook it into the App<&#47;h3><br />
+Here's the simple part. The goal, as we saw in the plugin example, is to register your custom Constraint with the Grails <em>ConstrainedProperty<&#47;em> class. I just took a guess on this one and it worked. Grails provides the<br />
+<em>Config.groovy<&#47;em> class to setup a bunch of things in your application. So all you need to do is add the <en>ConstraintProperty<&#47;em> configuration to your <em>Config.groovy<&#47;em> script and your application will have a new constraint:</p>
+<p><strong>Config.groovy<&#47;strong><br />
+<code><br />
+org.codehaus.groovy.grails.validation.ConstrainedProperty.registerNewConstraint(<br />
+    PostalCodeConstraint.POSTAL_CODE_CONSTRAINT, PostalCodeConstraint.class)<br />
+<&#47;code></p>
+<p>Have fun building your own Constraints!</p>

@@ -1,0 +1,156 @@
+---
+layout: post
+status: publish
+published: true
+title: Welcome Java 6
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 62
+wordpress_url: http://www.zorched.net/2006/12/13/welcome-java-6/
+date: '2006-12-13 21:32:14 -0500'
+date_gmt: '2006-12-14 03:32:14 -0500'
+categories:
+- Code
+- Java
+tags:
+- scripting_languages
+comments:
+- id: 2325
+  author: Brennan Stehling
+  author_email: offwhite@gmail.com
+  author_url: http://brennan.offwhite.net/blog/
+  date: '2006-12-14 21:21:31 -0500'
+  date_gmt: '2006-12-15 03:21:31 -0500'
+  content: "I am excited that it is open source now.  That should give it a real chance
+    to move to more platforms quickly, such as MacOS X or FreeBSD which Sun has never
+    supported directly.  It will also continue to foster a larger community which
+    will hopefully contribute valuable features back to the platform.\r\n\r\nI am
+    not thrilled about the scripting languages.  With .NET projects I have to go back
+    and forth between C# and VB.NET depending on the client.  I cannot imagine walking
+    into an environment with the very real possibility that the project could be implemented
+    with any number of scripting languages which introduces a whole new set of concerns.
+    \ There was a recent announcement for IronPython for .NET.  I had the same reaction
+    when it was announced.  But at least when you do use those scripting languages
+    in this way you have the same core framework so you will have at least a familiarity
+    with the platform if not for the syntax of the scripting language of the week.\r\n\r\nThe
+    ability to use the system tray is encouraging.  I would really like to see a screenshot
+    of what that looks like in MacOS X and Linux."
+- id: 5021
+  author: mark
+  author_email: mark_des2003@yahoo.co.uk
+  author_url: ''
+  date: '2007-01-24 20:54:42 -0500'
+  date_gmt: '2007-01-25 02:54:42 -0500'
+  content: "1.when run with scite noclass definition error . 2. when run with netbeans
+    null pointer exception error in the code below:\r\n\r\nimport java.io.*;\r\nimport
+    java.util.*;\r\nimport java.util.COLLECTIONS;\r\n\r\npublic class FilzLoc {\r\n
+    \   \r\n    public class FilzLoc implements IDictionary,\r\n    ICollection,\r\n
+    \   IEnumerable,\r\n    ICloneable {\r\n        protected Hashtable innerHash;\r\n
+    \       public static void main(String[] args) {\r\n        }\r\n        public
+    FilzLoc() {\r\n            innerHash = new Hashtable();\r\n        }\r\n        public
+    FilzLoc(FilzLoc original) {\r\n            innerHash = new Hashtable(original.innerHash);\r\n
+    \       }\r\n        public FilzLoc(IDictionary dictionary) {\r\n            innerHash
+    = new Hashtable(dictionary);\r\n        }\r\n        public FilzLoc(int capacity)
+    {\r\n            innerHash = new Hashtable(capacity);\r\n        }\r\n        public
+    FilzLoc(IDictionary dictionary, float loadFactor) {\r\n            innerHash =
+    new Hashtable(dictionary, loadFactor);\r\n        }\r\n        public FilzLoc(IHashCodeProvider
+    codeProvider, IComparer comparer) {\r\n            innerHash = new Hashtable(codeProvider,
+    comparer);\r\n        }\r\n        public FilzLoc(int capacity, int loadFactor)
+    {\r\n            innerHash = new Hashtable(capacity, loadFactor);\r\n        }\r\n
+    \       public FilzLoc(IDictionary dictionary, IHashCodeProvider codeProvider,
+    IComparer comparer) {\r\n            innerHash = new Hashtable(dictionary, codeProvider,
+    comparer);\r\n        }\r\n        public FilzLoc(int capacity, IHashCodeProvider
+    codeProvider, IComparer comparer) {\r\n            innerHash = new Hashtable(capacity,
+    codeProvider, comparer);\r\n        }\r\n        public FilzLoc(IDictionary dictionary,
+    float loadFactor, IHashCodeProvider codeProvider, IComparer comparer) {\r\n            innerHash
+    = new Hashtable(dictionary, loadFactor, codeProvider, comparer);\r\n        }\r\n
+    \       public FilzLoc(int capacity, float loadFactor, IHashCodeProvider codeProvider,
+    IComparer comparer) {\r\n            innerHash = new Hashtable(capacity, loadFactor,
+    codeProvider, comparer);\r\n        }\r\n    }\r\n\r\n    public IDictionaryEnumerator
+    GetEnumerator() {\r\n        return new DictionaryEnumerator(this);\r\n    }\r\n\r\n
+    \   public interface IDictionaryEnumerator implements IDictionary.GetEnumerator()
+    {\r\n        return new1 DictionaryEnumerator(this1);\r\n    }\r\n\r\n    IEnumerator
+    IEnumerable.GetEnumerator() {\r\n        return GetEnumerator();\r\n    }\r\n\r\n
+    \   public void Remove(java key) {\r\n        innerHash.Remove(key);\r\n    }\r\n\r\n
+    \   void IDictionary.Remove(object key) {\r\n        Remove((java) key);\r\n    }\r\n
+    \   public bool Contains(java key) {\r\n        return innerHash.Contains(key);\r\n
+    \   }\r\n    bool IDictionary.int Contains(object key) {\r\n        return Contains((java)
+    key);\r\n    }\r\n    public void Clear() {\r\n        innerHash.Clear();\r\n
+    \   }\r\n    public void Add(java key, xml value) {\r\n        innerHash.Add(key,
+    value);\r\n    }\r\n    void IDictionary.int Add(object key, object value) {\r\n
+    \       return Add((java) key, (xml) value);\r\n    }\r\n    public bool IsReadOnly
+    {\r\n        get {\r\n        return innerHash.IsReadOnly;\r\n    }\r\n        }\r\n
+    \   public xml this[java key]{\r\n        get {\r\n        return (xml) innerHash[key];\r\n
+    \       }set {\r\n        innerHash[key] = value;\r\n    }}\r\n    object IDictionary.this[object
+    key]{\r\n        get {\r\n        return this[(java) key];\r\n    }set {\r\n        this[(java)
+    key] = (xml) value;\r\n    }}\r\n    public System.Collections.ICollection Values
+    {\r\n        get {\r\n        return innerHash.Values;\r\n    }\r\n    }\r\n    public
+    System.Collections.ICollection Keys {\r\n        get {\r\n        return innerHash.Keys;\r\n
+    \       }\r\n    }\r\n    public bool IsFixedSize {\r\n        get {\r\n        return
+    innerHash.IsFixedSize;\r\n        }\r\n    }\r\n    public void CopyTo(System.Array
+    array, int index) {\r\n        innerHash.CopyTo(array, index);\r\n    }\r\n    public
+    bool IsSynchronized {\r\n        get {\r\n        return innerHash.IsSynchronized;\r\n
+    \       }\r\n    }\r\n    public int Count {\r\n        public object SyncRoot
+    {\r\n        get {\r\n        return innerHash.SyncRoot;\r\n        }\r\n    }\r\n
+    \   public FilzLoc Clone() {\r\n        FilzLoc clone = new FilzLoc();\r\n        clone.innerHash
+    = (Hashtable) innerHash.Clone();\r\n        return clone;\r\n    }\r\n    object
+    ICloneable.int Clone() {\r\n        return Clone();\r\n    }\r\n    public bool
+    ContainsKey(java key) {\r\n        return innerHash.ContainsKey(key);\r\n    }\r\n
+    \   public bool ContainsValue(xml value) {\r\n\r\n        return innerHash.ContainsValue(value);\r\n
+    \   }\r\n    public static FilzLoc Synchronized(FilzLoc nonSync) {\r\n\r\n     FilzLoc
+    sync = new FilzLoc();\r\n     sync.innerHash = Hashtable.Synchronized(nonSync.innerHash);\r\n
+    \       return sync;\r\n    }\r\n\r\n    internal Hashtable InnerHash {\r\n        get
+    {\r\n        return innerHash;\r\n    }\r\n    }\r\n    public void IDictionaryEnumerator
+    {\r\n\r\n    private IDictionaryEnumerator innerEnumerator;\r\n    internal FilzLocEnumerator(FilzLoc
+    enumerable) {\r\n        innerEnumerator = enumerable.InnerHash.GetEnumerator();\r\n
+    \   }\r\n    public java Key {\r\n        get {\r\n            return (java) innerEnumerator.Key;\r\n
+    \       }\r\n    }\r\n    object IDictionaryEnumerator.Key {\r\n        get {\r\n
+    \           return Key;\r\n        }\r\n    }\r\n    public xml Value {\r\n        get
+    {\r\n            return (xml) innerEnumerator.Value;\r\n        }\r\n    }\r\n\r\n
+    \   public class FilzLoc {\r\n    object IDictionaryEnumerator.Value;\r\n        get
+    {\r\n            return Value;\r\n        }\r\n    }\r\n\r\n    public System.COLLECTIONS.DictionaryEntry
+    Entry {\r\n        get {\r\n            return innerEnumerator.Entry;\r\n        }\r\n
+    \   }\r\n\r\n    region Implementation of IEnumerator public void Reset() {\r\n
+    \       innerEnumerator.Reset();\r\n    }\r\n\r\n    public bool MoveNext() {\r\n
+    \       return innerEnumerator.MoveNext();\r\n    }\r\n\r\n    public object Current
+    {\r\n        get {\r\n            return innerEnumerator.Current;\r\n        }\r\n
+    \   }\r\n\r\n}\r\n\r\n}\r\n*&#47;"
+- id: 5023
+  author: mark
+  author_email: mark_des2003@yahoo.co.uk
+  author_url: ''
+  date: '2007-01-24 21:14:27 -0500'
+  date_gmt: '2007-01-25 03:14:27 -0500'
+  content: "could you help me fix the error. I posted without comments because of
+    time\r\nconstraints but I know about comments from my specifications and algorithm\r\nformulated"
+- id: 5054
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2007-01-25 11:15:16 -0500'
+  date_gmt: '2007-01-25 17:15:16 -0500'
+  content: "Mark,\r\nIt looks like you're trying to use C# code in Java. That's not
+    going to work..."
+---
+<p>With great fanfare, <a href="http:&#47;&#47;java.sun.com&#47;javase&#47;6&#47;features.jsp">Java 6<&#47;a> was released to the world. Ok, that was a joke. Sun has the ability to make a major release without any fanfare or hullabaloo. Even <a href="http:&#47;&#47;www.springframework.org">Spring<&#47;a> had a countdown to their 2.0 release. Oh well.</p>
+<p>Java 5 was the really big release and added a lot of new functionality to the core language. Back in October of 2005 I wrote about the <a href="http:&#47;&#47;www.zorched.net&#47;2005&#47;10&#47;26&#47;whats-next-for-the-java-language&#47;">new features in Java 5<&#47;a> and did a little bit of prognostication about what might be next for Java. Well, if you look at it, you will soon realize that I was totally wrong. It turned into more of a "what I like in scripting languages that I wish I had in Java". Oh well, I won't quit my day job to try and predict the future. Java 5 added number of new language constructs like Generics, foreach loops, and enums. Java 6 on the other hand doesn't seem to add any new language constructs, but is all about extending the APIs. Where Java 5 almost had a theme of catching up to .NET 2.0, Java 6 seems like a relatively random collection of new things.</p>
+<h3>Scripting<&#47;h3><br />
+The <a href="http:&#47;&#47;java.sun.com&#47;javase&#47;6&#47;docs&#47;api&#47;javax&#47;script&#47;package-summary.html">Scripting API<&#47;a> is one of the bigger and more talked about features. It's definitely the thing that I'm most excited about. We've had <a href="http:&#47;&#47;www.jython.org&#47;">Jython<&#47;a> for years, <a href="http:&#47;&#47;groovy.codehaus.org&#47;">Groovy<&#47;a> for a while and more recently <a href="http:&#47;&#47;jruby.sourceforge.net&#47;">JRuby<&#47;a> which allowed us to use more scripting languages on top of the JVM. Java 6 has really extended support for using these languages on the JVM. Java 6 comes with support for using JavaScript built in. This support is built on top of the <a href="http:&#47;&#47;www.mozilla.org&#47;rhino&#47;">Rhino<&#47;a> engine originally from Mozilla.</p>
+<p>The API seems to offer everything you could want. It allows you to access Java APIs from the scripting language (this is likely implementation dependent, but is done in the built in JavaScript implementation), it allows you to execute the scripting language methods in Java. It even allows you to mold dynamic languages to Java by forcing them into implementing specific interfaces.</p>
+<p>As with most Java APIs, it has an extension mechanism to support various languages. There are already <a href="https:&#47;&#47;scripting.dev.java.net&#47;">implementations of a lot of different languages<&#47;a> available for download, so you can start trying your favorite scripting language.</p>
+<p>Check out the <a href="http:&#47;&#47;java.sun.com&#47;javase&#47;6&#47;docs&#47;technotes&#47;guides&#47;scripting&#47;programmer_guide&#47;index.html">Java 6 Scripting Guide<&#47;a> for some great examples on various pieces of the API.</p>
+<h3>Database and JDBC 4.0<&#47;h3><br />
+JDBC 4.0 offers a number of improvements to database access in Java. One of the bigger changes is that Java now comes with a 100% Java database implementation based on <a href="http:&#47;&#47;db.apache.org&#47;derby&#47;">Apache Derby<&#47;a>.  That makes it really easy to get started with an application. You can graduate to a standalone database if you need to later. JDBC 4 makes some improvements to loading of database drivers. It can now use meta-data in a file under META-INF. This means that you don't have to add the old Class.forName("some.db.Driver") in your code. It also means that changing the database is no longer a code-recompile, but just a simple file change (ok, so any serious application would have that string externalized already, but this is a nice thing to standardize).</p>
+<p>Check out this article for a <a href="http:&#47;&#47;www.onjava.com&#47;pub&#47;a&#47;onjava&#47;2006&#47;08&#47;02&#47;jjdbc-4-enhancements-in-java-se-6.html?CMP=ILC-VP9761447835&ATT=410">good overview of the changes in JDBC 4.0<&#47;a>.</p>
+<h3>Desktop Integration<&#47;h3><br />
+The Java 6 release has seen a number of improvements in terms of desktop integration so that Java Swing applications won't feel like aliens. They've added support for splash screens so that users can get immediate feedback that your application is starting. They've also added <a http:&#47;&#47;java.sun.com&#47;javase&#47;6&#47;docs&#47;api&#47;java&#47;awt&#47;TrayIcon.html">APIs for dealing with Tray Icons<&#47;a> and <a href="http:&#47;&#47;java.sun.com&#47;javase&#47;6&#47;docs&#47;api&#47;java&#47;awt&#47;SystemTray.html">the System Tray<&#47;a> which are really handy for a lot of applications.</p>
+<h3>Monitoring, Instrumentation and Tools Interface<&#47;h3><br />
+I haven't looked at a lot of the details of what's been added, but it seems like they've put a lot of work into the monitoring and instrumentation side of a running VM. JConsole, a great tool for looking at the various memory areas in your JVM, is now officially supported.</p>
+<p>One of the more interesting areas is the ability to transform already loaded Classes. The <a href="http:&#47;&#47;java.sun.com&#47;javase&#47;6&#47;docs&#47;technotes&#47;guides&#47;instrumentation&#47;changes6.html">new classes in java.lang.instrumentation<&#47;a> seem like they will be a great boon for a number of different uses. AOP and other Proxy implementations could make use of this. It also seems like this could be a very useful feature in conjunction with the new Scripting support. Languages like Ruby and JavaScript support dynamically adding methods and changing method definitions at runtime. Will this new code allow Script plugin developers to introduce that dynamic functionality into Java? </p>
+<p>These are the things that seem most interesting to me. Check out <a href="http:&#47;&#47;java.sun.com&#47;javase&#47;6&#47;webnotes&#47;features.html">all of the new features in Java 6<&#47;a> for yourself. What are you excited about?</p>

@@ -1,0 +1,54 @@
+---
+layout: post
+status: publish
+published: true
+title: Tapestry and Hibernate Take 2
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 34
+wordpress_url: http://www.zorched.net/2006/07/15/tapestry-and-hibernate-take-2/
+date: '2006-07-15 12:04:18 -0400'
+date_gmt: '2006-07-15 18:04:18 -0400'
+categories:
+- Code
+- Java
+tags:
+- tapestry
+- hibernate
+- orm
+comments:
+- id: 10853
+  author: Raoul Duke
+  author_email: raould@gmail.com
+  author_url: http://www.obfusco.com
+  date: '2007-07-13 16:46:08 -0400'
+  date_gmt: '2007-07-13 22:46:08 -0400'
+  content: "All I can say is, \"hallelujah, brother!\" It just seems so sad if this
+    is the best Humanity can do. (Of course, since I haven't constructed my own solution,
+    I'm simply Part of the Problem.)\r\n\r\n[Hey! While we're ranting, can we also
+    spit upon folks with really stupid annoying loud cell phone rings? Especially
+    when they leave it on in the office when they are gone? Or do I live in a glass
+    house? Probably.]"
+---
+<p>In a <a href="http:&#47;&#47;www.zorched.net&#47;2006&#47;04&#47;22&#47;why-do-tapestry-and-hibernate-fight-so-much&#47;">previous post<&#47;a> I lamented about <a href="http:&#47;&#47;tapestry.jakarta.org">Tapestry<&#47;a> and <a href="http:&#47;&#47;www.hibernate.org">Hibernate<&#47;a> fighting each other. This was very soon after I had started using Tapestry for the first time, and I wanted to talk a little bit more about it now that I've been using it for a while. So now I can rant with much more detail.</p>
+<h3>Cut to the Chase<&#47;h3><br />
+The short answer is that I have more of a mixed feeling about it now than I did before, but that I still think that Tapestry and Hibernate are not a good solution. There is too much of an impedance mismatch between the two. They are both very complex frameworks with leaky abstractions that make you have to know too much to use them well.</p>
+<h3>Complexity and Leaky Abstractions Sink Ships<&#47;h3><br />
+Hibernate and Tapestry are incredibly complex pieces of software. Throw in a lot of hidden, "magic" functionality in Tapestry from its use of Hivemind and it's even harder to understand what's going on. This complexity and lack of transparency means that understanding the deterministic behavior of an application is incredibly difficult. It seems like people "just try different things until something works". I would call this <a href="http:&#47;&#47;www.pragmaticprogrammer.com&#47;ppbook&#47;extracts&#47;rule_list.html">Programming by Coincidence<&#47;a>. The abstractions are just leaky enough that you have to know about the implementation details to effectively use the framework.</p>
+<blockquote><p>
+Example:<br />
+The @Persist annotation (or the persist property in the jwc&#47;page files, etc) store objects in the Web Session. If you modify the state of the object that change is not persisted because it does not know the object was changed. You have to actually call the setter of the persist property to get a new value set. This doesn't sound like that big of a deal until you try to integrate something like <a href="http:&#47;&#47;www.carmanconsulting.com&#47;tapernate&#47;">Tapernate<&#47;a> to help with Hibernate persistence issues. Tapernate will merge the persistent Hibernate object back into the current Hibernate Session. Well, if you've modified an @Persist bean and Tapernate merges it back into the Hibernate Session, you will end up with stale data in your Hibernate session unless you call the setter and set the value to null. Well if you set the value to null, then you break the back button because someone will click back and then get a NullPointerException if they try and submit the form.<br />
+<&#47;blockquote></p>
+<p>I should not put all of the blame on Tapestry though. Hibernate is itself a hugely complex piece of software as well. (<acronym title="Object Relational Management">ORM<&#47;acronym> is a complex problem, so some of this complexity might be unavoidable.) There are so many possible ways of mapping objects that you can never truly know if you've done it the right or the best way, and best is always dependent on your situation and your application uses which makes it even harder to discuss with others whether it's best. Hibernate does a lot of work to ensure the consistency of it's Session, if there's a possibility of it being inconsistent, it throws exceptions.</p>
+<p>So you get LazyInstantiationExceptions because the Session is closed, you get NonUniqueObject exceptions because an object with the same id is already in the Session, you get TransientObjectExceptions because you didn't schedule a new Object for saving in the session, etc, etc. Way too much implementation detail! Of course if you ever suggest to the Hibernate people that this is too much detail and they "should just handle it", you get told how smart they are and how dumb you are and how you wouldn't like the consequences of them not throwing these Exceptions. Isn't that helpful.</p>
+<p>As Ted Neward said, <a href="http:&#47;&#47;blogs.tedneward.com&#47;2006&#47;06&#47;26&#47;The+Vietnam+Of+Computer+Science.aspx">ORM is The Vietnam of Computer Science<&#47;a></p>
+<h3>Conclusion<&#47;h3><br />
+This can't be the best we can do. We've seen interesting things like <a href="http:&#47;&#47;wiki.rubyonrails.com&#47;rails&#47;pages&#47;ActiveRecord">Active Record<&#47;a> come out of the Ruby world. Not that Active Record is perfect, but I have yet to see a NonUniqueObject exception or a Lazy Loading error which is a Good Thing &trade; since I don't care about those details. I think the Application centric, declarative configuration of <a href="http:&#47;&#47;www.springframework.org">Spring<&#47;a> is much easier to understand and less error prone than the configuration of Hivemind.</p>
+<p>New axioms:<br />
+All things being equal, Using fewer frameworks is better. Using less complex frameworks is better. Managing complexity is the premier goal of software development. Code reuse should not trump simplicty of design and simplicity of implementation.</p>

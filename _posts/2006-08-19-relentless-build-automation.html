@@ -1,0 +1,174 @@
+---
+layout: post
+status: publish
+published: true
+title: Relentless Build Automation
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 40
+wordpress_url: http://www.zorched.net/2006/08/19/relentless-build-automation/
+date: '2006-08-19 16:55:53 -0400'
+date_gmt: '2006-08-19 22:55:53 -0400'
+categories:
+- Code
+- Java
+- Unit Testing
+- Automation
+tags: []
+comments:
+- id: 203
+  author: Brennan Stehling
+  author_email: offwhite@gmail.com
+  author_url: http://brennan.offwhite.net/blog/
+  date: '2006-08-20 20:49:39 -0400'
+  date_gmt: '2006-08-21 02:49:39 -0400'
+  content: "You could also automate error reporting, but at that point it is really
+    just programming.  It seems once you have gotten past automating building, testing
+    and deploying you are in a different territory beyond simple scripting.  Sure
+    you could write a script (Ant) which aggregates your errors and produces a report,
+    but at that point you are allowing your scripting to bleed into the domain of
+    what the application would be better equipped to handle.\r\n\r\nIt is best to
+    ensure that build scripts do not go too far.  To script a database you will likely
+    have PL&#47;SQL (or T&#47;SQL) procedures you can schedule or set up with a trigger
+    to run on an as needed basis which works best in that domain.  I know how trivial
+    it is to create a DTS package in SQL Server and schedule it to run nightly.  And
+    by allowing that code to be written in that language native to that area you allow
+    the experts in that area to maintain it because not everyone on a team will take
+    the time to learn to write an Ant script.\r\n\r\nI also consider that automation
+    scripts should be a very small portion of a project which act as the glue to keep
+    everything together.  If they become a significant portion of your project you
+    have to reconsider the role of that scripts.  It reminds me of how you can put
+    looping and conditional statments into XSLT and soon you end programming more
+    in your templating solution than you do in your actual code.  Just because you
+    can do it, does not mean it is a good idea."
+- id: 204
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2006-08-20 21:10:38 -0400'
+  date_gmt: '2006-08-21 03:10:38 -0400'
+  content: "I want to talk about relentless build automation, once you get outside
+    of the things that you need to get a system up and running from source, then you're
+    outside that realm. So, error reporting wouldn't count in my book...\r\n\r\nThe
+    beauty of a shared automation script is that not everyone on the team has to be
+    an expert in that scripting technology. Everyone on the team can benefit from
+    the automation expertise of only a few people. The same way that you can benefit
+    from having a CSS expert or a SQL expert. Everyone will know the basics, but you'll
+    have a \"goto guy\" for more complex tasks.\r\n\r\nI also don't think that script
+    size is relevant, they should be as big as they need to be and no bigger. Automation
+    with something like Ant is programming in a Domain Specific Language. It is a
+    DSL that is optimized for scripting repeatable developer tasks (just like XSLT
+    is a DSL for transforming XML documents). DSLs can be much more powerful and expressive
+    because they are working at a higher level of abstraction. Take advantage of that
+    power when you can.\r\n\r\nIf you're build scripts can't create a database, if
+    they can't populate it with test data, if it's not an automated, repeatable process,
+    then you can't get a new developer up and running without intervention, you can't
+    deploy to a new server without manual steps, you can't trash your development
+    environment and start from a new hard drive without rebuilding a whole bunch of
+    stuff by hand. Think of all the time you're wasting."
+- id: 205
+  author: Allan Wick
+  author_email: alwick@gmail.com
+  author_url: http://wickidcool.com/blog
+  date: '2006-08-21 06:52:09 -0400'
+  date_gmt: '2006-08-21 12:52:09 -0400'
+  content: "I also have added source code reports like Emma (Unit test Coverage),
+    PMD&#47;Checkstyle, JavaNCSS, etc.  To provide feedback and quality metrics to
+    the build scripts.\r\n\r\nThese reports can then be used to improve code quality
+    as part of the build process."
+- id: 206
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2006-08-21 12:25:03 -0400'
+  date_gmt: '2006-08-21 18:25:03 -0400'
+  content: "Al,\r\nGood point. By running code metrics (code coverage, complexity
+    analysis, etc) as a regular part of your build process, you can track changes
+    over time to make sure that you are not sacrificing on quality. Most often I would
+    recommend that this is done using a Continuous Integration server as it's mostly
+    a tracking, early warning system. Do you think it's the kind of thing that belongs
+    in a day-to-day development build script?"
+- id: 208
+  author: Allan Wick
+  author_email: alwick@gmail.com
+  author_url: http://wickidcool.com/blog
+  date: '2006-08-22 08:54:57 -0400'
+  date_gmt: '2006-08-22 14:54:57 -0400'
+  content: I run the build reports on every successful build as a regular part of
+    the continuous integration cycle.  I know several other buildmasters that do the
+    same thing.
+- id: 209
+  author: Allan Wick
+  author_email: alwick@gmail.com
+  author_url: http://wickidcool.com/blog
+  date: '2006-08-22 09:12:54 -0400'
+  date_gmt: '2006-08-22 15:12:54 -0400'
+  content: My reporting scripts are in a separate build file though...  Developers
+    don't normally run them as part of thier development routine.
+- id: 9274
+  author: Zorched &#47; One Line Fix &raquo; Automated Subversion Tagging With MSBuild
+  author_email: ''
+  author_url: http://www.zorched.net/2007/02/23/automated-subversion-tagging-with-msbuild/
+  date: '2007-02-23 12:05:25 -0500'
+  date_gmt: '2007-02-23 18:05:25 -0500'
+  content: "[...] CompactFramework XmlEnum with WhitespacePragmatic Project AutomationHow
+    Do You Deal With Blog Spam?Relentless Build AutomationGetting the Revision Number
+    of your Subversion Working CopyRuby 1.8 (today) vs C# 3.0 (some future [...]"
+---
+<p>How far is going to far when you are doing build automation? My answer to that question, is that it's basically not possible to go to far. Any task that you need to do more than three times deserves automation. Three times is my heuristic. The longer and more complex the task, the smaller the number you should allow yourself to do it by hand. Compiling for example is a pain if you don't automate it, so you automate it the first time. Computers are good at one thing, running algorithms. If you are doing those algorithms by hand, you're wasting your computer's potential.</p>
+<h3>Why Automate?<&#47;h3><br />
+There are two major reasons to automate:</p>
+<ol>
+<li>Reduce errors<&#47;li>
+<li>Being lazy<&#47;li><br />
+<&#47;ol></p>
+<p>Reducing errors is easy. We want to have a repeatable, dependable process that anyone can use to achieve the same results. If your deploy master has to know 15 steps and the ins and outs of some complex process, what happens when she goes on vacation? You don't do deployment. By automating you allow other people to perform the same task and you keep your computer working for you.</p>
+<p>But being lazy? Yes! <a href="http:&#47;&#47;www.paulagordon.com&#47;shows&#47;wall&#47;">A truly great computer programmer is lazy<&#47;a> and does everything in their power to avoid having to work that they've already done before. Likewise, if you've done it 10 times, doesn't it get boring to do the same thing over and over again? Wouldn't you rather be getting coffee or reading blogs while your computer works at what it does best? In addition to general laziness, automation will make your life easier when you want to do other things that you know you should be doing like unit testing, integration testing and functional testing.</p>
+<h3>What to Automate<&#47;h3></p>
+<p>Going back to my introduction, I say automate everything that you or someone new coming onto a project will need to do more than a few times. A little bit of effort up front can save every member of a team a lot of effort later on. So, as a punch list to get you started: </p>
+<ul title="Easy things to Automate">
+<li>Compiling code<&#47;li>
+<li>Packaging code into JARs, WARs, etc<&#47;li>
+<li>Running unit tests<&#47;li><br />
+<&#47;ul></p>
+<p>Most people doing Java development will automate code compilation and packaging all of the time. Some of the times, they'll automate unit tests, sometimes deployment, and rarely a few other things. We usually use some excellent script-based tools for that kind of thing like <a href="http:&#47;&#47;ant.apache.org">Ant<&#47;a> or <a href="http:&#47;&#47;maven.apache.org&#47;">Maven<&#47;a>. Even if you do all of these things, is that going far enough? I think that for most projects the answer is no. </p>
+<p>If you are slightly more ambitious you will also automate:</p>
+<ul title="Better Automation Includes">
+<li>Integration testing<&#47;li>
+<li>Functional testing<&#47;li>
+<li>Deployment<&#47;li><br />
+<&#47;ul></p>
+<p>There, now you've got all of your day-to-day activities automated. So you must be done right?</p>
+<h3>Generating Databases<&#47;h3></p>
+<p>Databases are the bane of automation. People don't take the time to script their database creation or to script their default or testing data. When you don't script your database, you make integration and functional testing very difficult. It's really easy to write functional tests and integration tests if they rely on the data being in a known state. If they do not, then running them is very difficult because the data underneath is always changing. That usually means that integration and automated functional testing are deemed to hard and are not done. But don't blame the tests. You're avoiding a little bit of work, that if you did it, would allow you to avoid A LOT of work. (I think little jobs that prevent you from having to do big jobs are a good tradeoff.)</p>
+<p>Generating your database will make new team members lives a breeze. They should be able to check out a project from source control and with one simple command, generate a database, compile the code, run the tests and know with confidence that everything is working for them. When they make any changes to the project they can repeat this process to know with confidence that they haven't broken anything. Likewise in day-to-day development, being able to get back to a known state is going to give you the ability to develop with more confidence and test with ease.</p>
+<p><a href="http:&#47;&#47;ant.apache.org">Ant<&#47;a> has a core task for running <a href="http:&#47;&#47;ant.apache.org&#47;manual&#47;CoreTasks&#47;sql.html">SQL<&#47;a> queries, so you don't even need any other tools to accomplish this. One problem that you might run into is that running DDL commands in JDBC can cause some problems. I found a <a href="http:&#47;&#47;www.javaddicts.net&#47;blog&#47;index.php&#47;2005&#47;06&#47;13&#47;executing-oracle-plsql-from-ant&#47;">great article on executing PL&#47;SQL with Ant<&#47;a> that you can probably apply to other databases as well. It allows you to run more database specific queries to build your schema from a blank database. This helped me overcome the last hurdle in a recent project to get it so I had the entire database scripted from scratch. So check it out.</p>
+<p>I find that having a few standard Ant tasks makes this a breeze:</p>
+<ul title="SQL Tasks">
+<li>A task to create tablespaces (if you have separate tablespaces for each database)<&#47;li>
+<li>A task to create a user<&#47;li>
+<li>A task to generate the full schema<&#47;li>
+<li>A task to delete the user and drop the schema<&#47;li><br />
+<&#47;ul></p>
+<p>Together these tasks can be woven together to fully to create the full database. To support development and testing, it is also handy to have loadable datasets around. Either maintain a list of SQL INSERT statements or use a tool like <a href="http:&#47;&#47;dbunit.sourceforge.net&#47;">DBUnit<&#47;a> to load the data into your database. Often it can be nice to have a few sets of base data:</p>
+<ul title="Data sets">
+<li>Unit testing data<&#47;li>
+<li>Functional testing data<&#47;li>
+<li>Demo data for showing of to clients and manager<&#47;li><br />
+<&#47;ul></p>
+<p>The only thing lacking is an easy way to dump a schema from a working database so that you can use nice GUI tools to modify the database and then dump it out using an easy Ant target. Even with this, you'll likely need to maintain change scripts so that you can apply them to working production systems without wiping out all of the data. I guess since I'm complaining, that will have to be my next side project. Leave a comment if you know how to do this.</p>
+<h3>Conclusion<&#47;h3><br />
+With a little bit of effort in going all the way with automation, you can make it easy for new people to come onto a project, you can make it easier to create and run all kinds of tests, and you can make the entire development process easier and more confident. The tools exist to help make automation easy, so why not?</p>
+<p>What things do you like to automate that you see people skipping on projects?</p>
+<h3>Resources<&#47;h3><br />
+Java Unit Testing: <a href="http:&#47;&#47;www.junit.org">JUnit<&#47;a>, <a href="http:&#47;&#47;testng.org">TestNG<&#47;a><br />
+Web Functional Testing: <a href="http:&#47;&#47;www.openqa.org&#47;selenium&#47;">Selenium<&#47;a><br />
+Java Build Automation: <a href="http:&#47;&#47;ant.apache.org">Ant<&#47;a></p>
+<h4>Update<&#47;h4><br />
+Looks like someone is a couple of steps ahead of me. While not a final release, the <a href="http:&#47;&#47;db.apache.org&#47;ddlutils&#47;ant-tasks.html">Apache DdlUtils<&#47;a> contains a set of Ant tasks that give you the ability to read and write database schemas as well as loading data sets defined in XML documents. Something to keep an eye on...</p>

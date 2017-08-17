@@ -1,0 +1,778 @@
+---
+layout: post
+status: publish
+published: true
+title: Start a New Branch on your Remote Git Repository
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 101
+wordpress_url: http://www.zorched.net/?p=101
+date: '2008-04-14 17:31:11 -0400'
+date_gmt: '2008-04-14 23:31:11 -0400'
+categories:
+- Code
+- Automation
+tags:
+- version-control
+- git
+- Automation
+comments:
+- id: 11246
+  author: Working with remote branches &laquo; Aslak Johansen and Jan Chu @ DIKU
+  author_email: ''
+  author_url: http://janslak.wordpress.com/2007/12/08/working-with-remote-branches/
+  date: '2008-05-18 14:55:54 -0400'
+  date_gmt: '2008-05-18 20:55:54 -0400'
+  content: "[...] Full description at this page. [...]"
+- id: 12927
+  author: Collin VanDyck
+  author_email: gluedtomyseat@gmail.com
+  author_url: http://www.gluedtomyseat.com/
+  date: '2008-06-15 08:41:15 -0400'
+  date_gmt: '2008-06-15 14:41:15 -0400'
+  content: Thanks very much for this; this is exactly what I was looking for.
+- id: 13489
+  author: pietro
+  author_email: pietro@riseup.net
+  author_url: ''
+  date: '2008-07-26 21:13:20 -0400'
+  date_gmt: '2008-07-27 03:13:20 -0400'
+  content: "i think it is easier to first create the branch locally and then push
+    it to the remote repo:\r\n\r\ngit checkout -b new_feature_name\r\ngit push origin
+    new_feature_name"
+- id: 13606
+  author: Kai
+  author_email: kai@kaishome.de
+  author_url: http://kaishome.de/
+  date: '2008-08-05 00:36:08 -0400'
+  date_gmt: '2008-08-05 06:36:08 -0400'
+  content: "Pietro,\r\n\r\ndoes this really setup tracking correctly? I had problems
+    with that way when I modified that branch on a second computer. After I returned
+    to the first computer where I initially setup the branch I tried to push some
+    commited work and it told me, that the remote branch is somehow not compatible.
+    But trying to merge the new commits into my local repo told me that there is no
+    such remote head to sync with. Very strange. I had to rename my branch, merge
+    the other branch into it and rebase it to commit it.\r\n\r\nNot sure if I did
+    everything right because I am still pretty new to git and originally came from
+    subversion. Git is so much nicer in many ways but the workflow is completly different
+    if you want to use it as its full potential. So I may sometimes still to thing
+    \"intuitively wrong\"."
+- id: 14273
+  author: Nikos Dimitrakopoulos
+  author_email: nospam@nikosd.com
+  author_url: http://blog.nikosd.com
+  date: '2008-11-16 11:55:23 -0500'
+  date_gmt: '2008-11-16 17:55:23 -0500'
+  content: "(take from http:&#47;&#47;cheat.errtheblog.com&#47;s&#47;git):\r\n\r\ngit
+    config branch.autosetupmerge true\r\n  Tells git-branch and git-checkout to setup
+    new branches so that git-pull(1)\r\n  will appropriately merge from that remote
+    branch.  Recommended.  Without this,\r\n  you will have to add --track to your
+    branch command or manually merge remote\r\n  tracking branches with \"fetch\"
+    and then \"merge\"."
+- id: 14316
+  author: 'Vertical Visions :: A technical Blog about Scripting, Monitoring and so
+    on...'
+  author_email: ''
+  author_url: http://www.vertical-visions.de/2008/11/27/mein-git-cheatsheet/
+  date: '2008-11-27 13:06:38 -0500'
+  date_gmt: '2008-11-27 19:06:38 -0500'
+  content: "[...] Blog-Eintrag zum Thema Arbeiten mit Remote Branches [...]"
+- id: 14317
+  author: Pavan Mishra
+  author_email: pavanmishra@gmail.com
+  author_url: ''
+  date: '2008-11-28 04:10:09 -0500'
+  date_gmt: '2008-11-28 10:10:09 -0500'
+  content: Quite helpful and concise. Thanks.
+- id: 14332
+  author: Maur&Atilde;&shy;cio Linhares
+  author_email: linhares.mauricio@gmail.com
+  author_url: http://blog.codevader.com/
+  date: '2008-12-05 13:37:39 -0500'
+  date_gmt: '2008-12-05 19:37:39 -0500'
+  content: "If someone happens to have a problem with pushing updates, at this command:\r\n\r\ngit
+    checkout --track -b new_branch origin&#47;new_feature_name\r\n\r\nInstead of \"new_branch\"
+    use the same name of the \"new_feature_name\". If you don't git won't be able
+    to figure out where to push your changes."
+- id: 14701
+  author: Micah Winkelspecht
+  author_email: winkelspecht@gmail.com
+  author_url: http://i.collectthoughts.com
+  date: '2009-01-22 21:11:58 -0500'
+  date_gmt: '2009-01-23 03:11:58 -0500'
+  content: "You can also delete a remote branch with:\r\n\r\ngit branch -r -d origin&#47;new_feature_name"
+- id: 14809
+  author: Tims Blog &raquo; Blog Archive &raquo; Time to use vacation
+  author_email: ''
+  author_url: http://caphrim.net/tim/?p=415
+  date: '2009-02-01 00:24:50 -0500'
+  date_gmt: '2009-02-01 06:24:50 -0500'
+  content: "[...] start a new branch on your remote git repo [...]"
+- id: 14844
+  author: Michael Johnson
+  author_email: mjohnson@pitsco.com
+  author_url: ''
+  date: '2009-02-03 10:43:58 -0500'
+  date_gmt: '2009-02-03 16:43:58 -0500'
+  content: "@kai &amp; @pietro (3 &amp; 4): (I know I'm late, but... just saw this)\r\n\r\nNo,
+    this doesn't automatically add tracking (even with Nikos' hint). Just tried it.
+    What you *can* do, is to edit the .git&#47;config file and add the following (after
+    doing the push):\r\n\r\n  [branch \"new_feature\"]\r\n    remote = origin\r\n
+    \   merge = refs&#47;heads&#47;new_feature\r\n\r\nYou can also do the same using
+    git config:\r\n\r\n  git config branch.new_feature.remote origin\r\n  git config
+    branch.new_feature.merge refs&#47;heads&#47;new_feature\r\n\r\nI tend to do the
+    edit, though."
+- id: 14941
+  author: Michael Johnson
+  author_email: mjohnson@pitsco.com
+  author_url: ''
+  date: '2009-02-09 15:36:31 -0500'
+  date_gmt: '2009-02-09 21:36:31 -0500'
+  content: "I've just added a simple alias to my ~&#47;.gitconfig file that lets me
+    \"publish\" an existing branch like:\r\n\r\n  git publish branchname\r\n\r\nSo
+    I can create my branch and publish it later. The alias is:\r\n\r\n[alias]\r\n
+    \    publish = !sh -c 'git push origin \\\"$0\\\" &amp;&amp; git config \\\"branch.$0.remote\\\"
+    origin &amp;&amp; \\\r\n       git config \\\"branch.$0.merge\\\" \\\"refs&#47;heads&#47;$0\\\"'\r\n\r\nI'd
+    like to modify it so it will publish the current branch, but for now this will
+    work, I believe."
+- id: 14958
+  author: Creating remote branches from local ones in Git | Question Defense
+  author_email: ''
+  author_url: http://www.question-defense.com/2009/03/06/creating-remote-branches-from-local-ones-in-git/
+  date: '2009-03-07 14:56:13 -0500'
+  date_gmt: '2009-03-07 20:56:13 -0500'
+  content: "[...] to this post for examples of setting up remote branches.   Share:
+    These icons link to social bookmarking sites [...]"
+- id: 14971
+  author: Working with remote GIT branches &laquo; Aslak Johansen and Jan Chu @ DIKU
+  author_email: ''
+  author_url: http://janslak.wordpress.com/2009/03/28/working-with-remote-git-branches/
+  date: '2009-03-27 20:27:46 -0400'
+  date_gmt: '2009-03-28 02:27:46 -0400'
+  content: "[...] http:&#47;&#47;www.zorched.net&#47;2008&#47;04&#47;14&#47;start-a-new-branch-on-your-remote-git-repository&#47;
+    [...]"
+- id: 14977
+  author: kbro
+  author_email: kevin@broadey.net
+  author_url: ''
+  date: '2009-03-31 15:57:31 -0400'
+  date_gmt: '2009-03-31 21:57:31 -0400'
+  content: "In the command &acirc;&euro;&oelig;git push origin origin:refs&#47;heads&#47;new_feature_name&acirc;&euro;\x9D
+    to create the remote branch, is the second &acirc;&euro;&oelig;origin&acirc;&euro;\x9D
+    correct? This is the <src> in the <src&gt:<dst&gt refspec, so I&acirc;&euro;&trade;d
+    expect it to be a branch name such as &acirc;&euro;&oelig;master&acirc;&euro;\x9D
+    or a revision name such as &acirc;&euro;&oelig;HEAD&acirc;&euro;\x9D. This would
+    then be the point at which the new branch came off its parent, which is what would
+    make sense to me.\r\n\r\nI stared at http:&#47;&#47;www.kernel.org&#47;pub&#47;software&#47;scm&#47;git&#47;docs&#47;git-push.html
+    for a long time to understand what you&acirc;&euro;&trade;re doing here.\r\n\r\nOther
+    than that, it&acirc;&euro;&trade;s a great post and answered the question of how
+    to create a branch in a remote respoitory and then use it, tracked, locally."
+- id: 15012
+  author: djwonk &rsaquo; Tracking Remote Git Branches
+  author_email: ''
+  author_url: http://djwonk.com/blog/2009/04/18/tracking-remote-git-branches/
+  date: '2009-04-18 14:12:05 -0400'
+  date_gmt: '2009-04-18 20:12:05 -0400'
+  content: "[...] Start a New Branch on your Remote Git Repository by Geoff Lane [...]"
+- id: 15013
+  author: David James
+  author_email: online@collectiveinsight.net
+  author_url: http://djwonk.com
+  date: '2009-04-18 18:14:48 -0400'
+  date_gmt: '2009-04-19 00:14:48 -0400'
+  content: "Thanks so much for this post and the comments.  I read it and others and
+    tried to synthesize what people have already said:\r\nhttp:&#47;&#47;djwonk.com&#47;blog&#47;2009&#47;04&#47;18&#47;tracking-remote-git-branches&#47;\r\n\r\nMy
+    goal was to zero in on the simplest way of starting with a local branch, pushing
+    to a remote branch, and getting automatic tracking to work."
+- id: 15060
+  author: When in doubt&#8230; &rsaquo; Creating (and removing) remote Git branches
+  author_email: ''
+  author_url: http://schubert.cx/?p=58
+  date: '2009-04-29 09:23:21 -0400'
+  date_gmt: '2009-04-29 15:23:21 -0400'
+  content: "[...] is the original post and source of all of [...]"
+- id: 15081
+  author: Justin Hernandez
+  author_email: justin@tivate.com
+  author_url: http://tivate.com
+  date: '2009-05-14 14:53:43 -0400'
+  date_gmt: '2009-05-14 20:53:43 -0400'
+  content: Thanks for this bro.
+- id: 15090
+  author: Justin
+  author_email: justinbkay@gmail.com
+  author_url: http://justinbkay.org
+  date: '2009-05-21 11:35:56 -0400'
+  date_gmt: '2009-05-21 17:35:56 -0400'
+  content: "Bash Friendly Script:\r\n<code lang=\"bash\">\r\n#!&#47;bin&#47;sh\r\n#
+    git-create-branch <branch_name>\r\n\r\nif [ $# -ne 1 ]; then\r\n         echo
+    1>&2 Usage: $0 branch_name\r\n         exit 127\r\nfi\r\n\r\nbranch_name=$1\r\ngit
+    push origin master:refs&#47;heads&#47;$branch_name\r\necho \"git push origin master:refs&#47;heads&#47;$branch_name\"\r\ngit
+    fetch origin\r\ngit checkout --track -b $branch_name origin&#47;$branch_name\r\ngit
+    pull\r\n<&#47;code>"
+- id: 15371
+  author: Vivek
+  author_email: vivek.balakrishnan@gmail.com
+  author_url: ''
+  date: '2009-06-12 15:50:51 -0400'
+  date_gmt: '2009-06-12 21:50:51 -0400'
+  content: "@Mauricio. Thanks for the advice. I got it to work now."
+- id: 15542
+  author: skiedr
+  author_email: skie@mail.ru
+  author_url: ''
+  date: '2009-07-04 01:10:49 -0400'
+  date_gmt: '2009-07-04 07:10:49 -0400'
+  content: "Windows CMD friendly script\r\n\r\n<code lang=\"winbatch\">\r\n@set argC=0\r\n@for
+    %%x in (%*) do Set &#47;A argC+=1\r\nIF %argC% == 1 (\r\n\tset branch_name=%1\r\n\tgit
+    push origin origin:refs&#47;heads&#47;%branch_name%\r\n\tgit fetch origin\r\n\tgit
+    checkout --track -b %branch_name% origin&#47;%branch_name%\r\n\tgit pull\r\n)
+    ELSE (\r\n\techo Usage: %0 branch_name\r\n)\r\n<&#47;code>"
+- id: 15627
+  author: Prabir
+  author_email: mail@prabir.me
+  author_url: http://blog.prabir.me
+  date: '2009-09-09 05:20:06 -0400'
+  date_gmt: '2009-09-09 11:20:06 -0400'
+  content: "Hi, \r\ngreat article,\r\nanyways i was wondering, if there is a way to
+    create an empty remote tracking branches."
+- id: 15659
+  author: John
+  author_email: hackedunit@me.com
+  author_url: ''
+  date: '2009-09-22 23:37:15 -0400'
+  date_gmt: '2009-09-23 05:37:15 -0400'
+  content: Is there a way to recover a branch that is deleted from both local and
+    remote ?
+- id: 15663
+  author: Entangled discussions &raquo; Gecko&#8217;s Guide to GIT
+  author_email: ''
+  author_url: http://www.glenstark.net/2009/09/geckos-guide-to-git
+  date: '2009-09-23 06:48:08 -0400'
+  date_gmt: '2009-09-23 12:48:08 -0400'
+  content: "[...] pulling our work-in-progress. The solution is for each of us to
+    have our own branch. This post tells us how to start a new branch on a remote
+    git repository. The steps are [...]"
+- id: 15713
+  author: Marcyes &#47; Working with remote branches &Acirc;&laquo; Aslak Johansen
+    and Jan Chu @ DIKU
+  author_email: ''
+  author_url: http://marcyes.com/2009/09/28/working_remote_branches_aslak_johansen_jan_chu_diku/
+  date: '2009-09-28 12:18:25 -0400'
+  date_gmt: '2009-09-28 18:18:25 -0400'
+  content: "[...] most useful post I found while trying to figure out how to push
+    and create a remote branch   [via zorched.net ] [ programming, git ]   permalink
+    \    Latest Updates from this [...]"
+- id: 15721
+  author: 'Creating remote git branch &laquo; Jonny Zone : Copyleft &#8211; all rights
+    reversed'
+  author_email: ''
+  author_url: http://acassis.wordpress.com/2009/09/29/creating-remote-git-branch/
+  date: '2009-09-29 07:27:12 -0400'
+  date_gmt: '2009-09-29 13:27:12 -0400'
+  content: "[...] Source: http:&#47;&#47;www.zorched.net&#47;2008&#47;04&#47;14&#47;start-a-new-branch-on-your-remote-git-repository&#47;
+    [...]"
+- id: 16022
+  author: Chetan Muneshwar
+  author_email: chetan.muneshwar@gmail.com
+  author_url: http://www.chetanjm.com
+  date: '2009-12-04 01:43:31 -0500'
+  date_gmt: '2009-12-04 07:43:31 -0500'
+  content: "Superb !!!!!!!!!!!!!\r\nremote branch creation is better than local branch
+    when multiple persons  working  on same modules at random in different branches.\r\n\r\n\r\nThanks
+    lots"
+- id: 16026
+  author: Apie
+  author_email: ivorpaul@gmail.com
+  author_url: ''
+  date: '2009-12-10 04:00:13 -0500'
+  date_gmt: '2009-12-10 10:00:13 -0500'
+  content: Just want to say that your post is listed in a private wiki for the company
+    I work for and I reference it every now and then - thanks for the lasting contribution
+    :)
+- id: 16028
+  author: Nucc
+  author_email: nucc@bteam.hu
+  author_url: http://nucc.bteam.hu
+  date: '2010-01-03 06:11:55 -0500'
+  date_gmt: '2010-01-03 12:11:55 -0500'
+  content: "John!\r\n\r\nYou should know a patch id from your removed branches. When
+    you remove a branch, your patches are not removed immediately, you can remove
+    them by using the garbage collector of git (git-gc). So you need to find one commit
+    on the removed branch, follow the commit tree, and create a branch that refers
+    to the last commit..."
+- id: 16029
+  author: Nucc
+  author_email: nucc@bteam.hu
+  author_url: http://nucc.bteam.hu
+  date: '2010-01-03 06:19:36 -0500'
+  date_gmt: '2010-01-03 12:19:36 -0500'
+  content: "I use a remote work branch to create snapshots before I change workstation
+    (from notebook to desktop). Therefore local branches are not enough, because I'd
+    like to sync to that \"snapshot\" branch from both machine...\r\n\r\nThanks the
+    article!"
+- id: 16049
+  author: R.S. Oldenbeuving
+  author_email: r.oldenbeuving@solidsquare.nl
+  author_url: http://www.solidsquare.nl
+  date: '2010-02-27 07:39:39 -0500'
+  date_gmt: '2010-02-27 13:39:39 -0500'
+  content: Great article, nice to keep in bookmarks and quickly check if you need
+    to create a new branch, thanks!
+- id: 16053
+  author: kevin_mic
+  author_email: kevin_mic@yahoo.com
+  author_url: ''
+  date: '2010-03-03 18:25:19 -0500'
+  date_gmt: '2010-03-04 00:25:19 -0500'
+  content: "Another useful way of creating a remote branch is by naming the topic
+    branch you want to push to origin\n\ngit push origin master:new_remote_branch\n\nor
+    \n\ngit push origin topic_branch:new_remote_branch"
+- id: 16082
+  author: Tom Lazar
+  author_email: tom@tomster.org
+  author_url: http://tomster.org
+  date: '2010-04-23 09:19:10 -0400'
+  date_gmt: '2010-04-23 15:19:10 -0400'
+  content: "Like Michael Johnson I, too, prefer to create the local branch <i>first<&#47;i>
+    (who knows if I really want to push it later?).\r\n\r\nInstead of using a .gitconfig
+    [alias] (and having to provide the branchname manually) I simply wrote a shell
+    script that parses the current branchname, and named it git-branch.\r\n\r\n<pre>\r\n#!&#47;bin&#47;sh\r\nfunction
+    parse_git_branch {\r\n  ref=$(git-symbolic-ref HEAD 2> &#47;dev&#47;null) || return\r\n
+    \ echo ${ref#refs&#47;heads&#47;}\r\n}\r\nBRANCHNAME=`parse_git_branch`\r\ngit
+    push  \r\ngit config branch.$BRANCHNAME.remote origin\r\ngit config branch.$BRANCHNAME.merge
+    refs&#47;heads&#47;$BRANCHNAME\r\n\r\n<&#47;pre>\r\n\r\nMore details can be found
+    on my <a href=\"http:&#47;&#47;tomster.org&#47;blog&#47;push-a-local-git-branch-to-remote-repository\"
+    rel=\"nofollow\">blog post<&#47;a>"
+- id: 16150
+  author: Toby
+  author_email: toby.osbourn@googlemail.com
+  author_url: http://www.tosbourn.com
+  date: '2010-05-21 03:36:26 -0400'
+  date_gmt: '2010-05-21 09:36:26 -0400'
+  content: This is exactly what I was looking for cheers!
+- id: 16160
+  author: Useful Git Links | Toby&#039;s Development Blog
+  author_email: ''
+  author_url: http://www.tosbourn.com/2010/06/git/useful-git-links/
+  date: '2010-06-22 06:48:19 -0400'
+  date_gmt: '2010-06-22 12:48:19 -0400'
+  content: "[...] Creating A New Branch On Your Remote Repository - Such a simple
+    task but one I couldn&#039;t easily find described somewhere for the layman. [...]"
+- id: 16259
+  author: "git&ccedil;&scaron;&bdquo;&aring;&circ;&dagger;&aring;&cedil;&fnof;&aring;&frac14;\x8F&aring;&frac14;&euro;&aring;\x8F&lsquo;&auml;&sup1;&lsaquo;&aring;&circ;&rsaquo;&aring;&raquo;&ordm;&egrave;&iquest;&oelig;&ccedil;&uml;&lsaquo;&aring;&circ;&dagger;&aelig;&rdquo;&macr;
+    - RubyEE.org - about Ruby,Rails,Sinatra,Mac OS &amp; iPhone app"
+  author_email: ''
+  author_url: http://blog.rubyee.org/2010/07/22/git%e7%9a%84%e5%88%86%e5%b8%83%e5%bc%8f%e5%bc%80%e5%8f%91%e4%b9%8b%e5%88%9b%e5%bb%ba%e8%bf%9c%e7%a8%8b%e5%88%86%e6%94%af/
+  date: '2010-07-21 20:04:57 -0400'
+  date_gmt: '2010-07-22 02:04:57 -0400'
+  content: "[...] http:&#47;&#47;www.zorched.net&#47;2008&#47;04&#47;14&#47;start-a-new-branch-on-your-remote-git-repository&#47;
+    [...]"
+- id: 16266
+  author: Dinesh T
+  author_email: dinesht@gmx.com
+  author_url: ''
+  date: '2010-08-09 03:41:10 -0400'
+  date_gmt: '2010-08-09 09:41:10 -0400'
+  content: Nice tutorial
+- id: 16269
+  author: Usman Ahmad
+  author_email: usmanahmad109@gmail.com
+  author_url: ''
+  date: '2010-08-13 04:57:49 -0400'
+  date_gmt: '2010-08-13 10:57:49 -0400'
+  content: Thanks.. Saved my time.. Really a concise and working tutorial :)
+- id: 16290
+  author: Jason Sydes
+  author_email: sydes@cs.uoregon.edu
+  author_url: ''
+  date: '2010-09-22 14:26:04 -0400'
+  date_gmt: '2010-09-22 20:26:04 -0400'
+  content: "I just added these to my gitconfig. They allow me to publish (or unpublish)
+    the current branch.\r\n\r\n<pre>[alias]\r\n  publish = !sh -c 'CURRENT=$(git symbolic-ref
+    HEAD | sed -e s@.*&#47;@@) \\\r\n      && git push --set-upstream origin $CURRENT:$CURRENT'\r\n
+    \ unpublish = !sh -c 'CURRENT=$(git symbolic-ref HEAD | sed -e s@.*&#47;@@) \\
+    \r\n      && git push origin :$CURRENT'<&#47;pre>\r\n\r\nRequires git version
+    1.7.\r\n\r\nThis is a play off of Michael Johnson&acirc;&euro;&trade;s aliases
+    above and a note from <a href='http:&#47;&#47;tomster.org&#47;blog&#47;push-a-local-git-branch-to-remote-repository'
+    rel=\"nofollow\">this post<&#47;a>."
+- id: 16301
+  author: Creating a New Branch on Remote Git Repository - Mike&#039;s burogu
+  author_email: ''
+  author_url: http://blog.bsodmike.com/2010/10/11/creating-a-new-branch-on-remote-git-repository/
+  date: '2010-10-11 04:43:06 -0400'
+  date_gmt: '2010-10-11 10:43:06 -0400'
+  content: "[...] Reference: http:&#47;&#47;www.zorched.net&#47;2008&#47;04&#47;14&#47;start-a-new-branch-on-your-remote-git-repository&#47;
+    [...]"
+- id: 16327
+  author: JMTyler
+  author_email: tyler.jared@gmail.com
+  author_url: http://www.epicrise.com
+  date: '2010-11-25 08:37:27 -0500'
+  date_gmt: '2010-11-25 14:37:27 -0500'
+  content: Thanks a LOT!  I was searching hopelessly to find out how to do precisely
+    this, and your short tutorial here just saved me tonnes of time!  Definitely bookmarking
+    your site. :D
+- id: 16333
+  author: Git tutorial pushing branch &laquo; YANNB &#8211; yet another not needed
+    blog
+  author_email: ''
+  author_url: http://mattions.wordpress.com/2010/12/01/git-tutorial-pushing-branch/
+  date: '2010-12-01 05:24:50 -0500'
+  date_gmt: '2010-12-01 11:24:50 -0500'
+  content: "[...] This is a very good and clear tutorial how to push a local branch
+    to a remote with git. [...]"
+- id: 16341
+  author: Alex
+  author_email: johndoeyu@yahoo.com
+  author_url: ''
+  date: '2010-12-10 04:43:16 -0500'
+  date_gmt: '2010-12-10 10:43:16 -0500'
+  content: "You can create a new local branch that's tracking remote trunk with just
+    one command:\r\ngit checkout -b some-branch-name -t origin&#47;trunk\r\n\r\nThat's
+    at least how I mostly do things. For each new feature&#47;bug-fix or whatever
+    makes sense to be a smallest group of file changes - I create a local branch.
+    I commit to it - once I'm satisfied (unit&#47;functional test passed and all)
+    I push changes to remote trunk.\r\n\r\nI rarely need to push my local branch to
+    \"main\" git repository as a branch there - perhaps when there is 2+ of us working
+    on the same thing..."
+- id: 16350
+  author: Brian K.
+  author_email: nadakidd@gmail.com
+  author_url: http://www.linkedin.com/in/briankidd
+  date: '2010-12-13 16:57:43 -0500'
+  date_gmt: '2010-12-13 22:57:43 -0500'
+  content: "As a shortcut to step #4, if you want the name of the local branch to
+    be the same as the remote, you can issue the following:\r\n<code lang=\"bash\">\r\ngit
+    checkout -t remote&#47;branch\r\n<&#47;code>\r\n\r\nThis is my default for checking
+    out remote branches as I can't remember ever having a reason to rename the branch
+    locally.  As a side effect, it reduces human error since you only enter the branch
+    name once.  :-)"
+- id: 17858
+  author: Start a New Branch on your Remote Git Repository &laquo; Stein @ Work
+  author_email: ''
+  author_url: http://steinatwork.wordpress.com/2011/02/17/start-a-new-branch-on-your-remote-git-repository/
+  date: '2011-02-17 13:48:58 -0500'
+  date_gmt: '2011-02-17 19:48:58 -0500'
+  content: '[...] Start a New Branch on your Remote Git Repository | Zorched &#47;
+    One-Line Fix.    GA_googleAddAttr("AdOpt", "1"); GA_googleAddAttr("Origin", "other");
+    GA_googleAddAttr("LangId", [...]'
+- id: 17861
+  author: Malvolio
+  author_email: mlorton@yahoo.com
+  author_url: ''
+  date: '2011-02-24 19:25:04 -0500'
+  date_gmt: '2011-02-25 01:25:04 -0500'
+  content: "This was great except it didn't work for me at all.  In response to the
+    initial push, I was getting the \"error: src refspec origin does not match any\",
+    which isn't even grammatical English, let alone helpful.  Turns out, somehow I
+    had branch.autosetupmerge set to false months ago when I clone my repo.    Fixed
+    it with\r\n\r\n<code>git branch --set-upstream master origin&#47;master<&#47;code>"
+- id: 17863
+  author: Malvolio
+  author_email: mlorton@yahoo.com
+  author_url: ''
+  date: '2011-02-25 00:24:39 -0500'
+  date_gmt: '2011-02-25 06:24:39 -0500'
+  content: "And, grrrr, it's\r\n\r\n<code>git push origin master:refs&#47;heads&#47;new_feature_name<&#47;code>\r\n\r\nThe
+    label \"origin\" only appears once!"
+- id: 17873
+  author: Pau
+  author_email: pau@nosolopau.com
+  author_url: ''
+  date: '2011-03-21 06:46:45 -0400'
+  date_gmt: '2011-03-21 12:46:45 -0400'
+  content: Tthanks!
+- id: 17889
+  author: push and delete remote branches &laquo; [tloring retain];
+  author_email: ''
+  author_url: http://blog.tloring.com/2011/04/23/push-and-delete-remote-branches/
+  date: '2011-04-23 16:06:31 -0400'
+  date_gmt: '2011-04-23 22:06:31 -0400'
+  content: "[...] http:&#47;&#47;www.zorched.net&#47;2008&#47;04&#47;14&#47;start-a-new-branch-on-your-remote-git-repository&#47;
+    [...]"
+- id: 17911
+  author: Dario
+  author_email: darios3@gmail.com
+  author_url: http://nilclass.blogspot.com
+  date: '2011-07-25 07:21:42 -0400'
+  date_gmt: '2011-07-25 13:21:42 -0400'
+  content: "This is a enhanced copy of an old post on my blog (spanish)\r\n\r\n<a
+    href=\"http:&#47;&#47;nilclass.blogspot.com&#47;2009&#47;08&#47;branches-remotos-en-git.html\"
+    rel=\"nofollow\"> http:&#47;&#47;nilclass.blogspot.com&#47;2009&#47;08&#47;branches-remotos-en-git.html<&#47;a>\r\n\r\nEven
+    the push command has copied wrong\r\n\r\nIs:\r\ngit push origin <b>HEAD<&#47;b>:refs&#47;heads&#47;new_feature_branch\r\n\r\nNot:\r\ngit
+    push origin <b>origin<&#47;b>:refs&#47;heads&#47;new_feature_branch\r\n\r\nHowever,
+    the more practical method to create a branch from current commit is:\r\n\r\ngit
+    checkout -b new_feature_branch\r\ngit push -u origin new_feature_branch"
+- id: 17912
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2011-07-25 08:00:42 -0400'
+  date_gmt: '2011-07-25 14:00:42 -0400'
+  content: "@Dario,  If you notice the date on mine is from 2008 and more than a year
+    older than your post. So please don't claim that I copied your work because you
+    happened to write something similar more than a year after I did."
+- id: 17914
+  author: 'Git: Links, News, Resources (1) &laquo; Angel &#8220;Java&#8221; Lopez
+    on Blog'
+  author_email: ''
+  author_url: http://ajlopez.wordpress.com/2011/07/27/git-links-news-resources-1/
+  date: '2011-07-27 04:13:29 -0400'
+  date_gmt: '2011-07-27 10:13:29 -0400'
+  content: "[...] Start a New Branch on your Remote Git Repository | Zorched &#47;
+    One-Line Fix http:&#47;&#47;www.zorched.net&#47;2008&#47;04&#47;14&#47;start-a-new-branch-on-your-remote-git-repository&#47;
+    [...]"
+- id: 17915
+  author: Peter von Kaehne
+  author_email: refdoc@gmx.net
+  author_url: ''
+  date: '2011-07-27 12:59:08 -0400'
+  date_gmt: '2011-07-27 18:59:08 -0400'
+  content: Many thanks! This was a useful post.
+- id: 17920
+  author: Dario
+  author_email: darios3@gmail.com
+  author_url: http://nilclass.blogspot.com
+  date: '2011-08-05 16:55:30 -0400'
+  date_gmt: '2011-08-05 22:55:30 -0400'
+  content: "@GeoffLane You may have used a Time Machine or something like that\r\n\r\nSeriously,
+    \ both you and me have copied this commands from a dubious source... I dont known
+    what origin means as commit specificator. is the current commit? is equivalent
+    to origin&#47;master?, is cleaner to put it as git push origin HEAD:refs&#47;heads&#47;new_feature\r\n\r\nSurely,
+    git push origin origin:refs&#47;heads&#47;new_feature works (I've used it), but
+    the meaning of origin to specify the commit is not clear\r\n\r\nNice blog,  just
+    watch your sources to avoid \"strange\" information"
+- id: 17922
+  author: "&raquo; Push branch to server &#47; remote location Emil&#039;s tech stuff"
+  author_email: ''
+  author_url: http://blog.ek-tek.dk/?p=48
+  date: '2011-08-15 05:36:35 -0400'
+  date_gmt: '2011-08-15 11:36:35 -0400'
+  content: "[...] easiest way, but there&acirc;&euro;&trade;s another way if you want
+    a different option.&Acirc;&nbsp;Geoff Lane&Acirc;&nbsp;has created a&Acirc;&nbsp;great
+    tutorial&Acirc;&nbsp;which goes over how to push a ref to a remote repository,
+    fetch any updates, and then start [...]"
+- id: 17923
+  author: Paul Moore
+  author_email: paul.k.moore@lineone.net
+  author_url: http://www.whosebill.com
+  date: '2011-08-24 04:31:31 -0400'
+  date_gmt: '2011-08-24 10:31:31 -0400'
+  content: Thanks Geoff - that really helped me.
+- id: 17926
+  author: Alex de Kruijff
+  author_email: akruijff@dds.nl
+  author_url: http://alex.kruijff.org/
+  date: '2011-08-28 11:01:59 -0400'
+  date_gmt: '2011-08-28 17:01:59 -0400'
+  content: "@Dario: Copyrigth does not apply to knowledge, which is the only thing
+    the two articles have in common. I don't see a copy in terms of the creative process
+    I don't see any copyright infringement."
+- id: 17943
+  author: Peter
+  author_email: peter.taylor@ti-solutions.co.uk
+  author_url: ''
+  date: '2011-09-20 09:11:35 -0400'
+  date_gmt: '2011-09-20 15:11:35 -0400'
+  content: "@GeoffLane Moral of story, break the spirit of sharing and keep all knowledge
+    to yourself. You just cant help some people! Rest assured Geoff it helped me and
+    countless others that didn't comment."
+- id: 17947
+  author: How to add and delete remote branches in git
+  author_email: ''
+  author_url: http://www.smashcompany.com/technology/how-to-add-and-delete-remote-branches-in-git
+  date: '2011-09-28 15:00:29 -0400'
+  date_gmt: '2011-09-28 21:00:29 -0400'
+  content: "[...] to add and delete remote branches in git This is a good tutorial:
+    \ The Workflow My workflow is generally something like this: Create a remote branch
+    Create a local [...]"
+- id: 17955
+  author: Git branches | WP Cookbook
+  author_email: ''
+  author_url: http://wpcookbook.wordpress.com/2011/10/22/git-branches/
+  date: '2011-10-22 17:41:08 -0400'
+  date_gmt: '2011-10-22 23:41:08 -0400'
+  content: "[...] From Geoff Lane Share this:TwitterFacebookLike this:LikeBe the first
+    to like this post. [...]"
+- id: 17956
+  author: Lanoxx
+  author_email: lanoxx@gmx.net
+  author_url: ''
+  date: '2011-11-03 05:40:53 -0400'
+  date_gmt: '2011-11-03 11:40:53 -0400'
+  content: "I am wondering what is the difference between these two lines:\r\ngit
+    push origin new_feature_name\r\ngit push origin origin:refs&#47;heads&#47;new_feature_name\r\n\r\nIf
+    I have already used the first line to create a remote branch, should I delete
+    that remote branch and create it again using the second line?\r\n\r\nCan I also
+    use the --track option to checkout a branch created with the first line?\r\n\r\nWould
+    be nice if you could clarify that. Also great tutorial thanks very much for sharing.\r\n\r\nCheers"
+- id: 17958
+  author: C&Atilde;&iexcl;ssio Nandi
+  author_email: cassionandi@gmail.com
+  author_url: http://cassionandi.blogspot.com
+  date: '2011-11-07 17:43:26 -0500'
+  date_gmt: '2011-11-07 23:43:26 -0500'
+  content: Great tip, helped a lot.
+- id: 18059
+  author: Remote Git branch | To the Great National Parks!
+  author_email: ''
+  author_url: http://geographerlyp.wordpress.com/2012/05/21/remote-git-branch/
+  date: '2012-05-20 22:26:18 -0400'
+  date_gmt: '2012-05-21 04:26:18 -0400'
+  content: "[...] http:&#47;&#47;www.zorched.net&#47;2008&#47;04&#47;14&#47;start-a-new-branch-on-your-remote-git-repository&#47;
+    Like this:LikeBe the first to like this post.   This entry was posted in &aelig;&oelig;&ordf;&aring;&circ;&dagger;&ccedil;&plusmn;&raquo;
+    by geographerlyp. Bookmark the permalink. [...]"
+- id: 18065
+  author: Olivier Clavel
+  author_email: olivier.clavel@gmail.com
+  author_url: ''
+  date: '2012-06-29 19:11:21 -0400'
+  date_gmt: '2012-06-30 01:11:21 -0400'
+  content: "Since I came across your article looking for something else and it is
+    pretty well referenced despite its age, I'll add my 2 cent of update :)\r\n\r\nThere
+    is an easier way to do this since version 1.7.0 of git  (at least more understandable
+    for my poor brain):\r\n1- Create the local branch from the current one\r\n<code
+    lang=\"bash\">\r\ngit checkout -b new_feature\r\n<&#47;code>\r\n\r\n2- Push that
+    branch to the remote\r\n<code lang=\"bash\">\r\ngit push origin new_feature\r\n<&#47;code>\r\nAt
+    this stage your local branch is set to push to the remote but pull won't work\r\n\r\n3-
+    Set the upstream branch to track\r\n<code lang=\"bash\">\r\ngit branch --set-upstream
+    new_feature origin&#47;new_feature\r\n<&#47;code>\r\nNow you can both push to
+    &#47; pull from the remote branch\r\n\r\n4- If you need to delete the remote branch\r\n<code
+    lang=\"bash\">\r\ngit push origin :new_feature\r\n<&#47;code>"
+- id: 18066
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2012-06-30 09:00:03 -0400'
+  date_gmt: '2012-06-30 15:00:03 -0400'
+  content: "@Olivier, thanks for posting a new method to do this. That's the main
+    problem with these blog posts is that they get stale. :)"
+- id: 18072
+  author: Paul Jacobs
+  author_email: paul.jacobs@gmail.com
+  author_url: ''
+  date: '2012-07-31 16:43:23 -0400'
+  date_gmt: '2012-07-31 22:43:23 -0400'
+  content: Oliver, thanks, your updated instructions helped a lot - and Geoff, thanks
+    for the older ones and the place for discussion.
+- id: 18076
+  author: vid
+  author_email: vid@uoregon.com
+  author_url: http://pages.uoregon.edu/vid/
+  date: '2012-08-15 11:08:59 -0400'
+  date_gmt: '2012-08-15 17:08:59 -0400'
+  content: "@Geoff, thanks for the post. I've been using this method for the past
+    several months. \r\nI used your automation idea too, with a git-create-branch
+    and git-delete-branch function. \r\n@Oliver, thanks for the comment I've adapted
+    my code to leverage the updated method.\r\nI posted the code and notes here: http:&#47;&#47;pages.uoregon.edu&#47;vid&#47;2012&#47;08&#47;14&#47;branching-with-git-%E2%80%93-follow-up-on-keeping-remote-and-local-sync%E2%80%99d&#47;\r\n\r\nHere
+    are the functions: <code>function git-create-branch(){ # git-create-branch <branch_name>\r\n
+    \ #!&#47;bin&#47;sh\r\n  #from http:&#47;&#47;www.zorched.net&#47;2008&#47;04&#47;14&#47;start-a-new-branch-on-your-remote-git-repository&#47;comment-page-2&#47;#comment-18065\r\n
+    \ if [[ ! -n \"$1\" ]] ; then\r\n    echo 1>&2 Usage: git-create-branch branch_name\r\n
+    \ else\r\n    #$1 => branch_namea\r\n    #vars:\r\n    GCO=\"git checkout -b $1\";\r\n
+    \   GPO=\"git push origin $1\";\r\n    GBRSUP=\"git branch --set-upstream $1 origin&#47;$1\";\r\n
+    \   GBR=\"git branch\";\r\n    GBRR=\"git branch -r\";\r\n    #actions:\r\n    echo
+    \"Adding $1\"\r\n    echo \"1 - Create the local branch from the current one:
+    '$GCO'\" > &#47;dev&#47;tty; $GCO\r\n    echo \"2 - Push that branch to the remote:
+    '$GPO'\" > &#47;dev&#47;tty; $GPO\r\n    echo \"3 - Set the upstream branch to
+    track: '$GBRSUP'\" > &#47;dev&#47;tty; $GBRSUP\r\n    echo \"4 - If you need to
+    delete the remote branch use: git-delete-branch $1 or git push origin :$1\" >
+    &#47;dev&#47;tty; echo -n;\r\n    echo \"### Local branches ($GBR) ### \"; $GBR\r\n
+    \   echo \"### Remote branches ($GBRR) ### \"; $GBRR\r\n  fi\r\n}<&#47;code>\r\n<code>\r\n\r\nfunction
+    git-delete-branch(){ # git-delete-branch <branch_name>\r\n  #!&#47;bin&#47;sh\r\n
+    \ #modified from script and comments at http:&#47;&#47;www.zorched.net&#47;2008&#47;04&#47;14&#47;start-a-new-branch-on-your-remote-git-repository&#47;comment-page-2&#47;#comment-18065\r\n
+    \ #if [ $# -ne 1 ]; then\r\n  if [[ ! -n \"$1\" ]] ; then\r\n    echo 1>&2 Usage:
+    git-delete-branch branch_name\r\n  else\r\n    #$1 -> branch_name\r\n    #vars:\r\n
+    \   GCO=\"git checkout master\";\r\n    GPOD=\"git push origin :$1\";\r\n    GBRD=\"git
+    branch -d $1\";\r\n    GFO=\"git fetch origin\";\r\n    GPL=\"git pull origin
+    master\"\r\n    GBR=\"git branch\";\r\n    GBRR=\"git branch -r\";\r\n    #Verbose
+    actions:\r\n    echo \"Removing $1\"\r\n    echo \"1 - Check out master branch:
+    '$GCO'\" > &#47;dev&#47;tty; $GCO\r\n    echo \"2 - Delete remote branch: '$GPOD'\"
+    > &#47;dev&#47;tty; $GPOD\r\n    echo \"3 - Delete local branch: '$GBRD'\" > &#47;dev&#47;tty;
+    $GBRD\r\n    echo \"4 - fetch and pull origin: '$GFO; $GPL;'\" > &#47;dev&#47;tty;
+    $GFO; $GPL;\r\n    echo \"### Local branches ($GBR) ### \"; $GBR\r\n    echo \"###
+    Remote branches ($GBRR) ### \"; $GBRR\r\n  fi\r\n}<&#47;code>"
+- id: 18080
+  author: Learning my ways with git | Eric&#039;s blog
+  author_email: ''
+  author_url: http://oerich.wordpress.com/2012/09/12/learning-my-ways-with-git/
+  date: '2012-09-12 12:58:37 -0400'
+  date_gmt: '2012-09-12 18:58:37 -0400'
+  content: "[...]  I gathered these commands from the diaspora workflow page, &#47;tmp&#47;labs&Acirc;&nbsp;git
+    cheat sheet, and Geoff&#8217;s blog post on the matter, especially in Oliver&#8217;s
+    update in the [...]"
+---
+<p><a href="http:&#47;&#47;git.or.cz&#47;">Git<&#47;a> is a <a href="http:&#47;&#47;www.zorched.net&#47;2005&#47;12&#47;29&#47;what-are-decen&acirc;&euro;&brvbar;ontrol-systems&#47;">distributed version control system<&#47;a> so it allows you to create branches locally and commit against them. It also supports a more centralized repository model. When using a centralized repository you can push changes to it so that others can pull them more easily. I have a tendency to work on multiple computers. Because of this, I like to use a centralized repository to track the branches as I work on them. That way no matter what machine I'm on, I can still get at my branches.<&#47;p></p>
+<h3>The Workflow<&#47;h3></p>
+<p>My workflow is generally something like this:<&#47;p></p>
+<ol>
+<li>Create a remote branch<&#47;li>
+<li>Create a local branch that tracks it<&#47;li>
+<li>Work, Test, Commit (repeat) - this is all local<&#47;li>
+<li>Push (pushes commits to the remote repository)<&#47;li><br />
+<&#47;ol></p>
+<p>Git commands can be a bit esoteric at times and I can't always seem to remember how to create a remote git branch and then start working on new code. There also seems to be multiple ways of doing it. I'm documenting the way that seem to work for me so that I can remember it. Maybe it will help someone else too.<&#47;p></p>
+<h3>Creating a Remote Branch<&#47;h3></p>
+<ol>
+<li>
+<p>Create the remote branch<br />
+<code lang="bash">git push origin origin:refs&#47;heads&#47;new_feature_name<&#47;code><&#47;p><&#47;li></p>
+<li>
+<p>Make sure everything is up-to-date<br />
+<code lang="bash">git fetch origin<&#47;code><&#47;p><&#47;li></p>
+<li>
+<p>Then you can see that the branch is created.<br />
+<code lang="bash">git branch -r<&#47;code><&#47;p><&#47;li><br />
+<&#47;ol></p>
+<p>This should show 'origin&#47;new_feature_name'<&#47;p></p>
+<ol>
+<li>Start tracking the new branch<br />
+<code lang="bash">git checkout --track -b new_feature_name origin&#47;new_feature_name<&#47;code><&#47;li><br />
+<&#47;ol></p>
+<p>This means that when you do pulls that it will get the latest from that branch as well.<&#47;p></p>
+<ol>
+<li>Make sure everything is up-to-date<br />
+<code lang="bash">git pull<&#47;code><&#47;li><br />
+<&#47;ol></p>
+<h3>Cleaning up Mistakes<&#47;h3></p>
+<p>If you make a mistake you can always delete the remote branch<br />
+<code lang="bash">git push origin :heads&#47;new_feature_name<&#47;code><br />
+<em>(Ok Git'ers - that has to be the least intuitive command ever.)<&#47;em><&#47;p></p>
+<h3>Use the Branch from Another Location<&#47;h3></p>
+<p>When you get to another computer or clone the git repository to a new computer, then you just need to start tracking the new branch again.<br />
+<code lang="bash">git branch -r<&#47;code> to show all the remote branches<br />
+<code lang="bash">git checkout --track -b new_branch origin&#47;new_feature_name<&#47;code> to start tracking the new branch<&#47;p></p>
+<h3>Automate it A Bit<&#47;h3></p>
+<p>That's a pretty easy thing to automate with a small shell script luckily<&#47;p></p>
+<p><code lang="bash"><&#47;p></p>
+<h1>!&#47;bin&#47;sh<&#47;h1></p>
+<h1>git-create-branch <branch_name><&#47;h1></p>
+<p>if [ $# -ne 1 ]; then<br />
+         echo 1>&amp;2 Usage: $0 branch_name<br />
+         exit 127<br />
+fi<&#47;p></p>
+<p>set branch_name = $1<br />
+git push origin origin:refs&#47;heads&#47;${branch_name}<br />
+git fetch origin<br />
+git checkout --track -b ${branch_name} origin&#47;${branch_name}<br />
+git pull<br />
+<&#47;code><&#47;p></p>
+<p>For further help, you might want to check out:<&#47;p></p>
+<ul>
+<li>
+<a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;product&#47;1934356158?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1934356158">Pragmatic Version Control Using Git (Pragmatic Starter Kit)<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&l=as2&o=1&a=1934356158" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;><br />
+<&#47;li></p>
+<li>
+<a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;product&#47;0596520123?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0596520123">Version Control with Git: Powerful tools and techniques for collaborative software development<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&l=as2&o=1&a=0596520123" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;><br />
+<&#47;li></p>
+<li>
+<a href="http:&#47;&#47;www.amazon.com&#47;gp&#47;product&#47;1430218339?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1430218339">Pro Git<&#47;a><img src="http:&#47;&#47;www.assoc-amazon.com&#47;e&#47;ir?t=zorchednet-20&l=as2&o=1&a=1430218339" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" &#47;><br />
+<&#47;li><br />
+<&#47;ul></p>
+<p>[ad name="image-banner"]<&#47;p></p>

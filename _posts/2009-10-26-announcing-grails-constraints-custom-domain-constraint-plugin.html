@@ -1,0 +1,147 @@
+---
+layout: post
+status: publish
+published: true
+title: Announcing Grails Constraints Custom Domain Constraint Plugin
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 379
+wordpress_url: http://www.zorched.net/?p=379
+date: '2009-10-26 20:15:05 -0400'
+date_gmt: '2009-10-27 02:15:05 -0400'
+categories:
+- Code
+- Groovy
+tags:
+- grails
+- plugins
+- validation
+comments:
+- id: 15976
+  author: Chii
+  author_email: chii@mailinator.com
+  author_url: ''
+  date: '2009-11-20 03:48:03 -0500'
+  date_gmt: '2009-11-20 09:48:03 -0500'
+  content: "+1 that is freaking awesome!"
+- id: 16006
+  author: mcv
+  author_email: mcvmcv@xs4all.nl
+  author_url: ''
+  date: '2009-11-23 08:12:17 -0500'
+  date_gmt: '2009-11-23 14:12:17 -0500'
+  content: "I love this idea, but unfortunately, it behaves very erritically for me.
+    Sometimes the validate closure gets called, sometimes it doesn't, and there doesn't
+    seem to be any predictability in whether it gets called or not. Sometimes I've
+    got it working, then kill the server, clean, restart, and then it fails (as in:
+    the validate closure doesn't get called).\r\n\r\nAnd it fails silently. It doesn't
+    complain that it can't find the constrain class or anything like that, it just
+    ignores it completely.\r\n\r\nIt's a real shame, because this plugin promises
+    to do exactly what I need: make lots of custom validators easy to maintain and
+    re-use.\r\n\r\nIs there any way I can help you fix this?"
+- id: 16018
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2009-11-25 09:08:19 -0500'
+  date_gmt: '2009-11-25 15:08:19 -0500'
+  content: "@mcv, the most help would be to make a repeatable test case. If that's
+    not possible, do you mind sending me some of your Constraints so I can take a
+    look at them?"
+- id: 16035
+  author: fabien7474
+  author_email: fabien7474@gmail.coo
+  author_url: http://www.irofoot.com
+  date: '2010-01-11 05:30:59 -0500'
+  date_gmt: '2010-01-11 11:30:59 -0500'
+  content: "@Geoff\r\nIs this plugin still relevant with the release of Grails 1.2
+    that allows re-use of  named constraint (it I am correct)?"
+- id: 16036
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2010-01-11 07:24:17 -0500'
+  date_gmt: '2010-01-11 13:24:17 -0500'
+  content: "@fabien7474,\r\nYes, I think it's still relevant with Grails 1.2. Grails
+    1.2 allows you to create named constraints based on the existing constraints and
+    then apply them to multiple classes. e.g.:\r\n<code lang=\"groovy\">\r\ngrails.gorm.default.constraints
+    = {\r\n   myConstraints(nullable:true, blank:false, size:1..20)\r\n}\r\n\r\nstatic
+    constraints = {\r\n  myProperty shared:\"myConstraints\"\r\n}\r\n<&#47;code>\r\n\r\nThe
+    constraints plugin allows you to create fundamentally new constraints. It also
+    allows you to supply parameters to those custom constraints to change the behavior,
+    something that the default constraints setup doesn't do. This is important, for
+    example, in a constraint that relies on the value of another property (see the
+    CompareToConstraint example above). In that scenario you need to configure the
+    constraint by passing the name of that other property.\r\n\r\nThe new feature
+    in Grails 1.2 is really about applying defaults and a way of clustering common
+    constraints together. That's great for what it is. The plugin is about creating
+    fundamentally new constraints."
+- id: 16332
+  author: ddiman
+  author_email: dan.diman@certifi.net
+  author_url: ''
+  date: '2010-11-30 12:11:49 -0500'
+  date_gmt: '2010-11-30 18:11:49 -0500'
+  content: "I'm having the same problems as mvc; was his issue ever resolved?  I've
+    followed the directions, and moving from a validator closure (that works) to a
+    named custom constraint using the plugin is causing me trouble - the custom validation
+    is never called, no errors to the console, no errors to the browser, none of the
+    debug printlns I stuck in the validate closure appear on the console.\r\n\r\nHere's
+    a fake-up of what I'm trying to do:\r\n\r\n<code lang=\"groovy\">\r\nclass MyDomain
+    {\r\n  Double oneSmallVal\r\n  Double anotherSmallVal\r\n\r\n  static constraints
+    = {\r\n    anotherSmallVal(smallEnough:true)\r\n  }\r\n}\r\n\r\nclass SmallEnoughConstraint
+    {\r\n\r\n  def validator = { val, obj ->\r\n    if (obj.oneSmallVal &amp;&amp;
+    val) {\r\n      return (val + obj.oneSmallVal < 1)\r\n    } else {\r\n      return
+    false\r\n    }\r\n  }\r\n}\r\n\r\n}\r\n<&#47;code>"
+- id: 274129
+  author: Where to put the utility class? &laquo; &aring;&curren;&copy;&aring;&curren;&copy;&aring;&yen;&frac12;&aring;&yen;&frac12;&aring;&shy;&brvbar;&auml;&sup1;&nbsp;
+  author_email: ''
+  author_url: http://WWW.TTHHXX.COM/where-to-put-the-utility-class/
+  date: '2015-05-30 08:14:49 -0400'
+  date_gmt: '2015-05-30 14:14:49 -0400'
+  content: "[&#8230;] You can find an example of a new Grails Artefact in the Constriants
+    plugin. The Author of this plugin recommends that users put their Constraint classes
+    in the grails-app&#47;utils&#47; directory. [&#8230;]\n"
+---
+<p>I've released my first public Grails Plugin today.</p>
+<p>The Grails Constraint plugin gives you the ability to create custom Constraints that you can apply to your Domain classes to validate them. These are applied and act just like the built in Domain class constraints.</p>
+<h3>Why would you want this?<&#47;h3><br />
+Grails provides two generic, catch-all Constraints in the core application:</p>
+<ul>
+<li>validator - a generic closure mechanism for validation<&#47;li>
+<li>matches - a regular expression mechanism<&#47;li><br />
+<&#47;ul></p>
+<p>While those work, I find myself often wanting to use the same Constraints on multiple Domain classes (think Social Security Number, Phone Number, Zipcode, etc.) and I don't like to repeat those regular expressions or validations all over the place.</p>
+<h3>What does this plugin do?<&#47;h3><br />
+With the Grails Constraints plugin, you can write a custom Constraint class, drop it in <em>&#47;grails-app&#47;utils&#47;<&#47;em> and it will automatically be available to all of your domain classes.</p>
+<h3>Example<&#47;h3></p>
+<p>I create a new constrain by hand in <em>&#47;grails-app&#47;utils&#47;ComparisonConstraint.groovy<&#47;em>. (You can also use the provided create-constraint script like <em>grails create-constraint com.foo.MyConstraint<&#47;em>)<br />
+<code lang="groovy"><br />
+class ComparisonConstraint {</p>
+<p>    static name = "compareTo"<br />
+    static expectsParams = true</p>
+<p>    def validate = { val, target -><br />
+        def compareVal = target."$params"<br />
+        if (null == val || null == compareVal)<br />
+            return false</p>
+<p>        return val.compareTo(compareVal) == 0<br />
+    }<br />
+}<br />
+<&#47;code></p>
+<p>Then you can apply your constraint to your Domain class:<br />
+<code lang="groovy"><br />
+class Login {<br />
+    String password<br />
+    String confirm</p>
+<p>    static constraints = {<br />
+        password(compareTo: 'confirm')<br />
+    }<br />
+}<br />
+<&#47;code></p>
+<p>See <a href="http:&#47;&#47;github.com&#47;geofflane&#47;grails-constraints">Grails Custom Constraints Plugin<&#47;a> for the full documentation on what all of the above means and  the source code.</p>

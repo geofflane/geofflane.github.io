@@ -1,0 +1,73 @@
+---
+layout: post
+status: publish
+published: true
+title: 'Erlang Examples: GUIs and Error Handling'
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 109
+wordpress_url: http://www.zorched.net/?p=109
+date: '2008-07-31 09:14:45 -0400'
+date_gmt: '2008-07-31 15:14:45 -0400'
+categories:
+- Erlang
+tags:
+- erlang exercises
+comments: []
+---
+<p>This is part of a series on the <a href="http:&#47;&#47;www.erlang.org&#47;course&#47;exercises.html">Erlang Exercises<&#47;a> which is a great set of programming problems that challenge you to implement solutions to some common Erlang problems. I'm going to share some of my solutions to these problems.</p>
+<h2>Robustness in Erlang, and use of a graphics package<&#47;h2><br />
+<strong>Excercise:<&#47;strong> Create a window containing three buttons: Quit , Spawn , Error.<br />
+The <strong>Spawn<&#47;strong> button shall create a child process which displays an identical window.<br />
+The <strong>Quit<&#47;strong> button should kill the window and its child windows.<br />
+The <strong>Error<&#47;strong> button should cause a runtime error that kills the window (and its children), this window shall then be restarted by its parent.</p>
+<p><code lang="erlang"><br />
+-module(gui).<br />
+-export([init&#47;0]).</p>
+<p>init() -><br />
+    S = gs:start(),<br />
+    Win = gs:create(window, S, [{width, 350}, {height, 100}]),<br />
+    gs:create(button, quit, Win, [{label, {text, "Quit"}}, {x, 0}]),<br />
+    gs:create(button, spawn, Win, [{label, {text, "Spawn"}}, {x, 100}]),<br />
+    gs:create(button, error, Win, [{label, {text, "Error"}}, {x, 200}]),<br />
+    gs:config(Win, {map, true}),<br />
+    loop().</p>
+<p>loop() -><br />
+    receive<br />
+        {gs, spawn, click, _, _} -><br />
+            Pid = spawn(?MODULE, init, []),<br />
+            handle_error(self(), Pid),<br />
+            io:format("got here~n",[]),<br />
+            loop();<br />
+        {gs, quit, click, _, _} -><br />
+            io:format("quitting~n",[]),<br />
+            gs:stop();<br />
+        {gs, error, click, _, _} -><br />
+            erlang:error(errorclick);<br />
+        exit -><br />
+            bye<br />
+    end.</p>
+<p>handle_error(MasterPid, Pid) -><br />
+    spawn(fun() -><br />
+                  process_flag(trap_exit, true),<br />
+                  link(Pid),<br />
+                  receive<br />
+                      {'EXIT', Pid, {errorclick, _}} -><br />
+                          io:format(" ~p died :~n",[Pid]),<br />
+                          MasterPid ! {gs, spawn, click, a, b};<br />
+                      _ -><br />
+                          io:format(" really quitting :~n", []),<br />
+                          MasterPid ! exit<br />
+                  end<br />
+          end).<br />
+<&#47;code></p>
+<h4>gs<&#47;h4><br />
+The <em>gs<&#47;em> code is all GUI code. It just goes to show that you can use FP to create GUIs even if it's not quite as intuitive as it might be in an OO language. It creates a windows with a series of buttons on it.</p>
+<h4>handle_error<&#47;h4><br />
+This <em>handle_error<&#47;em> code shows linking a Process to another error handler process. That spawns a process whose sole purpose is to listen for errors from the main process. If an <em>{'EXIT', Pid, {errorclick, _}}<&#47;em> error is received the error handler sends a message back asking the <em>MasterPid<&#47;em> to spawn a new window.</p>

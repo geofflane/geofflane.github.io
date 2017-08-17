@@ -1,0 +1,170 @@
+---
+layout: post
+status: publish
+published: true
+title: Random but Evenly Distributed Sets of Numbers
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 382
+wordpress_url: http://www.zorched.net/?p=382
+date: '2010-04-17 16:18:27 -0400'
+date_gmt: '2010-04-17 22:18:27 -0400'
+categories:
+- Code
+- Python
+tags: []
+comments:
+- id: 18067
+  author: Cara
+  author_email: cara13xxi@yahoo.com
+  author_url: ''
+  date: '2012-07-23 11:48:14 -0400'
+  date_gmt: '2012-07-23 17:48:14 -0400'
+  content: "I am curious if this would be a solution for my problem; would this work
+    for me?\r\nI have X number of groups to make (X changes based on the number of
+    participants I have vs the number allowed per group - in my case 10 are allowed
+    per group with an unknown number of participants.) I have it set up to take the
+    number of participants divided by the number allowed per group to give me the
+    number of groups that I have. (Let's say that number is 5) - So now I have (let's
+    say) 50 participants and 5 groups - I need these participants to be split evenly
+    and randomly among the 5 groups.\r\nWould this work for me and could you help
+    me to set this up? I am new at Excel and doing this project for free for our local
+    soccer association.\r\nThank you!"
+- id: 18068
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2012-07-23 12:12:08 -0400'
+  date_gmt: '2012-07-23 18:12:08 -0400'
+  content: "Cara,\r\nYour problem is actually easier than this I think. If you have
+    50 participants (1-50) you just need to randomly order that set of 50. You then
+    take the first 10 and assign them to group 1, the next 10 to group 2, etc. \r\n\r\nFor
+    a completely non-technical way to do it, you can put 50 numbered pieces of paper
+    in a hat and draw them out. First 10 go into group 1, etc.\r\n\r\nHope that helps."
+---
+<p>Let's say one is a computer programmer and let's say one's wife (or roommate; or significant other) does social science research (a totally hypothetical scenario of course). When doing social science research one needs to create randomized groups of participants. </p>
+<p>So in a group you might be testing a variable X and you need to divide the group in half to test that variable with a number of control subjects. In this scenario, one needs to create groups A and B (or 1 and 2) such that there are the same number of A and B in a given set.</p>
+<p>Now normally when generating random numbers you can just generate an arbitrary set of random numbers. But if you need a set of 10 numbers with 5 1's and 5 2's then that's a different problem. You could of course generate a set and test to make sure it's evenly distributed and then throw it away if it doesn't meet this constraint. That of course is an inefficient way of generating your sets because you would likely have to throw a lot of them away.</p>
+<p>The solution to this conundrum is to use random numbers not to create your set, but to shuffle it. Luckily other smart people have proven ways to do this already. The <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Fisher&acirc;&euro;&ldquo;Yates_shuffle">Fisher-Yates shuffle<&#47;a> is the technique that I used.</p>
+<p><code lang="python"><br />
+from random import randrange<br />
+items = [1,1,1,1,1,2,2,2,2,2]</p>
+<p># Fisher-Yates shuffle, Durstenfeld in-place implementation<br />
+n = len(items)<br />
+while n > 1:<br />
+    k = randrange(n)  # 0..n-1<br />
+    n = n - 1<br />
+    items[k], items[n] = items[n], items[k]</p>
+<p>print items    # e.g. [2, 1, 2, 1, 1, 2, 1, 2, 2, 1]<br />
+<&#47;code></p>
+<p>Basically the Fisher-Yates shuffle shuffle picks a random item and puts it at the end of the list by swapping the end with the randomly selected item. It then continues with the 'unpicked' numbers and puts them at the end of the unpicked set until it reaches the beginning of the list. Once it's traveled through, you have a randomly sorted set.</p>
+<p>That's fine if you're a programmer and want to run python from the command line and change your items set if you need a different size, etc. But if you want an end-user who's not a programmer to use it, you better come up with something a bit configurable. So I need to allow for some variation to the sets that will be generated and shuffled.</p>
+<p>Based on this information I created a simple class that would allow you to specify 3 properties that would define the random sets to generate: blocks, the number of individual sets; size, the number of numbers in each block; and groups, the number of variants within each block. So now you could generate a set of 10 blocks, with 12 numbers in each containing 1, 2, and 3 evenly distributed (i.e. 4 of each number).</p>
+<p><code lang="python"><br />
+from random import randrange</p>
+<p>class Shuffler(object):<br />
+    def __init__(self, blocks, blockSize, groups):<br />
+        self.blocks = blocks<br />
+        self._groups = groups<br />
+        self._blockSize = blockSize<br />
+        self.deck = self.make_deck()</p>
+<p>    @property<br />
+    def blockSize(self):<br />
+        return self._blockSize</p>
+<p>    # BlockSize setter also initializes deck<br />
+    @blockSize.setter<br />
+    def blockSize(self, value):<br />
+        self._blockSize = value<br />
+        self.deck = self.make_deck()</p>
+<p>    @property<br />
+    def groups(self):<br />
+        return self._groups</p>
+<p>    # Groups setter also initializes deck<br />
+    @groups.setter<br />
+    def groups(self, value):<br />
+        self._groups = value<br />
+        self.deck = self.make_deck()</p>
+<p>    def is_valid_group_size(self):<br />
+        return self.blockSize % self.groups == 0</p>
+<p>    # Fisher-Yates shuffle, Durstenfeld in-place implementation<br />
+    def shuffle(self):<br />
+        items = self.deck[:]    # copy deck for in-place shuffle<br />
+        n = len(items)<br />
+        while n > 1:<br />
+            k = randrange(n)  # 0..n-1<br />
+            n = n - 1<br />
+            items[k], items[n] = items[n], items[k]<br />
+        return items</p>
+<p>    def make_deck(self):<br />
+        result = []<br />
+        for i in range(self.blockSize):<br />
+            result.append(i % self.groups + 1)<br />
+        return result<br />
+<&#47;code></p>
+<p>Finally to wrap the shuffler in a nice command-line interface I created a simple specialization of the Shuffler class that would take command line arguments to generate blocks of specific properties.</p>
+<p><code lang="python"><br />
+#!&#47;usr&#47;bin&#47;env python<br />
+"""<br />
+Usage: %(program)s [options] ... [-b <number>] [-s <number>] [-g <number>]<br />
+Options:<br />
+  -h, --help    This help message<br />
+  -b, --blocks  The number of blocks (default: 20)<br />
+  -s, --size    The number of participants in each group (default: 10)<br />
+  -g, --groups  The number of groups in each block (default: 2)<br />
+"""</p>
+<p>import random, sys, getopt<br />
+import shuffle</p>
+<p>program = sys.argv[0]</p>
+<p>class CliShuffler(shuffle.Shuffler):<br />
+    def __init__(self):<br />
+        shuffle.Shuffler.__init__(self, 20, 10, 2)</p>
+<p>    def print_results(self):<br />
+        for i in  range(self.blocks):<br />
+            print ' '.join([str(i) for i in self.shuffle()])</p>
+<p>    def usage(self):<br />
+        print >> sys.stderr, __doc__ % globals()<br />
+        sys.exit()</p>
+<p>    def run(self, argv):<br />
+        try:<br />
+            opts, args = getopt.getopt(sys.argv[1:], "hg:s:b:", ["help", "groups=", "size=", "blocks="])<br />
+        except getopt.GetoptError, err:<br />
+            # print help information and exit:<br />
+            print str(err) # will print something like "option -a not recognized"<br />
+            self.usage()<br />
+            sys.exit(2)</p>
+<p>        for opt, arg in opts:<br />
+            if opt in ("-b", "--blocks"):<br />
+                try:<br />
+                    self.blocks = int(arg)<br />
+                except ValueError:<br />
+                    self.usage()<br />
+            elif opt in ("-s", "--size"):<br />
+                try:<br />
+                    self.blockSize = int(arg)<br />
+                except ValueError:<br />
+                    self.usage()<br />
+            elif opt in ("-g", "--groups"):<br />
+                try:<br />
+                    self.groups = int(arg)<br />
+                except ValueError:<br />
+                    self.usage()<br />
+            elif opt in ("-h", "--help"):<br />
+                self.usage()<br />
+            else:<br />
+                assert False, "unhandled option"</p>
+<p>        if not self.is_valid_group_size():<br />
+            print("Block Size must be evenly divisible by groups to get an even grouping.")<br />
+            self.usage()<br />
+            sys.exit()</p>
+<p>        self.print_results()</p>
+<p>if __name__ == "__main__":<br />
+    shuffler = CliShuffler()<br />
+    shuffler.run(sys.argv[1:])<br />
+<&#47;code></p>
+<p>Happy shuffling...</p>

@@ -1,0 +1,83 @@
+---
+layout: post
+status: publish
+published: true
+title: Check Multiple Mercurial Repositories for Incoming Changes
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 480
+wordpress_url: http://www.zorched.net/?p=480
+date: '2011-08-26 09:16:44 -0400'
+date_gmt: '2011-08-26 15:16:44 -0400'
+categories:
+- Automation
+tags:
+- version-control
+- Automation
+- hg
+- bash
+comments:
+- id: 17959
+  author: Jan Krag
+  author_email: jankrag@gmail.com
+  author_url: ''
+  date: '2011-11-09 10:12:03 -0500'
+  date_gmt: '2011-11-09 16:12:03 -0500'
+  content: "Hi Geoff.\r\nThanks for the script. I was looking for exactly this kind
+    of \"tool\", and found yours in about 20 seconds thanks to the very precise headline.\r\n\r\nI
+    have hacked around a little with my own version, and thought I would share back.\r\n\r\nMainly
+    I have changed the two \"commands\" to 'inc' and 'out' as my fingers are used
+    to typing this, and changed the actual hg commands to give a much more space-saving
+    overview:\r\n\r\n<code>hg -q -R \"$indir\" incoming --template '{rev} {node|short}
+    | {date|isodatesec} | {author|user}: {desc|strip|firstline}\\n'<&#47;code>\r\n\r\nI
+    might consider reinserting your original versions for the \"long format\" and
+    using  my short-commands as above for the abbreviated one-line format.\r\n\r\nI
+    also added a \"io\" command that gives a very concise summary like:\r\nMyProject
+    inc:2\r\nSecondP inc:1 out:3\r\nThirdP \r\nAnotherP  out:4\r\n\r\nbut this one
+    uses the <a href=\"http:&#47;&#47;stevelosh.com&#47;projects&#47;hg-prompt&#47;\"
+    rel=\"nofollow\">hg-prompt<&#47;a> extension by Steve Losh \r\n\r\nHope some of
+    this is useful.\r\nRegards Jan"
+- id: 18127
+  author: kelm
+  author_email: kelm@bluenode.org
+  author_url: http://-
+  date: '2012-12-06 12:45:01 -0500'
+  date_gmt: '2012-12-06 18:45:01 -0500'
+  content: "hi\r\nyou can do it like that to\r\nfind . -name \".hg\" -exec hg -R '{}&#47;..'
+    incoming \\; -exec hg -R '{}&#47;..' outgoing \\;\r\n\r\nthx for inspiration\r\n\r\nenjoy
+    your stay on earth"
+---
+<p>Currently I have a whole bunch of <a href="http:&#47;&#47;mercurial.selenic.com&#47;">Mercurial<&#47;a> repositories in a directory. All of these are cloned from a central repository that the team pushes their changes to. I like to generally keep my local repositories up-to-date so that I can review changes. Manually running <em>hg incoming -R some_directory<&#47;em> on 20 different projects is a lot of work. So I automated it with a simple shell script.</p>
+<p>This script will run incoming (or outgoing) on all of the local repositories and print the results to the console. Then I can manually sync the ones that have changed if I want.</p>
+<p>I called this file <em>hgcheckall.sh<&#47;em> and run it like: <em>.&#47;hgcheckall.sh incoming<&#47;em><br />
+<code lang="bash"><br />
+#!&#47;bin&#47;bash</p>
+<p># Find all the directories that are mercurial repos<br />
+dirs=(`find . -name ".hg"`)<br />
+# Remove the &#47;.hg from the path and that's the base repo dir<br />
+merc_dirs=( "${dirs[@]&#47;&#47;\&#47;.hg&#47;}" )</p>
+<p>case $1 in<br />
+    incoming)<br />
+    for indir in ${merc_dirs[@]}; do<br />
+        echo "Checking: ${indir}"<br />
+        hg -R "$indir" incoming<br />
+    done<br />
+    ;;<br />
+    outgoing)<br />
+    for outdir in ${merc_dirs[@]}; do<br />
+        echo "Checking: ${outdir}"<br />
+        hg -R "$outdir" outgoing<br />
+    done<br />
+    ;;<br />
+    *)<br />
+    echo "Usage: hgcheckall.sh [incoming|outgoing]"<br />
+    ;;<br />
+esac<br />
+<&#47;code></p>
+<p>I guess the next major improvement would be to capture the output and then automatically sync the ones that have changed, but I haven't gotten around to that yet.</p>

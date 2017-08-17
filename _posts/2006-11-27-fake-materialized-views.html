@@ -1,0 +1,65 @@
+---
+layout: post
+status: publish
+published: true
+title: Fake Materialized Views
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 58
+wordpress_url: http://www.zorched.net/2006/11/27/fake-materialized-views/
+date: '2006-11-27 20:21:54 -0500'
+date_gmt: '2006-11-28 02:21:54 -0500'
+categories:
+- Code
+tags:
+- performance
+- database
+- oracle
+comments:
+- id: 11165
+  author: Shirley Banks
+  author_email: shirley.banks@mymathgenius.com
+  author_url: ''
+  date: '2008-02-13 11:47:59 -0500'
+  date_gmt: '2008-02-13 17:47:59 -0500'
+  content: Do you have any idea of how to instantiate triggers on materialzed views?
+---
+<p>In a previous post, I discussed <a href="http:&#47;&#47;www.zorched.net&#47;2006&#47;10&#47;29&#47;oracle-materialized-views&#47;">materialized views<&#47;a> in Oracle. I wanted to share a relatively simple technique that can be used to create similar functionality in Oracle or another database.</p>
+<h2>Why Use Something Else?<&#47;h2><br />
+Materialized Views are a feature available in Oracle. If you're not using Oracle, then that's reason enough on its own. Materialized Views also have limitations in terms of how they are refreshed. Refreshing is the concept of updating the contents of the view. This can be done as a fast refresh when the base tables that it relies on changes. Certain things like <em>union<&#47;em> or other more "complex" SQL prevents any sort of fast refreshing from going on. The other option for updating the materialized view is a periodic update. Every <em>n minute<&#47;em> you can have the view refreshed. This is fine in certain circumstances, but there are use cases where this will be a show stopper. So what do you do?</p>
+<p><small><em>Yes, I ran into the refreshing problem and had to work with a DBA to figure out another way to accomplish the same thing.<&#47;em><&#47;small></p>
+<h2>Table, View, Trigger<&#47;h2><br />
+A materialized view is an object in the database that is backed by a table behind the scenes. We often want to use them as a way to denormalize data for reporting or performance reasons. Knowing this, you can create a structure that is a directly a table instead. This table will be the structure that you query against. To keep the data up to date you can implement a trigger that responds to changes in the base table to keep the dernomalized table up-to-date.</p>
+<p>The simplest way to do this is to create a regular database view of the data that you want. Why not use the view directly? When you query a view it re-runs the query against the base table. This can be an expensive operation and put a lot of load on your database. Once you have a view containing the data that you want, you can then "copy" the data into your table for day-to-day querying.</p>
+<h3>Example<&#47;h3><br />
+<code><br />
+create or replace view V$MY_VIEW AS<br />
+select table1.v1, table2.v2, table2.v3<br />
+from Table as table1<br />
+    inner join Child_Table table2<br />
+        on table1.id=table2.parent_id;<br />
+<&#47;code></p>
+<p><code><br />
+create table MY_TABLE<br />
+    value1 varchar2(32),<br />
+    value2 varchar2(128),<br />
+    value3 int;<br />
+insert into MY_TABLE select * from V$MY_VIEW;<br />
+<&#47;code></p>
+<p><code><br />
+create trigger UPDATE_MY_TABLE<br />
+after insert or update or delete on Table<br />
+begin<br />
+    delete from MY_TABLE;<br />
+    insert into MY_TABLE select * from V$MY_VIEW;<br />
+end;<br />
+<&#47;code></p>
+<h2>Conclusion<&#47;h2><br />
+This is a denormalization technique that you can use for some read performance benefits in certain scenarios. Of course you will likely suffer from write performance when you do this. This particular technique is likely only useful if there are relatively few rows in your dependent tables, otherwise the performance will probably degrade quickly.</p>
+<p>Obviously this is a pretty simple example, but hopefully it would help give you some inspiration if you need a similar solution.</p>

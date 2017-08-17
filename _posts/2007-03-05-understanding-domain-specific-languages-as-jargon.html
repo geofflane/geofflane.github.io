@@ -1,0 +1,128 @@
+---
+layout: post
+status: publish
+published: true
+title: Understanding Domain Specific Languages as Jargon
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 73
+wordpress_url: http://www.zorched.net/2007/03/05/understanding-domain-specific-languages-as-jargon/
+date: '2007-03-05 11:16:27 -0500'
+date_gmt: '2007-03-05 17:16:27 -0500'
+categories:
+- Code
+- Ruby
+tags:
+- software-development
+- dsl
+comments:
+- id: 9819
+  author: Coffee DSL in Groovy
+  author_email: ''
+  author_url: http://www.zorched.net/2007/03/08/coffee-dsl-in-groovy/
+  date: '2007-03-08 20:51:48 -0500'
+  date_gmt: '2007-03-09 02:51:48 -0500'
+  content: "[...] thought I&#8217;d follow up with my previous post with the Coffee
+    Domain Specific Language in the Groovy [...]"
+- id: 11117
+  author: Coffee DSL Redone With Meta-Programming
+  author_email: ''
+  author_url: http://www.zorched.net/2008/01/07/coffee-dsl-redone-with-meta-programming/
+  date: '2008-01-07 15:25:08 -0500'
+  date_gmt: '2008-01-07 21:25:08 -0500'
+  content: "[...] a previous post I wrote about DSLs as Jargon. I implemented a simple
+    Coffee DSL that would allow code to parse an order written by a human and [...]"
+---
+<p>Domain Specific Languages (DSLs) are the idea of creating syntaxes that model a very specific problem domain. Domain Specific Languages are not a new concept. Some people call them 'little languages'. The Unix world has a bunch of little languages. Grep, awk, sed, lex, and yacc all exhibit features of these domain specific languages. They are little tools that do one thing well. In these cases they are often highly encoded and not in  natural language of any sort. Modern domain specific languages should aim to be humane and literate in the language of the user.</p>
+<p>Domain Specific Languages should be expressed in the language of the problem being solved. They are a higher level of abstraction than for loops and object instantiation. They are at the level of abstraction of the problem space. <a href="http:&#47;&#47;www.nealford.com&#47;">Neal Ford<&#47;a> uses the example of "venti nonfat decaf whip latte". What am I talking about if I use those terms? If you guessed coffee, then you know the Jargon of one coffee chain out there. The person listening to the order understands that you are ordering a decaf coffee drink of a certain size, with non-fat milk and whipped cream. There is a lot of shared context in the Jargon of the coffee drinker and the coffee order taker. This shared context sets the stage for a rich conversation without a lot of unnecessary noise. This is true of all Jargon.</p>
+<p><code><br />
+# CoffeeDSL.rb<br />
+# This is the input from the user, likely read from a file<br />
+# or input through a user interface of some sort<br />
+CoffeeInput = "venti nonfat decaf whip latte"</p>
+<p>class Coffee</p>
+<p>    def method_missing(symbol)<br />
+        name = symbol.to_s<br />
+        if %w(venti grande).include?(name)<br />
+            @size = name<br />
+        elsif %w(whip nowhip).include?(name)<br />
+            @whip = 'whip'.eql?(name)<br />
+        elsif %w(caf decaf halfcaf).include?(name)<br />
+            @caf = name<br />
+        elsif %w(regular latte cappachino).include?(name)<br />
+            @type = name<br />
+        elsif %w(milk nonfat).include?(name)<br />
+            @milk = name<br />
+        else<br />
+            raise ArgumentError, "Unknown coffee informantion: #{name}."<br />
+        end<br />
+    end</p>
+<p>    def order<br />
+        params = ''<br />
+        params += @milk + ' ' if @milk<br />
+        params += @caf + ' ' if @caf<br />
+        params +=  'whip ' if @whip<br />
+        print "Ordering coffee: #{@size} #{params}#{@type}\n"<br />
+    end</p>
+<p>    def load<br />
+        # turn one line into multi-line "method calls"<br />
+        cleaned = CoffeeInput.gsub(&#47;\s+&#47;, "\n")<br />
+        self.instance_eval(cleaned)<br />
+    end<br />
+end</p>
+<p># this is your code which loads the DSL input and executes it<br />
+coffee = Coffee.new<br />
+coffee.load       # load the user input<br />
+coffee.order      # submit the order<br />
+<&#47;code></p>
+<p><a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Jargon">Jargon<&#47;a> is the terminology of a specific proffession or   group. Does your user community or problem space have a vocabulary? Can they express the things they want out of a system using that vocabulary or Jargon? If so, there is a very real possibility that you could utilize a DSL to solve some set of problems for those users.</p>
+<p>What about field validation?<br />
+<code><br />
+# ValidationDSL.rb<br />
+# Input from the user that would be read in<br />
+Input = <<EOF<br />
+min_length  2<br />
+max_length 5<br />
+EOF</p>
+<p>class Module<br />
+    def dsl_accessor(symbol)<br />
+        define_method("#{symbol}") do |v|<br />
+            instance_eval<br />
+            %{<br />
+                 @#{symbol} = v<br />
+            }<br />
+        end<br />
+    end<br />
+end</p>
+<p>class ValidateDSL<br />
+    dsl_accessor :max_length<br />
+    dsl_accessor :min_length</p>
+<p>    def validate(field)<br />
+        if @max_length and field.length > @max_length<br />
+            return false<br />
+        end<br />
+        if @min_length and field.length < @min_length<br />
+            return false<br />
+        end</p>
+<p>        return true<br />
+    end</p>
+<p>    def load<br />
+        self.instance_eval(Input)<br />
+    end<br />
+end</p>
+<p>val = ValidateDSL.new<br />
+val.load<br />
+print val.validate('foo')<br />
+print "\n"<br />
+print val.validate('')<br />
+print "\n"<br />
+print val.validate('abbbbbbbbbbbbbbbbbbbbbb')<br />
+print "\n"<br />
+<&#47;code></p>
+<p>How does your user community talk about a problem? Can they easily express what they intend with simple Jargon that they already know? Is that more natural for a power user than some complicated UI with buttons and checkboxes? Then you might have a good place to use a DSL.</p>

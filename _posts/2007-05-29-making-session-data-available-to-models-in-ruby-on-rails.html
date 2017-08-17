@@ -1,0 +1,311 @@
+---
+layout: post
+status: publish
+published: true
+title: Making Session Data Available to Models in Ruby on Rails
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 80
+wordpress_url: http://www.zorched.net/2007/05/29/making-session-data-available-to-models-in-ruby-on-rails/
+date: '2007-05-29 20:08:57 -0400'
+date_gmt: '2007-05-30 02:08:57 -0400'
+categories:
+- Web
+- Ruby
+tags:
+- ruby-on-rails
+comments:
+- id: 10877
+  author: Alex
+  author_email: alex@stacktrace.com
+  author_url: ''
+  date: '2007-08-09 01:03:26 -0400'
+  date_gmt: '2007-08-09 07:03:26 -0400'
+  content: I've done similar things in other architectures.  This is useful, but if
+    the container reuses threads (as can happen in J2EE) you can have serious security
+    and other issues.
+- id: 10880
+  author: Geoff Lane
+  author_email: geoff@zorched.net
+  author_url: http://www.zorched.net
+  date: '2007-08-10 21:45:55 -0400'
+  date_gmt: '2007-08-11 03:45:55 -0400'
+  content: "Alex,\r\nThat's a very good point. Luckily if you are using Mongrel to
+    deploy your Rails app it creates a new thread to handle each request. If anyone
+    is concerned, then just stick with the ActionController::Caching::Sweeper method
+    mentioned in the article."
+- id: 10891
+  author: Kai Krakow
+  author_email: kai@kaishome.de
+  author_url: http://hurikhan77.wordpress.com/
+  date: '2007-08-16 04:14:56 -0400'
+  date_gmt: '2007-08-16 10:14:56 -0400'
+  content: Very nice article. It helped me tracking the session user in an audit log
+    which would otherwise have been pretty useless. But how safe is this to use on
+    Apache2 mpm-worker with mod-fcgid? As far as I can see, the before_filter stores
+    the session user in a local thread var on each request in the beginning, so the
+    data stored there should be correct throughout the whole request. Does this hold
+    true on Apache2 mpm-worker with mod-fcgid?
+- id: 10892
+  author: Niko
+  author_email: ni-di@web.de
+  author_url: ''
+  date: '2007-08-16 06:00:05 -0400'
+  date_gmt: '2007-08-16 12:00:05 -0400'
+  content: I've no idea wether this concern is valid, but will it work with the Evented
+    Mongrel Swiftiply is using? Is it using one thread per request, too?
+- id: 10940
+  author: SynTruth
+  author_email: tmp@homewolf.com
+  author_url: ''
+  date: '2007-09-05 08:07:15 -0400'
+  date_gmt: '2007-09-05 14:07:15 -0400'
+  content: I got around this in another way.  I created a lib in the {RAILS_ROOT}&#47;lib
+    directory that was loaded in config&#47;enviroment.rb.  It contains helper functions
+    like is_logged_in?() and get_user_id() that checked for @session and @session[:user]
+    and such, and returned things as needed, these are callable from within the model
+    structure since they are global.
+- id: 11007
+  author: Prateek
+  author_email: prateek@muziboo.com
+  author_url: http://prateekdayal.net/blog
+  date: '2007-10-25 01:38:02 -0400'
+  date_gmt: '2007-10-25 07:38:02 -0400'
+  content: "I am reading rails recipes and they mention \"Cache Sweepers\" as a possible
+    solution for this problem. I am yet to try it out, but you can look at that as
+    an alternative too\r\n\r\nRegards\r\nPrateek"
+- id: 11081
+  author: Sam
+  author_email: dreamfeed@gmail.com
+  author_url: ''
+  date: '2007-11-29 13:04:21 -0500'
+  date_gmt: '2007-11-29 19:04:21 -0500'
+  content: Is there a simple way to explicitly specify that your app requires mongrel
+    version <= (whatever version is current at the time of writing)?  Cause then this
+    is actually not so bad.
+- id: 14226
+  author: Daniel
+  author_email: dmendler@wurzelteiler.de
+  author_url: ''
+  date: '2008-10-01 07:26:46 -0400'
+  date_gmt: '2008-10-01 13:26:46 -0400'
+  content: "Instead of cache_sweeper i use a similar implementation. Just include
+    Auditing to your controller and your observer should inherit the Auditing::Observer.
+    This is a lot cleaner approach than using TLS which might be server&#47;implementation
+    specific.\r\n\r\n<code lang=\"ruby\">\r\n module Auditing\r\n  def self.included(base)\r\n
+    \   ActiveRecord::Base.observers.each do |observer|\r\n      observer = if observer.respond_to?(:to_sym)\r\n
+    \       observer.to_s.camelize.constantize.instance\r\n      elsif observer.respond_to?(:instance)\r\n
+    \       observer.instance\r\n      else\r\n        raise ArgumentError, \"#{observer}
+    is an invalid class name\"\r\n      end\r\n      base.around_filter(observer)
+    if observer.is_a?(Auditing::Observer)\r\n    end\r\n  end\r\n\r\n  class Observer
+    < ActiveRecord::Observer\r\n    attr_accessor :controller\r\n\r\n    def before(controller)\r\n
+    \     self.controller = controller\r\n    end\r\n\r\n    def after(controller)\r\n
+    \     self.controller = nil\r\n    end\r\n  end\r\n\r\nend\r\n<&#47;code>"
+- id: 14313
+  author: Bj&Atilde;&para;rn
+  author_email: bjornsmedman@gmail.com
+  author_url: ''
+  date: '2008-11-26 17:44:19 -0500'
+  date_gmt: '2008-11-26 23:44:19 -0500'
+  content: "This is very useful information, thanks!\r\n\r\nOne thing to consider
+    though is if your model should not be extended to include the information you
+    need in the observer. In the example above that would mean adding an attribute
+    to Account perhaps named last_changed_by holding a reference to the User that
+    last changed the Account. That would then be accessible in the AccountObserver
+    as record.last_changed_by."
+- id: 14445
+  author: Tom
+  author_email: thoen@edgevaleinteractive.com
+  author_url: http://www.classroomparent.com
+  date: '2009-01-10 10:41:14 -0500'
+  date_gmt: '2009-01-10 16:41:14 -0500'
+  content: Does anyone know whether Thread.current works with Passenger?
+- id: 14618
+  author: magnum blog &raquo; Blog Archive &raquo; links for 2009-01-20
+  author_email: ''
+  author_url: http://www.antoniomolinari.com/blog/2009/01/20/links-for-2009-01-20/
+  date: '2009-01-20 11:00:13 -0500'
+  date_gmt: '2009-01-20 17:00:13 -0500'
+  content: "[...] Making Session Data Available to Models in Ruby on Rails | Zorched
+    &#47; One Line Fix include UserInfo (tags: programming tutorial rails rubyonrails
+    ruby security ror mongrel session sessions) [...]"
+- id: 14778
+  author: Alejandro
+  author_email: araiczyk@gmail.com
+  author_url: ''
+  date: '2009-01-28 15:56:02 -0500'
+  date_gmt: '2009-01-28 21:56:02 -0500'
+  content: "Hi, nice post!\r\nDo you know if this works with FastCGI?\r\nI tried it
+    with WEBrick and it works, but in production I have FastCGI and I couldn't confirm
+    it uses one thread per request.\r\nThanks!"
+- id: 14793
+  author: Mark
+  author_email: mark.k.roberts@gmail.com
+  author_url: http://www.actionitem.com
+  date: '2009-01-30 17:32:18 -0500'
+  date_gmt: '2009-01-30 23:32:18 -0500'
+  content: This is pretty nice.  Solves an interesting problem.  Just took a few minutes
+    to wire it in.  Thanks!
+- id: 15011
+  author: Cristian Livadaru
+  author_email: cristian@livadaru.net
+  author_url: http://lcx.at/
+  date: '2009-04-16 12:36:39 -0400'
+  date_gmt: '2009-04-16 18:36:39 -0400'
+  content: "what about using attr_accessor ? \r\nfor example: \r\n\r\n<code lang=\"ruby\">\r\nclass
+    Person < ActiveRecord::Base\r\n  attr_accessor :change_user\r\n  #..\r\nend\r\n<&#47;code>\r\n\r\nthen
+    you can access the data in the controller and assign the value from the session."
+- id: 15076
+  author: Ivar Vasara
+  author_email: ivar@noomii.com
+  author_url: http://www.noomii.com
+  date: '2009-05-08 17:03:06 -0400'
+  date_gmt: '2009-05-08 23:03:06 -0400'
+  content: Alternatively, a good working example of using ActionController::Caching::Sweeper
+    is the <a href="http:&#47;&#47;github.com&#47;jnunemaker&#47;user_stamp&#47;blob&#47;93d38c83c18919220a83914e4ae5c930c2548ca8&#47;lib&#47;user_stamp.rb"
+    rel="nofollow">user_stamp plugin<&#47;a>.
+- id: 15552
+  author: Prakash Teli
+  author_email: prakash0450@yahoo.com
+  author_url: http://www.saralcms.com
+  date: '2009-07-15 04:46:28 -0400'
+  date_gmt: '2009-07-15 10:46:28 -0400'
+  content: Thank you. This is exactly what I was looking for. I tried using global
+    variables first that was a bad idea. This is a much cleaner solution.
+- id: 15602
+  author: yuanping
+  author_email: yp.xjgz@gmail.com
+  author_url: ''
+  date: '2009-09-01 23:23:13 -0400'
+  date_gmt: '2009-09-02 05:23:13 -0400'
+  content: Thank you. This is exactly what I was looking for
+- id: 15892
+  author: Braxton Beyer
+  author_email: comments@kidbrax.oib.com
+  author_url: http://braxtonbeyer.com
+  date: '2009-10-27 19:53:20 -0400'
+  date_gmt: '2009-10-28 01:53:20 -0400'
+  content: "Could you achieve this same thing using Rails.cache? (http:&#47;&#47;www.highdots.com&#47;forums&#47;ruby-rails-talk&#47;best-way-store-global-variable-285504.html)\r\n\r\nWhat
+    are the pros&#47;cons of each method?"
+- id: 16043
+  author: Jason FB
+  author_email: tech@datatravels.com
+  author_url: http://www.datatravels.com/technotes/
+  date: '2010-02-18 11:12:07 -0500'
+  date_gmt: '2010-02-18 17:12:07 -0500'
+  content: "This is the best post I've found about this issue -- a hotly debated topic.
+    Just implemented this for the app I'm working on and we found this solution to
+    be the one we went with. It maintains abstraction while gets the job done.\r\n\r\nOne
+    thing to note, in your ApplicationController you don't need to include UserInfo:\r\n\r\nclass
+    ApplicationController < ActionController::Base\r\n  include UserInfo\r\n\r\nThe
+    include statement is unnecessary and in fact will get in the way if you have another
+    kind of authentication system (authlogic, restful-authentication) which is going
+    to define a current_user method at the Controller level too. \r\n\r\nSo I just
+    took it out there (it is still necessary in the model of course).\r\n\r\n(Since
+    UserInfo.current_user is setting a class variable, all you need is the module
+    loaded, not to mix it into your controller.)\r\n\r\nIf anyone sees a problem with
+    this approach let me know."
+- id: 17838
+  author: Scottie
+  author_email: scottie@scottiestech.info
+  author_url: http://scottiestech.info
+  date: '2011-01-11 12:11:26 -0500'
+  date_gmt: '2011-01-11 18:11:26 -0500'
+  content: "Oh man, you just saved my life!\r\n\r\nThis does seem to work quite well
+    with Rails 2.3 and Passenger 3.0.2. No problems yet, anyway.\r\n\r\nThanks!!!!"
+- id: 17892
+  author: Phantom
+  author_email: phantom@noemail.com
+  author_url: ''
+  date: '2011-05-02 07:59:53 -0400'
+  date_gmt: '2011-05-02 13:59:53 -0400'
+  content: Will this work with Webrick too?
+- id: 17944
+  author: Jay
+  author_email: teguhwpurwanto@gmail.com
+  author_url: ''
+  date: '2011-09-23 23:13:08 -0400'
+  date_gmt: '2011-09-24 05:13:08 -0400'
+  content: "Thread.current is available to available to the whole app so if user one
+    set Thread.current[:something] to x another user at different location will also
+    get the same variable.\r\nI am still looking for the perfect method to use sessions
+    in models."
+- id: 18124
+  author: Michael Baldry
+  author_email: michael@brightbits.co.uk
+  author_url: http://www.brightbits.co.uk
+  date: '2012-11-22 11:06:53 -0500'
+  date_gmt: '2012-11-22 17:06:53 -0500'
+  content: Jay, you shouldn't be using sessions in the model. Why should your model
+    know about sessions, keep HTTP and your domain separate.
+---
+<p>Ruby on Rails is implemented as the Model View Controller (MVC) pattern. This pattern separates the context of the Web Application (in the Controller and the View) from the core Model of the application. The Model contains the Domain objects which encapsulate business logic, data retrieval, etc. The View displays information to the user and allows them to provide input to the application. The Controller handles the interactions between the View and the Model.</p>
+<p>This separation is a very good design principle that generally helps prevent <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Spaghetti_code">spaghetti code<&#47;a>. Sometimes though the separation might break down.</p>
+<p><strong><em><br />
+The following is really an alternative to using the <a href="http:&#47;&#47;api.rubyonrails.com&#47;classes&#47;ActionController&#47;Caching&#47;Sweeping.html">ActionController::Caching::Sweeper<&#47;a> which is a hybrid Model&#47;Controller scoped Observer really. It seems to me, based on the name, that the intent is much more specific than giving Observers access to session data. Which do you prefer?<br />
+<&#47;em><&#47;strong></p>
+<p>Rails provides the concept of a Model Observer. This Observer allows you to write code that will respond to the lifecycle events of the Model objects. For example you could log information every time a specific kind of Model object is saved. For example you could record some information every time an Account changed using the following Observer:<br />
+<code lang="ruby"><br />
+class AccountObserver < ActiveRecord::Observer<br />
+  def after_update(record)<br />
+    Audit.audit_change(record.account_id, record.new_balance)<br />
+  end<br />
+end<br />
+<&#47;code></p>
+<p>You might have noticed a limitation with the previous API though. You didn't notice? The only information passed to the Observer is the Object that is being changed. What if you want more context than this? For example, what if you want to audit not only the values that changed them, but the user who made the change?<br />
+<code lang="ruby"><br />
+class AccountObserver < ActiveRecord::Observer<br />
+  def after_update(record)<br />
+    Audit.audit_change(current_user, record.account_id, record.new_balance)<br />
+  end<br />
+end<br />
+<&#47;code></p>
+<p>How do you get the current_user value? Well, you have to plan ahead a little bit. The User in this application is stored in the HTTP Session when the user is authenticated. The session isn't directly available to the Model level (including the Observers) so you have to figure out a way around this. One way to accomplish this is by using a named <a href="http:&#47;&#47;www.ruby-doc.org&#47;core&#47;classes&#47;Thread.html#M000484">Thread local variable<&#47;a>. Using <a href="http:&#47;&#47;mongrel.rubyforge.org&#47;">Mongrel<&#47;a> as a web server, each HTTP request is served by its own thread. That means that a variable stored as thread local will be available for the entire processing of a request.</p>
+<p>The UserInfo module encapsulates reading and writing the User object from&#47;to the Thread local. This module can then be mixed in with other objects for easy access.<br />
+<code lang="ruby"><br />
+module UserInfo<br />
+  def current_user<br />
+    Thread.current[:user]<br />
+  end</p>
+<p>  def self.current_user=(user)<br />
+    Thread.current[:user] = user<br />
+  end<br />
+end<br />
+<&#47;code></p>
+<p>A <em>before_filter<&#47;em> set in the ApplicationController will be called before any action is called in any controller. You can take advantage of this to copy a value out of the HTTP session and set it in the Thread local:</p>
+<p><code lang="ruby"><br />
+class ApplicationController < ActionController::Base<br />
+  include UserInfo<br />
+  # Pick a unique cookie name to distinguish our session data from others'<br />
+  session :session_key => '_app_session_id'</p>
+<p>  before_filter :set_user</p>
+<p>  protected<br />
+  def authenticate<br />
+    unless session[:user]<br />
+      redirect_to :controller => "login"<br />
+      return false<br />
+    end<br />
+  end</p>
+<p>  # Sets the current user into a named Thread location so that it can be accessed<br />
+  # by models and observers<br />
+  def set_user<br />
+    UserInfo.current_user = session[:user]<br />
+  end<br />
+end<br />
+<&#47;code></p>
+<p>At any point in an Observer of a Model class that you need to have access to those values you can just mixin the helper module and then use its methods to access the data. In this final example we mixin the UserInfo module to our AccountObserver and it will now have access to the current_user method:<br />
+<code lang="ruby"><br />
+class AccountObserver < ActiveRecord::Observer<br />
+  include UserInfo<br />
+  def after_update(record)<br />
+    Audit.audit_change(current_user, record.account_id, record.new_balance)<br />
+  end<br />
+end<br />
+<&#47;code></p>
+<p>You generally shouldn't need this kind of trick outside of an Observer. In most cases the Controller should pass all of the information needed by a Model object to it through its methods. That will allow the Model objects to interact and the Controller to do the orchestration needed. But in a few special cases, this trick might be handy.</p>

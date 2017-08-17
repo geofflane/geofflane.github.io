@@ -1,0 +1,117 @@
+---
+layout: post
+status: publish
+published: true
+title: Ruby 1.8 (today) vs C# 3.0 (some future date)
+author:
+  display_name: Geoff Lane
+  login: admin
+  email: geoff@zorched.net
+  url: http://www.zorched.net
+author_login: admin
+author_email: geoff@zorched.net
+author_url: http://www.zorched.net
+wordpress_id: 26
+wordpress_url: http://www.zorched.net/2006/03/25/ruby-18-today-vs-c-30-some-future-date/
+date: '2006-03-25 15:46:22 -0500'
+date_gmt: '2006-03-25 21:46:22 -0500'
+categories:
+- ".NET"
+- Ruby
+tags: []
+comments:
+- id: 120
+  author: Jacob Carpenter
+  author_email: blogger@jacobcarpenter.com
+  author_url: http://jacobcarpenters.blogspot.com
+  date: '2006-07-07 18:41:19 -0400'
+  date_gmt: '2006-07-08 00:41:19 -0400'
+  content: I threw together a table comparing Ruby's current Enumerable Mixin to equivalent
+    C# 2.0 and 3.0 methods at http://jacobcarpenters.blogspot.com/2006/06/rubys-enumerable-mixin-again.html.
+- id: 10748
+  author: Scott Hanselman's Computer Zen - Programmer Intent or What you're not getting
+    about Ruby and why it's the tits
+  author_email: ''
+  author_url: http://www.hanselman.com/blog/ProgrammerIntentOrWhatYoureNotGettingAboutRubyAndWhyItsTheTits.aspx
+  date: '2007-05-23 00:55:15 -0400'
+  date_gmt: '2007-05-23 06:55:15 -0400'
+  content: "[...] jury is still out on all these technologies. Hedge your bets and
+    learn as much as you can. There's more than&nbsp;one way to express yourself.&nbsp;Give
+    it a [...]"
+- id: 10822
+  author: lui
+  author_email: lancillotti@hotmail.com
+  author_url: ''
+  date: '2007-06-10 03:16:25 -0400'
+  date_gmt: '2007-06-10 09:16:25 -0400'
+  content: "what about the more compact ?\r\n(from s in names\r\n                               where
+    s.Length == 5\r\n                               orderby s\r\n                               select
+    s.ToUpper()).Wl();\r\n\r\nwhere Wl is an extension method that prints all the
+    IEnumerable to the console ( i think this is the first extension method that every
+    programmer has been writing after the first c# beta ).\r\nI like ruby, in c# i
+    took many ideas from it. Now  in c# i write n.times 4 a for and list.Each( lamdda
+    ) to apply a method to a collection."
+- id: 10855
+  author: C# Online.NET Editor
+  author_email: subscriber@csharp-online.net
+  author_url: http://en.csharp-online.net/
+  date: '2007-07-18 04:06:14 -0400'
+  date_gmt: '2007-07-18 10:06:14 -0400'
+  content: "I wish you would write an article for us on this topic. Keep up the good
+    work.\r\n\r\nC# Online.NET Editor\r\nhttp://en.csharp-online.net/"
+- id: 11173
+  author: Iterators, LINQ deferred execution and prime numbers computation - Patrick
+    Smacchia [MVP C#]
+  author_email: ''
+  author_url: http://codebetter.com/blogs/patricksmacchia/archive/2008/02/22/iterators-linq-deferred-execution-and-prime-numbers-computation.aspx
+  date: '2008-02-22 11:49:07 -0500'
+  date_gmt: '2008-02-22 17:49:07 -0500'
+  content: "[...] about what a multi-language platform bring to the mainstream development.
+    Some could say that Ruby was the initial starter but nobody can deny that LINQ
+    is really really [...]"
+---
+<p>One of the big features I keep hearing .NET developers talk about is something called <a href="http://msdn.microsoft.com/netframework/future/linq/">Language Integrated Query</a> (LINQ). LINQ is an Object Query Language (OQL) technology that is slated to be integrated into .NET 3.0. In the general sense an OQL allows you to "query" an object graph much the same way you would query a relational database. LINQ querys even look quite a bit like SQL queries.</p>
+<p>The LINQ implementation ends up relying on the introduction of Lambda functions in the core .NET 3.0 language. Lambda functions are a powerful way of encapsulating a (potentially reusable) block of code. The block of code can then be stored in a variable, passed to other methods, etc. As I discussed in a previous post <a href="http://www.zorched.net/2006/02/19/ruby-features-youll-wish-you-had-in-other-languages/">Ruby Features You&acirc;&euro;&trade;ll Wish You Had In Other Languages</a> these blocks can be used to implement simple patterns like Observer and Strategy. They also come in real handy for doing things like sorting and filtering lists as you'll see in the example below.</p>
+<p>LINQ Query:<br />
+<code><br />
+string[] names = { "Geoff", "Jessica", "Mike", "Megan",<br />
+                                    "Priscilla", "Jack", "Alma" };<br />
+    IEnumerable<string> expr = from s in names<br />
+                               where s.Length == 5<br />
+                               orderby s<br />
+                               select s.ToUpper();<br />
+    foreach (string item in expr)<br />
+      Console.WriteLine(item);<br />
+</code></p>
+<p>This is a really handy feature.</p>
+<p>Ruby has lambda functions, blocks and procs as well as built in support for a lot of filtering of arrays.</p>
+<p><code><br />
+# define the array<br />
+names = [ "Geoff", "Jessica", "Mike", "Megan", "Priscilla",<br />
+             "Jack", "Alma" ]<br />
+# find all names that are 5 characters long, sort them<br />
+# alphabetically and make them uppercase<br />
+expr = names.select {<br />
+    |n| n.length == 5<br />
+}.sort.collect { |n| n.upcase }<br />
+# print the results to standard output<br />
+expr.each {|n| puts n }<br />
+</code></p>
+<p>I'm a big fan of Object Oriented languages. The Ruby Way seems much more of a natural OO construct to me than the SQL/LINQ type syntax. Fortunately LINQ also introduces more of an OO syntax along with lambda functions that Ruby people (and Lispers) have come to love.</p>
+<p><code><br />
+Func<string , bool>   filter  = s => s.Length == 5;<br />
+Func<string , string> extract = s => s;<br />
+Func<string , string> project = s => s.ToUpper();<br />
+IEnumerable<string> expr = names.Where(filter)<br />
+                                .OrderBy(extract)<br />
+                                .Select(project);<br />
+</code></p>
+<p>Or the slightly more compact way:</p>
+<p><code><br />
+IEnumerable<string> expr = names<br />
+                           .Where(s => s.Length == 5)<br />
+                           .OrderBy(s => s)<br />
+                           .Select(s => s.ToUpper());<br />
+</code></p>
+<p>This code ends up looking remarkably like the Ruby example above doesn't it?</p>
+<p>The power of blocks and lambda functions in Ruby is the fact that they are so widely used in the core libraries of the language. They are an integral and extremely powerful part of the language so people become used to them very quickly. Only time will tell how well integrated the LINQ concepts are into the core .NET languages. Hopefully it will be better integrated than the Generics where in the Collections classes (where they created an entirely new namespace for the Generic collections instead of extending the existing ones). I look forward to this new addition to the .NET family of languages. But you don't have to wait to try these interesting and powerful features if you check out Ruby. Oh, and Ruby runs on the .NET CLR today, so check out <a href="http://www.iunknown.com/articles/2006/03/16/third-drop-of-rubyclr">Ruby CLR</a> too.</p>
