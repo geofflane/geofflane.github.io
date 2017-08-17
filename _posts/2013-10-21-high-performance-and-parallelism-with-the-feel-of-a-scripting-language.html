@@ -36,168 +36,168 @@ $ GOOS=linux go build myapp.go<br />
 </pre></p>
 <h3>Libraries for All The Things</h3></p>
 <p>Go has a large number of <a href="http://golang.org/pkg/">good libraries</a> that come standard. These libraries include support for making HTTP clients and servers. There's support for accessing databases (although the drivers themselves are not included). It includes support for parsing command line arguments, encoding and decoding JSON, for doing cryptography, and for using regular expressions. Basically it includes a lot of libraries that you need for creating applications whether it's something you want to maintain forever or whether it's a throw away app.</p></p>
-<p><code lang="go"><br />
-flag.BoolVar(&help, "h", false, "help")<br />
-resp, err := http.Get("http://example.com/")</p>
-<p>var exampleResp MyJsonResponse<br />
-decoder := json.NewDecoder(resp.Body)<br />
-err = decoder.Decode(&exampleResp)<br />
-</code></p>
+{% highlight go %}
+flag.BoolVar(&help, "h", false, "help")
+resp, err := http.Get("http://example.com/")
+var exampleResp MyJsonResponse
+decoder := json.NewDecoder(resp.Body)
+err = decoder.Decode(&exampleResp)
+{% endhighlight %}
 <h3>Concurrent Design and Parallel Execution</h3></p>
 <p>Goroutines allow a program to execute a function concurrently with other running code. Channels allow for different goroutines to communicate by passing messages to each other. Those two things together allow for a simple means of structuring code with a concurrent design.</p></p>
-<p><code lang="go"><br />
-ch := make(chan int)<br />
-go func() {<br />
-  for {<br />
-    val := <-ch<br />
-    fmt.Printf("Got an int: %v", val)<br />
-  }<br />
-}()<br />
-ch <- 1<br />
-ch <- 2<br />
-</code></p>
+{% highlight go %}
+ch := make(chan int)
+go func() {
+  for {
+    val := <-ch
+    fmt.Printf("Got an int: %v", val)
+  }
+}()
+ch <- 1
+ch <- 2
+{% endhighlight %}
 <p>In addition to having easy mechanisms to implement a concurrent design, your program also needs to be able to do actual work in parallel. Go can run many different goroutines in parallel and gives you control over how many run at the same time with a simple function call.</p></p>
-<pre><code>runtime.GOMAXPROCS(25)<br />
-</code></pre></p>
+<pre><code>runtime.GOMAXPROCS(25)</code></pre>
+
 <h2>Put The Pieces Together</h2></p>
 <p>Bringing together those libraries and a concurrent design allows us to easily create a program that meets our needs for testing these APIs.</p></p>
 <p>This is a simple application that does GET requests to a specific URL. The program allows you to specify the URL, the number of requests to make, and the number to run concurrently. It uses many of the libraries I mentioned above for handling HTTP, for parsing command line arguments, for calcuating the duration of requests, etc. It also uses goroutines to allow for multiple simultaneous requests to be made while using a channel to communicate the results back to the main program.</p></p>
-<p><code lang="go"><br />
-package main</p>
-<p>import (<br />
-  "flag"<br />
-  "fmt"<br />
-  "io/ioutil"<br />
-  "net/http"<br />
-  "runtime"<br />
-  "sync"<br />
-  "time"<br />
-)</p>
-<p>var help bool<br />
-var count int<br />
-var concurrent int<br />
-var url string</p>
-<p>var client *http.Client</p>
-<p>func init() {<br />
-  client = &http.Client{}</p>
-<p>  flag.BoolVar(&help, "h", false, "help")<br />
-  flag.IntVar(&count, "n", 1000, "number of requests")<br />
-  flag.IntVar(&concurrent, "c", runtime.NumCPU() + 1, "number of concurrent requests")<br />
-  flag.StringVar(&url, "u", "http://127.0.0.1:5000/", "url")<br />
-  flag.Parse()<br />
-}</p>
-<p>func main() {<br />
-  if help {<br />
-    flag.Usage()<br />
-    return<br />
-  }</p>
-<p>  fmt.Printf("Concurrent: %v\n", concurrent)<br />
-  runtime.GOMAXPROCS(concurrent + 2)</p>
-<p>  runChan := make(chan int, concurrent)<br />
-  resultChan := make(chan Result)</p>
-<p>  var wg sync.WaitGroup</p>
-<p>  success_cnt := 0<br />
-  failure_cnt := 0<br />
-  var durations []time.Duration<br />
-  var min_dur time.Duration<br />
-  var max_dur time.Duration</p>
-<p>  // Run the stuff<br />
-  dur := duration(func() {</p>
-<p>    // setup to handle responses<br />
-    go func() {<br />
-      for {<br />
-        r := <-resultChan<br />
-        durations = append(durations, r.Duration)<br />
-        min_dur = min(min_dur, r.Duration)<br />
-        max_dur = max(max_dur, r.Duration)</p>
-<p>        // 200s and 300s are success in HTTP<br />
-        if r.StatusCode < 400 {<br />
-          success_cnt += 1<br />
-        } else {<br />
-          fmt.Printf("Error: %v; %v\n", r.StatusCode, r.ErrOrBody())<br />
-          failure_cnt += 1<br />
-        }<br />
-        wg.Done()<br />
-      }<br />
-    }()</p>
-<p>    // setup to handle running requests<br />
-    wg.Add(count)<br />
-    go func() {<br />
-      for i:=0; i < count; i++ {<br />
-        <-runChan<br />
-        fmt.Printf(".")<br />
-        go func() {<br />
-          resultChan <- Execute()<br />
-          runChan <- 1<br />
-        }()<br />
-      }<br />
-    }()</p>
-<p>    // tell N number of requests to run, but this limits the concurrency<br />
-    for i := 0; i < concurrent; i ++ {<br />
-      runChan <- 1<br />
-    }</p>
-<p>    wg.Wait()<br />
-  })</p>
-<p>  fmt.Printf("\n")<br />
-  fmt.Printf("Success: %v\nFailure: %v\n", success_cnt, failure_cnt)<br />
-  fmt.Printf("Min: %v\nMax: %v\n", min_dur, max_dur)<br />
-  fmt.Printf("Mean: %v\n", avg(durations))<br />
-  fmt.Printf("Elapsed time: %v\n", dur.Seconds())</p>
-<p>}</p>
-<p>func avg(durs []time.Duration) time.Duration {<br />
-  total := float64(0)<br />
-  for _, d := range durs {<br />
-    total += d.Seconds()<br />
-  }<br />
-  return time.Duration((total / float64(len(durs))) * float64(time.Second))<br />
-}</p>
-<p>func min(a time.Duration, b time.Duration) time.Duration {<br />
-  if a != 0 && a < b {<br />
-    return a<br />
-  }<br />
-  return b<br />
-}</p>
-<p>func max(a time.Duration, b time.Duration) time.Duration {<br />
-  if a > b {<br />
-    return a<br />
-  }<br />
-  return b<br />
-}</p>
-<p>func Execute() Result {<br />
-  var resp *http.Response<br />
-  var err error<br />
-  dur := duration(func() {<br />
-    resp, err = http.Get(url)<br />
-  })</p>
-<p>  if err != nil {<br />
-    return Result{dur, -1, err, ""}<br />
-  }<br />
-  defer resp.Body.Close()<br />
-  var body string<br />
-  if b, err := ioutil.ReadAll(resp.Body); err == nil {<br />
-    body = string(b)<br />
-  } else {<br />
-    body = ""<br />
-  }</p>
-<p>  return Result{dur, resp.StatusCode, nil, body}<br />
-}</p>
-<p>type Result struct {<br />
-  Duration time.Duration<br />
-  StatusCode int<br />
-  Err error<br />
-  Body string<br />
-}<br />
-func (r *Result) ErrOrBody() string {<br />
-  if nil != r.Err {<br />
-    return r.Err.Error()<br />
-  } else {<br />
-    return r.Body<br />
-  }<br />
-}</p>
-<p>func duration(f func()) time.Duration {<br />
-  start := time.Now()<br />
-  f()<br />
-  return time.Now().Sub(start)<br />
-}<br />
-</code></p>
+{% highlight go %}
+package main
+import (
+  "flag"
+  "fmt"
+  "io/ioutil"
+  "net/http"
+  "runtime"
+  "sync"
+  "time"
+)
+var help bool
+var count int
+var concurrent int
+var url string
+var client *http.Client
+func init() {
+  client = &http.Client{}
+  flag.BoolVar(&help, "h", false, "help")
+  flag.IntVar(&count, "n", 1000, "number of requests")
+  flag.IntVar(&concurrent, "c", runtime.NumCPU() + 1, "number of concurrent requests")
+  flag.StringVar(&url, "u", "http://127.0.0.1:5000/", "url")
+  flag.Parse()
+}
+func main() {
+  if help {
+    flag.Usage()
+    return
+  }
+  fmt.Printf("Concurrent: %v\n", concurrent)
+  runtime.GOMAXPROCS(concurrent + 2)
+  runChan := make(chan int, concurrent)
+  resultChan := make(chan Result)
+  var wg sync.WaitGroup
+  success_cnt := 0
+  failure_cnt := 0
+  var durations []time.Duration
+  var min_dur time.Duration
+  var max_dur time.Duration
+  // Run the stuff
+  dur := duration(func() {
+    // setup to handle responses
+    go func() {
+      for {
+        r := <-resultChan
+        durations = append(durations, r.Duration)
+        min_dur = min(min_dur, r.Duration)
+        max_dur = max(max_dur, r.Duration)
+        // 200s and 300s are success in HTTP
+        if r.StatusCode < 400 {
+          success_cnt += 1
+        } else {
+          fmt.Printf("Error: %v; %v\n", r.StatusCode, r.ErrOrBody())
+          failure_cnt += 1
+        }
+        wg.Done()
+      }
+    }()
+    // setup to handle running requests
+    wg.Add(count)
+    go func() {
+      for i:=0; i < count; i++ {
+        <-runChan
+        fmt.Printf(".")
+        go func() {
+          resultChan <- Execute()
+          runChan <- 1
+        }()
+      }
+    }()
+    // tell N number of requests to run, but this limits the concurrency
+    for i := 0; i < concurrent; i ++ {
+      runChan <- 1
+    }
+    wg.Wait()
+  })
+  fmt.Printf("\n")
+  fmt.Printf("Success: %v\nFailure: %v\n", success_cnt, failure_cnt)
+  fmt.Printf("Min: %v\nMax: %v\n", min_dur, max_dur)
+  fmt.Printf("Mean: %v\n", avg(durations))
+  fmt.Printf("Elapsed time: %v\n", dur.Seconds())
+}
+func avg(durs []time.Duration) time.Duration {
+  total := float64(0)
+  for _, d := range durs {
+    total += d.Seconds()
+  }
+  return time.Duration((total / float64(len(durs))) * float64(time.Second))
+}
+func min(a time.Duration, b time.Duration) time.Duration {
+  if a != 0 && a < b {
+    return a
+  }
+  return b
+}
+func max(a time.Duration, b time.Duration) time.Duration {
+  if a > b {
+    return a
+  }
+  return b
+}
+func Execute() Result {
+  var resp *http.Response
+  var err error
+  dur := duration(func() {
+    resp, err = http.Get(url)
+  })
+  if err != nil {
+    return Result{dur, -1, err, ""}
+  }
+  defer resp.Body.Close()
+  var body string
+  if b, err := ioutil.ReadAll(resp.Body); err == nil {
+    body = string(b)
+  } else {
+    body = ""
+  }
+  return Result{dur, resp.StatusCode, nil, body}
+}
+type Result struct {
+  Duration time.Duration
+  StatusCode int
+  Err error
+  Body string
+}
+func (r *Result) ErrOrBody() string {
+  if nil != r.Err {
+    return r.Err.Error()
+  } else {
+    return r.Body
+  }
+}
+func duration(f func()) time.Duration {
+  start := time.Now()
+  f()
+  return time.Now().Sub(start)
+}
+{% endhighlight %}
 <p>The app we wrote started out a lot like this; easy and straightforward. As we needed to add more tests we stated refactoring out types to allow me to separate the core of the load testing and calculation of times from the actual requests run. Go provides function type aliases, higher order functions and a lot of other abstractions which make those refactorings quite elegant. But that's for a different post...</p></p>
