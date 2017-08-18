@@ -2,7 +2,7 @@
 
 name: Zorched / One-Line Fix
 paginate: 25
-url: "https://zorched.net/" # add your site url (format: https://example.com/)
+url: "https://www.zorched.net" # add your site url (format: https://example.com/)
 blog_theme: light # Or use dark
 
 # Optional settings
