@@ -1,0 +1,55 @@
+==================================================================
+https://keybase.io/geofflane
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of https://www.zorched.net
+  * I am geofflane (https://keybase.io/geofflane) on keybase.
+  * I have a public key ASDbVS2Ibb6dvXxF2BZa4UpZWjm6rP-eg5zW8_pJiO2AkQo
+
+To do so, I am signing this object:
+
+{
+  "body": {
+    "key": {
+      "eldest_kid": "0101e7bbb95bb8264111324105fa1272a47f08cb1be8d906e4a90b80598f7c59f8060a",
+      "host": "keybase.io",
+      "kid": "0120db552d886dbe9dbd7c45d8165ae14a595a39baacff9e839cd6f3fa4988ed80910a",
+      "uid": "7e6ad8405e4672e357d3cb370a9f1a00",
+      "username": "geofflane"
+    },
+    "merkle_root": {
+      "ctime": 1503104675,
+      "hash": "3c83bb4d05027d4f71cd83c33497535972d7d11561877a5f08d18db79525c9b488fc524ac11daa697a346b12739cd213fb7ffa1ceb1e78532eb9d6f94ced3b20",
+      "hash_meta": "de6ae5d2021d756f6595e859acf33c783c8634e2763f8590ed8df6900fcae52c",
+      "seqno": 1335001
+    },
+    "service": {
+      "hostname": "www.zorched.net",
+      "protocol": "https:"
+    },
+    "type": "web_service_binding",
+    "version": 1
+  },
+  "client": {
+    "name": "keybase.io go client",
+    "version": "1.0.28"
+  },
+  "ctime": 1503104690,
+  "expire_in": 504576000,
+  "prev": "0d7471675d50e21fb49deb46438859e3a4f89dc141117f172e61e4575606b5a0",
+  "seqno": 58,
+  "tag": "signature"
+}
+
+which yields the signature:
+
+hKRib2R5hqhkZXRhY2hlZMOpaGFzaF90eXBlCqNrZXnEIwEg21UtiG2+nb18RdgWWuFKWVo5uqz/noOc1vP6SYjtgJEKp3BheWxvYWTFA0l7ImJvZHkiOnsia2V5Ijp7ImVsZGVzdF9raWQiOiIwMTAxZTdiYmI5NWJiODI2NDExMTMyNDEwNWZhMTI3MmE0N2YwOGNiMWJlOGQ5MDZlNGE5MGI4MDU5OGY3YzU5ZjgwNjBhIiwiaG9zdCI6ImtleWJhc2UuaW8iLCJraWQiOiIwMTIwZGI1NTJkODg2ZGJlOWRiZDdjNDVkODE2NWFlMTRhNTk1YTM5YmFhY2ZmOWU4MzljZDZmM2ZhNDk4OGVkODA5MTBhIiwidWlkIjoiN2U2YWQ4NDA1ZTQ2NzJlMzU3ZDNjYjM3MGE5ZjFhMDAiLCJ1c2VybmFtZSI6Imdlb2ZmbGFuZSJ9LCJtZXJrbGVfcm9vdCI6eyJjdGltZSI6MTUwMzEwNDY3NSwiaGFzaCI6IjNjODNiYjRkMDUwMjdkNGY3MWNkODNjMzM0OTc1MzU5NzJkN2QxMTU2MTg3N2E1ZjA4ZDE4ZGI3OTUyNWM5YjQ4OGZjNTI0YWMxMWRhYTY5N2EzNDZiMTI3MzljZDIxM2ZiN2ZmYTFjZWIxZTc4NTMyZWI5ZDZmOTRjZWQzYjIwIiwiaGFzaF9tZXRhIjoiZGU2YWU1ZDIwMjFkNzU2ZjY1OTVlODU5YWNmMzNjNzgzYzg2MzRlMjc2M2Y4NTkwZWQ4ZGY2OTAwZmNhZTUyYyIsInNlcW5vIjoxMzM1MDAxfSwic2VydmljZSI6eyJob3N0bmFtZSI6Ind3dy56b3JjaGVkLm5ldCIsInByb3RvY29sIjoiaHR0cHM6In0sInR5cGUiOiJ3ZWJfc2VydmljZV9iaW5kaW5nIiwidmVyc2lvbiI6MX0sImNsaWVudCI6eyJuYW1lIjoia2V5YmFzZS5pbyBnbyBjbGllbnQiLCJ2ZXJzaW9uIjoiMS4wLjI4In0sImN0aW1lIjoxNTAzMTA0NjkwLCJleHBpcmVfaW4iOjUwNDU3NjAwMCwicHJldiI6IjBkNzQ3MTY3NWQ1MGUyMWZiNDlkZWI0NjQzODg1OWUzYTRmODlkYzE0MTExN2YxNzJlNjFlNDU3NTYwNmI1YTAiLCJzZXFubyI6NTgsInRhZyI6InNpZ25hdHVyZSJ9o3NpZ8RAhK61Nr6opvE3Mf4y2A1ts+HTekVP8hboTU3WJ715QYWuMk3sMnjP88VZ54l9BFSSOd2uWdm5vQqq6y3WU5dJAqhzaWdfdHlwZSCkaGFzaIKkdHlwZQildmFsdWXEIJIP7LQEEmpfeHRDCQvwUAEaT36IdpUq5pghYfyy5tv5o3RhZ80CAqd2ZXJzaW9uAQ==
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/geofflane
+
+==================================================================
