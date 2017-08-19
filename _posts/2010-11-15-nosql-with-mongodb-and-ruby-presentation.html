@@ -44,63 +44,63 @@ comments:
 ---
 <p>I presented at the Milwaukee Ruby User's Group tonight on NoSQL using MongoDB and Ruby.</p>
 <h3>Code Snippets for the Presentation</h3></p>
-<h4>Basic Operations</h4><br />
-<code lang="javascript"></p>
-<p>// insert data<br />
-db.factories.insert( { name: "Miller", metro: { city: "Milwaukee", state: "WI" } } );<br />
-db.factories.insert( { name: "Lakefront", metro: { city: "Milwaukee", state: "WI" } } );<br />
-db.factories.insert( { name: "Point", metro: { city: "Steven's Point", state: "WI" } } );<br />
-db.factories.insert( { name: "Pabst", metro: { city: "Milwaukee", state: "WI" } } );<br />
-db.factories.insert( { name: "Blatz", metro: { city: "Milwaukee", state: "WI" } } );<br />
+<h4>Basic Operations</h4>
+{% highlight javascript %}</p>
+<p>// insert data
+db.factories.insert( { name: "Miller", metro: { city: "Milwaukee", state: "WI" } } );
+db.factories.insert( { name: "Lakefront", metro: { city: "Milwaukee", state: "WI" } } );
+db.factories.insert( { name: "Point", metro: { city: "Steven's Point", state: "WI" } } );
+db.factories.insert( { name: "Pabst", metro: { city: "Milwaukee", state: "WI" } } );
+db.factories.insert( { name: "Blatz", metro: { city: "Milwaukee", state: "WI" } } );
 db.factories.insert( { name: "Coors", metro: { city: "Golden Springs", state: "CO" } } );</p>
-<p>// simple queries<br />
-db.factories.find()<br />
-db.factories.findOne()<br />
-db.factories.find( { "metro.city" : "Milwaukee" } )<br />
+<p>// simple queries
+db.factories.find()
+db.factories.findOne()
+db.factories.find( { "metro.city" : "Milwaukee" } )
 db.factories.find( { "metro.state": {$in : ["WI", "CO"] } } )</p>
-<p>// update data<br />
-db.factories.update( { name: "Lakefront"}, { $set : { thebest : true } } );<br />
+<p>// update data
+db.factories.update( { name: "Lakefront"}, { $set : { thebest : true } } );
 db.factories.find()</p>
-<p>// delete data<br />
-db.factories.remove({name:"Coors"})<br />
-db.factories.remove()<br />
-</code></p>
-<h4>Ruby Example</h4><br />
-<code lang="ruby"><br />
-require 'rubygems'<br />
-require 'mongo'<br />
+<p>// delete data
+db.factories.remove({name:"Coors"})
+db.factories.remove()
+{% endhighlight %}</p>
+<h4>Ruby Example</h4>
+{% highlight ruby %}
+require 'rubygems'
+require 'mongo'
 include Mongo</p>
-<p>db   = Connection.new.db('sample-db')<br />
+<p>db   = Connection.new.db('sample-db')
 coll = db.collection('factories')</p>
 <p>coll.remove</p>
-<p>coll.insert( { :name => "Miller",    :metro => { :city => "Milwaukee", :state => "WI" } } )<br />
-coll.insert( { :name => "Lakefront", :metro => { :city: "Milwaukee", :state => "WI" } } )<br />
-coll.insert( { :name => "Point",     :metro => { :city => "Steven's Point", :state => "WI" } } )<br />
-coll.insert( { :name => "Pabst",     :metro => { :city => "Milwaukee", :state => "WI" } } )<br />
-coll.insert( { :name => "Blatz",     :metro => { :city => "Milwaukee", :state => "WI" } } )<br />
+<p>coll.insert( { :name => "Miller",    :metro => { :city => "Milwaukee", :state => "WI" } } )
+coll.insert( { :name => "Lakefront", :metro => { :city: "Milwaukee", :state => "WI" } } )
+coll.insert( { :name => "Point",     :metro => { :city => "Steven's Point", :state => "WI" } } )
+coll.insert( { :name => "Pabst",     :metro => { :city => "Milwaukee", :state => "WI" } } )
+coll.insert( { :name => "Blatz",     :metro => { :city => "Milwaukee", :state => "WI" } } )
 coll.insert( { :name => "Coors",     :metro => { :city => "Golden Springs", :state => "CO" } } )</p>
-<p>puts "There are #{coll.count()} factories. Here they are:"<br />
-coll.find().each { |doc| puts doc.inspect }<br />
-coll.map_reduce("function () { emit(this.metro.city, this.name); }", "function (k, vals) { return vals.join(","); }").each { |r| puts r.inspect }<br />
-</code></p>
-<h4>Map Reduce Example</h4><br />
-<code lang="javascript"><br />
-db.factories.insert( { name: "Miller", metro: { city: "Milwaukee", state: "WI" } } );<br />
-db.factories.insert( { name: "Lakefront", metro: { city: "Milwaukee", state: "WI" } } );<br />
-db.factories.insert( { name: "Point", metro: { city: "Steven's Point", state: "WI" } } );<br />
-db.factories.insert( { name: "Pabst", metro: { city: "Milwaukee", state: "WI" } } );<br />
-db.factories.insert( { name: "Blatz", metro: { city: "Milwaukee", state: "WI" } } );<br />
+<p>puts "There are #{coll.count()} factories. Here they are:"
+coll.find().each { |doc| puts doc.inspect }
+coll.map_reduce("function () { emit(this.metro.city, this.name); }", "function (k, vals) { return vals.join(","); }").each { |r| puts r.inspect }
+{% endhighlight %}</p>
+<h4>Map Reduce Example</h4>
+{% highlight javascript %}
+db.factories.insert( { name: "Miller", metro: { city: "Milwaukee", state: "WI" } } );
+db.factories.insert( { name: "Lakefront", metro: { city: "Milwaukee", state: "WI" } } );
+db.factories.insert( { name: "Point", metro: { city: "Steven's Point", state: "WI" } } );
+db.factories.insert( { name: "Pabst", metro: { city: "Milwaukee", state: "WI" } } );
+db.factories.insert( { name: "Blatz", metro: { city: "Milwaukee", state: "WI" } } );
 db.factories.insert( { name: "Coors", metro: { city: "Golden Springs", state: "CO" } } );</p>
-<p>var fmap = function () {<br />
-    emit(this.metro.city, this.name);<br />
-}<br />
-var fred = function (k, vals) {<br />
-    return vals.join(",");<br />
-}<br />
-res = db.factories.mapReduce(fmap, fred)<br />
-db[res.result].find()<br />
-db[res.result].drop()<br />
-</code></p>
-<h3>The Presentation</h3><br />
+<p>var fmap = function () {
+    emit(this.metro.city, this.name);
+}
+var fred = function (k, vals) {
+    return vals.join(",");
+}
+res = db.factories.mapReduce(fmap, fred)
+db[res.result].find()
+db[res.result].drop()
+{% endhighlight %}</p>
+<h3>The Presentation</h3>
 <a href="/wp-content/uploads/2010/11/NoSQL-with-MongoDB-and-Ruby.pdf">Download NoSQL with MongoDB and Ruby Slides</a></p>
 <p>Thanks to Meghan at <a href="http://www.10gen.com">10Gen</a> for sending stickers and a copy of <a href="http://www.amazon.com/gp/product/1449381561?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1449381561">MongoDB: The Definitive Guide</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=1449381561" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /> that I gave out as a door prize. I read the book quickly this weekend before the talk and found it quite good, so I recommend it if you want to get started with MongoDB.</p>

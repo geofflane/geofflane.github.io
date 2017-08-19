@@ -30,27 +30,27 @@ comments: []
 <p>I recently got a free copy of RJS Templates for Rails from the <a href="http://www.mkerb.org/index.php/Main_Page">Milwaukee Ruby User's Group</a>. O'Reilly has a program that makes books available for free to Users Groups, which is a really nice thing (of course they bank on the word-of-mouth advertising that comes from it. Hi O'Reilly! <wave/>).</p>
 <p>RJS Templates for Rails is an O'Reilly "Short Cut" which is basically a small book released as a PDF only. It offers a brief look into some of the things that you can do with RJS templates that were added in <a href="http://www.rubyonrails.org">Ruby on Rails</a> 1.1. RJS is a way to write client-side JavaScript using the Ruby language and <a href="http://api.rubyonrails.org/classes/ActionView/Helpers/PrototypeHelper/JavaScriptGenerator/GeneratorMethods.html">JavaScriptGenerator API</a>. This allows you to do complex, multi-step processing to modify different parts of the page in a single request.</p>
 <p>The JavaScriptGenerator API is accessible from within a Controller and from RJS Templates. Which you use is part style and part pragmatic. For one-liners it is often just easier to write the code inline, reserving the RJS templates for more complex scripts.</p>
-<p>Inline code would look like:<br />
-<code><br />
-def hide_details<br />
-  render :update do |page|<br />
-    page[:details].hide<br />
-  end<br />
-end<br />
-</code></p>
-<p>Where an RJS template is automatically wrapped with the <code class="inline">render :update</code> block.<br />
-<code><br />
+<p>Inline code would look like:
+{% highlight ruby %}
+def hide_details
+  render :update do |page|
+    page[:details].hide
+  end
+end
+{% endhighlight %}</p>
+<p>Where an RJS template is automatically wrapped with the <code class="inline">render :update</code> block.
+{% highlight ruby %}
 page.insert_html :bottom, 'list', '
-<li>New Item At Bottom</li>'<br />
-</code></p>
-<p>Both of these are simple examples of course, but they give you an idea of what's going on. Each of these would generate JavaScript and send it back to the client where it would be executed in the browser. You can see that you do not have to write any JavaScript to use these techniques. The only thing that you have to do is to include the Prototype library in your pages using:<br />
-<code><br />
-<%= javascript_include_tag :defaults %><br />
-</code></p>
+<li>New Item At Bottom</li>'
+{% endhighlight %}</p>
+<p>Both of these are simple examples of course, but they give you an idea of what's going on. Each of these would generate JavaScript and send it back to the client where it would be executed in the browser. You can see that you do not have to write any JavaScript to use these techniques. The only thing that you have to do is to include the Prototype library in your pages using:
+{% highlight ruby %}
+<%= javascript_include_tag :defaults %>
+{% endhighlight %}</p>
 <p>RJS Templates for Rails is a really quick read that does a good job of getting you started with using RJS and the JavaScriptGenerator API. It starts with a very simple example program that you can have up and running in a matter of minutes. It continues with a slightly more in-depth example of an application that really uses some of the more interesting aspects of RJS including multi-element page updates with a single request. </p>
 <p>The book offers a reference to the API that gives you a quick reference to the methods that you can use to program JavaScript in Ruby. Being a short book, it does not offer a slew of recipes that you would want from a more comprehensive book. This feels like an appetizer to me, giving me a taste of what's available, whetting my appetite for more.</p>
 <p>In the abstract, RJS Templates for Rails actually offers some really good insight into how some people are doing AJAX with code generation techniques. Instead of writing JavaScript, they are creating APIs in their programming language of choice and then using code generation techniques to output the client-side code. While this style requires that the toolkit creator knows a great deal about the language being generated (JavaScript), it can encapsulate that knowledge so that others can leverage it without getting into the details. This is how the <a href="http://code.google.com/webtoolkit/">Google Web Toolkit (GWT)</a> works as well for the Java camp. Prior to reading this book I don't think I quite got what the big deal was, but now I see these frameworks really can do some incredible things for people who don't want to "get their hands dirty" doing client-side development.</p>
 <p>If you're an AJAX whiz, I'd doubt that this would offer a lot unless you just wanted to see another implementation and didn't know a lot about Rails. But if you want to see how easy it could be to add some really interesting AJAX features to a Rails application, this can help you get started. You'll almost definitely want to get a more comprehensive book to give you some more ideas on how to handle a broader range of situations.</p>
 <p><strong><em><a href="http://www.oreilly.com/catalog/rjsrails/">RJS Templates for Rails - Cody Fauser - ISBN: 0-596-52809-4</a></em></strong></p>
-<p><em>P.S.</em><br />
+<p><em>P.S.</em>
 The October 2006 issue of <a href="http://www.mactech.com">MacTech</a> has a really good article on RJS as well. It covers some of the same basics that the PDF covers, using a few different examples.</p>

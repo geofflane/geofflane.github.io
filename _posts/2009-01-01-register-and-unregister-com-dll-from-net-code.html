@@ -21,195 +21,97 @@ categories:
 tags:
 - com
 - csharp
-comments:
-- id: 14961
-  author: Stefano Gallina
-  author_email: warxsg@gmail.com
-  author_url: ''
-  date: '2009-03-16 09:45:28 -0400'
-  date_gmt: '2009-03-16 15:45:28 -0400'
-  content: |-
-    Hi Geoff,
-
-    I used your code to register and unregister some DLL.
-    I had a problem when i registered a dll.
-    Calling the register method in the following way has some problem :
-
-    <code lang="csharp">
-    using (Registrar registrar = new Registrar("path\\to\\com.dll"))
-    {
-        registrar.RegisterComDLL();
-    }
-    </code>
-
-
-    because...in the Dispose() method it is called the method UnRegisterComDLL()...so I couldn't to register a DLL in the right way.
-    Did you notice this thing ?
-    Cheers.
-
-                Stefano
-- id: 14965
-  author: Geoff Lane
-  author_email: geoff@zorched.net
-  author_url: http://www.zorched.net
-  date: '2009-03-16 11:16:58 -0400'
-  date_gmt: '2009-03-16 17:16:58 -0400'
-  content: "@Stafano,\r\nRight the idea is to register the DLL, call some code that
-    needs that DLL, and then unregister it. This is not intended to Register a DLL
-    forever. If you want to do that, you'll need to change the code in the example."
-- id: 14966
-  author: Stefano Gallina
-  author_email: warxsg@gmail.com
-  author_url: ''
-  date: '2009-03-16 11:46:15 -0400'
-  date_gmt: '2009-03-16 17:46:15 -0400'
-  content: "Hi Geoff,\r\n\r\nYou are 100% right; I explained myself in the wrong way...I
-    didn't intend to \"say\" that it was a mistake....my needs are different compare
-    to the needs of the example.\r\nInfact, I need to maintain the registration of
-    a DLL.\r\nThank you very for you answer....in you opinion what would be the best
-    way to modify your code to mantain your idea and satisfy my needs ?\r\nCheers.\r\n\r\n
-    \               Stefano"
-- id: 14967
-  author: Geoff Lane
-  author_email: geoff@zorched.net
-  author_url: http://www.zorched.net
-  date: '2009-03-16 16:42:48 -0400'
-  date_gmt: '2009-03-16 22:42:48 -0400'
-  content: "@Stefano,\r\nUsing the externs at the top you should be able to call something
-    like:\r\n\r\n<code lang=\"csharp\">\r\nIntPtr hLib = LoadLibrary(filePath);\r\nif
-    (IntPtr.Zero == hLib)\r\n{\r\n    int errno = Marshal.GetLastWin32Error();\r\n
-    \   throw new Win32Exception(errno, \"Failed to load library.\");\r\n}\r\n\r\nIntPtr
-    dllEntryPoint = GetProcAddress(hLib, \"DllRegisterServer\");\r\nif (IntPtr.Zero
-    == dllEntryPoint)\r\n{\r\n    throw new Win32Exception(Marshal.GetLastWin32Error());\r\n}\r\nPointerToMethodInvoker
-    drs = \r\n               (PointerToMethodInvoker) Marshal.GetDelegateForFunctionPointer(dllEntryPoint,
-    \r\n                           typeof(PointerToMethodInvoker));\r\n    drs();\r\n\r\n</code>"
-- id: 18328
-  author: Tom Hunter
-  author_email: tomhunter@runbox.com
-  author_url: http://www.unhandledexception.info/
-  date: '2013-01-22 15:25:37 -0500'
-  date_gmt: '2013-01-22 21:25:37 -0500'
-  content: "If you're getting an exception similar to the following, make sure you're
-    \ registering the COM dll once only:\r\n\r\n<blockquote>\r\n\tSystem.InvalidCastException
-    occurred\r\n\t  Message=Unable to cast COM object of type 'System.__ComObject'
-    to interface type 'P4COM.p4'. This operation failed because the QueryInterface
-    call on the COM component for the interface with IID '{E7D963D4-7AC8-4B89-B768-16F900DB2A93}'
-    failed due to the following error: No such interface supported (Exception from
-    HRESULT: 0x80004002 (E_NOINTERFACE)).\r\n\t  Source=Perforce\r\n\t  StackTrace:\r\n\t\t
-    \  at SourceLog.Plugin.Perforce.PerforcePlugin.CheckForNewLogEntries(Object state)\r\n\t
-    \ InnerException: \r\n</blockquote>\r\n\r\nI'm using a static constructor
-    to ensure only one registration:\r\n\r\n<code>\r\n    public class PerforcePlugin\r\n
-    \   {\r\n        static PerforcePlugin()\r\n        {\r\n            Registrar
-    registrar = new Registrar(\r\n                        Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
-    + \"\\\\p4com.dll\");\r\n            registrar.RegisterComDLL();\r\n            finalizer
-    = new Finalizer(registrar);\r\n        }\r\n        \r\n        static readonly
-    Finalizer finalizer;\r\n\r\n        sealed class Finalizer\r\n        {\r\n            private
-    Registrar _registrar;\r\n            internal Finalizer(Registrar registrar)\r\n
-    \           {\r\n                _registrar = registrar;\r\n            }\r\n\r\n
-    \           ~Finalizer()\r\n            {\r\n                _registrar.Dispose();\r\n
-    \           }\r\n        }\r\n    }\r\n</code>"
-- id: 131016
-  author: How To Fix Dllunregisterserver Clr Error Errors - Windows Vista, Windows
-    7 &amp; 8
-  author_email: ''
-  author_url: http://nwaha.org/dllunregisterserver-clr-error/
-  date: '2014-11-16 19:37:24 -0500'
-  date_gmt: '2014-11-17 01:37:24 -0500'
-  content: "[&#8230;] Register and Unregister COM DLL from .NET Code | &acirc;&euro;&brvbar;
-    &acirc;&euro;&ldquo; Background. The command regsvr32 is used to register a native,
-    unmanaged code DLL so that it is available via COM. With a registered DLL you
-    can use COM Interop to &#8230;&#8230; [&#8230;]\n"
 ---
-<h2>Background</h2><br />
+<h2>Background</h2>
 The command <a href="http://en.wikipedia.org/wiki/Regsvr32">regsvr32</a> is used to register a native, unmanaged code DLL so that it is available via COM. With a registered DLL you can use COM Interop to call that code from .NET Managed code.</p>
 <p>Regsvr32 is unmanaged code and as such makes use of some existing functions that are defined in the <em>kernel32.dll</em>. Fortunately .NET makes available a pretty easy to use <a href="http://en.wikipedia.org/wiki/Foreign_function_interface">foreign function interface (FFI)</a> in the form of <a href="http://en.wikipedia.org/wiki/P/Invoke">P/Invoke</a>. </p>
 <p>In general to call an unmanaged function you just need to use the <em>DllImport</em> annotation on an extern function to tell the CLR how to access the function.</p>
-<p>e.g.:<br />
-<code lang="csharp"><br />
-[DllImport("shell32.dll")]<br />
-static extern int DllGetVersion(ref DLLVERSIONINFO pdvi);<br />
-</code></p>
+<p>e.g.:
+{% highlight csharp %}
+[DllImport("shell32.dll")]
+static extern int DllGetVersion(ref DLLVERSIONINFO pdvi);
+{% endhighlight %}</p>
 <h2>Registering an Unmanaged DLL with C# Code</h2></p>
 <p>regsvr32 actually calls functions defined within the DLL itself in what is known as a self-registering DLL. So assuming your DLL is self-registering then you should be able to use this approach as well. The only thing we need to do is figure out what functions to call.</p>
 <p>It ends up there are 2 basic functions: <em>LoadLibrary</em> and <em>GetProcAddress</em>.</p>
-<h3>LoadLibrary</h3><br />
+<h3>LoadLibrary</h3>
 <a href="http://msdn.microsoft.com/en-us/library/ms684175.aspx">LoadLibrary</a> returns a handle the module (a pointer to a structure).</p>
 <p>After you are done with you library you can clean up by calling <em>FreeLibrary</em> passing it the handle that was returned from <em>LoadLibrary</em>.</p>
-<h3>GetProcAddress</h3><br />
+<h3>GetProcAddress</h3>
 <a href="http://msdn.microsoft.com/en-us/library/ms683212(VS.85).aspx">GetProcAddress</a> finds a function defined in a module and returns a pointer to that function. A function pointer allows you to call a method in a dynamic way. It is functionally equivalent to a <a href="http://msdn.microsoft.com/en-us/library/ms173171(VS.80).aspx">delegate</a> in managed code.</p>
-<p>In C e.g.:<br />
-<code lang="c"><br />
-(*some_func)();<br />
-</code></p>
-<h3>Put it All Together</h3><br />
+<p>In C e.g.:
+{% highlight c %}
+(*some_func)();
+{% endhighlight %}</p>
+<h3>Put it All Together</h3>
 Now we have a basic algorithm to register a DLL:</p>
 <ol>
 <li>LoadLibrary to get a handle to the library</li>
 <li>GetProcAddress to get a function pointer to the proper function to register the DLL</li>
 <li>Call the function returned from GetProcAddress</li>
-<li>Cleanup</li><br />
+<li>Cleanup</li>
 </ol></p>
-<p>Mix that in with some error checking code and I got the following:<br />
-<code lang="csharp"><br />
-public class Registrar : IDisposable<br />
-{<br />
+<p>Mix that in with some error checking code and I got the following:
+{% highlight csharp %}
+public class Registrar : IDisposable
+{
     private IntPtr hLib;</p>
-<p>    [DllImport("kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]<br />
+<p>    [DllImport("kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
     internal static extern IntPtr GetProcAddress(IntPtr hModule, string procName);</p>
-<p>    [DllImport("kernel32.dll", SetLastError = true)]<br />
+<p>    [DllImport("kernel32.dll", SetLastError = true)]
     internal static extern IntPtr LoadLibrary(string lpFileName);</p>
-<p>    [DllImport("kernel32.dll", SetLastError = true)]<br />
+<p>    [DllImport("kernel32.dll", SetLastError = true)]
     internal static extern bool FreeLibrary(IntPtr hModule);</p>
 <p>    internal delegate int PointerToMethodInvoker();</p>
-<p>    public Registrar(string filePath)<br />
-    {<br />
-        hLib = LoadLibrary(filePath);<br />
-        if (IntPtr.Zero == hLib)<br />
-        {<br />
-            int errno = Marshal.GetLastWin32Error();<br />
-            throw new Win32Exception(errno, "Failed to load library.");<br />
-        }<br />
+<p>    public Registrar(string filePath)
+    {
+        hLib = LoadLibrary(filePath);
+        if (IntPtr.Zero == hLib)
+        {
+            int errno = Marshal.GetLastWin32Error();
+            throw new Win32Exception(errno, "Failed to load library.");
+        }
     }</p>
-<p>    public void RegisterComDLL()<br />
-    {<br />
-        CallPointerMethod("DllRegisterServer");<br />
+<p>    public void RegisterComDLL()
+    {
+        CallPointerMethod("DllRegisterServer");
     }</p>
-<p>    public void UnRegisterComDLL()<br />
-    {<br />
-        CallPointerMethod("DllUnregisterServer");<br />
+<p>    public void UnRegisterComDLL()
+    {
+        CallPointerMethod("DllUnregisterServer");
     }</p>
-<p>    private void CallPointerMethod(string methodName)<br />
-    {<br />
-        IntPtr dllEntryPoint = GetProcAddress(hLib, methodName);<br />
-        if (IntPtr.Zero == dllEntryPoint)<br />
-        {<br />
-            throw new Win32Exception(Marshal.GetLastWin32Error());<br />
-        }<br />
-        PointerToMethodInvoker drs =<br />
-               (PointerToMethodInvoker) Marshal.GetDelegateForFunctionPointer(dllEntryPoint,<br />
-                           typeof(PointerToMethodInvoker));<br />
-        drs();<br />
+<p>    private void CallPointerMethod(string methodName)
+    {
+        IntPtr dllEntryPoint = GetProcAddress(hLib, methodName);
+        if (IntPtr.Zero == dllEntryPoint)
+        {
+            throw new Win32Exception(Marshal.GetLastWin32Error());
+        }
+        PointerToMethodInvoker drs =
+               (PointerToMethodInvoker) Marshal.GetDelegateForFunctionPointer(dllEntryPoint,
+                           typeof(PointerToMethodInvoker));
+        drs();
     }</p>
-<p>    public void Dispose()<br />
-    {<br />
-      if (IntPtr.Zero != hLib)<br />
-      {<br />
-          UnRegisterComDLL();<br />
-          FreeLibrary(hLib);<br />
-          hLib = IntPtr.Zero;<br />
-      }<br />
-    }<br />
-}<br />
-</code></p>
-<p><strong><em>Note:</em></strong><br />
+<p>    public void Dispose()
+    {
+      if (IntPtr.Zero != hLib)
+      {
+          UnRegisterComDLL();
+          FreeLibrary(hLib);
+          hLib = IntPtr.Zero;
+      }
+    }
+}
+{% endhighlight %}</p>
+<p><strong><em>Note:</em></strong>
 The requirement I was dealing with was a build script so I wanted to register the unmanaged DLL, use it, and then unregister it so the computer would be in its previous state. If you want to leave the DLL registered, such as for an install program, you would need to modify the above example.</p>
-<p>To call this code you just need to pass it a path to the dll that needs to be registered.<br />
-<code lang="csharp"><br />
-using (Registrar registrar = new Registrar("path\\to\\com.dll"))<br />
-{<br />
-    registrar.RegisterComDLL();<br />
-    return base.Execute();<br />
-}<br />
-</code></p>
-<p><strong><em>Resources:</em></strong><br />
+<p>To call this code you just need to pass it a path to the dll that needs to be registered.
+{% highlight csharp %}
+using (Registrar registrar = new Registrar("path\\to\\com.dll"))
+{
+    registrar.RegisterComDLL();
+    return base.Execute();
+}
+{% endhighlight %}</p>
+<p><strong><em>Resources:</em></strong>
 Check out <a href="http://pinvoke.net">pinvoke.net</a> for a lot of good documentation and example of how to call native methods from managed code.</p>

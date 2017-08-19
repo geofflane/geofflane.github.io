@@ -122,11 +122,11 @@ comments:
     of your Subversion Working CopyRuby 1.8 (today) vs C# 3.0 (some future [...]"
 ---
 <p>How far is going to far when you are doing build automation? My answer to that question, is that it's basically not possible to go to far. Any task that you need to do more than three times deserves automation. Three times is my heuristic. The longer and more complex the task, the smaller the number you should allow yourself to do it by hand. Compiling for example is a pain if you don't automate it, so you automate it the first time. Computers are good at one thing, running algorithms. If you are doing those algorithms by hand, you're wasting your computer's potential.</p>
-<h3>Why Automate?</h3><br />
+<h3>Why Automate?</h3>
 There are two major reasons to automate:</p>
 <ol>
 <li>Reduce errors</li>
-<li>Being lazy</li><br />
+<li>Being lazy</li>
 </ol></p>
 <p>Reducing errors is easy. We want to have a repeatable, dependable process that anyone can use to achieve the same results. If your deploy master has to know 15 steps and the ins and outs of some complex process, what happens when she goes on vacation? You don't do deployment. By automating you allow other people to perform the same task and you keep your computer working for you.</p>
 <p>But being lazy? Yes! <a href="http://www.paulagordon.com/shows/wall/">A truly great computer programmer is lazy</a> and does everything in their power to avoid having to work that they've already done before. Likewise, if you've done it 10 times, doesn't it get boring to do the same thing over and over again? Wouldn't you rather be getting coffee or reading blogs while your computer works at what it does best? In addition to general laziness, automation will make your life easier when you want to do other things that you know you should be doing like unit testing, integration testing and functional testing.</p>
@@ -135,14 +135,14 @@ There are two major reasons to automate:</p>
 <ul title="Easy things to Automate">
 <li>Compiling code</li>
 <li>Packaging code into JARs, WARs, etc</li>
-<li>Running unit tests</li><br />
+<li>Running unit tests</li>
 </ul></p>
 <p>Most people doing Java development will automate code compilation and packaging all of the time. Some of the times, they'll automate unit tests, sometimes deployment, and rarely a few other things. We usually use some excellent script-based tools for that kind of thing like <a href="http://ant.apache.org">Ant</a> or <a href="http://maven.apache.org/">Maven</a>. Even if you do all of these things, is that going far enough? I think that for most projects the answer is no. </p>
 <p>If you are slightly more ambitious you will also automate:</p>
 <ul title="Better Automation Includes">
 <li>Integration testing</li>
 <li>Functional testing</li>
-<li>Deployment</li><br />
+<li>Deployment</li>
 </ul></p>
 <p>There, now you've got all of your day-to-day activities automated. So you must be done right?</p>
 <h3>Generating Databases</h3></p>
@@ -154,21 +154,21 @@ There are two major reasons to automate:</p>
 <li>A task to create tablespaces (if you have separate tablespaces for each database)</li>
 <li>A task to create a user</li>
 <li>A task to generate the full schema</li>
-<li>A task to delete the user and drop the schema</li><br />
+<li>A task to delete the user and drop the schema</li>
 </ul></p>
 <p>Together these tasks can be woven together to fully to create the full database. To support development and testing, it is also handy to have loadable datasets around. Either maintain a list of SQL INSERT statements or use a tool like <a href="http://dbunit.sourceforge.net/">DBUnit</a> to load the data into your database. Often it can be nice to have a few sets of base data:</p>
 <ul title="Data sets">
 <li>Unit testing data</li>
 <li>Functional testing data</li>
-<li>Demo data for showing of to clients and manager</li><br />
+<li>Demo data for showing of to clients and manager</li>
 </ul></p>
 <p>The only thing lacking is an easy way to dump a schema from a working database so that you can use nice GUI tools to modify the database and then dump it out using an easy Ant target. Even with this, you'll likely need to maintain change scripts so that you can apply them to working production systems without wiping out all of the data. I guess since I'm complaining, that will have to be my next side project. Leave a comment if you know how to do this.</p>
-<h3>Conclusion</h3><br />
+<h3>Conclusion</h3>
 With a little bit of effort in going all the way with automation, you can make it easy for new people to come onto a project, you can make it easier to create and run all kinds of tests, and you can make the entire development process easier and more confident. The tools exist to help make automation easy, so why not?</p>
 <p>What things do you like to automate that you see people skipping on projects?</p>
-<h3>Resources</h3><br />
-Java Unit Testing: <a href="http://www.junit.org">JUnit</a>, <a href="http://testng.org">TestNG</a><br />
-Web Functional Testing: <a href="http://www.openqa.org/selenium/">Selenium</a><br />
+<h3>Resources</h3>
+Java Unit Testing: <a href="http://www.junit.org">JUnit</a>, <a href="http://testng.org">TestNG</a>
+Web Functional Testing: <a href="http://www.openqa.org/selenium/">Selenium</a>
 Java Build Automation: <a href="http://ant.apache.org">Ant</a></p>
-<h4>Update</h4><br />
+<h4>Update</h4>
 Looks like someone is a couple of steps ahead of me. While not a final release, the <a href="http://db.apache.org/ddlutils/ant-tasks.html">Apache DdlUtils</a> contains a set of Ant tasks that give you the ability to read and write database schemas as well as loading data sets defined in XML documents. Something to keep an eye on...</p>

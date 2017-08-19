@@ -94,83 +94,83 @@ comments:
     [...]"
 ---
 <p>SQL GROUP BY allows you to perform aggregate functions on data sets; To count all of the stores in each state, to average a series of related numbers, etc. MongoDB has <a href="http://www.mongodb.org/display/DOCS/Aggregation">some aggregate functions</a> but they are fairly limited in scope. The MongoDB group function also suffers from the fact that it does not work on <a href="http://en.wikipedia.org/wiki/Shard_(database_architecture)">sharded</a> configurations. So how do you perform grouped queries using MongoDB? By using MapReduce functions of course (you read the title right?)</p>
-<h3>Understanding MapReduce</h3><br />
+<h3>Understanding MapReduce</h3>
 Understanding MapReduce requires, or at least is made much easier by, understanding functional programming concepts. <em>map</em> and <em>reduce (fold, inject)</em> are functions that come from Lisp and have been inherited by a lot of languages (Scheme, Smalltalk, Ruby, Python).</p>
 <dl>
 <dt>map</dt>
 <dd>A higher-order function which transforms a list by applying a function to each of its elements. Its return value is the transformed list. In MongoDB terms, the map is a function that is run for each Document in a collection and can return a value for that row to be included in the transformed list.</dd></p>
 <dt>reduce</dt>
-<dd>A higher-order function that iterates an arbitrary function over a data structure and builds up a return value. The reduce function takes the values returned by map and allows you to run a function to manipulate those values in some way.</dd><br />
+<dd>A higher-order function that iterates an arbitrary function over a data structure and builds up a return value. The reduce function takes the values returned by map and allows you to run a function to manipulate those values in some way.</dd>
 </dl></p>
-<h3>Some Examples</h3><br />
-Let's start with some sample data:<br />
-<code lang="javascript"><br />
-db.factories.insert( { name: "Miller", metro: { city: "Milwaukee", state: "WI" } } );<br />
-db.factories.insert( { name: "Lakefront", metro: { city: "Milwaukee", state: "WI" } } );<br />
-db.factories.insert( { name: "Point", metro: { city: "Steven's Point", state: "WI" } } );<br />
-db.factories.insert( { name: "Pabst", metro: { city: "Milwaukee", state: "WI" } } );<br />
-db.factories.insert( { name: "Blatz", metro: { city: "Milwaukee", state: "WI" } } );<br />
-db.factories.insert( { name: "Coors", metro: { city: "Golden Springs", state: "CO" } } );<br />
-db.factories.find()<br />
-</code></p>
-<p>Lets say I want to count the number of factories in each of the cities (ignore the fact that I could have the same city in more than one state, I don't in my data). For a count, I write a function that "emits" the group by key and a value that you can count. It can be any value, but for simplicity I'll make it 1. <em>emit()</em> is a MongoDB server-side function that you use to identify a value in a row that should be added to the transformed list. If <em>emit()</em> is not called then the values for that row will be excluded from the results.<br />
-<code lang="javascript"><br />
-mapCity = function () {<br />
-    emit(this.metro.city, 1);<br />
-}<br />
-</code></p>
-<p>The next piece is the <em>reduce()</em> function. The reduce function will be passed a key and an array of values that were collected by the <em>map()</em> function. I know my map function returns a 1 for each row keyed by city. So the reduce function will be called with a key "Golden Springs" and a single-element array containing a 1. For "Milwaukee" it will be passed an 4-element array of 1s.<br />
-<code lang="javascript"><br />
-reduceCount = function (k, vals) {<br />
-    var sum = 0;<br />
-    for (var i in vals) {<br />
-        sum += vals[i];<br />
-    }<br />
-    return sum;<br />
-}<br />
-</code></p>
-<p>With those 2 functions I can call the mapReduce function to perform my Query.<br />
-<code lang="javascript"><br />
-res = db.factories.mapReduce(mapCity, reduceCount)<br />
-db[res.result].find()<br />
-</code></p>
-<p>This results in:<br />
-<code lang="javascript"><br />
-{ "_id" : "Golden Springs", "value" : 1 }<br />
-{ "_id" : "Milwaukee", "value" : 4 }<br />
-{ "_id" : "Steven's Point", "value" : 1 }<br />
-</code></p>
-<p>Counting is not the only thing I can do of course. Anything can be returned by the map function including complex JSON objects. In this example I combine the names of all of the Factories in a given City into a simple comma-separated list.<br />
-<code lang="javascript"><br />
-mapCity = function () {<br />
-    emit(this.metro.city, this.name);<br />
-}<br />
-reduceNames = function (k, vals) {<br />
-    return vals.join(",");<br />
-}<br />
-res = db.factories.mapReduce(mapCity, reduceNames)<br />
-db[res.result].find()<br />
-</code></p>
-<p>Give you:<br />
-<code lang="javascript"><br />
-{ "_id" : "Golden Springs", "value" : "Coors" }<br />
-{ "_id" : "Milwaukee", "value" : "Miller,Lakefront,Pabst,Blatz" }<br />
-{ "_id" : "Steven's Point", "value" : "Point" }<br />
-</code></p>
-<h3>Conclusion</h3><br />
+<h3>Some Examples</h3>
+Let's start with some sample data:
+{% highlight javascript %}
+db.factories.insert( { name: "Miller", metro: { city: "Milwaukee", state: "WI" } } );
+db.factories.insert( { name: "Lakefront", metro: { city: "Milwaukee", state: "WI" } } );
+db.factories.insert( { name: "Point", metro: { city: "Steven's Point", state: "WI" } } );
+db.factories.insert( { name: "Pabst", metro: { city: "Milwaukee", state: "WI" } } );
+db.factories.insert( { name: "Blatz", metro: { city: "Milwaukee", state: "WI" } } );
+db.factories.insert( { name: "Coors", metro: { city: "Golden Springs", state: "CO" } } );
+db.factories.find()
+{% endhighlight %}</p>
+<p>Lets say I want to count the number of factories in each of the cities (ignore the fact that I could have the same city in more than one state, I don't in my data). For a count, I write a function that "emits" the group by key and a value that you can count. It can be any value, but for simplicity I'll make it 1. <em>emit()</em> is a MongoDB server-side function that you use to identify a value in a row that should be added to the transformed list. If <em>emit()</em> is not called then the values for that row will be excluded from the results.
+{% highlight javascript %}
+mapCity = function () {
+    emit(this.metro.city, 1);
+}
+{% endhighlight %}</p>
+<p>The next piece is the <em>reduce()</em> function. The reduce function will be passed a key and an array of values that were collected by the <em>map()</em> function. I know my map function returns a 1 for each row keyed by city. So the reduce function will be called with a key "Golden Springs" and a single-element array containing a 1. For "Milwaukee" it will be passed an 4-element array of 1s.
+{% highlight javascript %}
+reduceCount = function (k, vals) {
+    var sum = 0;
+    for (var i in vals) {
+        sum += vals[i];
+    }
+    return sum;
+}
+{% endhighlight %}</p>
+<p>With those 2 functions I can call the mapReduce function to perform my Query.
+{% highlight javascript %}
+res = db.factories.mapReduce(mapCity, reduceCount)
+db[res.result].find()
+{% endhighlight %}</p>
+<p>This results in:
+{% highlight javascript %}
+{ "_id" : "Golden Springs", "value" : 1 }
+{ "_id" : "Milwaukee", "value" : 4 }
+{ "_id" : "Steven's Point", "value" : 1 }
+{% endhighlight %}</p>
+<p>Counting is not the only thing I can do of course. Anything can be returned by the map function including complex JSON objects. In this example I combine the names of all of the Factories in a given City into a simple comma-separated list.
+{% highlight javascript %}
+mapCity = function () {
+    emit(this.metro.city, this.name);
+}
+reduceNames = function (k, vals) {
+    return vals.join(",");
+}
+res = db.factories.mapReduce(mapCity, reduceNames)
+db[res.result].find()
+{% endhighlight %}</p>
+<p>Give you:
+{% highlight javascript %}
+{ "_id" : "Golden Springs", "value" : "Coors" }
+{ "_id" : "Milwaukee", "value" : "Miller,Lakefront,Pabst,Blatz" }
+{ "_id" : "Steven's Point", "value" : "Point" }
+{% endhighlight %}</p>
+<h3>Conclusion</h3>
 These are fairly simple examples, but I think it helps to work through this kind of simple thing to fully understand a new technique before you have to work with harder examples.</p>
 <p>For more on MongoDB check out these books:</p>
 <ul>
 <li>
-<a href="http://www.amazon.com/gp/product/1449381561?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1449381561">MongoDB: The Definitive Guide</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=1449381561" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /><br />
+<a href="http://www.amazon.com/gp/product/1449381561?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1449381561">MongoDB: The Definitive Guide</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=1449381561" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
 </li></p>
 <li>
-<a href="http://www.amazon.com/gp/product/1430230517?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1430230517">The Definitive Guide to MongoDB: The NoSQL Database for Cloud and Desktop Computing</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=1430230517" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /><br />
+<a href="http://www.amazon.com/gp/product/1430230517?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1430230517">The Definitive Guide to MongoDB: The NoSQL Database for Cloud and Desktop Computing</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=1430230517" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
 </li></p>
 <li>
-<a href="http://www.amazon.com/gp/product/0321705335?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0321705335">MongoDB for Web Development (Developer's Library)</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=0321705335" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /><br />
+<a href="http://www.amazon.com/gp/product/0321705335?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0321705335">MongoDB for Web Development (Developer's Library)</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=0321705335" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
 </li></p>
 <li>
-<a href="http://www.amazon.com/gp/product/0262062186?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0262062186">How to Design Programs: An Introduction to Programming and Computing</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=0262062186" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /> - If you want to learn more about functional programming I highly recommend this book.<br />
-</li><br />
+<a href="http://www.amazon.com/gp/product/0262062186?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0262062186">How to Design Programs: An Introduction to Programming and Computing</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=0262062186" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /> - If you want to learn more about functional programming I highly recommend this book.
+</li>
 </ul></p>

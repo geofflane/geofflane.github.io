@@ -70,62 +70,62 @@ comments:
 ---
 <p>Using Ajax for simple forms can offer users a very clean, simple and fast way to input data. I came across a situation recently where I was looking into replacing a document based workflow with an application. The documents themselves contained a series of different kinds of transactions that could have occurred. There were not a set number of any of the types and the user needed a simple way to enter many rows of data.</p>
 <p><a href="http://grails.org">Grails</a> offers some very easy to use simple Ajax controls. The <em>formRemote</em> tag has an <em>update</em> parameter that can be used to specify a DOM element to update after the form is submitted. This is Ajax in it's simplest form. Submit some data and replace the contents of a DOM element with a partial-page update. This works well if you want to update a div for example. But what if you want to add a row to a table? In the standard update method, you would have to re-render the entire table contents. In many cases that will be fine, but I figured I could do better than that and just render the new row and add it to the table.</p>
-<h3>Defining Domain Classes</h3><br />
+<h3>Defining Domain Classes</h3>
 For this example we'll start with some simple classes. An <em>Account</em> can have many <em>Checks</em> posted against it. There are no set number, so we define a <em>hasMany</em> relationship between the Account and the Checks.</p>
-<p><code lang="groovy"><br />
-class Account {<br />
-    static transients = ['checksTotal']<br />
+<p>{% highlight groovy %}
+class Account {
+    static transients = ['checksTotal']
     static hasMany = [checks:Check]</p>
 <p>    Date date = new Date()</p>
-<p>    Double getChecksTotal() {<br />
-        if (! checks)<br />
-            return 0<br />
-        return checks.inject(0) { current, check-> current + check.amount }<br />
+<p>    Double getChecksTotal() {
+        if (! checks)
+            return 0
+        return checks.inject(0) { current, check-> current + check.amount }
     }</p>
-<p>    static mapping = {<br />
-    	  checks joinTable: false<br />
-    }<br />
+<p>    static mapping = {
+    	  checks joinTable: false
+    }
 }</p>
-<p>class Check {<br />
-    String name<br />
-    Double amount<br />
-    String checkNumber<br />
-    String reason<br />
-}<br />
-</code></p>
-<h3>Creating a Controller</h3><br />
+<p>class Check {
+    String name
+    Double amount
+    String checkNumber
+    String reason
+}
+{% endhighlight %}</p>
+<h3>Creating a Controller</h3>
 Next we need to create a Controller to mediate between our Domain and our Views. The Controller is setup to generate the default scaffold. We'll end up overriding the <em>show</em> view to add a form on the page to easily post Checks to that Account. The action is the <em>postCheck</em> action. This is our Ajax action that will post the Check to the Account.</p>
-<p><code lang="groovy"><br />
+<p>{% highlight groovy %}
 class AccountController {</p>
 <p>    def scaffold = true</p>
-<p>    def postCheck = {<br />
-        def account = Account.get(params.id)<br />
-        if(account) {<br />
-            def check = new Check(params)<br />
-            account.addToChecks(check)<br />
-            if(! account.hasErrors() && account.save()) {<br />
-                render template:'check', bean:check, var:'check'<br />
-            }<br />
-        }<br />
-    }<br />
-}<br />
-</code></p>
+<p>    def postCheck = {
+        def account = Account.get(params.id)
+        if(account) {
+            def check = new Check(params)
+            account.addToChecks(check)
+            if(! account.hasErrors() && account.save()) {
+                render template:'check', bean:check, var:'check'
+            }
+        }
+    }
+}
+{% endhighlight %}</p>
 <p>The <em>postCheck</em> method calls the <em>render</em> method to render a template and return it as the Ajax response. This template contains the markup for a single Check row.</p>
-<p>You can see the check template here:<br />
-<code lang="xml"></p>
+<p>You can see the check template here:
+{% highlight xml %}</p>
 <tr>
 <td>${check?.name}</td></p>
 <td>${check?.checkNumber}</td></p>
 <td><g:formatNumber number="${check?.amount}" format="\$###,##0" /></td></p>
-<td>${check?.reason}</td><br />
-</tr><br />
-</code></p>
-<h3>Creating the Ajax Form</h3><br />
+<td>${check?.reason}</td>
+</tr>
+{% endhighlight %}</p>
+<h3>Creating the Ajax Form</h3>
 Now we need to add the form to our <em>account/show.gsp</em> so that we can call the <em>AccountController.postCheck</em> action. The example form is below. The thing to notice is that we're not using the update parameter of the formRemote, but rather the onSuccess parameter. The update method tell the Ajax callback what element to replace but we can't do that with a table. onSuccess on the other hand allows us to handle the returned values in our own way. Here' we're going to call the <em>appendTableRow</em> Javascript function to handle the response.</p>
 <p>In this case I definitely don't want to replace the entire node because the first row of my table is actually the form itself. This gives it a very nice look where the data is entered under the appropriate header and then immediately shows up as the following row when the user hits enter.</p>
-<p><code lang="xml"></p>
-<h3>Checks</h3><br />
-<g:formRemote name="postCheck" url="[action: 'postCheck', params: [id:account?.id]]"<br />
+<p>{% highlight xml %}</p>
+<h3>Checks</h3>
+<g:formRemote name="postCheck" url="[action: 'postCheck', params: [id:account?.id]]"
         onSuccess="appendTableRow('checks', e)"></p>
 <table id="checks">
 <thead>
@@ -133,25 +133,25 @@ Now we need to add the form to our <em>account/show.gsp</em> so that we can call
 <th>Name</th></p>
 <th>Check #</th></p>
 <th>Amount</th></p>
-<th>Reason</th><br />
-        </tr><br />
+<th>Reason</th>
+        </tr>
         </thead></p>
 <tbody>
 <tr>
 <td><g:textField id="name" name="name"/></td></p>
 <td><g:textField id="checkNumber" name="checkNumber"/></td></p>
 <td><g:textField id="amount" name="amount"/></td></p>
-<td><g:textField id="reason" name="reason"/></td><br />
-        </tr><br />
-        <g:render template="check" collection="${account?.checks}" var="check"/><br />
-        </tbody><br />
-    </table><br />
-</g:formRemote><br />
-</code></p>
-<p>Luckily the appendTableRow function is made pretty easy by using the <a href="http://www.prototypejs.org/">prototype</a> APIs. The event returned to us is an HTML snippet, so in this case we just want to insert that snippet directly into the DOM which is accomplished with the <em>insert</em> prototype function.<br />
-<code lang="javascript"><br />
-function appendTableRow(tableId, e) {<br />
-    $(tableId).down('tbody').down('tr').insert({after: e.responseText});<br />
-}<br />
-</code></p>
+<td><g:textField id="reason" name="reason"/></td>
+        </tr>
+        <g:render template="check" collection="${account?.checks}" var="check"/>
+        </tbody>
+    </table>
+</g:formRemote>
+{% endhighlight %}</p>
+<p>Luckily the appendTableRow function is made pretty easy by using the <a href="http://www.prototypejs.org/">prototype</a> APIs. The event returned to us is an HTML snippet, so in this case we just want to insert that snippet directly into the DOM which is accomplished with the <em>insert</em> prototype function.
+{% highlight javascript %}
+function appendTableRow(tableId, e) {
+    $(tableId).down('tbody').down('tr').insert({after: e.responseText});
+}
+{% endhighlight %}</p>
 <p>In the end you have a data table that allows for easy, fast updates with almost no hassle.</p>

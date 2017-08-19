@@ -22,260 +22,161 @@ tags:
 - compact framework
 - xml
 - windows-mobile
-comments:
-- id: 9435
-  author: ".NET Compact Framework Serialization Bugs"
-  author_email: ''
-  author_url: http://www.zorched.net/2007/02/27/net-compact-framework-serialization-bugs/
-  date: '2007-02-28 11:28:52 -0500'
-  date_gmt: '2007-02-28 17:28:52 -0500'
-  content: "[...] follow-up post on Writing a Custom XML Serializer has been [...]"
-- id: 10665
-  author: Andrew Arnott
-  author_email: andrewarnott@gmail.com
-  author_url: http://jmpinline.nerdbank.net
-  date: '2007-04-05 12:45:48 -0400'
-  date_gmt: '2007-04-05 18:45:48 -0400'
-  content: So what are the bugs in NetCF's serializer that you ran into?  And have
-    you tried CF 2.0 SP2 to see if the problems were fixed?
-- id: 10676
-  author: Geoff Lane
-  author_email: geoff@zorched.net
-  author_url: http://www.zorched.net
-  date: '2007-04-09 09:26:18 -0400'
-  date_gmt: '2007-04-09 15:26:18 -0400'
-  content: "Andrew,\r\nSee the linked post inline to <a href=\"http://www.zorched.net/2007/02/27/net-compact-framework-serialization-bugs/\"
-    rel=\"nofollow\">here</a> to read about the problems I ran into with XmlEnum
-    and PropertySpecified. Luckily both of these bugs have been fixed in the .NET
-    CF 2.0 SP2 release."
-- id: 11186
-  author: Coder12
-  author_email: Coder@coder.com
-  author_url: ''
-  date: '2008-03-10 23:34:07 -0400'
-  date_gmt: '2008-03-11 05:34:07 -0400'
-  content: "What is the point of using XML limited serializer if you can get the real
-    fast binary one\r\nhttp://www.freewebs.com/compactFormatter/links.html\r\nhttp://www.codeproject.com/KB/cs/CF_serializer.aspx"
-- id: 11187
-  author: Geoff Lane
-  author_email: geoff@zorched.net
-  author_url: http://www.zorched.net
-  date: '2008-03-11 06:44:04 -0400'
-  date_gmt: '2008-03-11 12:44:04 -0400'
-  content: "Coder12,\r\nThe point is that the entire world does not run .NET and if
-    you are going to be sending data to a remote service, you'll need to interoperate
-    with said service and its existing contract."
-- id: 11188
-  author: Coder12
-  author_email: Coder@coder.com
-  author_url: ''
-  date: '2008-03-11 19:10:46 -0400'
-  date_gmt: '2008-03-12 01:10:46 -0400'
-  content: "Geoff wrote:\r\nCoder12,\r\nThe point is that the entire world does not
-    run .NET and if you are going to be sending data to a remote service, you&acirc;&euro;&trade;ll
-    need to interoperate with said service and its existing contract.\r\n\r\nYou are
-    wrong Geoff,\r\nThe XML serializer is as useless as Binary one on different platform
-    because there is NO STANDARDS on the serialization/deserialization.  Only
-    SOAP &acirc;&euro;&ldquo; which is very inefficient and limited. Using XML serializer
-    on another platform only allows for adjusting your MANUALLY built serializer because
-    the stream (text) can be read. But you can do the same with a binary one. The
-    only difference is that the stream can not be viewed by a primitive text editor.
-    That is a common misconception."
-- id: 11189
-  author: Geoff Lane
-  author_email: geoff@zorched.net
-  author_url: http://www.zorched.net
-  date: '2008-03-11 19:54:34 -0400'
-  date_gmt: '2008-03-12 01:54:34 -0400'
-  content: "Coder12,\r\nI was serializing to XML that was being consumed by a Java
-    service. This is a real application where the Java service existed prior to the
-    .NETCF client. And it works. To claim that it useless for interoperation seems
-    to fly in the face of the fact that this is a real application. XML is a standard
-    supported by many languages. Making your objects serialize to a specific schema
-    allows it to be consumed by any language that could understand that schema. The
-    XML serialization gives you control over the format that comes out, not because
-    it's ASCII based, but because it's a configurable through declarative Attributes.
-    So I can make my objects output XML that matches that existing schema.\r\n\r\nI
-    think you are considering serializing only as a means of freezing and reconstituting
-    objects. In that case, sure that can't work across languages. But serializing
-    or marshaling is just representing object data and structure in a different format.
-    In this case an XML format is one that can be used by other tools much more easily
-    than a binary one."
-- id: 12347
-  author: Felipe Roos
-  author_email: felipe.roos@hp.com
-  author_url: http://www.linkedin.com/in/feliperoos
-  date: '2008-06-06 09:18:06 -0400'
-  date_gmt: '2008-06-06 15:18:06 -0400'
-  content: "Hi Geoff, \r\n\r\nI've trying this serialization code with TcpListener
-    and TcpClient to interprocess communication in a same pocket pc.\r\nBoth client
-    and server sockets seems to be ok, but when debugging they seems to be in deadlock.
-    A small code excerpt from client and server is below:\r\n//server:\r\n
-    \               TcpListener listener = new TcpListener(IPAddress.Loopback, port);\r\n
-    \               listener.Start();\r\n                TcpClient myClient = listener.AcceptTcpClient();\r\n
-    \               XmlSerializer stringSerial = new XmlSerializer(typeof(string));\r\n
-    \               string methodName = (string)stringSerial.Deserialize(netStream);\r\n
-    \               XmlSerializer boolSerial = new XmlSerializer(typeof(bool));\r\n
-    \               result  = true;\r\n                boolSerial.Serialize(netStream,
-    result);\r\n                listener.Stop();\r\n//client\r\n                TcpClient
-    client = new TcpClient(IPAddress.Loopback.ToString(), port);\r\n                NetworkStream
-    netStream = client.GetStream();\r\n                XmlSerializer stringSerial
-    = new XmlSerializer(typeof(string));\r\n                string metName = \"SomeString\";\r\n
-    \               stringSerial.Serialize(netStream, metName);\r\n                bool
-    resultOk = (bool)boolSerial.Deserialize(netStream);\r\n\r\nWhat happens is, Serialize
-    from client happens and then it ways for Deserialize. However, server nevers identify
-    that the Serialize was made, and waits forever on the Deserialize.\r\nIs this
-    the kind of problem you refer when working with serialization on .Net Framework?\r\n\r\nRegards,"
-- id: 13237
-  author: Dere
-  author_email: macguyver13@hotmail.com
-  author_url: ''
-  date: '2008-06-20 11:32:45 -0400'
-  date_gmt: '2008-06-20 17:32:45 -0400'
-  content: "Felipe,\r\n\r\nI was trying to do the same thing and discovered that after
-    you call the Serialize function, you must call Close on the stream. For example,
-    your code would be:\r\n\r\nXmlSerializer stringSerial = new XmlSerializer(typeof(string));\r\nstring
-    metName = &acirc;&euro;&oelig;SomeString&acirc;&euro;\x9D;\r\nstringSerial.Serialize(netStream,
-    metName);\r\nnetStream.Close();\r\n\r\nThat will allow the server to finish the
-    read. It appears to be waiting for the stream to finish before finalizing the
-    deserialization on the server's end."
 ---
 <p>.NET provides a whole slew of utilities for serializing objects into an XML form. But as I wrote in my previous post, <a href="http://www.zorched.net/2007/02/27/net-compact-framework-serialization-bugs/">.NET Compact Framework has serious problems with this serialization</a>. The good news is that you can leverage all of the existing Attributes and tricks that you think should work (if it weren't so buggy) and use them in your own serialization scheme.</p>
-<h3>Get Started</h3><br />
+<h3>Get Started</h3>
 For example I want to know if I should skip a given member? There are a number of different things I can check. Is a Reference type null? Is there and XmlIgnore attribute? Is there a <em>PropertyName</em>Specified value set to false? All of those questions can easily be answered using reflection.</p>
-<p><code><br />
-///<br />
-<summary>
-/// Should the current property be skipped based on rules<br />
-/// such as the existence of a propertySpecified value set to false?<br />
-/// </summary><br />
-///
-<param name="member">The MemberInfo to check</param><br />
-///
-<param name="o">The object that contained this member</param><br />
-/// <returns>true if this member should be skipped</returns><br />
-public bool SkipMember(MemberInfo member, object o)<br />
-{<br />
-    object val = null;<br />
-    if (member.MemberType == MemberTypes.Field)<br />
-    {<br />
-        val = ((FieldInfo)member).GetValue(o);<br />
-    }<br />
-    else if (member.MemberType == MemberTypes.Property)<br />
-    {<br />
-        val = ((PropertyInfo)member).GetValue(o, null);<br />
-    }</p>
-<p>    if (null == val)<br />
-        return true;</p>
-<p>    string propertyToTest = member.Name + "Specified";</p>
-<p>    PropertyInfo specifiedProperty = o.GetType().GetProperty(propertyToTest);<br />
-    if ((null != specifiedProperty && !(bool)specifiedProperty.GetValue(o, null)))<br />
-        return true;</p>
-<p>    FieldInfo specifiedField = o.GetType().GetField(propertyToTest, FIELD_BINDING_FLAGS);<br />
-    if ((null != specifiedField && !(bool)specifiedField.GetValue(o)))<br />
-        return true;</p>
-<p>    return member.IsDefined(typeof(XmlIgnoreAttribute), false);<br />
-}<br />
-</code></p>
+<p>
+{% highlight csharp %}
+/// <summary>
+/// Should the current property be skipped based on rules
+/// such as the existence of a propertySpecified value set to false?
+/// </summary>
+/// <param name="member">The MemberInfo to check</param>
+/// <param name="o">The object that contained this member</param>
+/// <returns>true if this member should be skipped</returns>
+public bool SkipMember(MemberInfo member, object o)
+{
+    object val = null;
+    if (member.MemberType == MemberTypes.Field)
+    {
+        val = ((FieldInfo)member).GetValue(o);
+    }
+    else if (member.MemberType == MemberTypes.Property)
+    {
+        val = ((PropertyInfo)member).GetValue(o, null);
+    }
+    if (null == val)
+      return true;
+
+    string propertyToTest = member.Name + "Specified";
+    PropertyInfo specifiedProperty = o.GetType().GetProperty(propertyToTest);
+    if ((null != specifiedProperty && !(bool)specifiedProperty.GetValue(o, null)))
+        return true;
+
+    FieldInfo specifiedField = o.GetType().GetField(propertyToTest, FIELD_BINDING_FLAGS);
+    if ((null != specifiedField && !(bool)specifiedField.GetValue(o)))
+        return true;
+
+    return member.IsDefined(typeof(XmlIgnoreAttribute), false);
+}
+{% endhighlight %}</p>
 <p>I can use a similar "fall-through" strategy to determine the name of the element to write using the XmlElement attribute for example. Now that I know I can answer some basic questions about an Object using the built-in mechanisms that .NET uses for serialization I can get down to serious serialization.</p>
 <p>We're all Object-Oriented programmers these days right? Right!? So to start I decided that the best way to handle this problem was to decompose it into a bunch of simpler problems.</p>
-<h3>ITagWriter</h3><br />
+<h3>ITagWriter</h3>
 There are two things that we can write in XML. Either an XML Element or an XML Attribute. So, I created an interface <code class="inline">ITagWriter</code> with two concrete implementations to correspond to these two XML types: <code class="inline">AttributeTagWriter</code> and <code class="inline">ElementTagWriter</code>. These classes allow me to write the structure of the XML Document.</p>
-<p><code><br />
-///<br />
-<summary>
-/// Interface to implement to write different Xml tags<br />
-/// Either Elements or Attributes.<br />
-/// </summary><br />
-internal interface ITagWriter<br />
-{<br />
-    ///<br />
-<summary>
-    /// Write the opening Xml tag with the given name<br />
-    /// </summary><br />
-    ///
-<param name="doc">The XML Document to write the tage to.</param><br />
-    ///
-<param name="tagName">The name of the tag</param><br />
-    void WriteStart(XmlWriter doc, string tagName);</p>
-<p>    ///<br />
-<summary>
-    /// Write the appropriate end tag<br />
-    /// </summary><br />
-    ///
-<param name="doc">The XML Document to write the tage to.</param><br />
-    void WriteEnd(XmlWriter doc);<br />
-}<br />
-</code></p>
-<h3>IValueWriter</h3><br />
+<p>
+{% highlight csharp %}
+/// <summary>
+/// Interface to implement to write different Xml tags
+/// Either Elements or Attributes.
+/// </summary>
+internal interface ITagWriter
+{
+    /// <summary>
+    /// Write the opening Xml tag with the given name
+    /// </summary>
+    /// <param name="doc">The XML Document to write the tage to.</param>
+    /// <param name="tagName">The name of the tag</param>
+    void WriteStart(XmlWriter doc, string tagName);
+    /// <summary>
+    /// Write the appropriate end tag
+    /// </summary>
+    /// <param name="doc">The XML Document to write the tage to.</param>
+    void WriteEnd(XmlWriter doc);
+}
+{% endhighlight %}</p>
+<h3>IValueWriter</h3>
 With the ability to write the structure, I then need to be able to write out the values of the various objects and their properties. Just like with the <code class="inline">ITagWriter</code> interface, I decided to create an <code class="inline">IValueWriter</code> for the various kinds of values that I would need to write. The types I came up with were <code class="inline">ObjectWriter</code>, <code class="inline">CollectionValueWriter</code>, <code class="inline">EnumValueWriter</code>, <code class="inline">SimpleValueWriter</code>, and <code class="inline">XmlElementValueWriter</code>.</p>
-<p><code><br />
-///<br />
-<summary>
-/// Interface to implement to write different kinds of values.<br />
-/// </summary><br />
-internal interface IValueWriter<br />
-{<br />
-    ///<br />
-<summary>
-    /// Write the Entry value to the XmlDocument<br />
-    /// </summary><br />
-    ///
-<param name="doc">The XML Document to write the tage to.</param><br />
-    ///
-<param name="entry">The meta-information and value to write.</param><br />
-    void Write(XmlWriter doc, CustomSerializationEntry entry);<br />
-}<br />
-</code></p>
-<p>You'll notice the <code class="inline">CustomSerializationEntry</code> class is the parameter for the <code class="inline">IValueWriter.Write()</code> method. This class contains all of the metadata and the value about the various properties of an Object. This alows us an easy way to ask questions about a given property. Is it a Collection? Is it an Enum? Is there a sort order? Basically the idea is to encapsulate all of the things that are interesting from a serialization point of view.</p>
-<p>To help manage the interaction I also created a basic <code class="inline">TypeLookup</code> class. The job of this class is to determine what type of <code class="inline">ITagWriter</code> and <code class="inline">IValueWriter</code> to use for a given <code class="inline">CustomSerializationEntry</code> instance. This allows us to centralize that decision making in a single class. The centralized knowledge keeps the individual writer implementations much simpler. They just need to ask for the correct writer and then call the methods defined in the interface. They don't need to care what type they are writing. All hail power of encapsulation and abstraction!</p>
-<h3>Start Serializing</h3><br />
-I bootstrap the serialization by creating an ObjectWriter to handle the outermost object. From there, the ObjectWriter takes over, constructing CustomSerializationEntry objects for each of the serialized object's properties. The type of the property determines the type of IValueWriter that is used to write the property value.</p>
-<p><code><br />
-///<br />
-<summary>
-/// Serialize an object using the given<br />
-///
-<paramref name="xmlRoot">xmlRoot</paramref> as the root element name.<br />
-/// </summary><br />
-///
-<param name="o"></param><br />
-///
-<param name="xmlRoot"></param><br />
-/// <returns></returns><br />
-public string Serialize(object o, string xmlRoot)<br />
-{<br />
-    StringBuilder sb = new StringBuilder();<br />
-    using (XmlTextWriter writer = new XmlTextWriter(new StringWriter(sb)))<br />
-    {<br />
-        writer.Formatting = Formatting.Indented;</p>
-<p>        XmlWriter xmlDoc = XmlWriter.Create(writer);<br />
-        WriteRootElement(xmlDoc, o, xmlRoot);<br />
-    }</p>
-<p>    return sb.ToString();<br />
-}</p>
-<p>private static void WriteRootElement(XmlWriter doc, object o, string rootElement)<br />
-{<br />
-    doc.WriteStartDocument();</p>
-<p>    ObjectWriter writer = new ObjectWriter(new TypeLookup());<br />
-    writer.Write(doc, o, rootElement);</p>
-<p>    doc.WriteEndDocument();<br />
-}<br />
-</code></p>
-<p>The ObjectWriter itself creates a CustomSerializationEntry for all the properties that should be written. It then loops over the properties. Notice how it uses the TypeLookup (lookup) to ask for the proper value writer for each of the properties.<br />
-<code><br />
-// ...<br />
-        public void Write(XmlWriter doc, object o, string elementName)<br />
-        {<br />
-            doc.WriteStartElement(elementName);<br />
-            IEnumerable<CustomSerializationEntry> entries = GetMemberInfo(o);<br />
-            foreach (CustomSerializationEntry currentEntry in entries)<br />
-            {<br />
-                lookup.GetValueWriter(currentEntry).Write(doc, currentEntry);<br />
-            }<br />
-            doc.WriteEndElement();<br />
-        }<br />
-// ...<br />
-</code></p>
-<h3>Conclusion</h3><br />
-OK, so I left out a lot of details! But If I gave you all of the answers it wouldn't be any fun now would it. I hope you can see how decomposing the problem of serialization turns it a series of relatively simple problems that you can answer. So, if I can do this in about 500 lines of code, how come Microsoft can't implement a decent XML Serializer for the .NET Compact Framework.</p>
+<p>
+{% highlight csharp %}
+/// <summary>
+/// Interface to implement to write different kinds of values.
+/// </summary>
+internal interface IValueWriter
+{
+    /// <summary>
+    /// Write the Entry value to the XmlDocument
+    /// </summary>
+    /// <param name="doc">The XML Document to write the tage to.</param>
+    /// <param name="entry">The meta-information and value to write.</param>
+    void Write(XmlWriter doc, CustomSerializationEntry entry);
+}
+{% endhighlight %}</p>
+<p>You'll notice the <code class="inline">CustomSerializationEntry</code> class
+  is the parameter for the <code class="inline">IValueWriter.Write()</code>
+  method. This class contains all of the metadata and the
+    value about the various properties of an Object. This alows us an easy way
+    to ask questions about a given property. Is it a Collection? Is it an Enum?
+    Is there a sort order? Basically the idea is to encapsulate all of the
+    things that are interesting from a serialization point of view.</p>
+  <p>To help manage the interaction I also created a basic <code
+      class="inline">TypeLookup</code> class. The job of this class is to
+    determine what type of <code class="inline">ITagWriter</code>
+    and <code class="inline">IValueWriter</code> to use for a
+    given <code class="inline">CustomSerializationEntry</code>
+          instance. This allows us to centralize that decision making in a
+          single class. The centralized knowledge keeps the individual writer
+          implementations much simpler. They just need to ask for the correct
+          writer and then call the methods defined in the interface. They don't
+          need to care what type they are writing. All hail power of
+          encapsulation and abstraction!</p>
+<h3>Start Serializing</h3>
+I bootstrap the serialization by creating an ObjectWriter to handle the
+outermost object. From there, the ObjectWriter takes over, constructing
+CustomSerializationEntry objects for each of the serialized object's
+properties. The type of the property determines the type of IValueWriter that
+is used to write the property value.</p>
+<p>
+{% highlight csharp %}
+/// <summary>
+/// Serialize an object using the given
+/// <paramref name="xmlRoot">xmlRoot</paramref> as the root element name.
+/// </summary>
+/// <param name="o"></param>
+/// <param name="xmlRoot"></param>
+/// <returns></returns>
+public string Serialize(object o, string xmlRoot)
+{
+    StringBuilder sb = new StringBuilder();
+    using (XmlTextWriter writer = new XmlTextWriter(new StringWriter(sb)))
+    {
+        writer.Formatting = Formatting.Indented;
+        XmlWriter xmlDoc = XmlWriter.Create(writer);
+        WriteRootElement(xmlDoc, o, xmlRoot);
+    }
+    return sb.ToString();
+}
+private static void WriteRootElement(XmlWriter doc, object o, string rootElement)
+{
+    doc.WriteStartDocument();
+    ObjectWriter writer = new ObjectWriter(new TypeLookup());
+    writer.Write(doc, o, rootElement);
+    doc.WriteEndDocument();
+}
+{% endhighlight %}</p>
+<p>The ObjectWriter itself creates a CustomSerializationEntry for all the
+  properties that should be written. It then loops over the properties. Notice
+  how it uses the TypeLookup (lookup) to ask for the proper value writer for
+  each of the properties.
+{% highlight csharp %}
+// ...
+        public void Write(XmlWriter doc, object o, string elementName)
+        {
+            doc.WriteStartElement(elementName);
+            IEnumerable<CustomSerializationEntry> entries = GetMemberInfo(o);
+            foreach (CustomSerializationEntry currentEntry in entries)
+            {
+                lookup.GetValueWriter(currentEntry).Write(doc, currentEntry);
+            }
+            doc.WriteEndElement();
+        }
+// ...
+{% endhighlight %}</p>
+<h3>Conclusion</h3>
+OK, so I left out a lot of details! But If I gave you all of the answers it
+wouldn't be any fun now would it. I hope you can see how decomposing the
+problem of serialization turns it a series of relatively simple problems that
+you can answer. So, if I can do this in about 500 lines of code, how come
+Microsoft can't implement a decent XML Serializer for the .NET Compact
+Framework.</p>

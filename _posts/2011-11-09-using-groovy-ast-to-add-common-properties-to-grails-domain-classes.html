@@ -22,123 +22,69 @@ tags:
 - groovy
 - meta-programming
 - grails
-comments:
-- id: 17995
-  author: Chris
-  author_email: imbaroxxor@gmail.com
-  author_url: ''
-  date: '2011-12-06 18:22:59 -0500'
-  date_gmt: '2011-12-07 00:22:59 -0500'
-  content: "Hi\r\nlove the article... finally understand a little more AST... \r\ni
-    am trying todo what you do but i am getting an:\r\n\r\nInternal compiler error:
-    java.lang.NullPointerException at \r\n org.codehaus.groovy.transform.ASTTransformationVisitor.visitClass(ASTTransformationVisitor.java:159)\r\n\r\nwhen
-    i annotate my class\r\n\r\ni tried it in IntelliJ  and STS... both have the same
-    result...\r\n\r\nAny help would be appriciated"
-- id: 17996
-  author: Geoff Lane
-  author_email: geoff@zorched.net
-  author_url: http://www.zorched.net
-  date: '2011-12-06 18:30:42 -0500'
-  date_gmt: '2011-12-07 00:30:42 -0500'
-  content: "@Chris,\r\nAST Transformations are really hard to debug since they're
-    done at compile time. I've seen that issue myself when I didn't have things quite
-    right. I'd try using some println statements and catching runtime exceptions (and
-    then printing out the results) to figure out what's happening. Other than that,
-    it's a bit hard to say without seeing more code..."
-- id: 17997
-  author: Chris
-  author_email: imbaroxxor@gmail.com
-  author_url: ''
-  date: '2011-12-06 23:46:23 -0500'
-  date_gmt: '2011-12-07 05:46:23 -0500'
-  content: "well the thing is that i dont even have anything in the ast transformation
-    class... but as soon as i just add the annoation \r\n\r\n@GroovyASTTransformationClass({
-    \"com..util.ast.AddDateASTTransformation\" })\r\n\r\nit brings me the error...
-    seems like there maybe an issue with groovy or something... \r\n\r\nmaybe you
-    have any tricks how to reset the groovy compilation? or do you maybe have an example
-    project that i could try?\r\n\r\nthis is what my annotation looks like:\r\n\r\n\r\n\r\nimport
-    java.lang.annotation.ElementType;\r\nimport java.lang.annotation.Retention;\r\nimport
-    java.lang.annotation.RetentionPolicy;\r\nimport java.lang.annotation.Target;\r\n\r\nimport
-    org.codehaus.groovy.transform.GroovyASTTransformationClass;\r\n\r\n@Target({ ElementType.TYPE
-    })\r\n@Retention(RetentionPolicy.RUNTIME)\r\n@GroovyASTTransformationClass({ \"com.util.ast.AddDateASTTransformation\"
-    })\r\npublic @interface AddDate {\r\n}\r\n\r\nthanks for any help\r\n\r\nChris"
-- id: 17998
-  author: Chris
-  author_email: imbaroxxor@gmail.com
-  author_url: ''
-  date: '2011-12-06 23:47:10 -0500'
-  date_gmt: '2011-12-07 05:47:10 -0500'
-  content: like the project wont even compile anymore
-- id: 18113
-  author: m3rol
-  author_email: m3rol666@gmail.com
-  author_url: ''
-  date: '2012-10-16 23:49:23 -0400'
-  date_gmt: '2012-10-17 05:49:23 -0400'
-  content: just change the "{"  for "["  its groovy man.
 ---
 <p>Groovy offers a lot of runtime meta-programming capabilities that allow you to add reusable functionality in a shared fashion. Grails plugins make use of this ability to enhance your project. One of the things that you can't do with runtime meta-programming in Grails is to add persistent Hibernate properties to your domain classes. If you want to add a persistent property in a plugin (or otherwise using meta-programming) for your Grails project you have to make use of "compile-time" meta-programming. In Groovy this is done with <abbr title="Abstract Syntax Tree">AST</abbr> Transformations.</p>
 <p>(If you are unfamiliar with the concept of the Abstract Syntax Tree, see the <a href="http://en.wikipedia.org/wiki/Abstract_syntax_tree">Wikipedia article on Abstract Syntax Tree</a>.)</p>
 <p>AST Transformations are made up of two parts: (1) An annotation and (2) an ASTTransformation implementation. During compilation the Groovy compiler finds all of the Annotations and calls the ASTTransformation implementation for the annotation passing in information about.</p>
 <p>To create your own Transformation you start by creating an Annotation. The key to the annotation working is that your annotation has to itself be annotated with @GroovyASTTransformationClass. The values passed to the GroovyASTTransformationClass define the Transformation that will be called on classes, methods or other code prior to it being compiled.</p>
-<h3>Example Annotation</h3><br />
-<code lang="groovy"><br />
+<h3>Example Annotation</h3>
+{% highlight groovy %}
 package net.zorched.grails.effectivity;</p>
-<p>import org.codehaus.groovy.transform.GroovyASTTransformationClass;<br />
+<p>import org.codehaus.groovy.transform.GroovyASTTransformationClass;
 import java.lang.annotation.*;</p>
-<p>@Target({ElementType.TYPE})<br />
-@Retention(RetentionPolicy.RUNTIME)<br />
-@GroovyASTTransformationClass({"net.zorched.grails.effectivity.EffectivizeASTTransformation"})<br />
-public @interface Effectivize {<br />
-}<br />
-</code></p>
+<p>@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@GroovyASTTransformationClass({"net.zorched.grails.effectivity.EffectivizeASTTransformation"})
+public @interface Effectivize {
+}
+{% endhighlight %}</p>
 <p>Notice the reference to <em>net.zorched.grails.effectivity.EffectivizeASTTransformation</em>. That's the important part because it defines the class that will be used to perform the transformation.</p>
-<h3>Example Transformation</h3><br />
-<code lang="groovy"><br />
-package net.zorched.grails.effectivity;</p>
-<p>import org.codehaus.groovy.ast.*;<br />
-import org.codehaus.groovy.ast.builder.AstBuilder;<br />
-import org.codehaus.groovy.ast.expr.*;<br />
-import org.codehaus.groovy.ast.stmt.*;<br />
-import org.codehaus.groovy.control.*;<br />
-import org.codehaus.groovy.transform.*;<br />
-import java.util.*;<br />
-import static org.springframework.asm.Opcodes.*;</p>
-<p>@GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)<br />
-public class EffectivizeASTTransformation implements ASTTransformation {</p>
-<p>    // This is the main method to implement from ASTTransformation that is called by the compiler<br />
-    public void visit(ASTNode[] nodes, SourceUnit sourceUnit) {<br />
-        if (null == nodes) return;<br />
-        if (null == nodes[0]) return;<br />
-        if (null == nodes[1]) return;<br />
-        if (!(nodes[0] instanceof AnnotationNode)) return;</p>
-<p>        ClassNode cNode = (ClassNode) nodes[1];<br />
-        addProperty(cNode, "effectiveStart", Date.class, createGenerateStartMethodCall())<br />
-        addProperty(cNode, "effectiveEnd", Date.class, createGenerateEndMethodCall())</p>
-<p>    }</p>
-<p>    // This method returns an expression that is used to initialize the newly created property<br />
-    private Expression createGenerateStartMethodCall() {<br />
-        return new ConstructorCallExpression(new ClassNode(Date.class), ArgumentListExpression.EMPTY_ARGUMENTS);<br />
-    }</p>
-<p>    private Expression createGenerateEndMethodCall() {<br />
-        return new MethodCallExpression(<br />
-                new ConstructorCallExpression(new ClassNode(Date.class), ArgumentListExpression.EMPTY_ARGUMENTS),<br />
-                "parse",<br />
-                new ArgumentListExpression(new ConstantExpression("yyyy/MM/dd"), new ConstantExpression("2099/12/31")));<br />
-    }</p>
-<p>    // This method adds a new property to the class. Groovy automatically handles adding the getters and setters so you<br />
-    // don't have to create special methods for those<br />
-    private void addProperty(ClassNode cNode, String propertyName, Class propertyType, Expression initialValue) {<br />
-        FieldNode field = new FieldNode(<br />
-                propertyName,<br />
-                ACC_PRIVATE,<br />
-                new ClassNode(propertyType),<br />
-                new ClassNode(cNode.getClass()),<br />
-                initialValue<br />
-        );</p>
-<p>        cNode.addProperty(new PropertyNode(field, ACC_PUBLIC, null, null));<br />
-    }<br />
-}<br />
-</code></p>
+<h3>Example Transformation</h3>
+{% highlight groovy %}
+package net.zorched.grails.effectivity;
+import org.codehaus.groovy.ast.*;
+import org.codehaus.groovy.ast.builder.AstBuilder;
+import org.codehaus.groovy.ast.expr.*;
+import org.codehaus.groovy.ast.stmt.*;
+import org.codehaus.groovy.control.*;
+import org.codehaus.groovy.transform.*;
+import java.util.*;
+import static org.springframework.asm.Opcodes.*;
+@GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
+public class EffectivizeASTTransformation implements ASTTransformation {
+      // This is the main method to implement from ASTTransformation that is called by the compiler
+    public void visit(ASTNode[] nodes, SourceUnit sourceUnit) {
+        if (null == nodes) return;
+        if (null == nodes[0]) return;
+        if (null == nodes[1]) return;
+        if (!(nodes[0] instanceof AnnotationNode)) return;
+          ClassNode cNode = (ClassNode) nodes[1];
+        addProperty(cNode, "effectiveStart", Date.class, createGenerateStartMethodCall())
+        addProperty(cNode, "effectiveEnd", Date.class, createGenerateEndMethodCall())
+      }
+      // This method returns an expression that is used to initialize the newly created property
+    private Expression createGenerateStartMethodCall() {
+        return new ConstructorCallExpression(new ClassNode(Date.class), ArgumentListExpression.EMPTY_ARGUMENTS);
+    }
+      private Expression createGenerateEndMethodCall() {
+        return new MethodCallExpression(
+                new ConstructorCallExpression(new ClassNode(Date.class), ArgumentListExpression.EMPTY_ARGUMENTS),
+                "parse",
+                new ArgumentListExpression(new ConstantExpression("yyyy/MM/dd"), new ConstantExpression("2099/12/31")));
+    }
+      // This method adds a new property to the class. Groovy automatically handles adding the getters and setters so you
+    // don't have to create special methods for those
+    private void addProperty(ClassNode cNode, String propertyName, Class propertyType, Expression initialValue) {
+        FieldNode field = new FieldNode(
+                propertyName,
+                ACC_PRIVATE,
+                new ClassNode(propertyType),
+                new ClassNode(cNode.getClass()),
+                initialValue
+        );
+          cNode.addProperty(new PropertyNode(field, ACC_PUBLIC, null, null));
+    }
+}
+{% endhighlight %}</p>
 <p>This example code gets called for each annotated class and adds two new Date properties called effectiveStart and effectiveEnd to it. Those properties are seen by Grails and Hibernate and will become persistent and behave the same as if you typed them directly in your Domain.</p>
 <p>It's a lot of work to add a simple property to a class, but if you're looking to consistently add properties and constraints across many Grails Domain classes, this is the way to do it.</p>

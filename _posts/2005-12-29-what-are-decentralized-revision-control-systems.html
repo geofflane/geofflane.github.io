@@ -32,29 +32,29 @@ comments:
     Or call it &#8220;lightly centralized&#8221;, to [...]"
 ---
 <p>Version Control, Revision Control or Configuration Management (what ever you choose to call it) is one of those things that often software developers use about rarely do they think about it very much. Version control systems are one of the most useful tools in software development though. Right after the compiler, I think a version control system is the most import tool that you can be using as a developer. What else allows you to retrieve the state of the project at any time? Accidently deleted a file? Get it from source control. Your latest changes broke the build? Revert that changeset so everyone else can continue working while you fix it. As with your editor or IDE, the more you know about the capabilities of your tools, the more productive you are going to be.</p>
-<h3>Current Popular Version Control Systems</h3><br />
+<h3>Current Popular Version Control Systems</h3>
 One of the "problems" that traditional version control systems have is the idea of a central repository. You need to connect to it to commit changes, create branches, and view previous revisions. If you are disconnected from the network, or the central repository is down, then you lose many of the capabilities that you need from a version control system.  This central repository model is also often not the way that many Open Source projects are developed. They want to work in a decentralized, distributed fashion. When a module or new feature is complete, then they submit a patch to the maintainer for review and inclusion in the main branch.</p>
-<p>To illustrate the problem a little:<br />
+<p>To illustrate the problem a little:
 If you are flying on a plane, working on your laptop and you want to do some development, there is no easy way to create small, atomic changesets for each of the bugs you resolve or the features that you add. When you land and connect to a network, you have to commit the whole slew of changes. Many of them will be unrelated, so if there is a problem you will have to revert all the changes. If someone decides that one of the new features is not ready and they want to rollback your changes, they will also lose all the bug fixes.</p>
-<h3>Decentralized Revision Control Systems</h3><br />
+<h3>Decentralized Revision Control Systems</h3>
 To address some of these issues, there has been some work recently in what is called "Decentralized Revision Control Systems" (DRCS). Basically the whole distinction between a client and server is removed and you get one system that is both the repository and the current working version. They generally store all of the revisions under the source tree itself. You can branch, merge and commit all locally and disconnected from the network. Other people can then "pull" revisions from your system or you can create patches which can be sent to a project maintainer. These systems, because of this decentralized model,  need to be very strong at making branches and merging changes because it is assumed that many people will be working mostly independently and then pulling/pushing changes to each other on a less regular basis.</p>
-<p>To revisit the plane example:<br />
+<p>To revisit the plane example:
 As you fix each bug or add each new feature, you can commit the changes to your local repository. Then each of these things is an individual changeset that can be published to others. Possibly a release is close and someone decides they only want the bug fixes, they can get those and wait to get the new features later. If one of the features introduces a new bug, they can revert that feature only and not lose anything else.</p>
 <p>Sounds pretty nice doesn't it?</p>
 <p>These systems can be very interesting for single person projects as well. You get all of the benefit of revision control without the overhead of maintaining a server system. You can be up and running in a matter of seconds.</p>
-<h3>As With Most Things, It's About Tradeoffs</h3><br />
+<h3>As With Most Things, It's About Tradeoffs</h3>
 They are by no means perfect of course. You lose the central server that can be easily backed up. The maintenance overhead can be increased if you are dealing with a large number of developers and you don't publish one repository as the central one. There needs to be a mechanism of publishing changes and having people pull them down. This seems to me to be most easily accomplished if everyone is working from a central, master source.</p>
 <p>Regardless of the downsides, the upsides are very large, so I think they are interesting. They are also interesting in that they might influence the "traditional" version control systems to allow for a lot more of this disconnected mode. What if <a title="Subversion version control" href="http:/&#47/a> allowed me to easily create a series of changesets and shelve them for later inclusion in a master repository? Could we get the best of both worlds?</p>
 <p>Here are a couple of the DRCS that I know about. Arch is probably currently more mature, but Bazaar-NG seems to be very interesting and the command syntax is a lot more intuitive to the CVS/<a title="Subversion version control" href="http://subversion.tigris.org">SVN</a> crowd (of which I'm a member).</p>
-<h4>Bazaar-NG (bzr):</h4><br />
-<a title="Bazaar-NG" href="http://www.bazaar-ng.org/">http://www.bazaar-ng.org/</a><br />
+<h4>Bazaar-NG (bzr):</h4>
+<a title="Bazaar-NG" href="http://www.bazaar-ng.org/">http://www.bazaar-ng.org/</a>
 <a title="Bazaar-NG Wiki Introduction" href="http://bazaar.canonical.com/IntroductionToBzr">http://bazaar.canonical.com/IntroductionToBzr</a></p>
-<h4>GNU Arch (tla):</h4><br />
+<h4>GNU Arch (tla):</h4>
 <a title="GNU Arch" href="http://www.gnu.org/software/gnu-arch/">http://www.gnu.org/software/gnu-arch/</a></p>
 <p><em><strong>Update:</strong> </em></p>
 <p><em>A couple of other DRCS implementations have come to my attention, so I thought I would add them as well.</em></p>
-<h4>Darcs: <a title="Darcs" href="http://www.darcs.net/" /></h4><br />
+<h4>Darcs: <a title="Darcs" href="http://www.darcs.net/" /></h4>
 <a title="Darcs" href="http://www.darcs.net/"> </a><a title="Darcs" href="http://www.darcs.net/">http://www.darcs.net/</a></p>
-<h4>Monotone:</h4><br />
+<h4>Monotone:</h4>
 <a title="Monotone" href="http://venge.net/monotone/">http://venge.net/monotone/</a></p>
 <p>Why so many you may ask? DRCS is a difficult problem and this just shows that there are a lot of people trying different ways to solve it.</p>

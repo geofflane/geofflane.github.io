@@ -71,15 +71,15 @@ comments:
     all of the plugins. There are a number of others including Liquibase and Autobase."
 ---
 <p>The <a href="http://code.google.com/p/dbmigrate/wiki/Grails">Grails DBMigrate Plugin</a> is a handy way to give you control over the generation of your database if you don't want Grails to auto-munge your schema. It works fine in development, but when you create a WAR for deployment on another machine the Migrations are not packaged in the WAR so the database can't be created or updated.</p>
-<h3>Packaging DBMigrate Scripts for Deployment</h3><br />
+<h3>Packaging DBMigrate Scripts for Deployment</h3>
 Here's the quick solution to package your DBMigrations in your WAR file.</p>
-<p>Just add this to your <strong>Config.groovy</strong> file and when you generate the WAR the migrations will be included and found by the Plugin.<br />
-<code lang="groovy"><br />
-grails.war.resources = {stagingDir -><br />
-    copy(todir: "${stagingDir}/WEB-INF/classes/grails-app/migrations") {<br />
-        fileset(dir:"grails-app/migrations")<br />
-    }<br />
-}<br />
-</code></p>
-<h3>Aside</h3><br />
+<p>Just add this to your <strong>Config.groovy</strong> file and when you generate the WAR the migrations will be included and found by the Plugin.
+{% highlight groovy %}
+grails.war.resources = {stagingDir ->
+    copy(todir: "${stagingDir}/WEB-INF/classes/grails-app/migrations") {
+        fileset(dir:"grails-app/migrations")
+    }
+}
+{% endhighlight %}</p>
+<h3>Aside</h3>
 The only problem with DBMigrate is that it doesn't handle creating or updating Stored Procedures and Functions which means if you want to use those - for Reporting purposes lets say - you're out of luck currently. </p>

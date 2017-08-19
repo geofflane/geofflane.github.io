@@ -21,160 +21,52 @@ categories:
 - Code
 - ".NET"
 tags: []
-comments:
-- id: 8
-  author: Brennan Stehling
-  author_email: offwhite@gmail.com
-  author_url: http://brennan.offwhite.net/blog/
-  date: '2005-11-18 12:26:55 -0500'
-  date_gmt: '2005-11-18 17:26:55 -0500'
-  content: So far everything I have done with .NET 2.0 has been with a Stored Procedures
-    in SQL Server 2000.  And I always wrap my columns which could be null with COALESCE
-    and give it a default value, even if it is an empty String.  I did not want to
-    even touch the situation with nulls.  My policy with objects is to prevent null
-    values from even being possible.  I always construct my variables to some default
-    and the Properties sometimes prevent a null value from replacing the non-null
-    value.  It depends on each case.  I never want to check if a value returned from
-    a method is a null.  Like when I return collections, if there are no values I
-    just return an empty collection, so I can call that function from a foreach loop
-    without checking for a null.  For strings I return String.Empty, etc.  My code
-    has worked quite well, and it is quite fast.  I also never use string, and instead
-    use String.  I do not care about optimizations through nuances with value types.  I
-    find I get greater performance gains by taking my time to design a caching mechanism
-    which cuts down on the db calls.  That is where 95% of your latency will be anyway.
-- id: 9
-  author: Geoff Lane
-  author_email: geoff@zorched.net
-  author_url: http://www.zorched.net
-  date: '2005-11-18 16:52:03 -0500'
-  date_gmt: '2005-11-18 21:52:03 -0500'
-  content: "It's possible in many cases to \"program defensively\" in such a way that
-    null values are basically never returned. But there are some applications where
-    null values (especially in a database) are required.\r\n\r\nI also completely
-    agree with you about performance. Good design is the place  to start, worry about
-    optimizing only when you find problem areas.\r\n\r\nI built a data collection
-    and reporting tool where we needed to be able to represent a NULL value in the
-    database to the user as an unanswered question. Of course without NULL value types,
-    you have to either represent it in the database as a \"magic number\" or create
-    some sort of wrappers around all of your integral values and have a \"magic number\"
-    in the code. (Hint, doing it in the database makes reporting off the data VERY
-    difficult) Of course Nullable negates the necessity of having this \"magic number\"
-    hack in place, so it's valuable in that sense. \r\n\r\nI just don't think it's
-    necessary to require any of these Nullable/DBNull/Wrapper Object workarounds.
-    If .NET provided a corollary reference type for all of the value types and would
-    allow null references of these reference types, we could handle it ourselves.
-    Minimzing/removing the use or value types because of the difference in semantics
-    for copying, calling methods, etc has the side benefit of decreasing surprise."
-- id: 11069
-  author: Brad
-  author_email: brad@hotmail.com
-  author_url: ''
-  date: '2007-11-22 00:30:33 -0500'
-  date_gmt: '2007-11-22 06:30:33 -0500'
-  content: "An interesting read and I agree with many things you say but I thought
-    I would correct one small thing.  Int32 is not a reference type that corresponds
-    to int as a value type.  Similarly, your claim of the difference between string
-    and String is flawed.  int and string are language-specific aliases for the value
-    type Int32 and the reference type String correspondingly.\r\n\r\nint i;\r\n\r\nand\r\n\r\nInt32
-    i;\r\n\r\nwill compile as identical code and become\r\n\r\nSystem.Int32 i;\r\n\r\nIn
-    VB.Net the aliases are Integer and String for these two types and in both languages,
-    these aliases serve little purpose beyond provide familiarity to people migrating
-    from non-.Net languages.\r\n\r\nStrings are not value types at all regardless
-    of the upper or lowercase s."
-- id: 11200
-  author: David Piepgrass
-  author_email: qwertie256-at@at-yahoo.com
-  author_url: http://qism.blogspot.com
-  date: '2008-03-19 13:18:52 -0400'
-  date_gmt: '2008-03-19 19:18:52 -0400'
-  content: 'You are incorrect in saying "As you can see, we can&acirc;&euro;&trade;t
-    have a null value type. So, you can see why the DBNull was added, because .NET
-    needed a way to represent a NULL database value." No, DBNull was not needed. DataRow["column"]
-    returns an object (a reference type), therefore it could hold null. I have no
-    idea why somebody at Microsoft invented DBNull, because the regular null value
-    would have worked just fine. My hypothesis: it was an idiot.'
-- id: 14362
-  author: hfrmobile
-  author_email: hfr@hfrmobile.com
-  author_url: http://www.hfrmobile.com
-  date: '2008-12-19 03:07:32 -0500'
-  date_gmt: '2008-12-19 09:07:32 -0500'
-  content: "You're right, the DBNull != null thing is awful. But since .NET 2.0 there
-    are \"nullable value types\"\r\n\r\ne.g.\r\n\r\n// C#.NET\r\nint? myInt
-    = null;\r\nDateTime? myDateTime = null;\r\n\r\nI assume that there exists something
-    equivalent in VB.NET?\r\n\r\nI would' expect for typed datasets that int? getter/setter
-    is generated for nullable ints and int for not nullable ones ...\r\n\r\n@David
-    Piepgrass: Yes and no. DBNull.Value is OK when it would be compageable with null
-    but: DBNull.Value != null (strange, I agree ;-))"
-- id: 16233
-  author: quetzalcoatl
-  author_email: quetzalcoatl@poczta.fm
-  author_url: ''
-  date: '2010-07-17 09:34:01 -0400'
-  date_gmt: '2010-07-17 15:34:01 -0400'
-  content: "<blockquote>I have no idea why somebody at Microsoft invented DBNull,
-    because the regular null value would have worked just fine. My hypothesis: it
-    was an idiot.</blockquote>\r\nIt's pretty damn obvious, if you'd look at the
-    way the Command and Parameters are built. I dont remember very well, but either
-    CMD.Parameters or some temporary value bag during query execution is based on
-    a Sys.Coll.Gen.Hashtable in a very straighforward way: name of the param is the
-    KEY and param's value is the VALUE. Now, recall how SGC.Hashtable works: if you
-    set any of its [KEY]=NULL, it is equivalent to call htab.Remove(KEY). Let me repeat:
-    SETTING HASHTABLE ENTRY TO NULL REMOVES IT. So, I hope now you do see why someone
-    introduced a special singleton object that represents 'db-null'.. It was simply
-    for the point of error checking: there is a BIG DIFFERENCE between FORGETTING
-    TO SET THE PARAMETER and SETTING IT TO (DB)NULL. They could not allow an assumption
-    that missing parameter is actually intended to be null'ed out. They had to be
-    sure, so here's a Sys.Data.DBNull.Value....\r\n....\r\n..\r\nAnother question
-    is, why the hell setting a HT's entry's value to null equals HT.Remove, and why
-    did they put their params into HT while they were aware of the HT's behaviour
-    on nulls.. I would not do that. They did. So we have DBNull now. Doh."
 ---
 <p>.NET has had DBNull since the beginning. With the release of .NET 2.0 it has also gained the Nullable type. DBNull is used to represent a null value returned from a database or a dataset. The Nullable type was added to give the ability to have null types for integral types. You might ask, "What's going on here? We can already have a null reference to class instance."</p>
-<h3>Background</h3><br />
+<h3>Background</h3>
 .NET has 2 kinds of types. It has Classes and it has Structs. Classes are known as "reference types" and stored in an area of memory called the heap. Structs are known as value types and stored in an area of memory known as the stack. What's the difference? Well for one, the stack is a faster form of memory allocation because it doesn't require dereferencing a pointer to get to an object type. The second difference is that stack based, value types can not be null.</p>
 <p>This value type is a performance optimzation, but I think it was a bad choice. </p>
-<h3>Rationale</h3><br />
+<h3>Rationale</h3>
 As you can see, we can't have a <code class="inline">null</code> value type. So, you can see why the <code class="inline">DBNull</code> was added, because .NET needed a way to represent a NULL database value. The bad part is that <code class="inline">DBNull.Value != null</code> so you have to check for <code class="inline">DBNull</code> in many cases. It is also a problem because setting <code class="inline">null</code> into a ADO.NET parameter will cause an error. This is a really terrible semantic for the language. Wouldn't they be able to hide <code class="inline">DBNull</code> within the ADO.NET classes and convert <code class="inline">null</code> to DBNulls within the code? Yes, IF it was possible to have a null value type.</p>
 <p>This also wouldn't be a problem if all of the Value types had a corresponding Reference type. int has Int32, string has String, etc. But what about DateTime? DateTime is a struct (a value type) with no corresponding reference type. So you can't have a <code class="inline">null</code> DateTime. Its default value is represented as DateTime.MinValue so you have to compare with that.</p>
 <p>What else? Well Value types can not be inherited and can't inherit from other Classes or Structs. They can implement Interfaces, but you no longer get little <abbr title="Object Oriented">OO</abbr> things like inheritance. What where they thinking?</p>
 <p>Yet another problem with this optimization is that it is only a half optimization. Methods in .NET are by default pass-by-value which means that a copy of a value is passed to the method. (In the case of an Object/Class  instance passed to a method, a copy of the pointer to the instance is passed, so it's a small value that is copied.) With value types, because the pointer represents all of the memory space for the values contained in the Struct, when a Struct/Value Object is passed to a method, the entire memory space is copied to a new location. This increases the amount of memory used. So you gain some speed, and lose some memory. Is that a good tradeoff? Depends a lot on where your constraints are</p>
 <p>In addition, because of the differences in that pass-by-value behavior, you get differences in the behavior of calling methods, or setting parameters from within a method.</p>
-<p><code lang="csharp"><br />
-    class Program {</p>
-<p>        class MyClass {<br />
-            public string SomeValue;<br />
-        }</p>
-<p>        struct ValueType {<br />
-            public string SomeValue;<br />
-        }</p>
-<p>        static void Main(string[] args) {<br />
-            MyClass mc = new MyClass();<br />
-            mc.SomeValue = "MyClass: out of method";<br />
-            Console.Out.WriteLine(mc.SomeValue);<br />
-            Change(mc);<br />
-            Console.Out.WriteLine(mc.SomeValue);</p>
-<p>            ValueType vt = new ValueType();<br />
-            vt.SomeValue = "ValueType: out of method";<br />
-            Console.Out.WriteLine(vt.SomeValue);<br />
-            Change(vt);<br />
-            Console.Out.WriteLine(vt.SomeValue);<br />
-        }</p>
-<p>        private static void Change(MyClass cl) {<br />
-            cl.SomeValue = "MyClass: in method";<br />
-        }</p>
-<p>        private static void Change(ValueType vt) {<br />
-            vt.SomeValue = "ValueType: in method";<br />
-        }<br />
-    }<br />
-</code></p>
-<p>What's the output?:<br />
-<samp><br />
-MyClass: out of method<br />
-MyClass: in method<br />
-ValueType: out of method<br />
-ValueType: out of method<br />
+<p>{% highlight csharp %}
+    class Program {
+          class MyClass {
+            public string SomeValue;
+        }
+          struct ValueType {
+            public string SomeValue;
+        }
+          static void Main(string[] args) {
+            MyClass mc = new MyClass();
+            mc.SomeValue = "MyClass: out of method";
+            Console.Out.WriteLine(mc.SomeValue);
+            Change(mc);
+            Console.Out.WriteLine(mc.SomeValue);
+              ValueType vt = new ValueType();
+            vt.SomeValue = "ValueType: out of method";
+            Console.Out.WriteLine(vt.SomeValue);
+            Change(vt);
+            Console.Out.WriteLine(vt.SomeValue);
+        }
+          private static void Change(MyClass cl) {
+            cl.SomeValue = "MyClass: in method";
+        }
+          private static void Change(ValueType vt) {
+            vt.SomeValue = "ValueType: in method";
+        }
+    }
+{% endhighlight %}</p>
+<p>What's the output?:
+<samp>
+MyClass: out of method
+MyClass: in method
+ValueType: out of method
+ValueType: out of method
 </samp></p>
 <p>Surprised? I was once I realized that was what would happen. These kinds of hidden semantic differences cause a lot of surprise. Surprise like that is not good in programming.</p>
-<h3>Conclusion</h3><br />
+<h3>Conclusion</h3>
 Non-nullable, surprising and different behaviors, inconsistent performance optmizations, extra hoops to jump through to do things like DBNulls. These kinds of things lead to developer frustration. All said, I don't think that the performance gain is enough to warrant this kind of trouble. I would have preferred to see a better design, one in which these kinds of optimizations were implemented in the compiler. Optimize developer productivity, not just runtime performance.</p>

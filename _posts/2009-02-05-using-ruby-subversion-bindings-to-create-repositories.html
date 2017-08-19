@@ -33,126 +33,126 @@ comments:
     given input or  svn gem located path .\r\n  \r\n  any  idea  ? thanks in advance.\r\n\r\n\r\n\r\nThanks,\r\nUma"
 ---
 <p>Subversion has a default Web UI that is served up by Apache if you run Subversion that way. It is pretty boring and read-only. Then there are things like <a href="http://websvn.tigris.org/">WebSVN</a> that make it less boring, but still read-only. I got curious about what it would take to make something even less boring and NOT read-only. Why not allow me to create a new repository on the server? Why not allow me to create a new default directory structure for a new project in a repository all through a web interface?</p>
-<h3>Parent Path Setup</h3><br />
+<h3>Parent Path Setup</h3>
 All of my repositories use the idea of the <a href="http://svnbook.red-bean.com/en/1.1/ch06s04.html">SVNParentPath</a>. This makes Apache assume that every directory under a given path is an SVN Repository. That structure makes it easy to deal with multiple repositories and secure them with a single security scheme. Using that assumption then it is easier to write  some code that will list existing repositories and create new ones in a known location.</p>
-<h3>SvnAdmin With Ruby Subversion Bindings</h3><br />
+<h3>SvnAdmin With Ruby Subversion Bindings</h3>
 Subversion provides language bindings for a number of different languages (Java, Python, Perl, PHP and Ruby) in addition to the native C libraries. Using these bindings it becomes fairly easy to deal with Subversion. The only hiccup will be dealing with the apparent lack of documentation for the code. So be prepared to do some exploration, digging and reading of the code.</p>
 <p>I chose to try this using Ruby because it was quick and easy and it was a language I was already familiar with.</p>
-<p>First you need to know how to create a new repository and open an existing repository. Fortunately those are simple, one-line operations:<br />
-<code lang="ruby"><br />
-Svn::Repos.create(repos_path, {})<br />
-repos = Svn::Repos.open(repos_path)<br />
-</code></p>
-<p>There was nothing special (from what I could tell) that would allow you to determine if a repository already existed, so I just created a simple function using the Ruby <em>File</em> operations to determine if a directory already existed. This code would allow me to determine if I needed to create new repository or open an existing one:<br />
-<code lang="ruby"><br />
-def repository_exists?(repos_path)<br />
-   File.directory?(repos_path)<br />
-end<br />
-</code></p>
+<p>First you need to know how to create a new repository and open an existing repository. Fortunately those are simple, one-line operations:
+{% highlight ruby %}
+Svn::Repos.create(repos_path, {})
+repos = Svn::Repos.open(repos_path)
+{% endhighlight %}</p>
+<p>There was nothing special (from what I could tell) that would allow you to determine if a repository already existed, so I just created a simple function using the Ruby <em>File</em> operations to determine if a directory already existed. This code would allow me to determine if I needed to create new repository or open an existing one:
+{% highlight ruby %}
+def repository_exists?(repos_path)
+   File.directory?(repos_path)
+end
+{% endhighlight %}</p>
 <p>Now I have a repository open so I wanted to build a project structure using the default conventions I use for Subversions projects. My convention is to have a repository named after a client, the top-level directories are named for the client's project and then each project has the standard trunk, branches and tags within that. Depending on the kind of work you do that convention may or may not make sense for you.</p>
 <p>With that decided, I created the code to write that structure in a repository. The one thing I found is that interacting with the Subversion repository allowed you to do things within a transaction that would force all of the changes to be recorded as a single commit. I thought this was a good thing, so performed these operations as a transaction:</p>
-<p><code lang="ruby"><br />
+<p>{% highlight ruby %}
 txn = repos.fs.transaction</p>
-<p># create the top-level, project based directory<br />
+<p># create the top-level, project based directory
 txn.root.make_dir(project_name)</p>
-<p># create the trunk, tags and branches for the new project<br />
-%w(trunk tags branches).each do |dir|<br />
-  txn.root.make_dir("#{project_name}/#{dir}")<br />
+<p># create the trunk, tags and branches for the new project
+%w(trunk tags branches).each do |dir|
+  txn.root.make_dir("#{project_name}/#{dir}")
 end</p>
-<p>repos.commit(txn)<br />
-</code></p>
-<p>Finally I put all of those things together into a class. The class had the concept of being initialized to a base Parent Path so all of the operations would know to start from that location:<br />
-<code lang="ruby"><br />
+<p>repos.commit(txn)
+{% endhighlight %}</p>
+<p>Finally I put all of those things together into a class. The class had the concept of being initialized to a base Parent Path so all of the operations would know to start from that location:
+{% highlight ruby %}
 require "svn/repos"</p>
-<p>class SvnAdmin<br />
-   def initialize(parent_path)<br />
-     @base_path = parent_path<br />
+<p>class SvnAdmin
+   def initialize(parent_path)
+     @base_path = parent_path
    end</p>
-<p>   # Provides a list of directory entries. path must be a directory.<br />
-   def ls(client_name, path="/", revision=nil)<br />
-     repos_path = File.join(@base_path, client_name)<br />
+<p>   # Provides a list of directory entries. path must be a directory.
+   def ls(client_name, path="/", revision=nil)
+     repos_path = File.join(@base_path, client_name)
      repos = ensure_repository(repos_path)</p>
-<p>     entries = repos.fs.root(revision).dir_entries(path)<br />
-     entries.keys<br />
+<p>     entries = repos.fs.root(revision).dir_entries(path)
+     entries.keys
    end</p>
-<p>   def create(client_name, project_name)<br />
-     repos_path = File.join(@base_path, client_name)<br />
+<p>   def create(client_name, project_name)
+     repos_path = File.join(@base_path, client_name)
      repos = ensure_repository(repos_path)</p>
-<p>     txn = repos.fs.transaction<br />
-     txn.root.make_dir(project_name)<br />
-     %w(trunk tags branches).each do |dir|<br />
-       txn.root.make_dir("#{project_name}/#{dir}")<br />
+<p>     txn = repos.fs.transaction
+     txn.root.make_dir(project_name)
+     %w(trunk tags branches).each do |dir|
+       txn.root.make_dir("#{project_name}/#{dir}")
      end</p>
-<p>     repos.commit(txn)<br />
+<p>     repos.commit(txn)
    end</p>
-<p>   private<br />
-   def ensure_repository(repos_path)<br />
-     if ! repository_exists?(repos_path)<br />
-       Svn::Repos.create(repos_path, {})<br />
-     end<br />
-     repos = Svn::Repos.open(repos_path)<br />
+<p>   private
+   def ensure_repository(repos_path)
+     if ! repository_exists?(repos_path)
+       Svn::Repos.create(repos_path, {})
+     end
+     repos = Svn::Repos.open(repos_path)
    end</p>
-<p>   def repository_exists?(repos_path)<br />
-     File.directory?(repos_path)<br />
+<p>   def repository_exists?(repos_path)
+     File.directory?(repos_path)
    end</p>
-<p>end<br />
-</code></p>
-<h3>SvnAdmin from Rails</h3><br />
+<p>end
+{% endhighlight %}</p>
+<h3>SvnAdmin from Rails</h3>
 Now that I had some simple code to create new repositories or add a new project to an existing repository I decided to wrap it in a simple Rails application that would allow me to create repositories using a web-based interface.</p>
-<p>To start with, I'm not going to use a database or any <em>ActiveRecord</em> classes in this project  (which you might do if you wanted authentication or something else) so I disabled ActiveRecord in the <em>config/environment.rb</em:<br />
-<code lang="ruby"><br />
-config.frameworks -= [ :active_record ]<br />
-</code></p>
+<p>To start with, I'm not going to use a database or any <em>ActiveRecord</em> classes in this project  (which you might do if you wanted authentication or something else) so I disabled ActiveRecord in the <em>config/environment.rb</em:
+{% highlight ruby %}
+config.frameworks -= [ :active_record ]
+{% endhighlight %}</p>
 <p>Then I created an <em>ReposController</em> to manage the Subversion repositories. This controller contains a couple of simple actions:</p>
 <ol>
 <li>An <em>index</em> action to list the existing repositories (directories)</li>
 <li>A <em>new</em> action to display a form to enter the client and project names</li>
-<li>A <em>create</em> action to use the SvnAdmin class to create a new repository and/or project</li><br />
+<li>A <em>create</em> action to use the SvnAdmin class to create a new repository and/or project</li>
 </ol></p>
-<p><code lang="ruby"><br />
+<p>{% highlight ruby %}
 require "svnadmin"</p>
-<p>class ReposController < ApplicationController<br />
+<p>class ReposController < ApplicationController
   layout 'default'</p>
-<p>  def index<br />
-    @dirs = Dir.new(SVN_PARENT_PATH).entries.sort.reject {|p| p == "." or p == ".."}<br />
+<p>  def index
+    @dirs = Dir.new(SVN_PARENT_PATH).entries.sort.reject {|p| p == "." or p == ".."}
   end</p>
-<p>  def new<br />
+<p>  def new
   end</p>
-<p>  def create<br />
-    svn = SvnAdmin.new(SVN_PARENT_PATH)<br />
+<p>  def create
+    svn = SvnAdmin.new(SVN_PARENT_PATH)
     repos = params[:repos]</p>
 <p>    respond_to do |format|</p>
-<p>      begin<br />
-        svn.create(repos[:client_name], repos[:project_name])<br />
-        flash[:notice] = "Successfully created."<br />
-        format.html { redirect_to :action => "index" }<br />
-        format.xml  { head :ok }<br />
-      rescue<br />
-        flash[:error] = "Failed to create structure."<br />
-        format.html { redirect_to :action => "index" }<br />
-        format.xml  { render :xml => object.errors, :status => :unprocessable_entity }<br />
-      end<br />
-    end<br />
-  end<br />
-end<br />
-</code></p>
+<p>      begin
+        svn.create(repos[:client_name], repos[:project_name])
+        flash[:notice] = "Successfully created."
+        format.html { redirect_to :action => "index" }
+        format.xml  { head :ok }
+      rescue
+        flash[:error] = "Failed to create structure."
+        format.html { redirect_to :action => "index" }
+        format.xml  { render :xml => object.errors, :status => :unprocessable_entity }
+      end
+    end
+  end
+end
+{% endhighlight %}</p>
 <p>You can also easily create a route and a <em>ProjectsController</em> that allows you to see all of the projects within a repository.</p>
-<p>The route in <em>config/routes.rb</em> is simply:<br />
-<code lang="ruby"><br />
-  map.connect ':repos/projects/',<br />
-      :controller => 'projects',<br />
-      :action => 'index'<br />
-</code></p>
-<p>And the <em>ProjectsController</em> looks up the <em>:repos</em> param to open the proper repository and list the top-level directories with it:<br />
-<code lang="ruby"><br />
+<p>The route in <em>config/routes.rb</em> is simply:
+{% highlight ruby %}
+  map.connect ':repos/projects/',
+      :controller => 'projects',
+      :action => 'index'
+{% endhighlight %}</p>
+<p>And the <em>ProjectsController</em> looks up the <em>:repos</em> param to open the proper repository and list the top-level directories with it:
+{% highlight ruby %}
 require "svnadmin"</p>
-<p>class ProjectsController < ApplicationController<br />
+<p>class ProjectsController < ApplicationController
   layout 'default'</p>
-<p>  def index<br />
-    repos_path = params[:repos]<br />
-    svn = SvnAdmin.new(SVN_PARENT_PATH)<br />
-    @projects = svn.ls(repos_path)<br />
-  end<br />
-end<br />
-</code></p>
+<p>  def index
+    repos_path = params[:repos]
+    svn = SvnAdmin.new(SVN_PARENT_PATH)
+    @projects = svn.ls(repos_path)
+  end
+end
+{% endhighlight %}</p>
 <p>Hopefully that will help you handle your Subversion administration. It should let you code up your conventions so that they are followed whenever a new repository is created or a new project is started.</p>

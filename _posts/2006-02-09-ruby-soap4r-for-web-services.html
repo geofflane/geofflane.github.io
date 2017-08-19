@@ -19,158 +19,74 @@ categories:
 - Code
 - Ruby
 tags: []
-comments:
-- id: 11096
-  author: Marcus
-  author_email: raathmd@gmail.com
-  author_url: ''
-  date: '2007-12-12 08:15:59 -0500'
-  date_gmt: '2007-12-12 14:15:59 -0500'
-  content: "Hi\r\nI need help to connect a ruby application to a document style web
-    service provided by SAP Business One.\r\nPlease provide me with the steps and
-    workarounds you did to make your example work.\r\nYour comment:\r\n\r\nOne Problem
-    I found\r\nSOAP4R was originally built to support RPC Literal encoded Web Services.
-    Support for Document Literal services is more recent. To get the service to work,
-    I had to update to the latest trunk version from their Subversion server. Before
-    the update I was not able to send Arrays of objects to my service. Document Literal
-    services are preferred for Contract First design because it offers full schema
-    validation of the soap message. Document Literal support is still a little bit
-    rough around the edges, but I got it to work successfully.\r\n\r\nMuch appreciated\r\nMarcus
-    Raath\r\nSouth Africa\r\n+27823009607"
-- id: 14146
-  author: Brian Candler
-  author_email: b.candler@pobox.com
-  author_url: ''
-  date: '2008-09-03 02:49:11 -0400'
-  date_gmt: '2008-09-03 08:49:11 -0400'
-  content: 'Remember to add at the top of your code: require ''soap/wsdlDriver'''
-- id: 14879
-  author: Clay McIlrath
-  author_email: clay@chosendevelopment.com
-  author_url: http://chosendevelopment.com/standing-out/break-the-mold-fix-the-community
-  date: '2009-02-05 00:50:13 -0500'
-  date_gmt: '2009-02-05 06:50:13 -0500'
-  content: SOAP4r is amazing for <a href="http://chosendevelopment.com" title="web
-    development" rel="nofollow">web development</a>. I just recently discovered
-    it and it rocked my world. Do you know if there is a Ruby Gem for it or support
-    with Rails?
-- id: 15066
-  author: Pepe
-  author_email: tcblues@gmail.com
-  author_url: ''
-  date: '2009-04-30 08:02:33 -0400'
-  date_gmt: '2009-04-30 14:02:33 -0400'
-  content: "Just one question... i'm a newbie...\r\nI'm doing something like:\r\nWSDL_URL
-    = \"http://myserver/WS/services/Access?wsdl\"\r\nservice =
-    SOAP::WSDLDriverFactory.new(WSDL_URL).create_rpc_driver\r\n\r\nquery=\"\r\n\r\n
-    \  \r\n   \r\n      \r\n         \r\n                        myName\r\n            asdf\r\n
-    \        \r\n      \r\n   \r\n\r\n\"\r\nservice.loginCustomer(query)\r\n\r\n\r\nplease,
-    What I'm doing wrong???\r\nI'm sure the query string is correct because I use
-    this query string with a SOAP client and it works.\r\n\r\nThanks a lot."
-- id: 15067
-  author: Pepe
-  author_email: tcblues@gmail.com
-  author_url: ''
-  date: '2009-04-30 08:04:12 -0400'
-  date_gmt: '2009-04-30 14:04:12 -0400'
-  content: in the query variable I defined I have xml tags for soapenv, header, body,
-    logincustomer, loginMethodDTO
-- id: 15068
-  author: Pepe
-  author_email: tcblues@gmail.com
-  author_url: ''
-  date: '2009-04-30 08:07:04 -0400'
-  date_gmt: '2009-04-30 14:07:04 -0400'
-  content: "<blockquote>\r\nquery=\"\r\n\r\n   \r\n   \r\n      \r\n         \r\nmyuser\r\nasdf\r\n
-    \        \r\n      \r\n   \r\n\r\n\"\r\n         </blockquote>"
-- id: 15550
-  author: Jose
-  author_email: jcag.developer@gmail.com
-  author_url: ''
-  date: '2009-07-14 16:17:57 -0400'
-  date_gmt: '2009-07-14 22:17:57 -0400'
-  content: Try passing your parameter as hash.  eg logincustomer(:id => 'your_id')
-- id: 17905
-  author: Melanio Reyes
-  author_email: melanio@gmail.com
-  author_url: http://codecheese.wordpress.com
-  date: '2011-07-13 08:23:15 -0400'
-  date_gmt: '2011-07-13 14:23:15 -0400'
-  content: "Geoff,\r\nThanks for writing this.  I'm also writing a SOAP web service
-    using Axis2.  And, I'm also interested in writing a client in ruby for pretty
-    much the same reason, to prove that it can be done.\r\n\r\nThanks\r\n\r\n- MEL"
-- id: 17936
-  author: Palani Kannan
-  author_email: kpalanikannan@gmail.com
-  author_url: ''
-  date: '2011-09-13 02:48:31 -0400'
-  date_gmt: '2011-09-13 08:48:31 -0400'
-  content: "\"driver = SOAP::WSDLDriverFactory.new(wsdl).create_rpc_driver\"\r\n\r\nThis
-    statement produces error. Please suggest me some possibilities to rectify this
-    problem\r\n\r\nignored element: {http://www.w3.org/2001/XMLSchema}complexType
-    : #"
 ---
 <p>Web Services are about sharing. SOAP Web Services are about interoperability. If you don't need to share information or services and if you don't need to interoperate with other systems or other programming languages, then why incur the overhead of doing Service Oriented Architecture (SOA)? If you don't need to share services or data, save yourself a bunch of trouble and save yourself the performance penalty and build a monolithic application. There will always be systems that need to be built to share their services with other systems though.</p>
 <p>I've (along with a <a href="http://brennan.offwhite.net/blog/">colleague</a>) been working on an example of Contract First Web Service design for a presentation. In doing so, I wanted to provide some examples in different languages (remember interoperable) to show users different ways of interacting with the service. I chose to build the service in Java using <a href="http://ws.apache.org/axis/">Apache Axis</a>. We're building a client in in ASP.NET to use the service. When it comes down to it though Java and .NET are very similar though, so I thought I would choose another language that was very different from those too.</p>
 <p>Ruby is pretty different, so I chose that.</p>
-<h3>Using SOAP4R</h3><br />
+<h3>Using SOAP4R</h3>
 Ruby comes with a package called <a href="http://dev.ctor.org/soap4r">SOAP4R</a> that handles all of the complexity of dealing with Web Services.</p>
 <p>SOAP4R offers a couple of different ways to create a web service client. I chose to use the WSDLDriverFactory which parses a WSDL file and dynamically generates service classes at runtime. </p>
-<p><code><br />
-service = SOAP::WSDLDriverFactory.new(WSDL_URL).create_rpc_driver<br />
-service.generate_explicit_type = true<br />
-service.wiredump_dev = STDOUT if $DEBUG<br />
-</code></p>
-<p><code><br />
-result = service.SearchContacts(:search => 'some_name')<br />
-if result.contacts.length > 0<br />
-    result.contacts.each { |c| print_contact(c) }<br />
-else<br />
-    puts "No contacts found..."<br />
-end<br />
-</code></p>
+<p>
+  {% highlight ruby %}
+service = SOAP::WSDLDriverFactory.new(WSDL_URL).create_rpc_driver
+service.generate_explicit_type = true
+service.wiredump_dev = STDOUT if $DEBUG
+{% endhighlight %}</p>
+<p>
+  {% highlight ruby %}
+result = service.SearchContacts(:search => 'some_name')
+if result.contacts.length > 0
+    result.contacts.each { |c| print_contact(c) }
+else
+    puts "No contacts found..."
+end
+{% endhighlight %}</p>
 <p>Ruby is a highly dynamic language which is one of its huge strengths. SOAP4R utilizes this by generating service bindings at runtime. This is a really cool feature but it can also make it difficult to figure out exactly what's going on. To get around this I ended up doing a lot of inspection of the runtime classes that were generated. This kind of inspection can be a bit tedious.</p>
 <p>Luckily the SOAP4R package also includes some handy utilities for generating code from XSD and WSDL files. </p>
 <ul>
 <li>xsd2ruby - A tool that will read an XML Schema Definition (XSD) and create classes from the defined entities.</li>
-<li>wsdl2ruby - This tool extends the xsd2ruby tool to include creating wrapper classes for the service calls.</li><br />
+<li>wsdl2ruby - This tool extends the xsd2ruby tool to include creating wrapper classes for the service calls.</li>
 </ul></p>
 <p>Using these tools gives you a file/files that contain the definitions for the business entities and services so that you have something to reference as you write code. The following isn't so different, but it uses generated code from the xsd2ruby tool.</p>
-<p>The generated code will look something like:<br />
-<code><br />
-# {urn:spiderlogic-com:contacts:service:v1}SearchContactsRequest<br />
-class SearchContactsRequest<br />
-  @@schema_type = "SearchContactsRequest"<br />
-  @@schema_ns = "urn:spiderlogic-com:contacts:service:v1"<br />
-  @@schema_qualified = "true"<br />
-  @@schema_element = [["query", "SOAP::SOAPString"]]<br />
-</code></p>
-<p><code><br />
-  attr_accessor :query<br />
-</code></p>
-<p><code><br />
-  def initialize(query = nil)<br />
-    @query = query<br />
-  end<br />
-end<br />
-</code></p>
+<p>The generated code will look something like:
+  {% highlight ruby %}
+# {urn:spiderlogic-com:contacts:service:v1}SearchContactsRequest
+class SearchContactsRequest
+  @@schema_type = "SearchContactsRequest"
+  @@schema_ns = "urn:spiderlogic-com:contacts:service:v1"
+  @@schema_qualified = "true"
+  @@schema_element = [["query", "SOAP::SOAPString"]]
+{% endhighlight %}</p>
+<p>
+  {% highlight ruby %}
+  attr_accessor :query
+{% endhighlight %}</p>
+<p>
+  {% highlight ruby %}
+  def initialize(query = nil)
+    @query = query
+  end
+end
+{% endhighlight %}</p>
 <p>As you can see, it adds in extra information that SOAP will need to map it to the proper schema elements.</p>
-<p>Using this generated code, you get code like:<br />
-<code><br />
-require 'service'<br />
-</code></p>
-<p><code><br />
-service = SOAP::WSDLDriverFactory.new(WSDL_URL).create_rpc_driver<br />
-service.generate_explicit_type = true<br />
-service.wiredump_dev = STDOUT if $DEBUG<br />
-</code></p>
-<p><code><br />
-result = service.SearchContacts(SearchContactsRequest.new('some_name'))<br />
-if result.contacts.length > 0<br />
-    result.contacts.each { |c| print_contact(c) }<br />
-else<br />
-    puts "No contacts found..."<br />
-end<br />
-</code></p>
-<h3>One Problem I found</h3><br />
+<p>Using this generated code, you get code like:
+  {% highlight ruby %}
+require 'service'
+{% endhighlight %}</p>
+<p>
+  {% highlight ruby %}
+service = SOAP::WSDLDriverFactory.new(WSDL_URL).create_rpc_driver
+service.generate_explicit_type = true
+service.wiredump_dev = STDOUT if $DEBUG
+{% endhighlight %}</p>
+<p>
+  {% highlight ruby %}
+result = service.SearchContacts(SearchContactsRequest.new('some_name'))
+if result.contacts.length > 0
+    result.contacts.each { |c| print_contact(c) }
+else
+    puts "No contacts found..."
+end
+{% endhighlight %}</p>
+<h3>One Problem I found</h3>
 SOAP4R was originally built to support RPC Literal encoded Web Services. Support for Document Literal services is more recent. To get the service to work, I had to update to the latest trunk version from their Subversion server. Before the update I was not able to send Arrays of objects to my service. Document Literal services are preferred for Contract First design because it offers full schema validation of the soap message. Document Literal support is still a little bit rough around the edges, but I got it to work successfully.</p>

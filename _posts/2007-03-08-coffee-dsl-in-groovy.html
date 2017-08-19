@@ -21,81 +21,60 @@ categories:
 tags:
 - groovy
 - dsl
-comments:
-- id: 10842
-  author: The Disco Blog &raquo; Blog Archive &raquo; Builders are Groovy&#8217;s
-    bag
-  author_email: ''
-  author_url: http://thediscoblog.com/2007/07/06/builders-are-groovys-bag/
-  date: '2007-07-05 19:38:35 -0400'
-  date_gmt: '2007-07-06 01:38:35 -0400'
-  content: "[...] ability to create DSLs involves a number of different techniques
-    as well (depending on the sophistication of the DSL [...]"
-- id: 13493
-  author: PaulF
-  author_email: paul@architek.co.uk
-  author_url: ''
-  date: '2008-07-28 14:00:37 -0400'
-  date_gmt: '2008-07-28 20:00:37 -0400'
-  content: "Well, actually this is metaprogramming. Or rather the 'invokeMethod' call
-    is metaprogramming. \r\n\r\nBoth Java and that other language both support reflection.
-    Reflection is metaprogramming, allowing run time access to the program in order
-    to alter execution. \r\n \r\nThere are many flavours of metaprogramming, and this
-    is certainly one of them."
 ---
 <p>I thought I'd follow up with my previous post with the  <a href="http://www.zorched.net/2007/03/05/understanding-domain-specific-languages-as-jargon/">Coffee Domain Specific Language</a> in the Groovy Language.</p>
 <p>This is really one of my first forays into Groovy, so it's pretty rough. It's really just a direct translation of the Ruby code and not what I would expect to be 'idiomatic Groovy'. I'll try and update this once I learn some more Groovy.</p>
-<p><code><br />
-// CoffeeDSL.groovy<br />
-// This is the input from the user, likely read from a file<br />
-// or input through a user interface of some sort</p>
-<p>CoffeeInput = "venti nonfat decaf whip latte"</p>
-<p>class Coffee<br />
-{<br />
-	def size<br />
-	def whip<br />
-	def caf<br />
-	def type<br />
-	def milk</p>
-<p>	public invokeMethod(name)<br />
-	{<br />
-		if (['venti', 'grande'].contains(name))<br />
-			size = name<br />
-		else if (['whip', 'nowhip'].contains(name))<br />
-			whip = 'whip'.equals(name)<br />
-		else if (['caf', 'decaf', 'halfcaf'].contains(name))<br />
-			caf = name<br />
-		else if (['regular', 'latte', 'cappachino'].contains(name))<br />
-			type = name<br />
-		else if (['milk', 'nonfat'].contains(name))<br />
-			milk = name<br />
-		else<br />
-		throw new Exception("Unknown coffee informantion: ${name}.")<br />
-	}</p>
-<p>	public order() {<br />
-		def params = ''<br />
-		if (milk)<br />
-			params += milk + ' '<br />
-		if (caf)<br />
-			params += caf + ' '<br />
-		if (whip)<br />
-			params +=  'whip '<br />
-		println("Ordering coffee: ${size} ${params}${type}\n")<br />
-	}</p>
-<p>	public load(input) {<br />
-		// turn one line into multi-line "method calls"<br />
-		def cleaned = input.split(/\s+/)<br />
-		instance_eval(cleaned)<br />
-	}</p>
-<p>	public instance_eval(methods) {<br />
-		for (method in methods) {<br />
-			this.invokeMethod(method)<br />
-		}<br />
-	}<br />
-}</p>
-<p>// this is your code which loads the DSL input and executes it<br />
-coffee = new Coffee()<br />
-coffee.load(CoffeeInput)    // load the user input<br />
-coffee.order()                 // submit the order<br />
-</code></p>
-<p>This isn't even metaprogramming. You could do this in any language, Java, C#, whatever. Everyone talks about metaprogramming in Groovy, but I have not yet found a lot of information on it. Does anyone have any pointers?</p>
+{% highlight ruby %}
+// CoffeeDSL.groovy
+// This is the input from the user, likely read from a file
+// or input through a user interface of some sort
+CoffeeInput = "venti nonfat decaf whip latte"
+class Coffee
+{
+  def size
+  def whip
+  def caf
+  def type
+  def milk
+  public invokeMethod(name)
+  {
+    if (['venti', 'grande'].contains(name))
+      size = name
+    else if (['whip', 'nowhip'].contains(name))
+      whip = 'whip'.equals(name)
+    else if (['caf', 'decaf', 'halfcaf'].contains(name))
+      caf = name
+    else if (['regular', 'latte', 'cappachino'].contains(name))
+      type = name
+    else if (['milk', 'nonfat'].contains(name))
+      milk = name
+    else
+    throw new Exception("Unknown coffee informantion: ${name}.")
+  }
+  public order() {
+    def params = ''
+    if (milk)
+      params += milk + ' '
+    if (caf)
+      params += caf + ' '
+    if (whip)
+      params +=  'whip '
+    println("Ordering coffee: ${size} ${params}${type}\n")
+  }
+  public load(input) {
+    // turn one line into multi-line "method calls"
+    def cleaned = input.split(/\s+/)
+    instance_eval(cleaned)
+  }
+  public instance_eval(methods) {
+    for (method in methods) {
+      this.invokeMethod(method)
+    }
+  }
+}
+// this is your code which loads the DSL input and executes it
+coffee = new Coffee()
+coffee.load(CoffeeInput)    // load the user input
+coffee.order()                 // submit the order
+{% endhighlight %}
+This isn't even metaprogramming. You could do this in any language, Java, C#, whatever. Everyone talks about metaprogramming in Groovy, but I have not yet found a lot of information on it. Does anyone have any pointers?</p>

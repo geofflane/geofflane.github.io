@@ -22,95 +22,96 @@ tags: []
 comments: []
 ---
 <p>Welcome to the disco era...wait, wrong Groovy. <a href="http://groovy.codehaus.org/">Groovy the programming language</a> is dynamic programming language that runs on the Java Virtual Machine. At a first glance it looks a lot like Ruby, but it's built from the ground up to leverage the JVM. This offers a lot of power as a transitional language. It allows you to leverage an existing investment in Java code while transitioning to a powerful, dynamic language.</p>
-<h3>Java and Groovy - Happy Together</h3><br />
+<h3>Java and Groovy - Happy Together</h3>
 One of the most interesting things about Groovy is that almost all standard Java code is valid Groovy code.</p>
-<p>The quintessential example:<br />
-<code><br />
-public class Hello<br />
-{<br />
-	public static void main(String[] args)<br />
-	{<br />
-		System.out.println("Hello");<br />
-	}<br />
-}<br />
-</code></p>
+<p>The quintessential example:
+  {% highlight groovy %}
+public class Hello
+{
+  public static void main(String[] args)
+  {
+    System.out.println("Hello");
+  }
+}
+{% endhighlight %}</p>
 <p>Is that Java code or Groovy code? In fact it's both. So what's the big deal?</p>
-<p>Well, in Groovy you can write the same thing like:<br />
-<code><br />
-println("Hello")<br />
-</code></p>
+<p>Well, in Groovy you can write the same thing like:
+{% highlight groovy %}
+println("Hello")
+{% endhighlight %}</p>
 <p>To steal <a href="http://www.agiledeveloper.com/">Venkat Subramaniam's</a> joke: If you get paid by lines of code, this is a terrible thing.</p>
-<h3>Easier Construction</h3><br />
+<h3>Easier Construction</h3>
 One of the other cool things with Groovy is that you can set named properties in the constructor. Conceptually setting a bunch of properties after you construct a class is often the same thing as setting those properties in a constructor. This makes code quite a bit cleaner looking. It also means the class writer does not need to predict all the combinations of the properties you might want use to initialize an object.</p>
-<p><code><br />
-car = new Car(make: "VW", model: "GTI", year: 2001)<br />
-</code></p>
-<h3>Easier Collections</h3><br />
-Of course they also add some interesting things to handle collections as well.<br />
-<code><br />
-lst = [1, 2, 4, 6, 8, 12]	// create java.util.ArrayList<br />
-println lst[-1]               // 12<br />
-println lst[1..3]            // [2, 4, 6]<br />
-println list[-1..-2]         // [12, 8]<br />
-</code></p>
-<h3>Easier Code Reuse</h3><br />
+{% highlight groovy %}
+car = new Car(make: "VW", model: "GTI", year: 2001)
+{% endhighlight %}
+<h3>Easier Collections</h3>
+Of course they also add some interesting things to handle collections as well.
+{% highlight groovy %}
+lst = [1, 2, 4, 6, 8, 12] // create java.util.ArrayList
+println lst[-1]               // 12
+println lst[1..3]            // [2, 4, 6]
+println list[-1..-2]         // [12, 8]
+{% endhighlight %}</p>
+<h3>Easier Code Reuse</h3>
 One of the biggest things that Groovy offers, which is the baby of the new scripting languages (and the baby of a bunch of old languages), is closures. Closures are blocks of code that can be passed around and executed sharing the context of where they are called from and where they are executed.</p>
-<p>This code separates the concept of iterating from what you want to do with the elements that are iterated over. This makes for great reusability.<br />
-<code><br />
-public iterate(count, closure)<br />
-{<br />
-    for (i in 0..count)<br />
-        closure(i)<br />
-}</p>
-<p>iterate(5) { println it }<br />
-val = 0<br />
-iterate(5) { val += it }<br />
-</code></p>
+<p>This code separates the concept of iterating from what you want to do with the elements that are iterated over. This makes for great reusability.
+{% highlight groovy %}
+public iterate(count, closure)
+{
+    for (i in 0..count)
+        closure(i)
+}
+iterate(5) { println it }
+val = 0
+iterate(5) { val += it }
+{% endhighlight %}
 <p>Of course this kind of thing is built into the existing collections as well.</p>
-<p><code><br />
-myNums = [1, 3, 5, 7, 9, 13]<br />
-myNums.each { curNum -> println curNum }<br />
-</code></p>
-<h3>Dynamic Messaging</h3><br />
+
+{% highlight groovy %}
+myNums = [1, 3, 5, 7, 9, 13]
+myNums.each { curNum -> println curNum }
+{% endhighlight %}
+<h3>Dynamic Messaging</h3>
 Unlike languages like Java or C#, Groovy gives you the ability to respond to method calls in a dynamic way. You do not have to have all of the methods defined up front, but can rather respond to them at runtime.</p>
-<p><code><br />
-baseball = ['Milwaukee' : 'Brewers', 'Chicago' : 'White Sox']<br />
-println baseball.Milwaukee        // Brewers<br />
-println baseball.'Chicago'          // White Sox<br />
-</code></p>
+{% highlight groovy %}
+baseball = ['Milwaukee' : 'Brewers', 'Chicago' : 'White Sox']
+println baseball.Milwaukee        // Brewers
+println baseball.'Chicago'          // White Sox
+{% endhighlight %}
 <p>In the case of the HashMap it interprets the new "method call" as your way of asking for the value from the Hash. Of course there are many other ways that you can use this as well. You can dynamically respond to methods on any class.</p>
-<p><code><br />
-class Thing<br />
-{<br />
-    def invokeMethod(String name, args)<br />
-    {<br />
-        println "I'm #{name}ing!"<br />
-    }<br />
-}<br />
-</code></p>
-<p>Of course this is a silly example, but it's utilized to great effect in the XML Builder.<br />
-<code><br />
-baseball = ['Milwaukee' : 'Brewers', 'Chicago' : 'White Sox']<br />
-bldr = new groovy.xml.MarkupBuilder()<br />
-xml = bldr.teams {<br />
-    baseball.each { key, value -><br />
-        team(city : key) {<br />
-            name (value)<br />
-        }<br />
-    }<br />
-}<br />
-</code></p>
-<p>Gives you:<br />
-<code><br />
-<teams><br />
-  <team city='Milwaukee'><br />
-    <name>Brewers</name><br />
-  </team><br />
-  <team city='Chicago'><br />
-    <name>White Sox</name><br />
-  </team><br />
-</teams><br />
-</code></p>
+{% highlight groovy %}
+class Thing
+{
+    def invokeMethod(String name, args)
+    {
+        println "I'm #{name}ing!"
+    }
+}
+{% endhighlight %}
+<p>Of course this is a silly example, but it's utilized to great effect in the XML Builder.
+{% highlight groovy %}
+baseball = ['Milwaukee' : 'Brewers', 'Chicago' : 'White Sox']
+bldr = new groovy.xml.MarkupBuilder()
+xml = bldr.teams {
+    baseball.each { key, value ->
+        team(city : key) {
+            name (value)
+        }
+    }
+}
+{% endhighlight %}</p>
+<p>Gives you:
+{% highlight xml %}
+<teams>
+  <team city='Milwaukee'>
+    <name>Brewers</name>
+  </team>
+  <team city='Chicago'>
+    <name>White Sox</name>
+  </team>
+</teams>
+{% endhighlight %}</p>
 <p>Isn't that a nice way to write XML?</p>
-<h3>Conclusion</h3><br />
+<h3>Conclusion</h3>
 I hope that gives you a taste of Groovy. It could be a very interesting language for some problems especially if you are already a Java shop looking for some more dynamic language features. That way you don't have to abandon everything you've done in the past. Instead you can start a slow migration or a bit of exploration utilizing the older code.</p>

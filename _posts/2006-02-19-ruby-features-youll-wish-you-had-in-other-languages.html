@@ -19,197 +19,207 @@ categories:
 - Code
 - Ruby
 tags: []
-comments:
-- id: 88
-  author: Zorched.Net &raquo; Blog Archive &raquo; Ruby 1.8 (today) vs C# 3.0 (some
-    future date)
-  author_email: ''
-  author_url: http://www.zorched.net/2006/03/25/ruby-18-today-vs-c-30-some-future-date/
-  date: '2006-03-25 15:46:35 -0500'
-  date_gmt: '2006-03-25 21:46:35 -0500'
-  content: "[...] The LINQ implementation ends up relying on the introduction of Lambda
-    functions in the core .NET 3.0 language. Lambda functions are a powerful way of
-    encapsulating a (potentially reusable) block of code. The block of code can then
-    be stored in a variable, passed to other methods, etc. As I discussed in a previous
-    post Ruby Features You&acirc;&euro;&trade;ll Wish You Had In Other Languages these
-    blocks can be used to implement simple patterns like Observer and Strategy. They
-    also come in real handy for doing things like sorting and filtering lists as you&#8217;ll
-    see in the example below. [...]"
-- id: 348
-  author: jo
-  author_email: jo@mailinator.com
-  author_url: http://www.mailinator.com
-  date: '2006-09-19 10:55:20 -0400'
-  date_gmt: '2006-09-19 16:55:20 -0400'
-  content: "Nice Ruby intro snippets! Similar interesting things btw can be found
-    on \r\nhttp://bigbold.com/snippets/"
-- id: 16178
-  author: What I love most about Ruby &laquo; iHack, therefore iBlog
-  author_email: ''
-  author_url: http://ihack.us/2010/06/29/what-i-love-most-about-ruby/
-  date: '2010-06-29 13:25:21 -0400'
-  date_gmt: '2010-06-29 19:25:21 -0400'
-  content: "[...] things beautifully well. So, I figured I should try to collect my
-    list of favorite things here (as many others have already done before [...]"
 ---
 <p><em>Three Ruby related posts in a row! Yes, I'm currently enamored with this colorful little language.</em></p>
-<p>If you know people that know (or you yourself know) languages like Smalltalk and Lisp, you'll often hear them curse when they use other languages. Something like "Damn, I could do this so much easier in Smalltalk. To do x would only take me 2 lines of code!". This is the best reason NOT to learn Ruby. Every time you program in other languages you'll think of all the little tricks you wish you could use from Ruby. I figured I'd share the pain (or at least what I think are some of the cool features).</p>
-<h3>Closures and Blocks</h3><br />
-Closures and Blocks are most used in Ruby in dealing with Arrays, Hashes and other like structures. They can be used in many places, but they are widely used in library routines for Enumerable types, so you get a lot of built in examples of that usage.</p>
-<p>Does an Array contain a specific item?:<br />
-<code lang="ruby"><br />
-me = people.find {  |p| p.first_name == 'Geoff' }<br />
-</code></p>
-<p>Find all of elements matching the condition:<br />
-<code lang="ruby"><br />
-myfamily = people.select {  |p| p.last_name == 'Lane' }<br />
-</code></p>
-<p>Create a new array with the results of running the block on each element (uniq then removes duplicates):<br />
-<code lang="ruby"><br />
-all_families = people.collect { |p| p. last_name }.uniq<br />
-</code></p>
+<p>If you know people that know (or you yourself know) languages like Smalltalk
+  and Lisp, you'll often hear them curse when they use other languages.
+  Something like "Damn, I could do this so much easier in Smalltalk. To do x
+  would only take me 2 lines of code!". This is the best reason NOT to learn
+  Ruby. Every time you program in other languages you'll think of all the
+  little tricks you wish you could use from Ruby. I figured I'd share the pain
+  (or at least what I think are some of the cool features).</p>
+<h3>Closures and Blocks</h3>
+Closures and Blocks are most used in Ruby in dealing with Arrays, Hashes and
+other like structures. They can be used in many places, but they are widely
+used in library routines for Enumerable types, so you get a lot of built in
+examples of that usage.</p>
+<p>Does an Array contain a specific item?:
+{% highlight ruby %}
+me = people.find {  |p| p.first_name == 'Geoff' }
+{% endhighlight %}</p>
+<p>Find all of elements matching the condition:
+{% highlight ruby %}
+myfamily = people.select {  |p| p.last_name == 'Lane' }
+{% endhighlight %}</p>
+<p>Create a new array with the results of running the block on each element (uniq then removes duplicates):
+{% highlight ruby %}
+all_families = people.collect { |p| p. last_name }.uniq
+{% endhighlight %}</p>
 <p>All of that stuff without writing a single Iterator or for loop!</p>
-<p>Blocks can be stored as a variable to call later and can be passed as an argument to a method. This can give you built-in support for light-weight version of patterns like the <a href="http://www.dofactory.com/Patterns/PatternStrategy.aspx">Strategy Pattern</a> or the <a href="http://www.dofactory.com/Patterns/PatternObserver.aspx">Observer Pattern</a>.</p>
-<p>An Observer for example:<br />
-<code lang="ruby"><br />
-class Subject<br />
-  def initialize<br />
-    @blocks = []<br />
-    @state = nil<br />
-  end<br />
-  def attach(&block)<br />
-    @blocks < < block<br />
-  end<br />
-  def state=(v)<br />
-    @state = v<br />
-    notify<br />
-  end<br />
-  private<br />
-  def notify<br />
-    @blocks.each { |b| b.call(@state) }<br />
-  end<br />
+<p>Blocks can be stored as a variable to call later and can be passed as an
+  argument to a method. This can give you built-in support for light-weight
+  version of patterns like the <a
+    href="http://www.dofactory.com/Patterns/PatternStrategy.aspx">Strategy
+    Pattern</a> or the <a
+    href="http://www.dofactory.com/Patterns/PatternObserver.aspx">Observer
+    Pattern</a>.</p>
+<p>An Observer for example:
+{% highlight ruby %}
+class Subject
+  def initialize
+    @blocks = []
+    @state = nil
+  end
+  def attach(&block)
+    @blocks < < block
+  end
+  def state=(v)
+    @state = v
+    notify
+  end
+  private
+  def notify
+    @blocks.each { |b| b.call(@state) }
+  end
 end</p>
-<p>class Observer<br />
-  def called<br />
-    puts "Observer called."<br />
-  end<br />
+<p>class Observer
+  def called
+    puts "Observer called."
+  end
 end</p>
-<p>class Observer2<br />
-  def called(state)<br />
-    puts "Observer2 was called with '#{state}'."<br />
-  end<br />
+<p>class Observer2
+  def called(state)
+    puts "Observer2 was called with '#{state}'."
+  end
 end</p>
-<p>o = Observer.new<br />
-o2 = Observer2.new<br />
-s = Subject.new<br />
-s.attach { o.called }<br />
-s.attach { |s| o2.called(s) }<br />
-s.state = 'Hi'<br />
-</code></p>
+<p>o = Observer.new
+o2 = Observer2.new
+s = Subject.new
+s.attach { o.called }
+s.attach { |s| o2.called(s) }
+s.state = 'Hi'
+{% endhighlight %}</p>
 <p>Gives us:</p>
 <pre>
-Observer called.<br />
-Observer2 was called with 'Hi'.<br />
+Observer called.
+Observer2 was called with 'Hi'.
 </pre></p>
-<p>A Strategy Example:<br />
-<code lang="ruby"><br />
-class Mathify<br />
-  def initialize(x, y, &block)<br />
-    @x = x<br />
-    @y = y<br />
-    @block = block<br />
+<p>A Strategy Example:
+{% highlight ruby %}
+class Mathify
+  def initialize(x, y, &block)
+    @x = x
+    @y = y
+    @block = block
   end</p>
-<p>  def call<br />
-    @block.call(@x, @y)<br />
-  end<br />
-end<br />
-</code></p>
-<p><code><br />
-add = proc {|a, b| a + b}<br />
-mult = proc {|a, b| a * b}<br />
-m = Mathify.new(2, 3, &add)<br />
-n = Mathify.new(2, 3, &mult)<br />
-puts m.call<br />
-puts n.call<br />
-</code></p>
-<h3>Metaprogramming</h3><br />
-Metaprogramming as the name implies is 'programming your programming'. Using the dynamic nature of a language like Ruby (or Lisp where much of this originated), you can programmatically add functionality to your classes or instances at runtime.</p>
-<p>Built-in examples:<br />
-<code lang="ruby"><br />
-class Person<br />
-  attr_accessor :first_name, :last_name<br />
-  attr_reader :person_id<br />
-  alias :last_name, :family_name<br />
-end<br />
-</code></p>
-<p><code class="inline">attr_accessor</code> and <code class="inline">attr_reader</code> dynamically create accessors for your class. <code class="inline">alias</code> creates another name that can be used to access the same attribute.</p>
-<p>Ruby has a lot of built-in support for this kind of functionality, but it also allows you to add your own as well:<br />
-<code lang="ruby"><br />
-class Module<br />
-  def log_call(method, *args)<br />
-    old_method = instance_method(method)<br />
-    define_method(method) do |*args|<br />
-      puts "Calling '#{method}'."<br />
-      old_method.bind(self).call(*args)<br />
-    end<br />
-  end<br />
+<p>  def call
+    @block.call(@x, @y)
+  end
+end
+{% endhighlight %}</p>
+<p>
+{% highlight ruby %}
+add = proc {|a, b| a + b}
+mult = proc {|a, b| a * b}
+m = Mathify.new(2, 3, &add)
+n = Mathify.new(2, 3, &mult)
+puts m.call
+puts n.call
+{% endhighlight %}</p>
+<h3>Metaprogramming</h3>
+Metaprogramming as the name implies is 'programming your programming'. Using
+the dynamic nature of a language like Ruby (or Lisp where much of this
+originated), you can programmatically add functionality to your classes or
+instances at runtime.</p>
+<p>Built-in examples:
+{% highlight ruby %}
+class Person
+  attr_accessor :first_name, :last_name
+  attr_reader :person_id
+  alias :last_name, :family_name
+end
+{% endhighlight %}</p>
+<p><code class="inline">attr_accessor</code> and <code
+    class="inline">attr_reader</code> dynamically create accessors for your
+  class. <code class="inline">alias</code> creates another name that
+    can be used to access the same attribute.</p>
+<p>Ruby has a lot of built-in support for this kind of functionality, but it also allows you to add your own as well:
+{% highlight ruby %}
+class Module
+  def log_call(method, *args)
+    old_method = instance_method(method)
+    define_method(method) do |*args|
+      puts "Calling '#{method}'."
+      old_method.bind(self).call(*args)
+    end
+  end
 end</p>
-<p>class MyClass<br />
-  def call_me<br />
-    puts "I've been called."<br />
-  end<br />
-  def call_me_too<br />
-    puts "I've been called too."<br />
-  end<br />
-  log_call :call_me_too<br />
+<p>class MyClass
+  def call_me
+    puts "I've been called."
+  end
+  def call_me_too
+    puts "I've been called too."
+  end
+  log_call :call_me_too
 end</p>
-<p>mc = MyClass.new<br />
-mc.call_me<br />
-mc.call_me_too<br />
-</code></p>
+<p>mc = MyClass.new
+mc.call_me
+mc.call_me_too
+{% endhighlight %}</p>
 <p>Prints:</p>
 <pre>
-I've been called.<br />
-Calling 'call_me_too'.<br />
-I've been called too.<br />
+I've been called.
+Calling 'call_me_too'.
+I've been called too.
 </pre></p>
-<p>As you see, I've 'decorated' one of the method calls with some new functionality. Basically, I'm dynamically redefining the method to log the call prior to passing along the call to the original implementation. You could intercept calls to set a 'dirty' flag to know that an instance had been changed so that you could do automatic caching.</p>
-<h3>Open Classes</h3><br />
-The other thing that this code example shows is that Classes in Ruby are never closed. You can at any time, open a Class add new methods, redefine methods, remove methods, anything you want. This is really great for Object Oriented programming because you can choose where a method resides based on where it is most appropriate.</p>
-<p><code lang="ruby"><br />
-class Array<br />
-  def first_half<br />
-    slice(0, size/2)<br />
-  end<br />
-end<br />
-a = [1, 2, 3, 4, 5, 6]<br />
-puts a.to_s<br />
-puts a.first_half.to_s<br />
-</code></p>
+<p>As you see, I've 'decorated' one of the method calls with some new
+  functionality. Basically, I'm dynamically redefining the method to log the
+  call prior to passing along the call to the original implementation. You
+  could intercept calls to set a 'dirty' flag to know that an instance had been
+  changed so that you could do automatic caching.</p>
+
+<h3>Open Classes</h3>
+The other thing that this code example shows is that Classes in Ruby are never
+closed. You can at any time, open a Class add new methods, redefine methods,
+remove methods, anything you want. This is really great for Object Oriented
+programming because you can choose where a method resides based on where it is
+most appropriate.</p>
+<p>{% highlight ruby %}
+class Array
+  def first_half
+    slice(0, size/2)
+  end
+end
+a = [1, 2, 3, 4, 5, 6]
+puts a.to_s
+puts a.first_half.to_s
+{% endhighlight %}</p>
 <p>Prints:</p>
 <pre>
-123456<br />
-123<br />
+123456
+123
 </pre></p>
 <p>So, if you have special needs to deal with built-in Classes or even just Classes from libraries that you are using, you can put the methods with the Classes where they rightly belong.</p>
-<h3>Mixin Modules</h3><br />
+<h3>Mixin Modules</h3>
 Ruby is a <a href="http://en.wikipedia.org/wiki/Single_inheritance">Single-Inheritance</a> language and it does not have Interfaces. Ruby believes in <a href="http://en.wikipedia.org/wiki/Duck_typing">Duck Typing</a>, if it has the right properties and methods, use it. What it has instead of multiple-inheritance or interfaces is Modules.</p>
-<p>When you <code>include</code> a Module into a Class, it 'mixes in' its properties and methods into the Class. This is widely used in the core Ruby classes. <code class="inline">Enumerable</code> is used to implement a whole suite of features for interacting with lists of objects. Array and Hash both include <code>Enumerable</code> to give them the implementation and interface of this code. You can use <code>Enumerable</code> in your own code of course, and as with all the other features I've talked about, you can create your own as well.</p>
-<p><code lang="ruby"><br />
-module Example<br />
-  def contrived<br />
-    puts "This is contrived."<br />
-  end<br />
+<p>When you <code>include</code> a Module into a Class, it 'mixes in' its
+  properties and methods into the Class. This is widely used in the core Ruby
+  classes. <code class="inline">Enumerable</code> is used to implement a whole
+  suite of features for interacting with lists of objects. Array and Hash both
+  include <code>Enumerable</code> to give them the implementation and interface
+  of this code. You can use <code>Enumerable</code> in your own code of course,
+  and as with all the other features I've talked about, you can create your own
+  as well.</p>
+{% highlight ruby %}
+module Example
+  def contrived
+    puts "This is contrived."
+  end
 end</p>
-<p>class Silly<br />
-  include Example<br />
+<p>class Silly
+  include Example
 end</p>
-<p>s = Silly.new<br />
-s.contrived<br />
-</code></p>
+<p>s = Silly.new
+s.contrived
+{% endhighlight %}
 <p>Prints:</p>
 <pre>
-This is contrived.<br />
-</pre></p>
-<h3>Conclusion</h3><br />
-Those are some of my favorite features of Ruby, but you really should ignore them. If not, when you have to programming in Java or .NET you'll be one of those people saying "Damn, I could do this so much easier in Ruby. To do x would only take me 2 lines of code!"</p>
+This is contrived.
+</pre>
+<h3>Conclusion</h3>
+<p>
+Those are some of my favorite features of Ruby, but you really should ignore
+them. If not, when you have to programming in Java or .NET you'll be one of
+those people saying "Damn, I could do this so much easier in Ruby. To do x
+would only take me 2 lines of code!"</p>

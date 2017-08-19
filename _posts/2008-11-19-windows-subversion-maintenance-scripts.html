@@ -70,72 +70,72 @@ comments:
 '
 ---
 <p>Previously I wrote about the <a href="http://www.zorched.net/2006/09/27/subversion-maintenance-scripts/">Subversion Maintenance Scripts</a> that I use for doing things like backups and upgrades. They were bash shell scripts that automated dealing with multiple Subversion repositories. The secret was that those guys were being run using Cygwin on Windows. Recently we got a new, more powerful server to run our Virtuals on. I decided to rewrite the scripts using native Windows Batch files so that I wouldn't have to install Cygwin again. Hopefully someone else will find this useful too.</p>
-<h2>Windows Batch Script for Creating a Default Repository Structure</h2><br />
+<h2>Windows Batch Script for Creating a Default Repository Structure</h2>
 I work for a <a href="http://www.spiderlogic.com">custom software development consulting firm</a> so we have a lot of different clients. We don't want to mix different clients' code so we create a repository per client. We often get multiple projects per client though (yeah, they like us) so we go ahead and create a project under the client. We also like to use the trunk, tags and branches directories by default.</p>
 <p>With all of these rules: Automate!</p>
-<p><strong><em>create_repo.bat</em</strong><br />
-<code lang="winbatch"><br />
+<p><strong><em>create_repo.bat</em</strong>
+{% highlight winbatch %}
 @echo off</p>
-<p>REM Check command line args to make sure a customer and project name were passed<br />
-IF (%1)==() GOTO CMDLINE<br />
+<p>REM Check command line args to make sure a customer and project name were passed
+IF (%1)==() GOTO CMDLINE
 IF (%2)==() GOTO CMDLINE</p>
-<p>REM If svnadmin is not in your path, uncomment the following<br />
+<p>REM If svnadmin is not in your path, uncomment the following
 REM PATH=%PATH%;"D:\Program Files\Subversion\bin"</p>
-<p>REM Set up variables with the directories<br />
-SET CUSTOMER=%1<br />
-SET PROJECT=%2<br />
-SET CUR_DIR=%~dp0<br />
-SET CUR_DIR=%CUR_DIR:\=/%<br />
-SET SVN_DIR=%CUR_DIR%/repos/%CUSTOMER%<br />
+<p>REM Set up variables with the directories
+SET CUSTOMER=%1
+SET PROJECT=%2
+SET CUR_DIR=%~dp0
+SET CUR_DIR=%CUR_DIR:\=/%
+SET SVN_DIR=%CUR_DIR%/repos/%CUSTOMER%
 SET PROJ_DIR=file:///%SVN_DIR%/%PROJECT%</p>
 <p>echo Creating directory in %SVN_DIR%</p>
-<p>svnadmin create "%SVN_DIR%"<br />
-svn -m "Create default structure." mkdir %PROJ_DIR% %PROJ_DIR%/trunk %PROJ_DIR%/tags %PROJ_DIR%/branches<br />
+<p>svnadmin create "%SVN_DIR%"
+svn -m "Create default structure." mkdir %PROJ_DIR% %PROJ_DIR%/trunk %PROJ_DIR%/tags %PROJ_DIR%/branches
 GOTO END</p>
-<p>:CMDLINE<br />
+<p>:CMDLINE
 echo Usage: %0 ^<customer^> ^
 <project^>
-<p>:END<br />
-echo Done<br />
-</code></p>
-<p>Some of the interesting pieces:<br />
-<em>%~dp0</em> gives you the directory that the current script lives in.<br />
+<p>:END
+echo Done
+{% endhighlight %}</p>
+<p>Some of the interesting pieces:
+<em>%~dp0</em> gives you the directory that the current script lives in.
 <em>%CUR_DIR:\=/%</em> replaces the backslash (\) with forward slashes (/) so that the SVN file:// URL will work correctly.</p>
-<h3>Windows Batch Script to Dump Your Subversion Repositories</h3><br />
+<h3>Windows Batch Script to Dump Your Subversion Repositories</h3>
 The next thing you might want to do is to dump all of your repositories so that you can back them up or upgrade SVN or move to a new server. With just one repository it's easy to do by hand. With 20+ repositories it's much nicer to run a script and then go do something else.</p>
-<p><strong><em>dump_all.bat</em</strong><br />
-<code lang="winbatch"><br />
+<p><strong><em>dump_all.bat</em</strong>
+{% highlight winbatch %}
 @echo off</p>
-<p>SET DUMP_DIR=dumps<br />
+<p>SET DUMP_DIR=dumps
 SET REPOS_DIR=repos</p>
-<p>IF NOT EXIST %DUMP_DIR% (<br />
-echo Creating directory %DUMP_DIR%<br />
-md %DUMP_DIR%<br />
+<p>IF NOT EXIST %DUMP_DIR% (
+echo Creating directory %DUMP_DIR%
+md %DUMP_DIR%
 )</p>
 <p>echo Dumping...</p>
-<p>FOR /f %%i IN ('dir /B /A:D %REPOS_DIR%\*') DO (<br />
-    echo Dumping %REPOS_DIR%\%%i to %DUMP_DIR%\%%i.dump<br />
-    svnadmin dump %REPOS_DIR%\%%i > %DUMP_DIR%\%%i.dump<br />
-)<br />
-</code></p>
-<p>Some of the interesting pieces:<br />
+<p>FOR /f %%i IN ('dir /B /A:D %REPOS_DIR%\*') DO (
+    echo Dumping %REPOS_DIR%\%%i to %DUMP_DIR%\%%i.dump
+    svnadmin dump %REPOS_DIR%\%%i > %DUMP_DIR%\%%i.dump
+)
+{% endhighlight %}</p>
+<p>Some of the interesting pieces:
 <em>FOR /f %%i IN ('dir /B /A:D %REPOS_DIR%\*') DO</em> is the part that finds each directory (in this case an SVN repository). Then for each repository you run the <em>svnadmin dump</em> command and send the dump file to a different directory.</p>
-<h3>Windows Batch Script to Load Your Subversion Repositories</h3><br />
+<h3>Windows Batch Script to Load Your Subversion Repositories</h3>
 After you've dumped all of your repositories and you need to restore them, because you've upgraded or moved them to a new server we need to do the reverse of the dump script.</p>
-<p><strong><em>restore_all.bat</em</strong><br />
-<code lang="winbatch"><br />
+<p><strong><em>restore_all.bat</em</strong>
+{% highlight winbatch %}
 @echo off</p>
-<p>SET DUMP_DIR=dumps<br />
+<p>SET DUMP_DIR=dumps
 SET REPOS_DIR=repos</p>
 <p>echo Restoring....</p>
 <p>REM %%~ni becomes the dump name without .dump</p>
-<p>FOR /f %%i IN ('dir /B %DUMP_DIR%\*.dump') DO (<br />
-    echo Restoring %DUMP_DIR%\%%i to %REPOS_DIR%\%%~ni<br />
-    svnadmin create %REPOS_DIR%\%%~ni<br />
-    svnadmin load %REPOS_DIR%\%%~ni < %DUMP_DIR%\%%i<br />
-)<br />
-</code></p>
-<p>Some of the interesting pieces:<br />
-<em>FOR</em> in this case is the same as the dump, except it's looking for all the dump files.<br />
+<p>FOR /f %%i IN ('dir /B %DUMP_DIR%\*.dump') DO (
+    echo Restoring %DUMP_DIR%\%%i to %REPOS_DIR%\%%~ni
+    svnadmin create %REPOS_DIR%\%%~ni
+    svnadmin load %REPOS_DIR%\%%~ni < %DUMP_DIR%\%%i
+)
+{% endhighlight %}</p>
+<p>Some of the interesting pieces:
+<em>FOR</em> in this case is the same as the dump, except it's looking for all the dump files.
 <em>%%i</em> holds the name of the dump file (e.g. repo.dump). <em>%%~ni</em> strips off the extension to give you just the name of the file (e.g. repo).</p>
 <p>Now you can manage your repositories with ease if you're stuck on a Windows machine.</p>

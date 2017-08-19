@@ -26,27 +26,27 @@ comments: []
 <p>Ok, so I might not exactly be on the cutting edge with this post, but I just started playing with <a href="http://www.jmock.org">jMock</a>, a framework for creating <a href="http://en.wikipedia.org/wiki/Mock_object">Mock objects</a>.</p>
 <p>Mock objects are used to isolate various layers of an application by providing a fake implementation that will mimic the behavior of the real implementation but offers a deterministic behavior. It's very useful for isolating database layers as well because DB access can slow down unit tests dramatically. And if unit tests take to long then they won't get run. Like <a href="http://www.martinfowler.com/articles/injection.html">Inversion of Control (IoC)</a>, Mock Objects, can be done by hand without the use of a framework, but frameworks can make the job a lot easier.</p>
 <p>jMock alows you to setup the methods that you want to call and define the return values for a given set of parameters. You basically script the expected calls with the return values you want. This lets you isolate classes so that you can test just a single method or class at a time thus simplifying the tests.</p>
-<p><code><br />
-public class MockTester extends MockObjectTestCase {<br />
-    Mock mockOrderService;<br />
-    OrderService orderService;</p>
-<p>    public void setUp() throws Exception {<br />
-        mockOrderService = new Mock(OrderService.class);<br />
-        orderService = (OrderService) mockOrderService.proxy();<br />
-    }</p>
-<p>    public void testSomeServiceMethod() throws Exception {<br />
-        String orderId = "orderId";</p>
-<p>        // The "doesOrderExist" method will be called once with the orderId parameter<br />
-        // and will return a true boolean value<br />
-        // If the method isn't called, then the mock will complain<br />
-        mockOrderService.expects(once())<br />
-            .method("doesOrderExist")<br />
-            .with(eq(orderId))<br />
-            .will(returnValue(true);</p>
-<p>       FullfillmentService fullfillment = new FullfillmentServiceImpl(orderService);<br />
-       assertTrue(fullfillment.confirmOrder(orderId));<br />
-    }<br />
-}<br />
-</code></p>
+{% highlight java %}
+public class MockTester extends MockObjectTestCase {
+    Mock mockOrderService;
+    OrderService orderService;
+      public void setUp() throws Exception {
+        mockOrderService = new Mock(OrderService.class);
+        orderService = (OrderService) mockOrderService.proxy();
+    }
+      public void testSomeServiceMethod() throws Exception {
+        String orderId = "orderId";
+          // The "doesOrderExist" method will be called once with the orderId parameter
+        // and will return a true boolean value
+        // If the method isn't called, then the mock will complain
+        mockOrderService.expects(once())
+            .method("doesOrderExist")
+            .with(eq(orderId))
+            .will(returnValue(true);
+         FullfillmentService fullfillment = new FullfillmentServiceImpl(orderService);
+       assertTrue(fullfillment.confirmOrder(orderId));
+    }
+}
+{% endhighlight %}
 <p>One thing to realize is that by default jMock will only create proxies for interfaces. If you want to mock concrete classes, you'll need the <a href="http://www.jmock.org/download.html">jmock-cglib extension</a> and the asm library so that it can create proxies of the concrete classes.</p>
 <p>I find this sort of scripting of Mock objects very compelling. It allows you to focus on testing the behavior of a very isolated piece of code. It even allows you to test code without having written all of the dependent objects. I encourage you to check it out for yourself.</p>

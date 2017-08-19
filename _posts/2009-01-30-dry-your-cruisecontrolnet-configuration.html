@@ -66,154 +66,154 @@ comments:
 <li>There will be less code to maintain</li>
 <li>If a bug is found, it should only have to be fixed in one place</li>
 <li>If an algorithm or process is changed, it only needs to be changed in one place</li>
-<li>More of the code should become reusable because as you do this you will parameterize methods to make them flexible for more cases</li><br />
+<li>More of the code should become reusable because as you do this you will parameterize methods to make them flexible for more cases</li>
 </ul></p>
 <p>If it's good for code isn't it good for other things like configuration? Why yes it is.</p>
-<h3>Using CruiseControl.NET Configuration Builder</h3><br />
+<h3>Using CruiseControl.NET Configuration Builder</h3>
 The Configuration Preprocessor allows you to define string properties and full blocks of XML to use for substitution and replacement.  To start using the Configuration Preprocessor, you add <em>xmlns:cb="urn:ccnet.config.builder"</em>, an xml namespace, to your document to tell the config parser that you plan to do this.</p>
-<p>From there you can define a simple property like:<br />
-<code lang="xml"><br />
-<cb:define client="xxx"/><br />
-</code></p>
-<p>Or you can make it a full block of XML:<br />
-<code lang="xml"><br />
-<cb:define name="svn-block"><br />
+<p>From there you can define a simple property like:
+{% highlight xml %}
+<cb:define client="xxx"/>
+{% endhighlight %}</p>
+<p>Or you can make it a full block of XML:
+{% highlight xml %}
+<cb:define name="svn-block">
     <sourcecontrol type="svn"></p>
-<trunkUrl>http://svn.example.com/svn/$(client)/$(project)/trunk</trunkUrl><br />
-        <workingDirectory>D:\Builds-Net\projects\$(client)\$(project)\trunk</workingDirectory><br />
-        <executable>svn.exe</executable><br />
-        <autoGetSource>true</autoGetSource><br />
-    </sourcecontrol><br />
-</cb:define><br />
-</code></p>
-<h4>Defining Reusable Blocks</h4><br />
+<trunkUrl>http://svn.example.com/svn/$(client)/$(project)/trunk</trunkUrl>
+        <workingDirectory>D:\Builds-Net\projects\$(client)\$(project)\trunk</workingDirectory>
+        <executable>svn.exe</executable>
+        <autoGetSource>true</autoGetSource>
+    </sourcecontrol>
+</cb:define>
+{% endhighlight %}</p>
+<h4>Defining Reusable Blocks</h4>
 Using these ideas I wanted to come up with a templated approach that would allow me to share configuration among multiple projects. That way, if I added new statistics or change the layout of my build server, I would only have to change it in a single place. Thus keeping things DRY. It also encourages more consistency across multiple projects making things easier to understand.</p>
 <p>So, I started defining some reusable blocks in the main <em>ccnet.config file</em> which you can see below. The exact details will depend on your configuration of course.</p>
-<h4>Full Example of <em>config.xml</em></h4><br />
-<code lang="xml"><br />
-<!--<br />
-How to add a new project:<br />
-Step 1. Create a config file named "<config>-project.xml"<br />
-Step 2. Add the project reference below<br />
+<h4>Full Example of <em>config.xml</em></h4>
+{% highlight xml %}
+<!--
+How to add a new project:
+Step 1. Create a config file named "<config>-project.xml"
+Step 2. Add the project reference below
 --></p>
 <p><cruisecontrol xmlns:cb="urn:ccnet.config.builder"></p>
-<p>    <!-- cb defines to compose reusable blocks of configuration --><br />
+<p>    <!-- cb defines to compose reusable blocks of configuration -->
     <!-- use <cb:define client="xxx"/> and <cb:define project="yyy"/> to use these --></p>
-<p>    <cb:define name="svn-block"><br />
+<p>    <cb:define name="svn-block">
         <sourcecontrol type="svn"></p>
-<trunkUrl>http://svn.example.com/svn/$(client)/$(project)/trunk</trunkUrl><br />
-            <workingDirectory>D:\Builds-Net\projects\$(client)\$(project)\trunk</workingDirectory><br />
-            <executable>svn.exe</executable><br />
-            <autoGetSource>true</autoGetSource><br />
-        </sourcecontrol><br />
+<trunkUrl>http://svn.example.com/svn/$(client)/$(project)/trunk</trunkUrl>
+            <workingDirectory>D:\Builds-Net\projects\$(client)\$(project)\trunk</workingDirectory>
+            <executable>svn.exe</executable>
+            <autoGetSource>true</autoGetSource>
+        </sourcecontrol>
     </cb:define></p>
-<p>    <cb:define name="msbuild-20-block"><br />
-        <msbuild><br />
-            <executable>C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727\MSBuild.exe</executable><br />
+<p>    <cb:define name="msbuild-20-block">
+        <msbuild>
+            <executable>C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727\MSBuild.exe</executable>
             <workingDirectory>D:\Builds-Net\projects\$(client)\$(project)\trunk</workingDirectory></p>
-<projectFile>build.proj</projectFile><br />
-            <buildArgs>$(build-args) </buildArgs><br />
-            <targets>$(build-targets)</targets><br />
-            <timeout>600</timeout><br />
-            <logger>D:\Program Files\CruiseControl.NET\server\Rodemeyer.MsBuildToCCNet.dll</logger><br />
-        </msbuild><br />
+<projectFile>build.proj</projectFile>
+            <buildArgs>$(build-args) </buildArgs>
+            <targets>$(build-targets)</targets>
+            <timeout>600</timeout>
+            <logger>D:\Program Files\CruiseControl.NET\server\Rodemeyer.MsBuildToCCNet.dll</logger>
+        </msbuild>
     </cb:define></p>
-<p>    <cb:define name="msbuild-35-block"><br />
-        <msbuild><br />
-            <executable>C:\WINDOWS\Microsoft.NET\Framework\v3.5\MSBuild.exe</executable><br />
+<p>    <cb:define name="msbuild-35-block">
+        <msbuild>
+            <executable>C:\WINDOWS\Microsoft.NET\Framework\v3.5\MSBuild.exe</executable>
             <workingDirectory>D:\Builds-Net\projects\$(client)\$(project)\trunk</workingDirectory></p>
-<projectFile>build.proj</projectFile><br />
-            <buildArgs>$(build-args) </buildArgs><br />
-            <targets>$(build-targets)</targets><br />
-            <timeout>600</timeout><br />
-            <logger>D:\Program Files\CruiseControl.NET\server\Rodemeyer.MsBuildToCCNet.dll</logger><br />
-        </msbuild><br />
+<projectFile>build.proj</projectFile>
+            <buildArgs>$(build-args) </buildArgs>
+            <targets>$(build-targets)</targets>
+            <timeout>600</timeout>
+            <logger>D:\Program Files\CruiseControl.NET\server\Rodemeyer.MsBuildToCCNet.dll</logger>
+        </msbuild>
     </cb:define></p>
-<p>    <cb:define name="merge-block"><br />
-        <!-- Merge the output of tests, code coverage and fxcop --><br />
-        <merge><br />
-            <files><br />
-                <file>D:\Builds-Net\projects\$(client)\$(project)\trunk\*.Test.xml</file><br />
-                <file>D:\Builds-Net\projects\$(client)\$(project)\trunk\*.CoverageMerge.xml</file><br />
-                <file>D:\Builds-Net\projects\$(client)\$(project)\trunk\*.CoverageSummary.xml</file><br />
-                <file>D:\Builds-Net\projects\$(client)\$(project)\trunk\*.FxCop.xml</file><br />
-            </files><br />
-        </merge><br />
+<p>    <cb:define name="merge-block">
+        <!-- Merge the output of tests, code coverage and fxcop -->
+        <merge>
+            <files>
+                <file>D:\Builds-Net\projects\$(client)\$(project)\trunk\*.Test.xml</file>
+                <file>D:\Builds-Net\projects\$(client)\$(project)\trunk\*.CoverageMerge.xml</file>
+                <file>D:\Builds-Net\projects\$(client)\$(project)\trunk\*.CoverageSummary.xml</file>
+                <file>D:\Builds-Net\projects\$(client)\$(project)\trunk\*.FxCop.xml</file>
+            </files>
+        </merge>
     </cb:define></p>
-<p>    <cb:define name="loggers-block"><br />
-        <xmllogger><br />
-            <logDir>D:\Builds-Net\projects\$(client)\$(project)\logs</logDir><br />
-        </xmllogger><br />
-        <rss/><br />
-        <modificationHistory  onlyLogWhenChangesFound="true" /><br />
+<p>    <cb:define name="loggers-block">
+        <xmllogger>
+            <logDir>D:\Builds-Net\projects\$(client)\$(project)\logs</logDir>
+        </xmllogger>
+        <rss/>
+        <modificationHistory  onlyLogWhenChangesFound="true" />
     </cb:define></p>
-<p>    <cb:define name="stats-block"><br />
-        <statistics><br />
-            <statisticList><br />
-                <firstMatch name="Svn Revision" xpath="//modifications/modification/changeNumber" /><br />
-                <firstMatch name="Coverage" xpath="//coverageReport/project/@coverage" generateGraph="true"/><br />
-                <firstMatch name="Warnings" xpath="//msbuild/@warning_count" generateGraph="true"/><br />
+<p>    <cb:define name="stats-block">
+        <statistics>
+            <statisticList>
+                <firstMatch name="Svn Revision" xpath="//modifications/modification/changeNumber" />
+                <firstMatch name="Coverage" xpath="//coverageReport/project/@coverage" generateGraph="true"/>
+                <firstMatch name="Warnings" xpath="//msbuild/@warning_count" generateGraph="true"/>
                 <firstMatch name="Errors" xpath="//msbuild/@error_count" generateGraph="true"/></p>
-<p>                <!-- NDepend --><br />
-                <!--<br />
-                <firstMatch name="ILInstructions" xpath="//ApplicationMetrics/@NILInstruction" /><br />
-                <firstMatch name="Avgerage Complexity" xpath="//ApplicationMetrics/MethodCC/@Avg" /><br />
-                <firstMatch name="Max Complexity" xpath="//ApplicationMetrics/MethodCC/@MaxVal" /><br />
-                <firstMatch name="LinesOfCode" xpath="//ApplicationMetrics/@NbLinesOfCode" generateGraph="true"/><br />
-                <firstMatch name="LinesOfComment" xpath="//ApplicationMetrics/@NbLinesOfComment" generateGraph="true"/><br />
-                --><br />
-            </statisticList><br />
-        </statistics><br />
+<p>                <!-- NDepend -->
+                <!--
+                <firstMatch name="ILInstructions" xpath="//ApplicationMetrics/@NILInstruction" />
+                <firstMatch name="Avgerage Complexity" xpath="//ApplicationMetrics/MethodCC/@Avg" />
+                <firstMatch name="Max Complexity" xpath="//ApplicationMetrics/MethodCC/@MaxVal" />
+                <firstMatch name="LinesOfCode" xpath="//ApplicationMetrics/@NbLinesOfCode" generateGraph="true"/>
+                <firstMatch name="LinesOfComment" xpath="//ApplicationMetrics/@NbLinesOfComment" generateGraph="true"/>
+                -->
+            </statisticList>
+        </statistics>
     </cb:define></p>
-<p>    <cb:include href="config-client-project.xml"/><br />
-    <cb:include href="config-client2-project-trunk.xml"/><br />
-</cruisecontrol><br />
-</code></p>
+<p>    <cb:include href="config-client-project.xml"/>
+    <cb:include href="config-client2-project-trunk.xml"/>
+</cruisecontrol>
+{% endhighlight %}</p>
 <p>At the end of the file you can see the <em>cb:include</em> references. Those are one-line includes to include the configuration of each project. This makes things easier to manage, I think, because you only have to look at the individual project configuration.</p>
 <h4>Using Reusable Blocks in Individual Configuration Files</h4></p>
 <p>From there I need to make use of those defined blocks in in individual file. The first thing I needed to do was to set the parameters that I had defined as simple string replacements in the reusable blocks. Normally you would do that with <em>cb:define</em> as I showed above. But the trick is that you can only have one property with a given name defined. If you include multiple project configurations that doesn't work. What does work is using <em>cb:scope</em> definitions. This allows for a value to be defined only within a specific scope. </p>
-<p><code lang="xml"><br />
-<cb:scope<br />
-         client="ExampleClient"<br />
-         project="SpecialProject"<br />
-         build-args="/p:Configuration=Debug"<br />
-         build-targets="Clean;Test"><br />
- ...<br />
-</cb:scope><br />
-</code></p>
+<p>{% highlight xml %}
+<cb:scope
+         client="ExampleClient"
+         project="SpecialProject"
+         build-args="/p:Configuration=Debug"
+         build-targets="Clean;Test">
+ ...
+</cb:scope>
+{% endhighlight %}</p>
 <p>From there you just need to start including the blocks that you defined in the main <em>ccnet.confg</em> within the scope block.</p>
-<h4>Full Example of Project Configuration</h4><br />
-<code lang="xml"></p>
+<h4>Full Example of Project Configuration</h4>
+{% highlight xml %}</p>
 <p><!-- CruiseControl.NET configuration --></p>
 <project name="ExampleClient SpecialProject" xmlns:cb="urn:ccnet.config.builder">
-<p>    <cb:scope<br />
-         client="ExampleClient"<br />
-         project="SpecialProject"<br />
-         build-args="/p:Configuration=Debug"<br />
+<p>    <cb:scope
+         client="ExampleClient"
+         project="SpecialProject"
+         build-args="/p:Configuration=Debug"
          build-targets="Clean;Test"></p>
 <p>        <cb:svn-block/></p>
-<p>        <tasks><br />
-            <cb:msbuild-35-block/><br />
+<p>        <tasks>
+            <cb:msbuild-35-block/>
         </tasks></p>
 <publishers>
 <p>            <cb:merge-block/></p>
-<p>            <!-- Enable collection of project statistics --><br />
+<p>            <!-- Enable collection of project statistics -->
             <cb:stats-block/></p>
 <p>            <cb:loggers-block/></p>
-<p>            <email mailhost="smtp.example.com" from="ccnet@example.com" includeDetails="true"><br />
-                <users><br />
-                    <user name="Developer One" group="buildmaster" address="dev1@example.com" /><br />
-                    <user name="Developer Two" group="developers" address="dev2@example.com" /><br />
-                </users><br />
-                <groups><br />
-                    <group name="developers" notification="change" /><br />
-                    <group name="buildmaster" notification="change" /><br />
-                </groups><br />
-            </email><br />
-        </publishers><br />
-    </cb:scope><br />
-</project><br />
-</code></p>
+<p>            <email mailhost="smtp.example.com" from="ccnet@example.com" includeDetails="true">
+                <users>
+                    <user name="Developer One" group="buildmaster" address="dev1@example.com" />
+                    <user name="Developer Two" group="developers" address="dev2@example.com" />
+                </users>
+                <groups>
+                    <group name="developers" notification="change" />
+                    <group name="buildmaster" notification="change" />
+                </groups>
+            </email>
+        </publishers>
+    </cb:scope>
+</project>
+{% endhighlight %}</p>
 <p>As you can see, the only one I didn't template out was the <em>email</em> block because that depends on the developers working on each project.</p>
 <p>Have fun bringing simplicity and consistency to your Cruise Control.NET configuration!</p>
 <p><em>For the full details see the <a href="http://confluence.public.thoughtworks.org/display/CCNET/Configuration+Preprocessor">CruiseControl.NET Configuration Preprocessor</a> documentation.</p>

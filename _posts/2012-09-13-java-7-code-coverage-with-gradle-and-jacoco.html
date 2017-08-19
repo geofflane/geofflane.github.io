@@ -24,89 +24,59 @@ tags:
 - code coverage
 - gradle
 - jacoco
-comments:
-- id: 18249
-  author: shin
-  author_email: shin.nien+zorched@gmail.com
-  author_url: ''
-  date: '2012-12-27 10:06:42 -0500'
-  date_gmt: '2012-12-27 16:06:42 -0500'
-  content: "\"One problem that I ran into was referencing project paths like the project.buildDir
-    from within an Ant task. Hopefully someone will come along and let me know how
-    that&acirc;&euro;&trade;s done.\"\r\n\r\nI think generateCoverageReport will be
-    passed a reference of the task itself so you should be able to do something like
-    'task.project.buildDir'"
-- id: 18250
-  author: shin
-  author_email: shin.nien+zorched@gmail.com
-  author_url: ''
-  date: '2012-12-27 10:08:53 -0500'
-  date_gmt: '2012-12-27 16:08:53 -0500'
-  content: "Sorry, I should have made that a bit clearer:\r\n\r\n<code>\r\ntask generateCoverageReport
-    << { thisTask ->\r\n    ant.mkdir (dir: \"${thisTask.project.buildDir}/reports\"\r\n}\r\n</code>"
-- id: 18389
-  author: Arun
-  author_email: arun_sangal@yahoo.com
-  author_url: ''
-  date: '2013-10-11 17:32:56 -0400'
-  date_gmt: '2013-10-11 23:32:56 -0400'
-  content: |
-    Can someone answer this please:
-
-    http://stackoverflow.com/questions/18879250/jacoco-unit-and-integration-tests-coverage-individual-and-overall
 ---
-<h3>Thanks</h3><br />
+<h3>Thanks</h3>
 Steven Dicks' post on <a href="http://stevendick.github.com/blog/2012/01/22/jacoco-and-gradle/">Jacoco and Gradle</a> is a great start to integrating Jacoco and Gradle, this is a small iteration on top of that work.</p>
-<h3>Java 7 Code Coverage</h3><br />
+<h3>Java 7 Code Coverage</h3>
 The state of Code Coverage took a serious turn for the worst when Java 7 came out. The byte-code changes in Java 7 effectively made Emma and Cobertura defunct. They will not work with Java 7 constructs. Fortunately there is a new player in town called <a href="http://www.eclemma.org/jacoco/">JaCoCo</a> (for Java Code Coverage). JaCoCo is the successor to Emma which is being built on the knowledge gained over the years by the Eclipse and Emma teams on how best to do code coverage. And works with Java 7 out-of-the-box.</p>
 <p>The advantage of using established tools is that they generally are well supported across your toolchain. JaCoCo is fairly new and so support in <a href="http://gradle.org">Gradle</a> isn't so smooth. Fortunately Steven's post got me started down the right path. The one thing that I wanted to improve right away was to use transitive dependency declarations as opposed to having local jar files in my source repository. JaCoCo is now available in the Maven repos so we can do that. <em>One thing to note is that the default files build in the Maven repo are Eclipse plugins, so we need to reference the "runtime" classifier in our dependency</em></p>
-<h3>The Gradle Script</h3><br />
-<code lang="groovy"><br />
-configurations {<br />
-    codeCoverage<br />
-    codeCoverageAnt<br />
-}<br />
-dependencies {<br />
-    codeCoverage 'org.jacoco:org.jacoco.agent:0.5.10.201208310627:runtime@jar'<br />
-    codeCoverageAnt 'org.jacoco:org.jacoco.ant:0.5.10.201208310627'<br />
-}<br />
-test {<br />
-    systemProperties = System.properties<br />
-    jvmArgs "-javaagent:${configurations.codeCoverage.asPath}=destfile=${project.buildDir.path}/coverage-results/jacoco.exec,sessionid=HSServ,append=false",<br />
-            '-Djacoco=true',<br />
-            '-Xms128m',<br />
-            '-Xmx512m',<br />
-            '-XX:MaxPermSize=128m'<br />
-}<br />
-task generateCoverageReport << {<br />
-    ant {<br />
-        taskdef(name:'jacocoreport', classname: 'org.jacoco.ant.ReportTask', classpath: configurations.codeCoverageAnt.asPath)</p>
-<p>        mkdir dir: "build/reports/coverage"</p>
-<p>        jacocoreport {<br />
-            executiondata {<br />
-                fileset(dir: "build/coverage-results") {<br />
-                    include name: 'jacoco.exec'<br />
-                }<br />
-            }<br />
-            structure(name: project.name) {<br />
-                classfiles {<br />
-                    fileset(dir: "build/classes/main") {<br />
-                        exclude name: 'org/ifxforum/**/*'<br />
-                        exclude name: 'org/gca/euronet/generated**/*'<br />
-                    }<br />
-                }<br />
-                sourcefiles(encoding: 'CP1252') {<br />
-                    fileset dir: "src/main/java"<br />
-                }<br />
-            }</p>
-<p>            xml  destfile: "build/reports/coverage/jacoco.xml"<br />
-            html destdir:  "build/reports/coverage"<br />
-        }<br />
-    }<br />
-}<br />
-</code></p>
-<h3>A Few Details</h3><br />
+<h3>The Gradle Script</h3>
+{% highlight groovy %}
+configurations {
+    codeCoverage
+    codeCoverageAnt
+}
+dependencies {
+    codeCoverage 'org.jacoco:org.jacoco.agent:0.5.10.201208310627:runtime@jar'
+    codeCoverageAnt 'org.jacoco:org.jacoco.ant:0.5.10.201208310627'
+}
+test {
+    systemProperties = System.properties
+    jvmArgs "-javaagent:${configurations.codeCoverage.asPath}=destfile=${project.buildDir.path}/coverage-results/jacoco.exec,sessionid=HSServ,append=false",
+            '-Djacoco=true',
+            '-Xms128m',
+            '-Xmx512m',
+            '-XX:MaxPermSize=128m'
+}
+task generateCoverageReport << {
+    ant {
+        taskdef(name:'jacocoreport', classname: 'org.jacoco.ant.ReportTask', classpath: configurations.codeCoverageAnt.asPath)
+          mkdir dir: "build/reports/coverage"
+          jacocoreport {
+            executiondata {
+                fileset(dir: "build/coverage-results") {
+                    include name: 'jacoco.exec'
+                }
+            }
+            structure(name: project.name) {
+                classfiles {
+                    fileset(dir: "build/classes/main") {
+                        exclude name: 'org/ifxforum/**/*'
+                        exclude name: 'org/gca/euronet/generated**/*'
+                    }
+                }
+                sourcefiles(encoding: 'CP1252') {
+                    fileset dir: "src/main/java"
+                }
+            }
+              xml  destfile: "build/reports/coverage/jacoco.xml"
+            html destdir:  "build/reports/coverage"
+        }
+    }
+}
+{% endhighlight %}</p>
+<h3>A Few Details</h3>
 The magic is in the <em>jvmArgs</em> of the test block. JaCoCo is run as a Java Agent which uses the runtime instrumentation feature added in Java 6 to be able to inspect the running code. Extra arguments can be added to JaCoCo there including things like <em>excludes</em> to exclude specific classes from coverage. The available parameters are the same as the <a href="http://www.eclemma.org/jacoco/trunk/doc/prepare-agent-mojo.html">maven JaCoCo parameters</a>.</p>
 <p>The <em>generateCoverageReport</em> task converts the jacoco.exec binary into html files for human consumption. If you're just integrating with a CI tool, like Jenkins, then you probably don't need this, but it's handy for local use and to dig into the details of what's covered.</p>
-<h3>Loose Ends</h3><br />
+<h3>Loose Ends</h3>
 One problem that I ran into was referencing project paths like the project.buildDir from within an Ant task. Hopefully someone will come along and let me know how that's done.</p>

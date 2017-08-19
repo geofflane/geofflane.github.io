@@ -156,51 +156,51 @@ comments:
 ---
 <p>One interesting thing about some languages is their support for adding new syntax. While all languages have the ability to add new functions or types some have specific properties that make it easy to add what looks like new built-in syntax.</p>
 <p>Scala is an Object Oriented language. You can declare classes and objects, do inheritance and composition, and all the other things you might expect from an OO language. Scala is also a Functional language because functions are first-class citizens (also called <a href="http://en.wikipedia.org/wiki/Functor">a functor</a>). And when I say Scala is an OO language I really mean it: everything is an Object. Even functions are Objects. (Chew on that one for a bit.)</p>
-<p>Scala also supports the idea of optional parenthesis for method calls that only take a single argument (<em><strong>Note:</strong> This applies to method calls on object only. Not to functions.</em>). This ends up being for a very practical reason. Take the following example:<br />
-<code lang="scala"><br />
-1 + 2<br />
-</code></p>
-<p>This is a very nice way to write an addition operation. In reality what's happening is:<br />
-<code lang="scala"><br />
-1.+(2)<br />
-</code><br />
+<p>Scala also supports the idea of optional parenthesis for method calls that only take a single argument (<em><strong>Note:</strong> This applies to method calls on object only. Not to functions.</em>). This ends up being for a very practical reason. Take the following example:
+{% highlight scala %}
+1 + 2
+{% endhighlight %}</p>
+<p>This is a very nice way to write an addition operation. In reality what's happening is:
+{% highlight scala %}
+1.+(2)
+{% endhighlight %}
 1 is an object and + is a method on that object that takes a single parameter. Applying the previous rule we get to remove the dot and the the parenthesis. Which allows us to write our previous example <em>1 + 2</em>.</p>
 <p>The good news is they bring this consistency to the language as a whole, so any method call can optionally use the dot. Any call to a method that only takes a single parameter can exclude the parenthesis around its arguments. These features make it pretty easy to emulate the built-in syntax of a language.</p>
-<h3>Your Own While Loop</h3><br />
-Let's say I want to write my own <em>while</em> loop:<br />
-<code lang="scala"><br />
-def mywhile(condition: => Boolean)(command: => Unit) {<br />
-    if (condition) {<br />
-        command<br />
-        mywhile(condition)(command)<br />
-    }<br />
+<h3>Your Own While Loop</h3>
+Let's say I want to write my own <em>while</em> loop:
+{% highlight scala %}
+def mywhile(condition: => Boolean)(command: => Unit) {
+    if (condition) {
+        command
+        mywhile(condition)(command)
+    }
 }</p>
-<p>var x = 1<br />
-mywhile(x < 100000) {<br />
-    println(x)<br />
-    x += 1<br />
-}<br />
-</code></p>
+<p>var x = 1
+mywhile(x < 100000) {
+    println(x)
+    x += 1
+}
+{% endhighlight %}</p>
 <p>As you can see, I end up calling <em>mywhile</em> the same as I would call a built-in <em>while</em>. This is implemented as a tail-recursive function. If the condition is met, the command is executed. The function then recurses, calling itself to continue. <em>x < 100000</em> is an anonymous function that returns a boolean expression.</p>
-<h3>Your Own Do...While Loop</h3><br />
+<h3>Your Own Do...While Loop</h3>
 A <em>while</em> loop can be built using just a single function. What if you want to create a <em>do...while</em> loop instead? In this case you can make use of the OO/functional hybrid.</p>
-<p><code lang="scala"><br />
-class Repeater(command: => Unit){<br />
-    final def aslongas(condition: => Boolean)  {<br />
-        command<br />
-        if (condition) aslongas(condition)<br />
-    }<br />
+<p>{% highlight scala %}
+class Repeater(command: => Unit){
+    final def aslongas(condition: => Boolean)  {
+        command
+        if (condition) aslongas(condition)
+    }
 }</p>
-<p>def mydo(command: => Unit): Repeater = {<br />
-    new Repeater(command)<br />
+<p>def mydo(command: => Unit): Repeater = {
+    new Repeater(command)
 }</p>
-<p>var x = 0<br />
-mydo {<br />
-    x += 1<br />
-    println(x)<br />
-} aslongas (x < 100000)<br />
-</code></p>
+<p>var x = 0
+mydo {
+    x += 1
+    println(x)
+} aslongas (x < 100000)
+{% endhighlight %}</p>
 <p>In this case I use recursion again to do the looping. But I use an Object to bind the command to and an <em>aslongas</em> method to run that command and check the looping condition. I use a function <em>mydo</em> to bootstrap an instance of the <em>Repeater</em> class. Scala gives us the ability to use functions and objects when they make sense.</p>
-<h3>Why Should You Care?</h3><br />
+<h3>Why Should You Care?</h3>
 Ok, so you're not going to write your own while loops. The language has them built-in already. But what this allows you to see is how you can add new "syntax". That ability makes it quite convenient and easy to write higher-order syntax to solve application specific problems or to create DSLs.</p>
 <p><em><strong>Update:</strong> Changed the until name to 'aslongas' since it really wasn't until the condition was met.</em></p>

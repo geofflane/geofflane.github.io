@@ -97,77 +97,77 @@ comments:
     appreciate it."
 ---
 <p>The Struts2 documentation contains examples that are often basic at best which can make it challenging to figure out how to do things sometimes. I was working on creating a form that would allow me to select values from a list to connect 2 objects in a <em>One-to-Many</em> relationship. This is a common relationship for many things. In this example, I'll use a <em>User and Role</em> class to demonstrate the concept.</p>
-<p>For background, here's a JPA mapped User and Role class.<br />
-<code lang="java"><br />
-import java.util.List;<br />
+<p>For background, here's a JPA mapped User and Role class.
+{% highlight java %}
+import java.util.List;
 import javax.persistence.*;</p>
-<p>@Entity<br />
+<p>@Entity
 public class User {</p>
-<p>    private Long id;<br />
-    // ... other member variables<br />
+<p>    private Long id;
+    // ... other member variables
     private List<Role> roles;</p>
-<p>    @Id<br />
-    @GeneratedValue(strategy = GenerationType.AUTO)<br />
-    public Long getId() {<br />
-        return id;<br />
+<p>    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    public Long getId() {
+        return id;
     }</p>
-<p>    public void setId(Long id) {<br />
-        this.id = id;<br />
+<p>    public void setId(Long id) {
+        this.id = id;
     }</p>
-<p>    @OneToMany<br />
-    @JoinTable(name = "UserRoles",<br />
-            joinColumns = @JoinColumn(name = "user_Id"),<br />
-            inverseJoinColumns = @JoinColumn(name = "role_Id"),<br />
-            uniqueConstraints = @UniqueConstraint(columnNames = {"user_Id", "role_Id"})<br />
-    )<br />
-    public List<Role> getRoles() {<br />
-        return roles;<br />
+<p>    @OneToMany
+    @JoinTable(name = "UserRoles",
+            joinColumns = @JoinColumn(name = "user_Id"),
+            inverseJoinColumns = @JoinColumn(name = "role_Id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"user_Id", "role_Id"})
+    )
+    public List<Role> getRoles() {
+        return roles;
     }</p>
-<p>    public void setRoles(List<Role> roles) {<br />
-        this.roles = roles;<br />
+<p>    public void setRoles(List<Role> roles) {
+        this.roles = roles;
     }</p>
-<p>    // ... other properties<br />
+<p>    // ... other properties
 }</p>
-<p>@Entity<br />
+<p>@Entity
 public class Role {</p>
 <p>    private Long id;</p>
-<p>    @Id<br />
-    @GeneratedValue(strategy = GenerationType.AUTO)<br />
-    public Long getId() {<br />
-        return id;<br />
+<p>    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    public Long getId() {
+        return id;
     }</p>
-<p>    public void setId(Long id) {<br />
-        this.id = id;<br />
+<p>    public void setId(Long id) {
+        this.id = id;
     }</p>
-<p>    // ... other properties<br />
-}<br />
-</code></p>
+<p>    // ... other properties
+}
+{% endhighlight %}</p>
 <p>A list of Roles exists in the database. When a User is created, they are assigned one or more Roles. The User and Roles are connected in the Database through a join table as defined in the mapping.  At this point I created some DAO Repository classes to manage the persistence and an Action to handle the form values. (The details of JPA, setting up Persistence and Actions are beyond the scope of this post.)</p>
-<p>The part that caused me the most grief ended up being the form. I wanted to add a checkbox list that contained all of the Roles. The example on the Struts site for <a href="http://struts.apache.org/2.x/docs/checkboxlist.html">checkboxlist</a>, a control with 43 documented properties is:<br />
-<code lang="html"><br />
-<s:checkboxlist name="foo" list="bar"/><br />
-</code><br />
+<p>The part that caused me the most grief ended up being the form. I wanted to add a checkbox list that contained all of the Roles. The example on the Struts site for <a href="http://struts.apache.org/2.x/docs/checkboxlist.html">checkboxlist</a>, a control with 43 documented properties is:
+{% highlight html %}
+<s:checkboxlist name="foo" list="bar"/>
+{% endhighlight %}
 Needless to say, there was some 'figuring out' to be done.</p>
 <p>The form itself is pretty vanilla for the most part. The <em>checkboxlist</em> is the interesting part because it's what allows us to map the User to the Roles.  I knew that I was looking for something to put into the <em>value</em> property of the control that would tell it to pre-select the Role values that were already associated with the User. </p>
-<p>I started out with something like:<br />
-<code lang="html"><br />
-<s:checkboxlist name="user.roles.id"<br />
-                    list="roles"<br />
-                    listKey="id"<br />
-                    listValue="name"<br />
-                    label="%{getText('label.roles')}"<br />
-                    value="user.roles"/><br />
-</code></p>
+<p>I started out with something like:
+{% highlight html %}
+<s:checkboxlist name="user.roles.id"
+                    list="roles"
+                    listKey="id"
+                    listValue="name"
+                    label="%{getText('label.roles')}"
+                    value="user.roles"/>
+{% endhighlight %}</p>
 <p>That didn't work. When you think about it, that makes sense because the keys in the list are ids and the values supplied are Role objects. So I needed to figure out how to get the Ids from the Roles. I could have done that in the Action class, but it seemed like there should be a better way. A way that would allow me to continue in more of a Domain fashion.</p>
 <p>Doing some research into <a href="http://www.opensymphony.com/ognl/">OGNL</a>, I came upon the <a href="http://www.opensymphony.com/ognl/html/LanguageGuide/projection.html">list projections</a> section which was the key...</p>
 <p>The OGNL projection syntax gives us <em>user.roles.{id}</em>. Basically that is a list comprehension that takes of list of Role objects and turns it into a list of Role Ids. That list of Ids becomes the list of values that will be preselected.</p>
-<p>Knowing that I can now create a select box that will include the pre-selected values on an edit form:<br />
-<code lang="html"><br />
-<s:checkboxlist name="user.roles.id"<br />
-                    list="roles"<br />
-                    listKey="id"<br />
-                    listValue="name"<br />
-                    label="%{getText('label.roles')}"<br />
-                    value="user.roles.{id}"/><br />
-</code></p>
+<p>Knowing that I can now create a select box that will include the pre-selected values on an edit form:
+{% highlight html %}
+<s:checkboxlist name="user.roles.id"
+                    list="roles"
+                    listKey="id"
+                    listValue="name"
+                    label="%{getText('label.roles')}"
+                    value="user.roles.{id}"/>
+{% endhighlight %}</p>
 <p>Enjoy.</p>

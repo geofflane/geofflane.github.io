@@ -23,30 +23,30 @@ tags:
 comments: []
 ---
 <p>I haven't posted in a while, but I've recently been studying <a href="http://www.htdp.org/">How to Design Programs (HtDP)</a>. It's really a book about teaching beginners how to program by following a series of recipes that tell you how to identify and solve different classes of problems. The techniques are taught in a very basic subset of <a href="http://en.wikipedia.org/wiki/Scheme_programming_language">Scheme</a>. (There are actually multiple learning languages that slowly build up the available functionality.) You don't have to know any Scheme to get started though.</p>
-<h3>Basic Scheme</h3><br />
-I'm sure you can figure out what the following does without knowing any scheme:<br />
-<code><br />
-(+ 1 3)<br />
-(* 10 10)<br />
-</code></p>
-<p>They explain a bit about equality and conditionals:<br />
-<code><br />
-(= 1 1)            ; true<br />
-(and true true)  ; true<br />
-(or true false)   ; false<br />
-(and (>= 1 1) (= 2 2)) ; true<br />
-</code></p>
-<p>Then building on basic arithmetic and boolean logic, they add a bit of algebra to teach how to define your own methods:<br />
-<code><br />
-(define (add1 n)<br />
-    (+ n 1))<br />
-(define (sqr n)<br />
+<h3>Basic Scheme</h3>
+I'm sure you can figure out what the following does without knowing any scheme:
+{% highlight scheme %}
+(+ 1 3)
+(* 10 10)
+{% endhighlight %}</p>
+<p>They explain a bit about equality and conditionals:
+{% highlight scheme %}
+(= 1 1)            ; true
+(and true true)  ; true
+(or true false)   ; false
+(and (>= 1 1) (= 2 2)) ; true
+{% endhighlight %}</p>
+<p>Then building on basic arithmetic and boolean logic, they add a bit of algebra to teach how to define your own methods:
+{% highlight scheme %}
+(define (add1 n)
+    (+ n 1))
+(define (sqr n)
     (* n n))</p>
-<p>;; Tests<br />
-(= (add1 2) 3)<br />
-(= (sqr 10) 100)<br />
-</code></p>
+<p>;; Tests
+(= (add1 2) 3)
+(= (sqr 10) 100)
+{% endhighlight %}</p>
 <p>It grows from those simple constructs into how to build structured and list data and how to process those kinds of data.</p>
-<h3>Why Might You Care?</h3><br />
+<h3>Why Might You Care?</h3>
 It's very hard for me to judge what it would be like to learn to program using this book. I personally have 10 years of programming experience myself and learned first with BASIC, then really with Pascal and C/C++. Professionally I first programmed in Java, then C#. From there I really got interested in dynamic languages like Python then Ruby and looked a bit at Objective-C in there. By and large these are all <a href="http://en.wikipedia.org/wiki/Imperative_programming">Imperative Programming Languages</a>. I'm sure my experience isn't unique for those of us who didn't go to MIT. So, if like me, you are new to <a href="http://en.wikipedia.org/wiki/Functional_programming">Functional Programming</a> then it is an interesting book because it teaches you how to think in terms of functional decomposition.</p>
 <p>Multi-core processing is the future and functional programming, due to the ability to much more easily create side-effect free programs, is well suited for parallelization. Understanding functional programming is going to be very important for programmers in the future. We might never go to all functional programming, but we might go to more mixed-mode languages that allow us to easily write parallelized code for portions of a program that need it.</p>

@@ -53,35 +53,35 @@ comments:
 <p>Basically Ferret and Lucene keep a full-text index outside of the database that allows it to quickly perform full-text searches and find the identifers of rows in your database. Then you can go get those objects out of the database. It's pretty slick.</p>
 <p>Ferret uses <a href="http://www.ruby-doc.org/stdlib/libdoc/drb/rdoc/index.html">DRb</a> as a means of supporting multiple-concurrent clients and for scaling across multiple machines. You really don't need to know much about DRb to use <abbr title="Acts As Ferret">AAF</abbr>, but you do need to run the ferret DRb server in your production environment. Which gets us to...</p>
 <h3>Automating The Starting and Stopping of ferret_server</h3></p>
-<p>A few lines of code in your Capistrano <strong>deploy.rb</strong> and you are off and running.<br />
-<code lang="ruby"><br />
-before "deploy:start" do<br />
-  run "#{current_path}/script/ferret_server -e production start"<br />
+<p>A few lines of code in your Capistrano <strong>deploy.rb</strong> and you are off and running.
+{% highlight ruby %}
+before "deploy:start" do
+  run "#{current_path}/script/ferret_server -e production start"
 end </p>
-<p>after "deploy:stop" do<br />
-  run "#{current_path}/script/ferret_server -e production stop"<br />
+<p>after "deploy:stop" do
+  run "#{current_path}/script/ferret_server -e production stop"
 end</p>
-<p>after 'deploy:restart' do<br />
-  run "cd #{current_path} && ./script/ferret_server -e production stop"<br />
-  run "cd #{current_path} && ./script/ferret_server -e production start"<br />
-end<br />
-</code></p>
-<p>Except it doesn't work. I ended up with some errors like:<br />
-<samp>could not execute command</samp><br />
+<p>after 'deploy:restart' do
+  run "cd #{current_path} && ./script/ferret_server -e production stop"
+  run "cd #{current_path} && ./script/ferret_server -e production start"
+end
+{% endhighlight %}</p>
+<p>Except it doesn't work. I ended up with some errors like:
+<samp>could not execute command</samp>
 <samp>no such file to load -- /usr/bin/../config/environment</samp></p>
 <p>It also ends up that it's not Capistrano's fault.</p>
 <h3>Acts As Ferret server_manager.rb</h3></p>
-<p>In the file <strong>vendor/plugins/acts_as_ferret/lib/server_manager.rb</strong> there is a line that sets up where to look for its environment information. For some reason this is the default:<br />
-<code lang="ruby"><br />
-  # require(File.join(File.dirname(__FILE__), '../../../../config/environment'))<br />
-  require(File.join(File.dirname(ENV['_']), '../config/environment'))<br />
-</code></p>
+<p>In the file <strong>vendor/plugins/acts_as_ferret/lib/server_manager.rb</strong> there is a line that sets up where to look for its environment information. For some reason this is the default:
+{% highlight ruby %}
+  # require(File.join(File.dirname(__FILE__), '../../../../config/environment'))
+  require(File.join(File.dirname(ENV['_']), '../config/environment'))
+{% endhighlight %}</p>
 <p>If you notice, there is a line commented out. It just so happens that uncommenting that line and commenting out the other fixed the issue for me. It ends up that ENV['_'] points to the base path of the executable and thats <strong>/usr/bin/env</strong>. And that doesn't work. I'm not sure why that's the default behavior.</p>
-<p>Anyway, it's easily fixed:<br />
-<code lang="ruby"><br />
-  require(File.join(File.dirname(__FILE__), '../../../../config/environment'))<br />
-  # require(File.join(File.dirname(ENV['_']), '../config/environment'))<br />
-</code></p>
+<p>Anyway, it's easily fixed:
+{% highlight ruby %}
+  require(File.join(File.dirname(__FILE__), '../../../../config/environment'))
+  # require(File.join(File.dirname(ENV['_']), '../config/environment'))
+{% endhighlight %}</p>
 <p>With that fix in place, the Capistrano deployment will restart the Ferret DRb server when you deploy your application.</p>
-<p><strong><em>Update</em></strong><br />
-According to John in the comments below you can fix the AAF problem without changing the code as well. Just add <code class="inline">default_run_options[:shell] = false</code> to your Capistrano script and that will take care of it.</p>
+<p><strong><em>Update</em></strong>
+According to John in the comments below you can fix the AAF problem without changing the code as well. Just add <code class="inline">default_run_options[:shell] = false{% endhighlight %} to your Capistrano script and that will take care of it.</p>

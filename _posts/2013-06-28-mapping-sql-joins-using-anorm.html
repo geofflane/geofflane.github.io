@@ -36,154 +36,161 @@ comments:
     Now I just have to test my theory myself to see if the jdbc library can do it without any issues.
 ---
 <p><a href="http://www.playframework.com/documentation/2.1.1/ScalaAnorm">Anorm</a> is a <a href="http://www.scala-lang.org/">Scala</a> framework that is a fairly thin veneer over <a href="https://en.wikipedia.org/wiki/Java_Database_Connectivity">JDBC</a> that allows you to write SQL queries and map results into Scala objects. The examples easily found on the web have a tendency to be fairly simple. One of the first problems I ran into was mapping a Parent-Child hierarchy where the parent has a collection of values from a different table.</p>
-<p>For this post, I'm using a simple, contrived schema that looks like the following:<br />
-<code lang="sql"><br />
-CREATE TABLE user (<br />
-  id         SERIAL,<br />
-  user_name  varchar(100),<br />
-  CONSTRAINT pk_user PRIMARY KEY (id)<br />
+<p>For this post, I'm using a simple, contrived schema that looks like the following:</p>
+{% highlight sql %}
+CREATE TABLE user (
+  id         SERIAL,
+  user_name  varchar(100),
+  CONSTRAINT pk_user PRIMARY KEY (id)
 );</p>
-<p>CREATE TABLE email (<br />
-  user_id    LONG,<br />
-  email      varchar(100),<br />
-  CONSTRAINT pk_email PRIMARY_KEY (user_id, email)<br />
-);<br />
+<p>CREATE TABLE email (
+  user_id    LONG,
+  email      varchar(100),
+  CONSTRAINT pk_email PRIMARY_KEY (user_id, email)
+);
 ALTER TABLE email ADD CONSTRAINT fk_email_user FOREIGN_KEY (user_id) REFERENCES user (id);</p>
-<p>CREATE TABLE phone (<br />
-  user_id    LONG,<br />
-  phone      varchar(11),<br />
-CONSTRAINT pk_phone PRIMARY_KEY (user_id, phone)<br />
-);<br />
-ALTER TABLE phone ADD CONSTRAINT fk_phone_user FOREIGN_KEY (user_id) REFERENCES user (id);<br />
-</code></p>
-<h3>The Simple Case</h3><br />
-In the simplest case, Anorm allows you to map the results of a query to a Scala case class like the following:<br />
-<code lang="scala"><br />
-case class User(id:Long, name: String)<br />
-object User {<br />
-  def rowMapper = {<br />
-      long("id") ~<br />
-      str("user_name") map {<br />
-        case id ~ name => User(id, name)<br />
-      }<br />
-  }<br />
-}</p>
-<p>def getUser(id: String): Option[User] = {<br />
-  DB.withConnection {<br />
-    implicit conn =><br />
-      SQL("SELECT id, user_name FROM user WHERE user.id = {id}")<br />
-        .on("id" -> id)<br />
-        .as(User.rowMapper singleOpt)<br />
-  }<br />
-}<br />
-</code></p>
+<p>CREATE TABLE phone (
+  user_id    LONG,
+  phone      varchar(11),
+CONSTRAINT pk_phone PRIMARY_KEY (user_id, phone)
+);
+ALTER TABLE phone ADD CONSTRAINT fk_phone_user FOREIGN_KEY (user_id) REFERENCES user (id);
+{% endhighlight %}
+<h3>The Simple Case</h3>
+In the simplest case, Anorm allows you to map the results of a query to a Scala case class like the following:
+{% highlight scala %}
+case class User(id:Long, name: String)
+object User {
+  def rowMapper = {
+      long("id") ~
+      str("user_name") map {
+        case id ~ name => User(id, name)
+      }
+  }
+}
+<p>def getUser(id: String): Option[User] = {
+  DB.withConnection {
+    implicit conn =>
+      SQL("SELECT id, user_name FROM user WHERE user.id = {id}")
+        .on("id" -> id)
+        .as(User.rowMapper singleOpt)
+  }
+}
+{% endhighlight %}</p>
 <p>The query is executed and the results of the query are mapped to the User using a RowMapper which converts the result columns into Scala types and ultimately to a Scala User object that you've defined.</p>
-<h3>Joins</h3><br />
-But what if you want a more complex object, such as adding Phone numbers and Email addresses to your user object? Lets say you want something more like the following:<br />
-<code lang="scala"><br />
-case class User(id:Long, name: String, emails: List[String], phones: List[String])<br />
-object User {<br />
-  def rowMapper = {<br />
-      long("id") ~<br />
-      str("user_name") ~<br />
-      (str("email") ?) ~<br />
-      (str("number") ?) map {<br />
-        case id ~ name ~ email ~ number => ((id, name), email, number)<br />
-      }<br />
-  }<br />
-}<br />
-</code></p>
+<h3>Joins</h3>
+<p>But what if you want a more complex object, such as adding Phone numbers and
+  Email addresses to your user object? Lets say you want something more like
+  the following:
+</p>
+{% highlight scala %}
+case class User(id:Long, name: String, emails: List[String], phones: List[String])
+object User {
+  def rowMapper = {
+      long("id") ~
+      str("user_name") ~
+      (str("email") ?) ~
+      (str("number") ?) map {
+        case id ~ name ~ email ~ number => ((id, name), email, number)
+      }
+  }
+}
+{% endhighlight %}
 <p>This row mapper doesn't return a User object directly, but rather the columns grouped into a Triple (with id and name as the first part of the Triple).</p>
-<p>Anorm doesn't have a lot of support for that out of the box, but Scala's built in functions for dealing with Lists and Maps have the tools that you need. Take a look at the following example. If you're new to Scala, good luck wrapping your brain around it.<br />
-<code lang="scala"><br />
-def getUser(id: String): Option[User] = {<br />
-  DB.withConnection {<br />
-    implicit conn =><br />
-      SQL(<br />
-        """SELECT user_name, email.email, phone.number<br />
-          |FROM user<br />
-          |LEFT JOIN email ON email.user_id = user.id<br />
-          |LEFT JOIN phone ON phone.user_id = user.id<br />
-          |WHERE user.id = {id}""".stripMargin)<br />
-        .on("id" -> id)<br />
-        .as(User.rowMapper *)<br />
-        .groupBy(_._1)<br />
-        .map {<br />
-          case ((dbId, name), rest) => User(dbId, name, rest.unzip3._2.map(_.orNull), rest.unzip3._3.map(_.orNull))<br />
-        }.headOption<br />
-  }<br />
-}<br />
-</code></p>
-<p>But we can break down those steps a little bit, include the type declarations of what happens at each step to make it more clear as to what's being done. Using those type declarations you end up with something like the following.<br />
-<code lang="scala"><br />
-def getUser(id: String): Option[User] = {<br />
-  DB.withConnection {<br />
-    implicit conn =><br />
-      val result: List[((Long, String), Option[String], Option[String])] = SQL(<br />
-        """SELECT user_name, email.email, phone.number<br />
-          |FROM user<br />
-          |LEFT JOIN email ON email.user_id = user.id<br />
-          |LEFT JOIN phone ON phone.user_id = user.id<br />
-          |WHERE user.id = {id}""".stripMargin)<br />
-        .on("id" -> id)<br />
-        .as(User.rowMapper *)</p>
-<p>      val queryGroupedByUser: Map[(Long, String), List[((Long, String), Option[String], Option[String])]]<br />
-        = result.groupBy(_._1)</p>
-<p>      val listOfUser: Iterable[User] = queryGroupedByUser.map {<br />
-        case ((dbId, name), rest) => {<br />
-          val emails: List[String] = rest.unzip3._2.map(_.orNull) // convert Option[String]s to List[String] where Some[String]<br />
-          val phones: List[String] = rest.unzip3._3.map(_.orNull) // convert Option[String]s to List[String] where Some[String]<br />
-          User(dbId, name, emails, phones)<br />
-        }<br />
-      }</p>
-<p>      listOfUser.headOption<br />
-  }<br />
-}<br />
-</code></p>
-<p>Let's break that down a little more:<br />
-<code lang="scala"><br />
-val result: List[((Long, String), Option[String], Option[String])] = SQL(<br />
-  """SELECT user_name, email.email, phone.number<br />
-    |FROM user<br />
-    |LEFT JOIN email ON email.user_id = user.id<br />
-    |LEFT JOIN phone ON phone.user_id = user.id<br />
-    |WHERE user.id = {id}""".stripMargin)<br />
-  .on("id" -> id)<br />
-  .as(User.rowMapper *)<br />
-</code></p>
+<p>Anorm doesn't have a lot of support for that out of the box, but Scala's built in functions for dealing with Lists and Maps have the tools that you need. Take a look at the following example. If you're new to Scala, good luck wrapping your brain around it.
+{% highlight scala %}
+def getUser(id: String): Option[User] = {
+  DB.withConnection {
+    implicit conn =>
+      SQL(
+        """SELECT user_name, email.email, phone.number
+          |FROM user
+          |LEFT JOIN email ON email.user_id = user.id
+          |LEFT JOIN phone ON phone.user_id = user.id
+          |WHERE user.id = {id}""".stripMargin)
+        .on("id" -> id)
+        .as(User.rowMapper *)
+        .groupBy(_._1)
+        .map {
+          case ((dbId, name), rest) => User(dbId, name, rest.unzip3._2.map(_.orNull), rest.unzip3._3.map(_.orNull))
+        }.headOption
+  }
+}
+{% endhighlight %}</p>
+<p>But we can break down those steps a little bit, include the type declarations of what happens at each step to make it more clear as to what's being done. Using those type declarations you end up with something like the following.
+{% highlight scala %}
+def getUser(id: String): Option[User] = {
+  DB.withConnection {
+    implicit conn =>
+      val result: List[((Long, String), Option[String], Option[String])] = SQL(
+        """SELECT user_name, email.email, phone.number
+          |FROM user
+          |LEFT JOIN email ON email.user_id = user.id
+          |LEFT JOIN phone ON phone.user_id = user.id
+          |WHERE user.id = {id}""".stripMargin)
+        .on("id" -> id)
+        .as(User.rowMapper *)
+        val queryGroupedByUser: Map[(Long, String), List[((Long, String), Option[String], Option[String])]]
+        = result.groupBy(_._1)
+        val listOfUser: Iterable[User] = queryGroupedByUser.map {
+        case ((dbId, name), rest) => {
+          val emails: List[String] = rest.unzip3._2.map(_.orNull) // convert Option[String]s to List[String] where Some[String]
+          val phones: List[String] = rest.unzip3._3.map(_.orNull) // convert Option[String]s to List[String] where Some[String]
+          User(dbId, name, emails, phones)
+        }
+      }
+      listOfUser.headOption
+  }
+}
+{% endhighlight %}</p>
+<p>Let's break that down a little more:</p>
+{% highlight scala %}
+val result: List[((Long, String), Option[String], Option[String])] = SQL(
+  """SELECT user_name, email.email, phone.number
+    |FROM user
+    |LEFT JOIN email ON email.user_id = user.id
+    |LEFT JOIN phone ON phone.user_id = user.id
+    |WHERE user.id = {id}""".stripMargin)
+  .on("id" -> id)
+  .as(User.rowMapper *)
+{% endhighlight %}
 <p>This code creates a List as you can see from the type declaration. The List contains an entry for each row returned in the result set. Because we used JOIN clauses, we might have gotten back many rows. For example, if a user had 2 emails the results might have looked like:</p>
 <pre>
-id, name, email, number<br />
-1, Geoff, geoff@example.com, 15135551212<br />
-1, Geoff, geoff2@example.com, 15135551212<br />
-</pre></p>
-<p>The resulting Scala List that directly contains the data from that result set. But we take an extra step of grouping the basic User data (the parent) into its own Tuple which we'll use later to identify the unique Users. The Scala list of the above result set would contain:<br />
-<code lang="scala"><br />
-List(((1, "Geoff"), Some("geoff@example.com"), Some("15135551212")),<br />
-     ((1, "Geoff"), Some("geoff2@example.com"), Some("15135551212")))<br />
-</code></p>
-<p>Next we create a map of the results where the key to the map is the unique users:<br />
-<code lang="scala"><br />
-val queryGroupedByUser: Map[(Long, String), List[((Long, String), Option[String], Option[String])]]<br />
-  = result.groupBy(_._1)<br />
-</code></p>
-<p>From that list, we create a map, where the keys of the map are the unique parent objects. This turns the list shown above into a map like:<br />
-<code lang="scala"><br />
-Map((1, "Geoff"),<br />
-  List(((1, "Geoff"), Some("geoff@example.com"), Some("15135551212")),<br />
-       ((1, "Geoff"), Some("geoff2@example.com"), Some("15135551212")))<br />
-)<br />
-</code></p>
+id, name, email, number
+1, Geoff, geoff@example.com, 15135551212
+1, Geoff, geoff2@example.com, 15135551212
+</pre>
+<p>The resulting Scala List that directly contains the data from that result
+  set. But we take an extra step of grouping the basic User data (the parent)
+  into its own Tuple which we'll use later to identify the unique Users. The
+  Scala list of the above result set would contain:</p>
+{% highlight scala %}
+List(((1, "Geoff"), Some("geoff@example.com"), Some("15135551212")),
+     ((1, "Geoff"), Some("geoff2@example.com"), Some("15135551212")))
+{% endhighlight %}
+<p>Next we create a map of the results where the key to the map is the unique users:</p>
+{% highlight scala %}
+val queryGroupedByUser: Map[(Long, String), List[((Long, String), Option[String], Option[String])]]
+  = result.groupBy(_._1)
+{% endhighlight %}
+<p>From that list, we create a map, where the keys of the map are the unique
+  parent objects. This turns the list shown above into a map like:</p>
+{% highlight scala %}
+Map((1, "Geoff"),
+  List(((1, "Geoff"), Some("geoff@example.com"), Some("15135551212")),
+       ((1, "Geoff"), Some("geoff2@example.com"), Some("15135551212")))
+)
+{% endhighlight %}
 <p>This mapping will work if there are many keys returned as well (assuming you were querying by something non-unique). In that case your map will contain one entry for each of the unique parents.</p>
-<p>Finally, we need to take apart the Map and turn it into our domain object:<br />
-<code lang="scala"><br />
-val listOfUser: Iterable[User] = queryGroupedByUser.map {<br />
-  case ((dbId, name), rest) => {<br />
-    val emails: List[String] = rest.unzip3._2.map(_.orNull) // convert Option[String]s to List[String] where not null<br />
-    val phones: List[String] = rest.unzip3._3.map(_.orNull) // convert Option[String]s to List[String] where not null<br />
-    User(dbId, name, emails, phones)<br />
-  }<br />
-}<br />
-</code></p>
+<p>Finally, we need to take apart the Map and turn it into our domain object:</p>
+{% highlight scala %}
+val listOfUser: Iterable[User] = queryGroupedByUser.map {
+  case ((dbId, name), rest) => {
+    val emails: List[String] = rest.unzip3._2.map(_.orNull) // convert Option[String]s to List[String] where not null
+    val phones: List[String] = rest.unzip3._3.map(_.orNull) // convert Option[String]s to List[String] where not null
+    User(dbId, name, emails, phones)
+  }
+}
+{% endhighlight %}
 <p>The case statement destructures the Map back into the key containing the basic user information and then the list of all the other data associated with that user. <em>rest.unzip3</em> turns the <em>List(A, B, C)</em> into (List[A], List[B], List[C]). <em>_.2</em> takes the second element out of the Triple, in this case the List[String] containing the emails. We then map over them to get the value or null from the Option[String] to create a list of the items that are not null. The same process is done for emails and phones. Those values along with the key from the map are used to create the instances of our Users. In this case, since we only expect one based on an id, we also use <em>listOfUser.headOption</em> to get the first element of the list (or None if the list is empty).</p>
 <p>Hopefully breaking down the Scala into smaller chunks will help some people understand how this stuff works.</p>

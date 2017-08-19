@@ -33,36 +33,36 @@ comments:
 <p><a href="http://www.germane-software.com/software/rexml/">REXML</a> is a pure Ruby implementation of an XML parser. It was inspired by an Open Source Java XML parser called Electric XML. Basically the whole point of REXML is to make an XML parser that feels like a Ruby library. It is a reaction to the SAX and the DOM parsers that exist. SAX and DOM parsers are generally available in all kinds of languages, but they are really tightly coupled to the demands of XML. </p>
 <p>As a bit of background: SAX is an event-based model that parses a document in a single pass triggering event callbacks when specific elements are reached. The programmer is then responsible for deciphering the context and calling the appropriate functions. DOM on the other hand is a heirarchical, in-memory representation of an XML document. It allows for ad-hoc traversal of the XML structure. DOM also allows for the use of things like XPath for querying elements (attributes too) of an XML structure.</p>
 <p>REXML on the other hand aims to feel like Ruby.</p>
-<p>Creating a document:<br />
-<code lang="ruby"><br />
-doc = REXML::Document.new(atom_feed)<br />
-root = doc.root()<br />
-</code></p>
-<p>Getting a single text node:<br />
-<code lang="ruby"><br />
-linkNode = root.elements['link']<br />
-linkValue = linkNode.text if linkNode<br />
-</code></p>
+<p>Creating a document:
+{% highlight ruby %}
+doc = REXML::Document.new(atom_feed)
+root = doc.root()
+{% endhighlight %}</p>
+<p>Getting a single text node:
+{% highlight ruby %}
+linkNode = root.elements['link']
+linkValue = linkNode.text if linkNode
+{% endhighlight %}</p>
 <p>REXML also uses the standard Enumerable features found by other collections classes so that it feels very natural to use. In Ruby it is common to use "blocks" to handle each of the items in a method. Rather than having to itterate over a collection of items, you let the collection do the itterating for you.</p>
-<p>For each of the elements called "author" call the add_author method:<br />
-<code  lang="ruby"><br />
-root.elements.each('author') { |a| add_author(a) }<br />
-</code></p>
-<p>You can also use XPath:<br />
-<code  lang="ruby"><br />
-XPath.each(doc, "//entry") { |e| add_entry(e) }<br />
-</code></p>
-<p>Of course you can create and/or modify documents as well in a Ruby-esque way.<br />
-<code lang="ruby"><br />
-entry = Element.new("entry")<br />
-id = Element.new("id")<br />
-id.add_element(Text.new("_some_unique_id"))<br />
-entry.add_element(id)<br />
-['Geoff', 'Bob', 'Sam'].each do |author|<br />
-    a = Element.new("author")<br />
-    name = Element.new("name")<br />
-    name.add_element(Text.new(author))<br />
-    entry.elements << a<br />
-end<br />
-</code></p>
+<p>For each of the elements called "author" call the add_author method:
+{% highlight ruby %}
+root.elements.each('author') { |a| add_author(a) }
+{% endhighlight %}</p>
+<p>You can also use XPath:
+{% highlight ruby %}
+XPath.each(doc, "//entry") { |e| add_entry(e) }
+{% endhighlight %}</p>
+<p>Of course you can create and/or modify documents as well in a Ruby-esque way.
+{% highlight ruby %}
+entry = Element.new("entry")
+id = Element.new("id")
+id.add_element(Text.new("_some_unique_id"))
+entry.add_element(id)
+['Geoff', 'Bob', 'Sam'].each do |author|
+    a = Element.new("author")
+    name = Element.new("name")
+    name.add_element(Text.new(author))
+    entry.elements << a
+end
+{% endhighlight %}</p>
 <p>It's nice to see a slightly different take on XML manipulation.</p>

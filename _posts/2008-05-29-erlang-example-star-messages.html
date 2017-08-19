@@ -22,41 +22,41 @@ tags:
 comments: []
 ---
 <p>This is part of a series on the <a href="http://www.erlang.org/course/exercises.html">Erlang Exercises</a> which is a great set of programming problems that challenge you to implement solutions to some common Erlang problems. I'm going to share some of my solutions to these problems.</p>
-<h2>Interaction between processes, Concurrency</h2><br />
+<h2>Interaction between processes, Concurrency</h2>
 3) Write a function which starts N processes in a star, and sends a message to each of them M times. After the messages have been sent the processes should terminate gracefully.</p>
-<p><code lang="erlang"><br />
--module(star).<br />
--export([start/2, loop/0, sendMessage/2]).<br />
-start(0, _) -><br />
-    io:format("done~n", []);<br />
-start(N, M) -><br />
-    timer:sleep(random:uniform(10) * 100),<br />
-    LoopPid = spawn(?MODULE, loop, []),<br />
-    spawn(?MODULE, sendMessage, [M, LoopPid]),<br />
-    start(N - 1, M).<br />
-sendMessage(0, Pid) -><br />
-    Pid ! done;<br />
-sendMessage(M, Pid) -><br />
-    timer:sleep(random:uniform(5) * 100),<br />
-    Pid ! M,<br />
-    sendMessage(M - 1, Pid).<br />
-loop() -><br />
-    receive<br />
-        done -><br />
-            io:format("* Process: ~10w, Message#: terminate!~n", [self()]);<br />
-        R -><br />
-            io:format(": Process: ~10w, Message#: ~w ..~n", [self(), R]),<br />
-            loop()<br />
-    end.<br />
-</code></p>
-<h3>Explanation</h3><br />
-<strong>start(N, M)</strong><br />
+<p>{% highlight erlang %}
+-module(star).
+-export([start/2, loop/0, sendMessage/2]).
+start(0, _) ->
+    io:format("done~n", []);
+start(N, M) ->
+    timer:sleep(random:uniform(10) * 100),
+    LoopPid = spawn(?MODULE, loop, []),
+    spawn(?MODULE, sendMessage, [M, LoopPid]),
+    start(N - 1, M).
+sendMessage(0, Pid) ->
+    Pid ! done;
+sendMessage(M, Pid) ->
+    timer:sleep(random:uniform(5) * 100),
+    Pid ! M,
+    sendMessage(M - 1, Pid).
+loop() ->
+    receive
+        done ->
+            io:format("* Process: ~10w, Message#: terminate!~n", [self()]);
+        R ->
+            io:format(": Process: ~10w, Message#: ~w ..~n", [self(), R]),
+            loop()
+    end.
+{% endhighlight %}</p>
+<h3>Explanation</h3>
+<strong>start(N, M)</strong>
 The entry point to the code defines the Number of processes to start and the number of Messages to pass. <strong>timer:sleep(random:uniform(10) * 100),</strong> is just to demonstrate that things are actually happening concurrently. Without this the program usually runs to fast and everything is sequential. <strong>LoopPid = spawn(?MODULE, loop, []),</strong> creates a new process running the loop function. That process is set up to receive messages and print some information out. <strong>spawn(?MODULE, sendMessage, [M, LoopPid]),</strong> is then called to create a new process whose job it is to send each LoopPid (really the nodes in the star) M number of messages. Finally <strong>start(N - 1, M).</strong> is called tail recursively with one less Node count.</p>
-<p><strong>start(0, _)</strong><br />
+<p><strong>start(0, _)</strong>
 This function is called or matched when the tail recursion from <strong>start(N, M)</strong> finally gets down to the value where N is zero. In that case we no longer want to spawn processes so we just write "done" and exit the function.</p>
-<p><strong>sendMessage(M, Pid)</strong><br />
+<p><strong>sendMessage(M, Pid)</strong>
 Following a similar pattern to the <strong>start</strong> function this counts down M to zero and sends M as a message to the given Pid. The tail recursion handles decrementing to the count of M until the pattern (0, Pid) is matched at which point <strong>sendMessage(0, Pid)</strong> is matched and the Pid is sent the 'done' message.</p>
-<p><strong>loop()</strong><br />
+<p><strong>loop()</strong>
 This is the function that is run as the individual processes or the "points of the star". Its job is to receive messages passed to it. When <strong>done -></strong> is matched by a message, the process will print out some information and then end gracefully. <strong>R -></strong> represents a message being passed with a single value that is anything other than the atom 'done'. When it is matched the value is printed and the process waits for another message by calling back to itself with <strong>loop()</strong></p>
-<h3>Thoughts</h3><br />
+<h3>Thoughts</h3>
 One of the interesting things to me is the tail recursion of Erlang and other Functional Programming Languages. This accomplished the same thing as a looping construct without using <em>for</em> or <em>while</em> or any of those usual imperative methods.</p>

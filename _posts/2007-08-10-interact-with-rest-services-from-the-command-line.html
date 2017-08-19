@@ -47,109 +47,109 @@ comments:
 ---
 <p><a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST</a> is becoming more popular as a means of implementing <a href="http://en.wikipedia.org/wiki/Service-oriented_architecture">Service Oriented Architectures</a> (SOA) as well as merely providing simple remote APIs for interacting with systems. The main reason for this is that it provides a very simple means of creating and consuming Services. Contrasted to SOA implementations like SOAP and REST can be a relief of simplicity.</p>
 <p>One of the main advantages of REST is that it requires no tooling to use. Unlike <a href="http://en.wikipedia.org/wiki/SOAP">SOAP</a>, it is very easy to construct ad-hoc clients to consume a RESTful service. These examples use <a href="http://curl.haxx.se/">curl</a> a command-line utility available on Unix systems or using <a href="http://www.cygwin.com/">Cygwin</a> on Windows. The same concepts can be translated to anything that can send HTTP requests.</p>
-<h2>Example REST Service with Ruby on Rails</h2><br />
+<h2>Example REST Service with Ruby on Rails</h2>
 As the example implementation, I'll use a Ruby on Rails controller. Rails has very good support for implementing RESTful services so is easy to show.</p>
-<p>To get started with this example you can generate a Rails project and the Order object with the following commands:<br />
-<code><br />
-rails order_example<br />
-cd order_example<br />
-./script generate resource order name:string<br />
-</code></p>
-<p>Then you can implement a RESTful controller with the following code:<br />
-<code lang="ruby"><br />
-class OrdersController < ApplicationController<br />
-  # GET /orders<br />
-  # GET /orders.xml<br />
-  def index<br />
-    @orders = Order.find(:all)<br />
-    respond_to do |format|<br />
-      format.html # index.rhtml<br />
-      format.xml  { render :xml => @orders.to_xml }<br />
-    end<br />
+<p>To get started with this example you can generate a Rails project and the Order object with the following commands:
+{% highlight bash %}
+rails order_example
+cd order_example
+./script generate resource order name:string
+{% endhighlight %}</p>
+<p>Then you can implement a RESTful controller with the following code:
+{% highlight ruby %}
+class OrdersController < ApplicationController
+  # GET /orders
+  # GET /orders.xml
+  def index
+    @orders = Order.find(:all)
+    respond_to do |format|
+      format.html # index.rhtml
+      format.xml  { render :xml => @orders.to_xml }
+    end
   end</p>
-<p>  # GET /orders/1<br />
-  # GET /orders/1.xml<br />
-  def show<br />
-    @order = Order.find(params[:id])<br />
-    respond_to do |format|<br />
-      format.html # index.rhtml<br />
-      format.xml  { render :xml => @order.to_xml }<br />
-    end<br />
+<p>  # GET /orders/1
+  # GET /orders/1.xml
+  def show
+    @order = Order.find(params[:id])
+    respond_to do |format|
+      format.html # index.rhtml
+      format.xml  { render :xml => @order.to_xml }
+    end
   end</p>
-<p>  # POST /orders<br />
-  # POST /orders.xml<br />
-  def create<br />
-    @order = Order.new(params[:order])<br />
-    respond_to do |format|<br />
-      if @order.save<br />
-        flash[:notice] = 'Order was successfully created.'<br />
-        format.html { redirect_to order_url(@order) }<br />
-        format.xml  { head :created, :location => order_url(@order) }<br />
-      else<br />
-        format.html { render :action => "new" }<br />
-        format.xml  { render :xml => @order.errors.to_xml }<br />
-      end<br />
-    end<br />
+<p>  # POST /orders
+  # POST /orders.xml
+  def create
+    @order = Order.new(params[:order])
+    respond_to do |format|
+      if @order.save
+        flash[:notice] = 'Order was successfully created.'
+        format.html { redirect_to order_url(@order) }
+        format.xml  { head :created, :location => order_url(@order) }
+      else
+        format.html { render :action => "new" }
+        format.xml  { render :xml => @order.errors.to_xml }
+      end
+    end
   end</p>
-<p>  # PUT /orders/1<br />
-  # PUT /orders/1.xml<br />
-  def update<br />
-    @order = Order.find(params[:id])<br />
-    respond_to do |format|<br />
-      if @order.update_attributes(params[:order])<br />
-        flash[:notice] = 'Order was successfully updated.'<br />
-        format.html { redirect_to order_url(@order) }<br />
-        format.xml  { head :ok }<br />
-      else<br />
-        format.html { render :action => "edit" }<br />
-        format.xml  { render :xml => @order.errors.to_xml }<br />
-      end<br />
-    end<br />
+<p>  # PUT /orders/1
+  # PUT /orders/1.xml
+  def update
+    @order = Order.find(params[:id])
+    respond_to do |format|
+      if @order.update_attributes(params[:order])
+        flash[:notice] = 'Order was successfully updated.'
+        format.html { redirect_to order_url(@order) }
+        format.xml  { head :ok }
+      else
+        format.html { render :action => "edit" }
+        format.xml  { render :xml => @order.errors.to_xml }
+      end
+    end
   end</p>
-<p>  # DELETE /orders/1<br />
-  # DELETE /orders/1.xml<br />
-  def destroy<br />
-    @order = Order.find(params[:id])<br />
-    @order.destroy<br />
-    respond_to do |format|<br />
-      format.html { redirect_to orders_url }<br />
-      format.xml  { head :ok }<br />
-    end<br />
-  end<br />
-end<br />
-</code></p>
+<p>  # DELETE /orders/1
+  # DELETE /orders/1.xml
+  def destroy
+    @order = Order.find(params[:id])
+    @order.destroy
+    respond_to do |format|
+      format.html { redirect_to orders_url }
+      format.xml  { head :ok }
+    end
+  end
+end
+{% endhighlight %}</p>
 <p>This controller allows you respond to all of the Actions that can be taken on a Resource: GET, POST, PUT and DELETE.</p>
-<h2>Command Line Interaction with the Service</h2><br />
-Start our Rails application and then you can see the following commands at work.<br />
-<code><br />
-./script/server<br />
-</code></p>
-<h3>Get a list of all of the Orders</h3><br />
-The first thing you want to do is get a list of all of the orders in the system. To do this we perform a GET command  asking for an XML response. The URI in this case represents a list of all the Orders in the system.<br />
-<code><br />
-curl -X GET -H 'Accept: application/xml' http://localhost:3000/orders<br />
-</code></p>
-<h3>Get a single Order</h3><br />
-If we want to get the XML representation of a single order then we can ask for a specific Order by changing the ID to a URI that represents just one Order.<br />
-<code><br />
-curl -X GET -H 'Accept: application/xml' http://localhost:3000/orders/15<br />
-</code></p>
-<h3>Delete an Order</h3><br />
-REST keeps things simple by having consistent Resource URIs. The URI that represents Order number 15 can also be used to Delete or Modify that Order. In this case the URI for the GET is the same, but we ask it to delete the Order instead.<br />
-<code><br />
-curl -X DELETE -H 'Accept: application/xml' http://localhost:3000/orders/15<br />
-</code></p>
-<h3>Modify an existing Order</h3><br />
-Just as with delete, if we want to modify an Order we use the URI that represents that specific Order. The only difference is that we have to tell the server that we are sending it XML, and then actually send the XML.<br />
-<code><br />
-curl -i -X PUT -H 'Content-Type: application/xml' -H 'Accept: application/xml' \<br />
--d '<order><name>Foo</name></order>'  http://localhost:3000/orders/15<br />
-</code></p>
-<h3>Create a new Order</h3><br />
-Creating an Order looks very similar to modifying an Order but the URI changes to the Resource URI for the collection of all Orders. The response to this command will be an HTTP 302 Redirect that gives you the URI of the newly created Order Resource.<br />
-<code><br />
-curl -i -X POST -H 'Content-Type: application/xml' -H 'Accept: application/xml' \<br />
--d '<order><name>Foo</name></order>'  http://localhost:3000/orders/<br />
-</code></p>
-<h2>Conclusion</h2><br />
+<h2>Command Line Interaction with the Service</h2>
+Start our Rails application and then you can see the following commands at work.
+{% highlight bash %}
+./script/server
+{% endhighlight %}</p>
+<h3>Get a list of all of the Orders</h3>
+The first thing you want to do is get a list of all of the orders in the system. To do this we perform a GET command  asking for an XML response. The URI in this case represents a list of all the Orders in the system.
+{% highlight bash %}
+curl -X GET -H 'Accept: application/xml' http://localhost:3000/orders
+{% endhighlight %}</p>
+<h3>Get a single Order</h3>
+If we want to get the XML representation of a single order then we can ask for a specific Order by changing the ID to a URI that represents just one Order.
+{% highlight bash %}
+curl -X GET -H 'Accept: application/xml' http://localhost:3000/orders/15
+{% endhighlight %}</p>
+<h3>Delete an Order</h3>
+REST keeps things simple by having consistent Resource URIs. The URI that represents Order number 15 can also be used to Delete or Modify that Order. In this case the URI for the GET is the same, but we ask it to delete the Order instead.
+{% highlight bash %}
+curl -X DELETE -H 'Accept: application/xml' http://localhost:3000/orders/15
+{% endhighlight %}</p>
+<h3>Modify an existing Order</h3>
+Just as with delete, if we want to modify an Order we use the URI that represents that specific Order. The only difference is that we have to tell the server that we are sending it XML, and then actually send the XML.
+{% highlight bash %}
+curl -i -X PUT -H 'Content-Type: application/xml' -H 'Accept: application/xml' \
+-d '<order><name>Foo</name></order>'  http://localhost:3000/orders/15
+{% endhighlight %}</p>
+<h3>Create a new Order</h3>
+Creating an Order looks very similar to modifying an Order but the URI changes to the Resource URI for the collection of all Orders. The response to this command will be an HTTP 302 Redirect that gives you the URI of the newly created Order Resource.
+{% highlight bash %}
+curl -i -X POST -H 'Content-Type: application/xml' -H 'Accept: application/xml' \
+-d '<order><name>Foo</name></order>'  http://localhost:3000/orders/
+{% endhighlight %}</p>
+<h2>Conclusion</h2>
 I think you can see how easily you can interact with a REST service using only the most basic tools available, namely simple Unix command line utilities. This simplicity offers a lot of power, flexibility and interoperability that you lose when you implement services with more complicated implementations such as SOAP. That's not to say that SOAP and all of the WS-* specifications don't have have their place, because they do. When you can implement a simple solution and meet your needs you will often find that solution to have a surprising amount of added benefits such as flexibility.</p>

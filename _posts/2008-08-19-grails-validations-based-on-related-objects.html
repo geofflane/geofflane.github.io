@@ -25,42 +25,42 @@ comments: []
 <p>Grails has a rich set of tools for performing validations of your domain objects. There are quite a few <a href="http://www.grails.org/Validation+Reference">built in validations</a> that you can use. These mainly resolve around validating single properties within a single domain object. It also supports things like validating the sizes of dependent collections.</p>
 <p>Sometimes you need to know about the properties of one instance to validate another dependent instance. The property of that dependent instance might be used to determine the valid values of or might provide a limit for a property.</p>
 <p>This is more easily explained with an example.</p>
-<h3>Problem Statement</h3><br />
+<h3>Problem Statement</h3>
 I'll use voting for members of the Board of a public company as an example.</p>
 <p>A ShareHolder owns N number of shares of stock in a company. When the ShareHolder votes on a Board member of the company, the ShareHolder can assign 1 to N shares to that Candidate. The top 5 Candidates that receive the most Shares (not individual votes) win the election.</p>
-<p>We might create a series of Domain classes like this:<br />
-<code lang="groovy"><br />
-class ShareHolder {<br />
+<p>We might create a series of Domain classes like this:
+{% highlight groovy %}
+class ShareHolder {
     static hasMany = [votes:Vote]</p>
-<p>    String name<br />
-    Double shares<br />
+<p>    String name
+    Double shares
 }</p>
-<p>class Candidate {<br />
+<p>class Candidate {
     static hasMany = [votes:Vote]</p>
-<p>    String name<br />
+<p>    String name
 }</p>
-<p>class Vote {<br />
+<p>class Vote {
     static belongsTo = [shareHolder: ShareHolder, candidate: Candidate]</p>
-<p>    Double voteShares<br />
-}<br />
-</code></p>
+<p>    Double voteShares
+}
+{% endhighlight %}</p>
 <p>A ShareHolder can vote multiple times, so it has many Votes. A Candidate can be voted for many times, so it has many Votes. A given Vote can be assigned 1 or more shares. But the shares for a given vote must be less than or equal to the number of shares that the voter (the ShareHolder) owns.</p>
-<h3>Validation</h3><br />
+<h3>Validation</h3>
 The natural place to perform this validation is on the Vote domain object itself. The problem is that the limit is really the shares value from the ShareHolder domain object. To solve this we can not use a built in validation. Instead we need to create our own.</p>
 <p>To do this we can utilize the <a href="http://www.grails.org/Validation+Reference#validator">validator</a> validation. This is no different than any other custom validation that we might need to create. Since we must have the ShareHolder and the Candidate set for this to be a valid object, we can assume that they are available. Because of this we should be able to access their properties to validate our Vote domain object.</p>
-<p>Add a custom validator constraint:<br />
-<code lang="groovy"><br />
-class Vote {<br />
+<p>Add a custom validator constraint:
+{% highlight groovy %}
+class Vote {
     static belongsTo = [shareHolder: ShareHolder, candidate: Candidate]</p>
 <p>    Double voteShares</p>
-<p>    static constraints = {<br />
-        voteShares(min: 0D,<br />
-                validator: {<br />
-                    val, obj -><br />
-                    val <= obj.shareHolder?.shares<br />
-                })<br />
-    }<br />
-}<br />
-</code></p>
+<p>    static constraints = {
+        voteShares(min: 0D,
+                validator: {
+                    val, obj ->
+                    val <= obj.shareHolder?.shares
+                })
+    }
+}
+{% endhighlight %}</p>
 <p>As you can see, the <em>obj</em> that gets passed in is the instance that is being validated. The <em>val</em> is the value of the property being validated, in this case the <em>voteShares</em> property. All that has to be done is to compare the value of the <em>obj.shareHolder?.shares</em> too the <em>voteShares</em> property. The <em>obj.shareHolder?.</em> should protect us against a null reference in case the shareHolder isn't set. Then the validation will just fail on not having the ShareHolder.</p>
 <p>Nothing really tricky here, just something interesting I ran into recently.</p>

@@ -178,79 +178,79 @@ comments:
 <p><a href="http://en.wikipedia.org/">Wikipedia</a> defines a <a href="http://en.wikipedia.org/wiki/Mixin">mixin</a> as "a class that provides a certain functionality to be inherited by a subclass, but is not meant to stand alone. Inheriting from a mixin is not a form of specialization but is rather a means to collect functionality. A subclass may even choose to inherit most or all of its functionality by inheriting from one or more mixins through multiple inheritance. A mixin can also be viewed as an interface with implemented methods."</p>
 <p>Inheritance defines an "is a" relationship between classes. A car "is a" vehicle &mdash; a car is a specialization of a vehicle. A mixin, on the otherhand, is a means of sharing functionality among a series of related classes that do not inherit from the same base class. A mixin allows you to reuse code without implying a relationship among the classes. It also allows you to get around the Single Inheritance model a bit to do this.</p>
 <p>An <a href="http://en.wikipedia.org/wiki/Extension_method">extension method</a> is a new feature of C# 3.0. It is essentially a way of providing methods on existing classes that you may or may not have access to. This is similar in many ways to "open classes" that allow you to add methods to existing classes in languages such as Ruby. The interesting things is that you can add domain specific methods to framework classes like String or Int.</p>
-<p>e.g.:<br />
+<p>e.g.:
 3.Days().FromNow()</p>
-<p><code lang="csharp"><br />
-public static class TimeMixin {<br />
-    public static TimeSpan Days(this int days)<br />
-    {<br />
-        return new TimeSpan(days, 0, 0, 0);<br />
+<p>{% highlight csharp %}
+public static class TimeMixin {
+    public static TimeSpan Days(this int days)
+    {
+        return new TimeSpan(days, 0, 0, 0);
     }</p>
-<p>    public static DateTime FromNow(this TimeSpan timeSpan)<br />
-    {<br />
-        return DateTime.Now.Add(timeSpan);<br />
-    }<br />
-}<br />
-</code></p>
+<p>    public static DateTime FromNow(this TimeSpan timeSpan)
+    {
+        return DateTime.Now.Add(timeSpan);
+    }
+}
+{% endhighlight %}</p>
 <p>This is a great way to keep code looking and feeling like Object Oriented code and avoiding a whole bunch of Utility classes with static methods. Avoiding these Utility methods keeps the power of OO for dealing with complexity through polymorphism and avoids the often more complex structures that come out of procedural code.</p>
 <p>So, how do you use Extension Methods as Mixins?</p>
-<h3>Define an Interface (or use an existing one)</h3><br />
-This could be anything from a <a href="http://en.wikipedia.org/wiki/Marker_interface">marker interface</a> to a full interface that defines a contract. In this simple example, I'll make use of an existing interface.<br />
-<code lang="csharp"><br />
-public interface IComparable {<br />
-    int CompareTo(object other);<br />
-}<br />
-</code></p>
-<h3>Create Extension Methods for the Interface</h3><br />
-<code lang="csharp"><br />
-namespace Mixins {<br />
-    public static class ComparableExtension {<br />
-        public static bool GreaterThan(this IComparable leftHand, object other) {<br />
-            return leftHand.CompareTo(other) > 0;<br />
+<h3>Define an Interface (or use an existing one)</h3>
+This could be anything from a <a href="http://en.wikipedia.org/wiki/Marker_interface">marker interface</a> to a full interface that defines a contract. In this simple example, I'll make use of an existing interface.
+{% highlight csharp %}
+public interface IComparable {
+    int CompareTo(object other);
+}
+{% endhighlight %}</p>
+<h3>Create Extension Methods for the Interface</h3>
+{% highlight csharp %}
+namespace Mixins {
+    public static class ComparableExtension {
+        public static bool GreaterThan(this IComparable leftHand, object other) {
+            return leftHand.CompareTo(other) > 0;
         }</p>
-<p>        public static bool LessThan(this IComparable leftHand, object other) {<br />
-            return leftHand.CompareTo(other) < 0;<br />
-        }<br />
-    }<br />
-}<br />
-</code></p>
+<p>        public static bool LessThan(this IComparable leftHand, object other) {
+            return leftHand.CompareTo(other) < 0;
+        }
+    }
+}
+{% endhighlight %}</p>
 <p>Notice the 'this' in the method declaration before the first parameter. The 'this' denotes an extension method. It defines the types of objects that will have this method available to be called on them. </p>
-<h3>Implement the interface in a Concrete class</h3><br />
-<code lang="csharp"><br />
-namespace Domain {<br />
-    public class Money : IComparable {<br />
-        private double amount;<br />
-        private string currency;<br />
+<h3>Implement the interface in a Concrete class</h3>
+{% highlight csharp %}
+namespace Domain {
+    public class Money : IComparable {
+        private double amount;
+        private string currency;
         private CurrencyConverter converter;</p>
-<p>        public Money(CurrencyConverter converter, double amount, string currency) {<br />
-            this.amount = amount;<br />
-            this.currency = currency;<br />
-            this.converter = converter;<br />
+<p>        public Money(CurrencyConverter converter, double amount, string currency) {
+            this.amount = amount;
+            this.currency = currency;
+            this.converter = converter;
         }</p>
-<p>        public int CompareTo(object other) {<br />
-            double otherAmount = converter.ConvertAmount(this.currency, (Money) other);<br />
-            return this.amount.CompareTo(otherAmount);<br />
-        }<br />
-    }<br />
-}<br />
-</code></p>
-<h3>Use the Code</h3><br />
-<code lang="csharp"><br />
-namespace Domain {<br />
+<p>        public int CompareTo(object other) {
+            double otherAmount = converter.ConvertAmount(this.currency, (Money) other);
+            return this.amount.CompareTo(otherAmount);
+        }
+    }
+}
+{% endhighlight %}</p>
+<h3>Use the Code</h3>
+{% highlight csharp %}
+namespace Domain {
     using Mixin;</p>
-<p>    public class Account : IComparable {<br />
+<p>    public class Account : IComparable {
         private Money currentBalance;</p>
-<p>        public void Withdrawl(Money amount) {<br />
-            if (currentBalance.LessThan(amount)) {<br />
-                 throw new BalanceExceededException(currentBalance);<br />
-            }<br />
-            // ... implement the rest of the method<br />
+<p>        public void Withdrawl(Money amount) {
+            if (currentBalance.LessThan(amount)) {
+                 throw new BalanceExceededException(currentBalance);
+            }
+            // ... implement the rest of the method
         }</p>
-<p>        public int CompareTo(object other) {<br />
-            return currentBalance.CompareTo(((Account) other).currentBalance);<br />
-        }<br />
-    }<br />
-}<br />
-</code></p>
+<p>        public int CompareTo(object other) {
+            return currentBalance.CompareTo(((Account) other).currentBalance);
+        }
+    }
+}
+{% endhighlight %}</p>
 <p>Now the LessThan and GreaterThan methods implementations are reusable on both the Money and the Account classes. They are of course available on any class that implements IComparable.</p>
 <p>So now you can avoid some limitations of Single Inheritance and increase the amount of code reuse that is available to you with the concept of a Mixin. This is probably officially a 'sharp knife' so be careful with this kind of programming. It can be non-intuitive to people and can probably be greatly overused but it is a very valuable tool in many cases.</p>

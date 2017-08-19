@@ -19,125 +19,28 @@ categories:
 - Code
 tags:
 - subversion
-comments:
-- id: 373
-  author: Grant
-  author_email: grettke@acm.org
-  author_url: ''
-  date: '2006-09-24 11:00:12 -0400'
-  date_gmt: '2006-09-24 17:00:12 -0400'
-  content: "You find out the current revision of a working directory by running 'svn
-    info '. \r\n\r\nYou find out whether a working copy has changes by running 'svn
-    status '.\r\n\r\nIf you attempt to place the revision number into your application,
-    and then commit that change, the revision will immediately be invalid. What are
-    you trying to accomplish here?"
-- id: 374
-  author: Geoff Lane
-  author_email: geoff@zorched.net
-  author_url: http://www.zorched.net
-  date: '2006-09-24 12:07:23 -0400'
-  date_gmt: '2006-09-24 18:07:23 -0400'
-  content: "Grant,\r\nThanks for the extra information. We were actually using this
-    trick in our deployment script so that we could insert the revision number into
-    our application so that it would be available for QA and help desk people."
-- id: 14945
-  author: Rob Russell
-  author_email: rob@latenightpc.com
-  author_url: http://www.latenightpc.com/blog
-  date: '2009-02-11 08:31:57 -0500'
-  date_gmt: '2009-02-11 14:31:57 -0500'
-  content: "@Grant\r\nRunning svn info only gives you revision info for the current
-    directory. If your working copy has subdirectories then svn info doesn't tell
-    you anything about them. Using svn info -R will give you way too much info. \r\n\r\nsvnversion
-    gave me what I needed - the latest revision number of any subdirectory of my working
-    copy as well as the modified status.\r\n\r\nThanks."
-- id: 14979
-  author: lex
-  author_email: lex@mailinator2.com
-  author_url: ''
-  date: '2009-04-02 03:31:41 -0400'
-  date_gmt: '2009-04-02 09:31:41 -0400'
-  content: "The commands you quote are broken.\r\ne.g. \r\ngrep revision .svn/entries
-    | awk -F\" '{print $2}'\r\n\r\nhas a single double-quote in it. This won't run.
-    What are the correct commands please?\r\n\r\nThanks!"
-- id: 14980
-  author: Geoff Lane
-  author_email: geoff@zorched.net
-  author_url: http://www.zorched.net
-  date: '2009-04-02 07:40:28 -0400'
-  date_gmt: '2009-04-02 13:40:28 -0400'
-  content: "@lex, just escape the quote with a backslash. Although this is old enough
-    that I don't think it works with the latest versions of subversion."
-- id: 15103
-  author: g4b
-  author_email: spam@g4b.org
-  author_url: http://www.g4b.org/wiki/tech/workflow
-  date: '2009-05-25 08:09:35 -0400'
-  date_gmt: '2009-05-25 14:09:35 -0400'
-  content: svn info -R | grep "Revision\:" | sort -k2nr | head -n1
-- id: 17897
-  author: gjpanam
-  author_email: gjose77@gmail.com
-  author_url: ''
-  date: '2011-05-23 10:42:32 -0400'
-  date_gmt: '2011-05-23 16:42:32 -0400'
-  content: great help. thanks very much
-- id: 18053
-  author: Subbu
-  author_email: j2eeguide@yahoo.com
-  author_url: http://www.javaiq.net
-  date: '2012-04-19 11:37:59 -0400'
-  date_gmt: '2012-04-19 17:37:59 -0400'
-  content: 'Does anyone know on how to get latest revision # of a component from SVN
-    from client browser?'
-- id: 18128
-  author: Chris
-  author_email: cstahly@gmail.com
-  author_url: ''
-  date: '2012-12-06 21:37:43 -0500'
-  date_gmt: '2012-12-07 03:37:43 -0500'
-  content: "Hi.\r\n\r\nA viola is an instrument.  \"Voila\" is what magicians say."
-- id: 18476
-  author: Sm4sh3r
-  author_email: smash@gmail.com
-  author_url: ''
-  date: '2014-03-26 16:58:55 -0400'
-  date_gmt: '2014-03-26 22:58:55 -0400'
-  content: |
-    Chris,
-
-    "A little Unix scripting and voila!"  (perfectly spelled)
-    Where do you find "viola" in here??
-
-    Viola is indeed an instrument that makes sounds...
-    You are not an instrument, yet you "sound" like an asshole.
-- id: 40776
-  author: whatdoctor
-  author_email: whatdoctor@hotmail.com
-  author_url: ''
-  date: '2014-07-07 00:00:06 -0400'
-  date_gmt: '2014-07-07 06:00:06 -0400'
-  content: 'The command "svn info" does not give you updated information about checkins
-    in subdirectories - but will tell you the last time you did a sync with the repository.  You
-    can then look at the history for any checkin you made after that point and that
-    will be your last revision.
-
-'
 ---
-<p>I was asked today "How do I find out the revision number of my Subversion directory?" and I didn't know the answer. The good news is there is an easy answer:<br />
-<code lang="bash">svnversion . </code></p></p>
-<p>From the <code>svnversion help</code> command:</p></p>
+<p>I was asked today "How do I find out the revision number of my Subversion
+  directory?" and I didn't know the answer. The good news is there is an easy
+  answer:
+{% highlight bash %}svnversion . {% endhighlight %}</p></p>
+<p>From the {% highlight bash %}svnversion help{% endhighlight %} command:</p></p>
 <blockquote><p>
-The version number will be a single number if the working<br />
-  copy is single revision, unmodified, not switched and with<br />
-  an URL that matches the TRAIL_URL argument.  If the working<br />
-  copy is unusual the version number will be more complex:<br />
+The version number will be a single number if the working
+  copy is single revision, unmodified, not switched and with
+  an URL that matches the TRAIL_URL argument.  If the working
+  copy is unusual the version number will be more complex:
 </blockquote></p>
-<p>This command takes a little while to run, because it runs against the remote repository as well. It gives more detailed results also such as whether or not you have local modifications or if the repository has been changed since your last update. These details can be interesting in certain cases. But sometimes all you want to know is what revision you currently have checked out...</p></p>
-<p>If all you want to do is check on the current revision of your local working copy you can use some Unix magic to do that.<br />
-<code lang="bash">grep revision .svn/entries |  awk -F\" '{print $2}'</code></p></p>
-<p>Redirect this output to a file or use it as an argument to a build script and you can have the revision number put into your application.<br />
-<code lang="bash">ant -Drevision=<code>grep revision .svn/entries | awk -F\" '{print $2}'</code></code><br />
+<p>This command takes a little while to run, because it runs against the remote
+  repository as well. It gives more detailed results also such as whether or
+  not you have local modifications or if the repository has been changed since
+  your last update. These details can be interesting in certain cases. But
+  sometimes all you want to know is what revision you currently have checked
+  out...</p></p>
+<p>If all you want to do is check on the current revision of your local working copy you can use some Unix magic to do that.
+{% highlight bash %}grep revision .svn/entries |  awk -F\" '{print $2}'{% endhighlight %}</p></p>
+<p>Redirect this output to a file or use it as an argument to a build script and you can have the revision number put into your application.
+{% highlight bash %}ant -Drevision=grep revision .svn/entries | awk -F\" '{print $2}'{% endhighlight %}
 <small>(notice the backticks ` and this needs to be on one line)</small></p></p>
 <p>A little Unix scripting and voila!</p></p>
 <p><small>(Thanks to Ross Greinke for this little snippet)</small></p></p>

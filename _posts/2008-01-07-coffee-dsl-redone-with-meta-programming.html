@@ -22,103 +22,94 @@ categories:
 tags:
 - dsl
 - meta-programming
-comments:
-- id: 11121
-  author: Grant Rettke
-  author_email: grettke@acm.org
-  author_url: http://www.wisdomandwonder.com/
-  date: '2008-01-09 11:32:57 -0500'
-  date_gmt: '2008-01-09 17:32:57 -0500'
-  content: "Your example shows off Ruby meta-programming; you should develop your
-    DSL to have more syntax rather than straight text.\r\n\r\nHow would you write
-    it if it had an xml like structure like this? Would it be different?\r\n\r\n<code>\r\ncoffee-order\r\n\tfor:
-    \tGeoff\r\n\ttype: \tlatte\r\n\tsize: \tventi\r\n\tmilk: \t4%\r\n</code>"
 ---
 <p>In a <a href="http://www.zorched.net/2007/03/05/understanding-domain-specific-languages-as-jargon/">previous post I wrote about DSLs as Jargon</a>. I implemented a simple Coffee DSL that would allow code to parse an order written by a human and turn it into a domain model. I used a fairly basic method_missing structure to capture the values.</p>
 <p>There's a much better way to do it in Ruby with meta-programming. Meta-programming allows you to write code to write code. You program your programming. In this case we can create the syntax of Coffee using a meta-programming technique.</p>
 <p><em>dsl_attr :size, %w(venti grande tall)</em></p>
-<p>This is us programming the class to say: "If someone calls a method venti, grande, or tall on our object they mean that they are telling us the size of the coffee, so store that value as the size". So now we can write our Coffee class like this:<br />
-<code><br />
-# CoffeeDSL.rb<br />
-# This is the input from the user, likely read from a file<br />
-# or input through a user interface of some sort<br />
-CoffeeInput = "venti nonfat whip latte"</p>
-<p>class Coffee<br />
-    dsl_attr :size, %w(venti grande tall)<br />
-    dsl_attr :whipped, %w(whip nowhip)<br />
-    dsl_attr :caffinated, %w(caf decaf halfcaf)<br />
-    dsl_attr :type, %w(regular latte cappachino)<br />
-    dsl_attr :milks, %w(milk nonfat soy)</p>
-<p>    def order<br />
-        params = ''<br />
-        params += milks + ' ' if milks?<br />
-        params += caffinated + ' ' if caffinated?<br />
-        params += whipped + ' ' if whipped?<br />
-        print "Ordering coffee: #{size} #{params}#{type}\n"<br />
-    end</p>
-<p>    def load<br />
-        # turn one line into multi-line "method calls"<br />
-        cleaned = CoffeeInput.gsub(/\s+/, "\n")<br />
-        self.instance_eval(cleaned)<br />
-    end<br />
-end<br />
-</code></p>
+<p>This is us programming the class to say: "If someone calls a method venti, grande, or tall on our object they mean that they are telling us the size of the coffee, so store that value as the size". So now we can write our Coffee class like this:
+{% highlight ruby %}
+# CoffeeDSL.rb
+# This is the input from the user, likely read from a file
+# or input through a user interface of some sort
+CoffeeInput = "venti nonfat whip latte"
+class Coffee
+    dsl_attr :size, %w(venti grande tall)
+    dsl_attr :whipped, %w(whip nowhip)
+    dsl_attr :caffinated, %w(caf decaf halfcaf)
+    dsl_attr :type, %w(regular latte cappachino)
+    dsl_attr :milks, %w(milk nonfat soy)
+    def order
+        params = ''
+        params += milks + ' ' if milks?
+        params += caffinated + ' ' if caffinated?
+        params += whipped + ' ' if whipped?
+        print "Ordering coffee: #{size} #{params}#{type}\n"
+    end
+    def load
+        # turn one line into multi-line "method calls"
+        cleaned = CoffeeInput.gsub(/\s+/, "\n")
+        self.instance_eval(cleaned)
+    end
+end
+{% endhighlight %}</p>
 <p>We are essentially configuring the class in code. We could add extra values as well, such as a default value, required validation, any number of things. We then just need to implement the <em>dsl_attr</em> using meta-programming. That can be done in the Module in Ruby which makes that available to all classes in the system.</p>
-<p><code><br />
-class Module<br />
-    def dsl_attr(param_name, values)<br />
-        attr param_name<br />
-        class_eval "def #{param_name}?; @#{param_name}; end"<br />
-        values.each do |val|<br />
-            define_method("#{val}") do<br />
-                instance_eval %{<br />
-                    @#{param_name} = '#{val}'<br />
-                }<br />
-            end<br />
-      end<br />
-    end<br />
-end<br />
-</code></p>
-<p>Now when you run the code it captures all of the values that are parsed from the input and puts them into your object as meaningful values.<br />
-<code><br />
-c = Coffee.new<br />
-c.load<br />
-c.order<br />
-</code></p>
+<p>
+{% highlight ruby %}
+class Module
+    def dsl_attr(param_name, values)
+        attr param_name
+        class_eval "def #{param_name}?; @#{param_name}; end"
+        values.each do |val|
+            define_method("#{val}") do
+                instance_eval %{
+                    @#{param_name} = '#{val}'
+                }
+            end
+      end
+    end
+end
+{% endhighlight %}</p>
+<p>Now when you run the code it captures all of the values that are parsed from the input and puts them into your object as meaningful values.
+{% highlight ruby %}
+c = Coffee.new
+c.load
+c.order
+{% endhighlight %}</p>
 <p>I did the same <a href="http://www.zorched.net/2007/03/08/coffee-dsl-in-groovy/">DSL in Groovy</a> and thought I could attempt to do it more justice using meta-programming as well. In <a href="http://groovy.codehaus.org">Groovy</a>, meta-programming is done with the ExpandoMetaClass - no, I didn't make that up. Each Class has a metaClass property that gets you access to that types' ExpandoMetaClass instance. You can then add properties and methods and whatnot to it. This has the effect of making the properties or methods callable on an instance of that type.</p>
-<p><code><br />
-ExpandoMetaClass.enableGlobally()   // have to do this to get inheritance of dslAttr</p>
-<p>Object.metaClass.dslAttr << {String param_name, values -><br />
-    def clazz = delegate<br />
-    clazz.metaClass."${param_name}" = null<br />
-    values.each() { val -><br />
-        clazz.metaClass."${val}" << {-> clazz."${param_name}" = "${val}" }<br />
-    }<br />
-}</p>
-<p>class Coffee {<br />
-    def Coffee() {<br />
-        dslAttr("size", ['venti', 'tall', 'grande'])<br />
-        dslAttr("whipped", ['whip', 'nowhip'])<br />
-        dslAttr("caffinated", ['caf', 'decaf', 'halfcaf'])<br />
-        dslAttr("type", ['regular', 'latte', 'cappachino'])<br />
-        dslAttr("milks", ['milk', 'nonfat', 'soy'])<br />
-    }</p>
-<p>    def order() {<br />
-        def params = ''<br />
-        if (null != getMilks()) params += "${getMilks()} "<br />
-        if (null != getCaffinated()) params += "${getCaffinated()} "<br />
-        if (null != getWhipped()) params += "${getWhipped()} "<br />
-        println "Ordering coffee: ${getSize()} ${params}${getType()}\n"<br />
-    }</p>
-<p>    def load(String input) {<br />
-        // turn one line into multi-line "method calls"<br />
-        def cleaned = input.split(/\s+/)<br />
-        cleaned.each() { meth -> this.&"${meth}"() }<br />
-    }<br />
-}</p>
-<p>def c = new Coffee()<br />
-c.load("venti nonfat whip latte")<br />
-c.order()<br />
-</code></p>
+<p>
+{% highlight ruby %}
+ExpandoMetaClass.enableGlobally()   // have to do this to get inheritance of dslAttr
+Object.metaClass.dslAttr << {String param_name, values ->
+    def clazz = delegate
+    clazz.metaClass."${param_name}" = null
+    values.each() { val ->
+        clazz.metaClass."${val}" << {-> clazz."${param_name}" = "${val}" }
+    }
+}
+class Coffee {
+    def Coffee() {
+        dslAttr("size", ['venti', 'tall', 'grande'])
+        dslAttr("whipped", ['whip', 'nowhip'])
+        dslAttr("caffinated", ['caf', 'decaf', 'halfcaf'])
+        dslAttr("type", ['regular', 'latte', 'cappachino'])
+        dslAttr("milks", ['milk', 'nonfat', 'soy'])
+    }
+    def order() {
+        def params = ''
+        if (null != getMilks()) params += "${getMilks()} "
+        if (null != getCaffinated()) params += "${getCaffinated()} "
+        if (null != getWhipped()) params += "${getWhipped()} "
+        println "Ordering coffee: ${getSize()} ${params}${getType()}\n"
+    }
+    def load(String input) {
+        // turn one line into multi-line "method calls"
+        def cleaned = input.split(/\s+/)
+        cleaned.each() { meth -> this.&"${meth}"() }
+    }
+}
+def c = new Coffee()
+c.load("venti nonfat whip latte")
+c.order()
+{% endhighlight %}</p>
 <p>I'm not sure if there is a better way to do this or not. Ideally I would like to have the dslAttr add something to the Coffee metaClass instead of just adding stuff to the instances, but this seems to do the trick for now.</p>
 <p>The Ruby and Groovy implementations become fairly similar at this point. It's a great way to reduce the amount of boilerplate code you would need to normally write to implement this kind of thing in less dynamic languages.</p>

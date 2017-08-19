@@ -31,8 +31,8 @@ comments: []
 <h3>Write-Once (Compile a Few Times) and Run Anywhere</h3></p>
 <p>One of the advantages of Go is that it is easy to cross-compile it to other architectures and operating systems. This property made it easy to write a little application that we could run at the same time on Mac OS and Linux. Just like a scripting language it was write-once and run anywhere. Of course we had to compile it for each of the different operating systems but that is incredibly easy with Go. Unlike most scripting languages, once a Go binary is compiled for an OS, nothing else needs to be installed to run it. There's no management of different versions or libraries. A Go binary is entirely self-contained so no extra Go runtime is needed to be installed for the application to be run and all of the depencies are statically linked in. Simply copy the binary to the appropriate machine and execute it. You can't get much simpler than that.</p></p>
 <pre>
-$ brew install go --cross-compile-common<br />
-$ GOOS=linux go build myapp.go<br />
+$ brew install go --cross-compile-common
+$ GOOS=linux go build myapp.go
 </pre></p>
 <h3>Libraries for All The Things</h3></p>
 <p>Go has a large number of <a href="http://golang.org/pkg/">good libraries</a> that come standard. These libraries include support for making HTTP clients and servers. There's support for accessing databases (although the drivers themselves are not included). It includes support for parsing command line arguments, encoding and decoding JSON, for doing cryptography, and for using regular expressions. Basically it includes a lot of libraries that you need for creating applications whether it's something you want to maintain forever or whether it's a throw away app.</p></p>

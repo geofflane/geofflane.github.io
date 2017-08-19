@@ -23,167 +23,103 @@ tags:
 - database
 - Automation
 - csharp
-comments:
-- id: 13878
-  author: Spencer
-  author_email: spencer.dillard@gmail.com
-  author_url: ''
-  date: '2008-08-22 03:13:12 -0400'
-  date_gmt: '2008-08-22 09:13:12 -0400'
-  content: "Question - does Migrator support timestamps in the table creation?  I
-    wanted to use that to do dirty checks, but I'm not seeing an option anywhere.\r\nThanks
-    in advance..."
-- id: 13884
-  author: Geoff Lane
-  author_email: geoff@zorched.net
-  author_url: http://www.zorched.net
-  date: '2008-08-22 08:53:15 -0400'
-  date_gmt: '2008-08-22 14:53:15 -0400'
-  content: "Spencer,\r\nIt does not currently support automated timestamps or anything.
-    You can of course create your own timestamp tables using the framework, but the
-    framework won't do anything special with them."
-- id: 14017
-  author: Spencer
-  author_email: spencer.dillard@gmail.com
-  author_url: ''
-  date: '2008-08-28 15:00:54 -0400'
-  date_gmt: '2008-08-28 21:00:54 -0400'
-  content: "Thanks.  I ended up creating an extension that is called in the AfterUp
-    method.  It is SQL-specific, because that is what will be used for this system;
-    I need to look into making it useful for the other supported systems and then
-    proposing a patch.  In case anyone else wants to see it, here is the class that
-    handles my stamp-like columns:\r\n<code lang=\"csharp\">\r\npublic static class
-    MigrationHelper\r\n{\r\n    /// \r\n    /// This SQL Server-Specific
-    method creates a Timestamp column.\r\n    /// \r\n    ///
-    \r\n    /// \r\n     public static void AddConcurrencyChecking(ITransformationProvider
-    database, string tableName)\r\n    {\r\n          string addTimestampQuery = \"ALTER
-    TABLE \" + tableName + \" ADD timestamp TIMESTAMP NOT NULL;\";\r\n          IDbCommand
-    cmd = database.GetCommand();\r\n          cmd.Connection.Open();\r\n          database.ExecuteNonQuery(addTimestampQuery);\r\n
-    \         cmd.Connection.Close();         \r\n    }\r\n     public static void
-    AddTimeStamps(ITransformationProvider database, string tableName)\r\n    {\r\n
-    \           AddColumn(database, tableName, \"created_at\", DbType.DateTime);\r\n
-    \           AddColumn(database, tableName, \"updated_at\", DbType.DateTime);\r\n
-    \   }\r\n     public static void AddUserStamps(ITransformationProvider database,
-    string tableName)\r\n    {\r\n          AddColumn(database, tableName, \"created_by\",
-    DbType.Int32);\r\n          AddColumn(database, tableName, \"updated_by\", DbType.Int32);\r\n
-    \   }\r\n     private static void AddColumn(ITransformationProvider database,
-    string tableName, string columnName, DbType dbType)\r\n    {\r\n          database.AddColumn(tableName,
-    new Migrator.Framework.Column(columnName,dbType));\r\n    }\r\n}\r\n</code>"
-- id: 16040
-  author: Terry
-  author_email: terry@helpfulmove.com
-  author_url: ''
-  date: '2010-01-27 03:52:08 -0500'
-  date_gmt: '2010-01-27 09:52:08 -0500'
-  content: "Hello spencer, I am new to using Migrator.Framework please I would like
-    you explain what you're trying to achieve from each method(AddConcurrencyChecking,
-    AddTimeStamps, AddUserStamps and AddColumn). \r\n\r\nThanks for your time"
-- id: 16292
-  author: Onderweg Blog &raquo; Blog Archive &raquo; DynamicModel
-  author_email: ''
-  author_url: http://blog.onderweg.eu/2010/10/02/dynamicmodel/
-  date: '2010-10-02 12:28:20 -0400'
-  date_gmt: '2010-10-02 18:28:20 -0400'
-  content: "[...] from Ruby on Rail migrations. A .NET tool that inspired me is migratordotnet;
-    see this blog post: Database Migrations for .NET. The only major .NET ORM that
-    also supports migrations (to my knowledge) is Lightspeed [...]"
 ---
 <p>One of the more difficult things to manage in software projects is often changing a database schema over time. On the projects that I work on, we don't usually have DBAs who manage the schema so it is left up to the developers to figure out. The other thing you have to manage is applying changes to the database in such a way that you don't disrupt the work of other developers on your team. We need the change to go in at the same time as the code so that Continuous Integration can work.</p>
-<h3>Migrations</h3><br />
+<h3>Migrations</h3>
 While I don't know if they were invented there, migrations seem to have been popularized by Ruby on Rails. Rails is a database centric framework that implies the properties of your domain from the schema of your database. For that reason it makes sense that they came up with a very good way of These are some example migrations to give you an idea of the basics of creating a schema.</p>
-<p><strong>001_AddAddressTable.cs</strong>:<br />
-<code lang="csharp"><br />
-using Migrator.Framework;<br />
-using System.Data;<br />
-[Migration(1)]<br />
-public class AddAddressTable : Migration<br />
-{<br />
-    override public void Up()<br />
-    {<br />
-         Database.AddTable("Address",<br />
-             new Column("id", DbType.Int32, ColumnProperty.PrimaryKey),<br />
-             new Column("street", DbType.String, 50),<br />
-             new Column("city", DbType.String, 50),<br />
-             new Column("state", DbType.StringFixedLength, 2),<br />
-             new Column("postal_code", DbType.String, 10)<br />
-    }<br />
-    override public void Down()<br />
-    {<br />
-        Database.RemoveTable("Address");<br />
-    }<br />
-}<br />
-</code></p>
-<p><strong>02_AddAddressColumns.cs</strong>:<br />
-<code lang="csharp"><br />
-using Migrator.Framework;<br />
-using System.Data;<br />
-[Migration(2)]<br />
-public class AddAddressColumns : Migration<br />
-{<br />
-    public override void Up()<br />
-    {<br />
-        Database.AddColumn("Address", new Column("street2", DbType.String, 50));<br />
-        Database.AddColumn("Address", new Column("street3", DbType.String, 50));<br />
-    }<br />
-    public override void Down()<br />
-    {<br />
-        Database.RemoveColumn("Address", "street2");<br />
-        Database.RemoveColumn("Address", "street3");<br />
-    }<br />
-}<br />
-</code></p>
-<p><strong>003_AddPersonTable.cs</strong>:<br />
-<code lang="csharp"><br />
-using Migrator.Framework;<br />
-using System.Data;<br />
-[Migration(3)]<br />
-public class AddPersonTable : Migration<br />
-{<br />
-    public override void Up()<br />
-    {<br />
-        Database.AddTable("Person",<br />
-            new Column("id", DbType.Int32, ColumnProperty.PrimaryKey),<br />
-            new Column("first_name", DbType.String, 50),<br />
-            new Column("last_name", DbType.String, 50),<br />
-            new Column("address_id", DbType.Int32, ColumnProperty.Unsigned)<br />
-        );<br />
-        Database.AddForeignKey("FK_PERSON_ADDRESS", "Person", "address_id", "Address", "id");<br />
-    }<br />
-    public override void Down()<br />
-    {<br />
-        Database.RemoveTable("Person");<br />
-    }<br />
-}<br />
-</code></p>
-<h3>Run Your Migrations</h3><br />
+<p><strong>001_AddAddressTable.cs</strong>:
+{% highlight csharp %}
+using Migrator.Framework;
+using System.Data;
+[Migration(1)]
+public class AddAddressTable : Migration
+{
+    override public void Up()
+    {
+         Database.AddTable("Address",
+             new Column("id", DbType.Int32, ColumnProperty.PrimaryKey),
+             new Column("street", DbType.String, 50),
+             new Column("city", DbType.String, 50),
+             new Column("state", DbType.StringFixedLength, 2),
+             new Column("postal_code", DbType.String, 10)
+    }
+    override public void Down()
+    {
+        Database.RemoveTable("Address");
+    }
+}
+{% endhighlight %}</p>
+<p><strong>02_AddAddressColumns.cs</strong>:
+{% highlight csharp %}
+using Migrator.Framework;
+using System.Data;
+[Migration(2)]
+public class AddAddressColumns : Migration
+{
+    public override void Up()
+    {
+        Database.AddColumn("Address", new Column("street2", DbType.String, 50));
+        Database.AddColumn("Address", new Column("street3", DbType.String, 50));
+    }
+    public override void Down()
+    {
+        Database.RemoveColumn("Address", "street2");
+        Database.RemoveColumn("Address", "street3");
+    }
+}
+{% endhighlight %}</p>
+<p><strong>003_AddPersonTable.cs</strong>:
+{% highlight csharp %}
+using Migrator.Framework;
+using System.Data;
+[Migration(3)]
+public class AddPersonTable : Migration
+{
+    public override void Up()
+    {
+        Database.AddTable("Person",
+            new Column("id", DbType.Int32, ColumnProperty.PrimaryKey),
+            new Column("first_name", DbType.String, 50),
+            new Column("last_name", DbType.String, 50),
+            new Column("address_id", DbType.Int32, ColumnProperty.Unsigned)
+        );
+        Database.AddForeignKey("FK_PERSON_ADDRESS", "Person", "address_id", "Address", "id");
+    }
+    public override void Down()
+    {
+        Database.RemoveTable("Person");
+    }
+}
+{% endhighlight %}</p>
+<h3>Run Your Migrations</h3>
 The best way to run your migrations will be to integrate it into your build automation tool of choice. If you are not using one, now is the time.</p>
 <p>MigratorDotNet supports MSBuild and NAnt.</p>
-<p><strong>MSBuild</strong>:<br />
-<code lang="xml"><br />
-<Target name="Migrate" DependsOnTargets="Build"><br />
-    <CreateProperty Value="-1"  Condition="'$(SchemaVersion)'==''"><br />
-        <Output TaskParameter="Value" PropertyName="SchemaVersion"/><br />
-    </CreateProperty><br />
-    <Migrate Provider="SqlServer"<br />
-            Connectionstring="Database=MyDB;Data Source=localhost;User Id=;Password=;"<br />
-            Migrations="bin/MyProject.dll"<br />
-            To="$(SchemaVersion)"/><br />
-</Target><br />
-</code></p>
-<p><strong>NAnt</strong>:<br />
-<code lang="xml"><br />
+<p><strong>MSBuild</strong>:
+{% highlight xml %}
+<Target name="Migrate" DependsOnTargets="Build">
+    <CreateProperty Value="-1"  Condition="'$(SchemaVersion)'==''">
+        <Output TaskParameter="Value" PropertyName="SchemaVersion"/>
+    </CreateProperty>
+    <Migrate Provider="SqlServer"
+            Connectionstring="Database=MyDB;Data Source=localhost;User Id=;Password=;"
+            Migrations="bin/MyProject.dll"
+            To="$(SchemaVersion)"/>
+</Target>
+{% endhighlight %}</p>
+<p><strong>NAnt</strong>:
+{% highlight xml %}
 <target name="migrate" description="Migrate the database" depends="build"></p>
 <property name="version" value="-1" overwrite="false" />
-  <migrate<br />
-    provider="MySql|PostgreSQL|SqlServer"<br />
-    connectionstring="Database=MyDB;Data Source=localhost;User Id=;Password=;"<br />
-    migrations="bin/MyProject.dll"<br />
-    to="${version}" /><br />
-</target><br />
-</code></p>
-<h3>So You Want to Migrate?</h3><br />
+  <migrate
+    provider="MySql|PostgreSQL|SqlServer"
+    connectionstring="Database=MyDB;Data Source=localhost;User Id=;Password=;"
+    migrations="bin/MyProject.dll"
+    to="${version}" />
+</target>
+{% endhighlight %}</p>
+<h3>So You Want to Migrate?</h3>
 Some more documentation and example are available <a href="http://code.google.com/p/migratordotnet/w/list>on the wiki</a>.</p>
 <p>The code can be downloaded at <a href="http://code.google.com/p/migratordotnet">MigratorDotNet</a>.  Some of the changes represented are still in an experimental branch that is in the process of being merged.</p>
-<p><em><br />
-MigratorDotNet is a continuation of code started by <a href="http://macournoyer.wordpress.com/">Marc-Andr&Atilde;&copy; Cournoyer</a> and Nick Hemsley.<br />
+<p><em>
+MigratorDotNet is a continuation of code started by <a href="http://macournoyer.wordpress.com/">Marc-Andr&Atilde;&copy; Cournoyer</a> and Nick Hemsley.
 </em></p>

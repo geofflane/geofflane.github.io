@@ -123,112 +123,112 @@ comments:
 <p>While Ajax has an 'X' which stands for XML in its name, Ajax really has nothing to do with XML at its core. In reality parsing XML is usually a lot more work than you need to do when you expect that a client will be a browser. Along comes JSON. JavaScript Object Notation is a structured format that corresponds to the needs of the client-side programming environment: JavaScript. JSON can be evaluated on the client into JavaScript object graphs, no parsing, no XML Sax or DOM parsing, just eval() into a JavaScript object and then call methods on it.</p>
 <p>Ajax, as a hot technology, I was of course interested in learning more so I created a small example application that I could build and play with a bit. I thought I'd share it with everyone so they could use it as a quick-start example for trying some of these technologies.</p>
 <p>I chose to use the <a href="http://www.dojotoolkit.org">DOJO Toolkit</a> as my client-side framework because it seems to have a very broad library already built and a reasonable amount of documentation. DOJO is really engineered like a true software application. It really shows off the fact that you can write good code and good frameworks using the JavaScript language.</p>
-<h2>Show Me Some Code</h2><br />
+<h2>Show Me Some Code</h2>
 Here's an example of a simple blog application that talks to a single table to display articles.</p>
-<h3>showArticle.html</h3><br />
-A very simple HTML skeleton that imports the CSS, DOJO and the Application written in JavaScript.<br />
-<code lang="xhtml"><br />
-<html><br />
+<h3>showArticle.html</h3>
+A very simple HTML skeleton that imports the CSS, DOJO and the Application written in JavaScript.
+{% highlight xhtml %}
+<html>
 <head></p>
 <link rel="stylesheet" type="text/css" href="blog.css" />
-	<script type="text/javascript" src="dojo.js"></script><br />
-	<script type="text/javascript" src="blog.js"></script><br />
-</head><br />
+	<script type="text/javascript" src="dojo.js"></script>
+	<script type="text/javascript" src="blog.js"></script>
+</head>
 <body></p>
 <div id="header">Blog</div></p>
 <ul id="articleList"></ul></p>
-<div id="article"></div><br />
-</body><br />
-</html><br />
-</code></p>
-<h3>blog.js</h3><br />
+<div id="article"></div>
+</body>
+</html>
+{% endhighlight %}</p>
+<h3>blog.js</h3>
 The Application that is delivered to the Client.</p>
 <p>getArticle() is called and initiates an asynchronous call to the getArticle.php code. When the response comes back DOJO automatically calls the showArticle() function and passes the response data to it. The showArticle() function handles formatting the data by manipulating the HTML DOM of the page.</p>
-<p><code lang="php"><br />
-dojo.require("dojo.event.*");<br />
-dojo.require("dojo.io.*");<br />
-dojo.require("dojo.date.*");<br />
-dojo.require("dojo.lfx.*");<br />
-function getArticle(id) {<br />
-	var idStr = "{\"id\":" + id + "}";<br />
-	request = {'action' : 'getArticle', 'data' : idStr};<br />
-	dojo.io.bind({<br />
-    	url: "getArticle.php",<br />
-    	handler: showArticle,<br />
-    	mimetype: "text/json",<br />
-		content: request<br />
-	});<br />
-}<br />
-function showArticle(type, data, evt) {<br />
-	dojo.dom.removeChildren(dojo.byId('article'));<br />
-	appendArticlePart('title', data.title);<br />
-	var date = dojo.date.fromSql(data.time);<br />
-	appendArticlePart('time', dojo.date.toRelativeString(date));<br />
-	appendArticlePart('content', data.content);<br />
-	dojo.lfx.highlight(dojo.byId('article'), dojo.lfx.Color);<br />
-}<br />
-function appendArticlePart(id, value) {<br />
-	var element = document.createElement("div");<br />
-	element.id=id;<br />
-	element.innerHTML=value;<br />
-	dojo.byId('article').appendChild(element);<br />
-}<br />
-</code></p>
-<h3>getArticle.php</h3><br />
-The code that lives on the server and responds to a given service request. This PHP code parses the HTTP request that the DOJO toolkit sends to the server. It parses the data from a JSON string into PHP objects, calls into the database and gets some values out. It then turns a PHP array into a JSON string to return to the web client.<br />
-<code lang="php"><br />
-<?php<br />
-header('Content-type: text/json');<br />
-$action = $_REQUEST["action"];<br />
-$data = $_REQUEST["data"];<br />
-$data = str_replace("\\\"","\"",$data);<br />
-require_once('JSON.php');<br />
-$json = new services_JSON();<br />
-if ( $action == "getArticle") {<br />
-	$jsonArray = $json->decode($data);<br />
-	$article = getArticle($jsonArray);<br />
-	print $json->encode($article);<br />
-}<br />
-function getArticle($node) {<br />
-	$result = null;<br />
-	$link = connect_db();<br />
-	if ($stmt = $link->prepare("select id, title, publish_time, content from articles where id=?")) {<br />
-		$stmt->bind_param("i", intval($node->id));<br />
-		$stmt->execute();<br />
-		$stmt->bind_result($id, $title, $time, $content);<br />
-		if ($stmt->fetch()) {<br />
-			$result = array(<br />
-				"id"=> $id,<br />
-				"title" => $title,<br />
-				"time" => $time,<br />
-				"content" => $content,<br />
-				"objectId"=> "article"<br />
-				);<br />
-			}<br />
-			$stmt->close();<br />
-		}<br />
-		$link->close();<br />
-		return $result;<br />
-	}<br />
-function connect_db() {<br />
-	$mysqli =  new mysqli("localhost", "root", null, "blog");<br />
-	/* check connection */<br />
-	if (mysqli_connect_errno()) {<br />
-		printf("Connect failed: %s\n", mysqli_connect_error());<br />
-		exit();<br />
-	}<br />
-	return $mysqli;<br />
-}<br />
-?><br />
-</code></p>
+<p>{% highlight php %}
+dojo.require("dojo.event.*");
+dojo.require("dojo.io.*");
+dojo.require("dojo.date.*");
+dojo.require("dojo.lfx.*");
+function getArticle(id) {
+	var idStr = "{\"id\":" + id + "}";
+	request = {'action' : 'getArticle', 'data' : idStr};
+	dojo.io.bind({
+    	url: "getArticle.php",
+    	handler: showArticle,
+    	mimetype: "text/json",
+		content: request
+	});
+}
+function showArticle(type, data, evt) {
+	dojo.dom.removeChildren(dojo.byId('article'));
+	appendArticlePart('title', data.title);
+	var date = dojo.date.fromSql(data.time);
+	appendArticlePart('time', dojo.date.toRelativeString(date));
+	appendArticlePart('content', data.content);
+	dojo.lfx.highlight(dojo.byId('article'), dojo.lfx.Color);
+}
+function appendArticlePart(id, value) {
+	var element = document.createElement("div");
+	element.id=id;
+	element.innerHTML=value;
+	dojo.byId('article').appendChild(element);
+}
+{% endhighlight %}</p>
+<h3>getArticle.php</h3>
+The code that lives on the server and responds to a given service request. This PHP code parses the HTTP request that the DOJO toolkit sends to the server. It parses the data from a JSON string into PHP objects, calls into the database and gets some values out. It then turns a PHP array into a JSON string to return to the web client.
+{% highlight php %}
+<?php
+header('Content-type: text/json');
+$action = $_REQUEST["action"];
+$data = $_REQUEST["data"];
+$data = str_replace("\\\"","\"",$data);
+require_once('JSON.php');
+$json = new services_JSON();
+if ( $action == "getArticle") {
+	$jsonArray = $json->decode($data);
+	$article = getArticle($jsonArray);
+	print $json->encode($article);
+}
+function getArticle($node) {
+	$result = null;
+	$link = connect_db();
+	if ($stmt = $link->prepare("select id, title, publish_time, content from articles where id=?")) {
+		$stmt->bind_param("i", intval($node->id));
+		$stmt->execute();
+		$stmt->bind_result($id, $title, $time, $content);
+		if ($stmt->fetch()) {
+			$result = array(
+				"id"=> $id,
+				"title" => $title,
+				"time" => $time,
+				"content" => $content,
+				"objectId"=> "article"
+				);
+			}
+			$stmt->close();
+		}
+		$link->close();
+		return $result;
+	}
+function connect_db() {
+	$mysqli =  new mysqli("localhost", "root", null, "blog");
+	/* check connection */
+	if (mysqli_connect_errno()) {
+		printf("Connect failed: %s\n", mysqli_connect_error());
+		exit();
+	}
+	return $mysqli;
+}
+?>
+{% endhighlight %}</p>
 <p>While this example is written in PHP, there is nothing that would prevent you from writing the server component in any language. There are JSON libraries for every language you've ever heard of (and a lot that you've never even heard of). The notation itself is fairly simple (it's about 700 lines of code in PHP), so implementing it in another language should be relatively easy as well.</p>
 <p>Consider using implementation neutral URIs for your service calls and then using something like Apache mod-rewrite to map those URIs to the proper calls in whatever language you use to implement the server code. Doing this and you should be able to completely decouple your web client from the server components.</p>
-<h2>Resources</h2><br />
-<a href="http://en.wikipedia.org/wiki/Ajax_(programming)">Ajax</a><br />
-<a href="http://json.org">JSON</a><br />
-<a href="http://www.php.net">PHP</a><br />
-<a href="http://www.dojotoolkit.org">DOJO Toolkit</a><br />
-<a href="http://mike.teczno.com/json.html">JSON-PHP</a><br />
-<a href="http://www.aurore.net/projects/php-json/">PHP-JSON</a><br />
-<a href="http://www.amazon.com/gp/product/0596516487?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0596516487">Dojo: The Definitive Guide</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=0596516487" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /><br />
+<h2>Resources</h2>
+<a href="http://en.wikipedia.org/wiki/Ajax_(programming)">Ajax</a>
+<a href="http://json.org">JSON</a>
+<a href="http://www.php.net">PHP</a>
+<a href="http://www.dojotoolkit.org">DOJO Toolkit</a>
+<a href="http://mike.teczno.com/json.html">JSON-PHP</a>
+<a href="http://www.aurore.net/projects/php-json/">PHP-JSON</a>
+<a href="http://www.amazon.com/gp/product/0596516487?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0596516487">Dojo: The Definitive Guide</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=0596516487" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
 <a href="http://www.amazon.com/gp/product/1934356115?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1934356115">Mastering Dojo: JavaScript and Ajax Tools for Great Web Experiences (Pragmatic Programmers)</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=1934356115" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /></p>

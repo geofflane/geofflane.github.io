@@ -22,52 +22,52 @@ tags:
 comments: []
 ---
 <p>This is part of a series on the <a href="http://www.erlang.org/course/exercises.html">Erlang Exercises</a> which is a great set of programming problems that challenge you to implement solutions to some common Erlang problems. I'm going to share some of my solutions to these problems.</p>
-<h2>Robustness in Erlang, and use of a graphics package</h2><br />
-<strong>Excercise:</strong> Create a window containing three buttons: Quit , Spawn , Error.<br />
-The <strong>Spawn</strong> button shall create a child process which displays an identical window.<br />
-The <strong>Quit</strong> button should kill the window and its child windows.<br />
+<h2>Robustness in Erlang, and use of a graphics package</h2>
+<strong>Excercise:</strong> Create a window containing three buttons: Quit , Spawn , Error.
+The <strong>Spawn</strong> button shall create a child process which displays an identical window.
+The <strong>Quit</strong> button should kill the window and its child windows.
 The <strong>Error</strong> button should cause a runtime error that kills the window (and its children), this window shall then be restarted by its parent.</p>
-<p><code lang="erlang"><br />
--module(gui).<br />
+<p>{% highlight erlang %}
+-module(gui).
 -export([init/0]).</p>
-<p>init() -><br />
-    S = gs:start(),<br />
-    Win = gs:create(window, S, [{width, 350}, {height, 100}]),<br />
-    gs:create(button, quit, Win, [{label, {text, "Quit"}}, {x, 0}]),<br />
-    gs:create(button, spawn, Win, [{label, {text, "Spawn"}}, {x, 100}]),<br />
-    gs:create(button, error, Win, [{label, {text, "Error"}}, {x, 200}]),<br />
-    gs:config(Win, {map, true}),<br />
+<p>init() ->
+    S = gs:start(),
+    Win = gs:create(window, S, [{width, 350}, {height, 100}]),
+    gs:create(button, quit, Win, [{label, {text, "Quit"}}, {x, 0}]),
+    gs:create(button, spawn, Win, [{label, {text, "Spawn"}}, {x, 100}]),
+    gs:create(button, error, Win, [{label, {text, "Error"}}, {x, 200}]),
+    gs:config(Win, {map, true}),
     loop().</p>
-<p>loop() -><br />
-    receive<br />
-        {gs, spawn, click, _, _} -><br />
-            Pid = spawn(?MODULE, init, []),<br />
-            handle_error(self(), Pid),<br />
-            io:format("got here~n",[]),<br />
-            loop();<br />
-        {gs, quit, click, _, _} -><br />
-            io:format("quitting~n",[]),<br />
-            gs:stop();<br />
-        {gs, error, click, _, _} -><br />
-            erlang:error(errorclick);<br />
-        exit -><br />
-            bye<br />
+<p>loop() ->
+    receive
+        {gs, spawn, click, _, _} ->
+            Pid = spawn(?MODULE, init, []),
+            handle_error(self(), Pid),
+            io:format("got here~n",[]),
+            loop();
+        {gs, quit, click, _, _} ->
+            io:format("quitting~n",[]),
+            gs:stop();
+        {gs, error, click, _, _} ->
+            erlang:error(errorclick);
+        exit ->
+            bye
     end.</p>
-<p>handle_error(MasterPid, Pid) -><br />
-    spawn(fun() -><br />
-                  process_flag(trap_exit, true),<br />
-                  link(Pid),<br />
-                  receive<br />
-                      {'EXIT', Pid, {errorclick, _}} -><br />
-                          io:format(" ~p died :~n",[Pid]),<br />
-                          MasterPid ! {gs, spawn, click, a, b};<br />
-                      _ -><br />
-                          io:format(" really quitting :~n", []),<br />
-                          MasterPid ! exit<br />
-                  end<br />
-          end).<br />
-</code></p>
-<h4>gs</h4><br />
+<p>handle_error(MasterPid, Pid) ->
+    spawn(fun() ->
+                  process_flag(trap_exit, true),
+                  link(Pid),
+                  receive
+                      {'EXIT', Pid, {errorclick, _}} ->
+                          io:format(" ~p died :~n",[Pid]),
+                          MasterPid ! {gs, spawn, click, a, b};
+                      _ ->
+                          io:format(" really quitting :~n", []),
+                          MasterPid ! exit
+                  end
+          end).
+{% endhighlight %}</p>
+<h4>gs</h4>
 The <em>gs</em> code is all GUI code. It just goes to show that you can use FP to create GUIs even if it's not quite as intuitive as it might be in an OO language. It creates a windows with a series of buttons on it.</p>
-<h4>handle_error</h4><br />
+<h4>handle_error</h4>
 This <em>handle_error</em> code shows linking a Process to another error handler process. That spawns a process whose sole purpose is to listen for errors from the main process. If an <em>{'EXIT', Pid, {errorclick, _}}</em> error is received the error handler sends a message back asking the <em>MasterPid</em> to spawn a new window.</p>

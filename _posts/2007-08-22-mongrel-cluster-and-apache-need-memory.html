@@ -77,16 +77,16 @@ comments:
 <li>MySQL 5</li>
 <li>Postfix Mail Server</li>
 <li>Courier IMAP Server</li>
-<li>ssh for remote access of course</li><br />
+<li>ssh for remote access of course</li>
 </ul></p>
 <p>I recently started playing with a site built using <a href="http://radiantcms.org">Radiant CMS</a> which is itself built on top of <a href="http://www.rubyonrails.org">Ruby on Rails</a>. So, I've added to the mix:</p>
 <ul>
-<li>3 Mongrel instances running under mongrel_cluster</li><br />
+<li>3 Mongrel instances running under mongrel_cluster</li>
 </ul></p>
 <p>These mongrel instances are proxied behind <a href="http://blog.codahale.com/2006/06/19/time-for-a-grown-up-server-rails-mongrel-apache-capistrano-and-you/">Apache using mod_proxy_balance as described here</a>. This setup works very well and is more and more becoming the defacto standard for deploying Rails applications. Even the Ruby on Rails sites are deployed with this setup now. It allows you to serve all of your dynamic content through Rails and all of your static content through Apache. This gives you all of the speed and robustness that Apache has to offer (afterall it runs over 50% of all the hosts on the internet) for serving static content without burdening Mongrel with this task.</p>
 <p>I was noticing that the site was pretty slow though. I tracked it down to the fact that I had started using too much memory. I was running the site on a VPS with 256M of RAM, but with the new Mongrel instances I had just pushed my server into swap space. Web applications in general are happier with more RAM. In this case it is definitely born out. I upped the VPS to have 512M of RAM and things became VERY SNAPPY! While I didn't do a scientific before and after. The page loads prior to the upgrade were taking about 5-10s. After the memory increase you can't tell if the application is static or dynamic.</p>
 <p>So, if you're running into performance issues with Mongrel behind an Apache mod_proxy_balance setup, check your memory. If you are running into swap space then you are likely to see serious performance issues. Let me know of any other simple tweaks to get more performance out of this setup if you have them.</p>
-<p><strong><em>As an aside:</em></strong><br />
+<p><strong><em>As an aside:</em></strong>
 Big kudos to <a href="http://www.slicehost.com">SliceHost</a> on their VPS upgrade capabilities. I clicked 2 buttons on my web-based management console and about 10 minutes later I was running on a bigger VPS. You can't ask for much better than that if you need to scale up a server!</p>
-<p><strong><em>Update:</em></strong><br />
+<p><strong><em>Update:</em></strong>
 I guess Lighttpd and Nginx do both support running PHP applications under fast_cgi. You might want to try this kind of setup if you are so inclined. I'm still an Apache partisan.</p>
