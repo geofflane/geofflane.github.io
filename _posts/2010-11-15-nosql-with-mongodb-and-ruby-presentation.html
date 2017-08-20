@@ -22,46 +22,27 @@ tags:
 - ruby-on-rails
 - mongodb
 - nosql
-comments:
-- id: 16322
-  author: Tweets that mention NoSQL with MongoDB and Ruby Presentation | Zorched /
-    One-Line Fix -- Topsy.com
-  author_email: ''
-  author_url: http://topsy.com/www.zorched.net/2010/11/15/nosql-with-mongodb-and-ruby-presentation/?utm_source=pingback&amp;utm_campaign=L2
-  date: '2010-11-16 09:29:06 -0500'
-  date_gmt: '2010-11-16 15:29:06 -0500'
-  content: "[...] This post was mentioned on Twitter by Alex Lemanski and Milwaukee
-    Ruby, geofflane. geofflane said: Posted my presentation on my blog for download:
-    http://bit.ly/9sh6C5 @rubymke #devmke [...]"
-- id: 16323
-  author: NoSQL Daily &#8211; Wed Nov 17 &rsaquo; PHP App Engine
-  author_email: ''
-  author_url: http://php-app-engine.com/2010/nosql/nosql-daily-wed-nov-17/
-  date: '2010-11-16 19:15:46 -0500'
-  date_gmt: '2010-11-17 01:15:46 -0500'
-  content: "[...] NoSQL with MongoDB and Ruby Presentation | Zorched / One-Line
-    Fix [...]"
 ---
 <p>I presented at the Milwaukee Ruby User's Group tonight on NoSQL using MongoDB and Ruby.</p>
 <h3>Code Snippets for the Presentation</h3></p>
 <h4>Basic Operations</h4>
-{% highlight javascript %}</p>
-<p>// insert data
+{% highlight javascript %}
+// insert data
 db.factories.insert( { name: "Miller", metro: { city: "Milwaukee", state: "WI" } } );
 db.factories.insert( { name: "Lakefront", metro: { city: "Milwaukee", state: "WI" } } );
 db.factories.insert( { name: "Point", metro: { city: "Steven's Point", state: "WI" } } );
 db.factories.insert( { name: "Pabst", metro: { city: "Milwaukee", state: "WI" } } );
 db.factories.insert( { name: "Blatz", metro: { city: "Milwaukee", state: "WI" } } );
-db.factories.insert( { name: "Coors", metro: { city: "Golden Springs", state: "CO" } } );</p>
-<p>// simple queries
+db.factories.insert( { name: "Coors", metro: { city: "Golden Springs", state: "CO" } } );
+// simple queries
 db.factories.find()
 db.factories.findOne()
 db.factories.find( { "metro.city" : "Milwaukee" } )
-db.factories.find( { "metro.state": {$in : ["WI", "CO"] } } )</p>
-<p>// update data
+db.factories.find( { "metro.state": {$in : ["WI", "CO"] } } )
+// update data
 db.factories.update( { name: "Lakefront"}, { $set : { thebest : true } } );
-db.factories.find()</p>
-<p>// delete data
+db.factories.find()
+// delete data
 db.factories.remove({name:"Coors"})
 db.factories.remove()
 {% endhighlight %}</p>
@@ -69,17 +50,17 @@ db.factories.remove()
 {% highlight ruby %}
 require 'rubygems'
 require 'mongo'
-include Mongo</p>
-<p>db   = Connection.new.db('sample-db')
-coll = db.collection('factories')</p>
-<p>coll.remove</p>
-<p>coll.insert( { :name => "Miller",    :metro => { :city => "Milwaukee", :state => "WI" } } )
+include Mongo
+db   = Connection.new.db('sample-db')
+coll = db.collection('factories')
+coll.remove
+coll.insert( { :name => "Miller",    :metro => { :city => "Milwaukee", :state => "WI" } } )
 coll.insert( { :name => "Lakefront", :metro => { :city: "Milwaukee", :state => "WI" } } )
 coll.insert( { :name => "Point",     :metro => { :city => "Steven's Point", :state => "WI" } } )
 coll.insert( { :name => "Pabst",     :metro => { :city => "Milwaukee", :state => "WI" } } )
 coll.insert( { :name => "Blatz",     :metro => { :city => "Milwaukee", :state => "WI" } } )
-coll.insert( { :name => "Coors",     :metro => { :city => "Golden Springs", :state => "CO" } } )</p>
-<p>puts "There are #{coll.count()} factories. Here they are:"
+coll.insert( { :name => "Coors",     :metro => { :city => "Golden Springs", :state => "CO" } } )
+puts "There are #{coll.count()} factories. Here they are:"
 coll.find().each { |doc| puts doc.inspect }
 coll.map_reduce("function () { emit(this.metro.city, this.name); }", "function (k, vals) { return vals.join(","); }").each { |r| puts r.inspect }
 {% endhighlight %}</p>
@@ -90,8 +71,8 @@ db.factories.insert( { name: "Lakefront", metro: { city: "Milwaukee", state: "WI
 db.factories.insert( { name: "Point", metro: { city: "Steven's Point", state: "WI" } } );
 db.factories.insert( { name: "Pabst", metro: { city: "Milwaukee", state: "WI" } } );
 db.factories.insert( { name: "Blatz", metro: { city: "Milwaukee", state: "WI" } } );
-db.factories.insert( { name: "Coors", metro: { city: "Golden Springs", state: "CO" } } );</p>
-<p>var fmap = function () {
+db.factories.insert( { name: "Coors", metro: { city: "Golden Springs", state: "CO" } } );
+var fmap = function () {
     emit(this.metro.city, this.name);
 }
 var fred = function (k, vals) {
