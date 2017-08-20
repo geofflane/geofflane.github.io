@@ -1,0 +1,61 @@
+<p>Groovy offers a lot of runtime meta-programming capabilities that allow you to add reusable functionality in a shared fashion. Grails plugins make use of this ability to enhance your project. One of the things that you can't do with runtime meta-programming in Grails is to add persistent Hibernate properties to your domain classes. If you want to add a persistent property in a plugin (or otherwise using meta-programming) for your Grails project you have to make use of "compile-time" meta-programming. In Groovy this is done with <abbr title="Abstract Syntax Tree">AST</abbr> Transformations.</p>
+<p>(If you are unfamiliar with the concept of the Abstract Syntax Tree, see the <a href="http://en.wikipedia.org/wiki/Abstract_syntax_tree">Wikipedia article on Abstract Syntax Tree</a>.)</p>
+<p>AST Transformations are made up of two parts: (1) An annotation and (2) an ASTTransformation implementation. During compilation the Groovy compiler finds all of the Annotations and calls the ASTTransformation implementation for the annotation passing in information about.</p>
+<p>To create your own Transformation you start by creating an Annotation. The key to the annotation working is that your annotation has to itself be annotated with @GroovyASTTransformationClass. The values passed to the GroovyASTTransformationClass define the Transformation that will be called on classes, methods or other code prior to it being compiled.</p>
+<h3>Example Annotation</h3>
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="kn">package</span> <span class="nn">net.zorched.grails.effectivity</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="kn">import</span> <span class="nn">org.codehaus.groovy.transform.GroovyASTTransformationClass</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.lang.annotation.*</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="nd">@Target</span><span class="o">({</span><span class="n">ElementType</span><span class="o">.</span><span class="na">TYPE</span><span class="o">})</span>
+<span class="nd">@Retention</span><span class="o">(</span><span class="n">RetentionPolicy</span><span class="o">.</span><span class="na">RUNTIME</span><span class="o">)</span>
+<span class="nd">@GroovyASTTransformationClass</span><span class="o">({</span><span class="s2">"net.zorched.grails.effectivity.EffectivizeASTTransformation"</span><span class="o">})</span>
+<span class="kd">public</span> <span class="nd">@interface</span> <span class="n">Effectivize</span> <span class="o">{</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>Notice the reference to <em>net.zorched.grails.effectivity.EffectivizeASTTransformation</em>. That's the important part because it defines the class that will be used to perform the transformation.</p>
+<h3>Example Transformation</h3>
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="kn">package</span> <span class="nn">net.zorched.grails.effectivity</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.codehaus.groovy.ast.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.codehaus.groovy.ast.builder.AstBuilder</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.codehaus.groovy.ast.expr.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.codehaus.groovy.ast.stmt.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.codehaus.groovy.control.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.codehaus.groovy.transform.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">asm</span><span class="o">.</span><span class="na">Opcodes</span><span class="o">.*;</span>
+<span class="nd">@GroovyASTTransformation</span><span class="o">(</span><span class="n">phase</span> <span class="o">=</span> <span class="n">CompilePhase</span><span class="o">.</span><span class="na">CANONICALIZATION</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">EffectivizeASTTransformation</span> <span class="kd">implements</span> <span class="n">ASTTransformation</span> <span class="o">{</span>
+      <span class="c1">// This is the main method to implement from ASTTransformation that is called by the compiler</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">visit</span><span class="o">(</span><span class="n">ASTNode</span><span class="o">[]</span> <span class="n">nodes</span><span class="o">,</span> <span class="n">SourceUnit</span> <span class="n">sourceUnit</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">nodes</span><span class="o">)</span> <span class="k">return</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">nodes</span><span class="o">[</span><span class="mi">0</span><span class="o">])</span> <span class="k">return</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">nodes</span><span class="o">[</span><span class="mi">1</span><span class="o">])</span> <span class="k">return</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(!(</span><span class="n">nodes</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="k">instanceof</span> <span class="n">AnnotationNode</span><span class="o">))</span> <span class="k">return</span><span class="o">;</span>
+          <span class="n">ClassNode</span> <span class="n">cNode</span> <span class="o">=</span> <span class="o">(</span><span class="n">ClassNode</span><span class="o">)</span> <span class="n">nodes</span><span class="o">[</span><span class="mi">1</span><span class="o">];</span>
+        <span class="n">addProperty</span><span class="o">(</span><span class="n">cNode</span><span class="o">,</span> <span class="s2">"effectiveStart"</span><span class="o">,</span> <span class="n">Date</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">createGenerateStartMethodCall</span><span class="o">())</span>
+        <span class="n">addProperty</span><span class="o">(</span><span class="n">cNode</span><span class="o">,</span> <span class="s2">"effectiveEnd"</span><span class="o">,</span> <span class="n">Date</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">createGenerateEndMethodCall</span><span class="o">())</span>
+      <span class="o">}</span>
+      <span class="c1">// This method returns an expression that is used to initialize the newly created property</span>
+    <span class="kd">private</span> <span class="n">Expression</span> <span class="nf">createGenerateStartMethodCall</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">ConstructorCallExpression</span><span class="o">(</span><span class="k">new</span> <span class="n">ClassNode</span><span class="o">(</span><span class="n">Date</span><span class="o">.</span><span class="na">class</span><span class="o">),</span> <span class="n">ArgumentListExpression</span><span class="o">.</span><span class="na">EMPTY_ARGUMENTS</span><span class="o">);</span>
+    <span class="o">}</span>
+      <span class="kd">private</span> <span class="n">Expression</span> <span class="nf">createGenerateEndMethodCall</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">MethodCallExpression</span><span class="o">(</span>
+                <span class="k">new</span> <span class="nf">ConstructorCallExpression</span><span class="o">(</span><span class="k">new</span> <span class="n">ClassNode</span><span class="o">(</span><span class="n">Date</span><span class="o">.</span><span class="na">class</span><span class="o">),</span> <span class="n">ArgumentListExpression</span><span class="o">.</span><span class="na">EMPTY_ARGUMENTS</span><span class="o">),</span>
+                <span class="s2">"parse"</span><span class="o">,</span>
+                <span class="k">new</span> <span class="nf">ArgumentListExpression</span><span class="o">(</span><span class="k">new</span> <span class="n">ConstantExpression</span><span class="o">(</span><span class="s2">"yyyy/MM/dd"</span><span class="o">),</span> <span class="k">new</span> <span class="n">ConstantExpression</span><span class="o">(</span><span class="s2">"2099/12/31"</span><span class="o">)));</span>
+    <span class="o">}</span>
+      <span class="c1">// This method adds a new property to the class. Groovy automatically handles adding the getters and setters so you</span>
+    <span class="c1">// don't have to create special methods for those</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">addProperty</span><span class="o">(</span><span class="n">ClassNode</span> <span class="n">cNode</span><span class="o">,</span> <span class="n">String</span> <span class="n">propertyName</span><span class="o">,</span> <span class="n">Class</span> <span class="n">propertyType</span><span class="o">,</span> <span class="n">Expression</span> <span class="n">initialValue</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">FieldNode</span> <span class="n">field</span> <span class="o">=</span> <span class="k">new</span> <span class="n">FieldNode</span><span class="o">(</span>
+                <span class="n">propertyName</span><span class="o">,</span>
+                <span class="n">ACC_PRIVATE</span><span class="o">,</span>
+                <span class="k">new</span> <span class="nf">ClassNode</span><span class="o">(</span><span class="n">propertyType</span><span class="o">),</span>
+                <span class="k">new</span> <span class="nf">ClassNode</span><span class="o">(</span><span class="n">cNode</span><span class="o">.</span><span class="na">getClass</span><span class="o">()),</span>
+                <span class="n">initialValue</span>
+        <span class="o">);</span>
+          <span class="n">cNode</span><span class="o">.</span><span class="na">addProperty</span><span class="o">(</span><span class="k">new</span> <span class="n">PropertyNode</span><span class="o">(</span><span class="n">field</span><span class="o">,</span> <span class="n">ACC_PUBLIC</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">));</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>This example code gets called for each annotated class and adds two new Date properties called effectiveStart and effectiveEnd to it. Those properties are seen by Grails and Hibernate and will become persistent and behave the same as if you typed them directly in your Domain.</p>
+<p>It's a lot of work to add a simple property to a class, but if you're looking to consistently add properties and constraints across many Grails Domain classes, this is the way to do it.</p>

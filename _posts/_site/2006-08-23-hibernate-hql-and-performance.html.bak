@@ -1,0 +1,55 @@
+<p>The <a href="http://www.hibernate.org/">Hibernate</a> <acronym title="Object Relational Mapper">ORM</acronym> tool give you the ability to write SQL-esque queries using <a href="http://www.hibernate.org/hib_docs/reference/en/html/queryhql.html">HQL</a> to do custom joining, filtering, etc. to pull Objects from your database. The documentation gives you a lot of examples of the things you can do, but I haven't seen any caveats or warnings.</p></p>
+<h3>Database Performance</h3></p>
+<p>As far as database performance goes there are two major things to start with when you want to understand your database performance:</p></p>
+<ul title="Basic Database Performance">
+<li>How many queries are run?</li>
+<li>How expensive are the individual queries?</li>
+</ul></p>
+<p>Not too earth shattering is it? Basically if you run fewer queries of the same cost you're better off. Likewise, if you make the queries themselves cost less (by optimizing the queries themselves, creating the proper indexes, etc) then they will run faster. So of course the best is to do both. Identify you to run fewer, faster queries. <small>(Yes, I'm still waiting on my Nobel prize.)</small></p></p>
+<p>I'll talk more about fewer queries later...</p></p>
+<p>To make queries faster, you mostly are working in the database. You depend on good tools and good statistics. If the size and kind of data changes, you might have to redo this stuff.</p></p>
+<p>To Optimize your database queries:</p></p>
+<ol title="Optimizing database queries">
+<li>Run some queries examining their execution plans</li>
+<li>Find some possible columns to index</li>
+<li>Create an index</li>
+<li>Re-run the queries and examine the execution plans again</li>
+<li>Keep it if it's faster, get rid of it if it's not</li>
+<li>Goto 1</li>
+</ol></p>
+<h3>Hibernate and Caches</h3></p>
+<p>Hibernate does one thing: It maps Objects to a Relational database. Hibernate is really pretty good at that mapping and can support all kinds of schemas. So you should be able to (relatively) easily map your objects to your schema.</p></p>
+<p>Hibernate also has two potential caching schemes. What it calls Level-1 and Level-2 caching. Level-1 caching is done through the Hibernate session. As long as the Hibernate session is open, any object that you have loaded will be pulled from the session if you query for it again.</p></p>
+<p>The Level-2 cache is a longer-running, more advanced caching scheme. It allows you to store objects across Hibernate sessions. You're often discouraged against using Level-2 caching, but it is very nice for read-only objects that you don't expect to change in the database (think of pre-defined type information and the like). Again, if you query or one of these objects using Hibernate, then you'll get an object from the Level-2 cache.</p></p>
+<p>Notice how the Level-1 and Level-2 cache prevent Hibernate from having to re-query the database for a lot of objects. This of course can be a huge performance benefit. Likewise, Hibernate supports Lazy Loading of collections, so if your object is related to a collection of other objects, Hibernate will wait to load them until you need them. Once they've been loaded though, they are in the Object graph, so accessing them a second time does not require another round-trip to the database.</p></p>
+<p>All of this lazy loading and caching is about reducing the number of queries you need to run against the database. You can also tweak your Hibernate mapping files to implement things like batching (loading children of multiple parents in one query) to greatly reduce the number of queries that need to be run. You can also specify to pre-load a related object using a left join if you will always need the object and want to get both in the same query. Most of the decisions are dependent on your application and what you are doing, but they are very easy to play with in your configuration and see if they improve your application performance.</p></p>
+<h3>Why the hard time for HQL?</h3></p>
+<p>All of the Caching and tweaking you can do in your Hibernate mappings (or using Annotations) is totally wasted if you using HQL queries to load your objects.</p></p>
+<p>If you specify a fetch="join" in your mapping to do a left join and load a dependent object, that doesn't get used when you use HQL to load the object, so you will be doing more queries than you need.</p></p>
+<p>If you have natural mappings of parent/child relationships then the following code will only generate a single query to load the Person and a single query to get the Addresses.
+  <figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Person</span> <span class="n">p</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">Person</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="mi">1</span><span class="o">);</span>
+<span class="n">List</span><span class="o">&lt;</span><span class="n">Address</span><span class="o">&gt;</span> <span class="n">address</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="na">getAddresses</span><span class="o">();</span>
+<span class="n">List</span><span class="o">&lt;</span><span class="n">Address</span><span class="o">&gt;</span> <span class="n">address2</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="na">getAddresses</span><span class="o">();</span></code></pre></figure></p></p>
+<p>This code still only generates two queries:
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Person</span> <span class="n">p</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="na">createQuery</span><span class="o">(</span><span class="s">"from Person where id=:id"</span><span class="o">)</span>
+                       <span class="o">.</span><span class="na">setParameter</span><span class="o">(</span><span class="s">"id"</span><span class="o">,</span> <span class="mi">1</span><span class="o">).</span><span class="na">uniqueResult</span><span class="o">();</span>
+<span class="n">List</span><span class="o">&lt;</span><span class="n">Address</span><span class="o">&gt;</span> <span class="n">address</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="na">getAddresses</span><span class="o">();</span>
+<span class="n">List</span><span class="o">&lt;</span><span class="n">Address</span><span class="o">&gt;</span> <span class="n">address</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="na">getAddresses</span><span class="o">();</span></code></pre></figure></p></p>
+<p>But the following code generates twice as many queries to load the addresses.
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Person</span> <span class="n">p</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="na">createQuery</span><span class="o">(</span><span class="s">"from Person where id=:id"</span><span class="o">)</span>
+                       <span class="o">.</span><span class="na">setParameter</span><span class="o">(</span><span class="s">"id"</span><span class="o">,</span> <span class="mi">1</span><span class="o">).</span><span class="na">uniqueResult</span><span class="o">();</span>
+<span class="n">List</span><span class="o">&lt;</span><span class="n">Address</span><span class="o">&gt;</span> <span class="n">address</span> <span class="o">=</span> <span class="n">session</span>
+                       <span class="o">.</span><span class="na">createQuery</span><span class="o">(</span><span class="s">"from Addresses where person_id=:id"</span><span class="o">)</span>
+                       <span class="o">.</span><span class="na">setParameter</span><span class="o">(</span><span class="s">"id"</span><span class="o">,</span> <span class="mi">1</span><span class="o">).</span><span class="na">list</span><span class="o">();</span>
+<span class="n">List</span><span class="o">&lt;</span><span class="n">Address</span><span class="o">&gt;</span> <span class="n">address2</span> <span class="o">=</span> <span class="n">session</span>
+                       <span class="o">.</span><span class="na">createQuery</span><span class="o">(</span><span class="s">"from Addresses where person_id=:id"</span><span class="o">)</span>
+                       <span class="o">.</span><span class="na">setParameter</span><span class="o">(</span><span class="s">"id"</span><span class="o">,</span> <span class="mi">1</span><span class="o">).</span><span class="na">list</span><span class="o">();</span></code></pre></figure></p></p>
+<p>Of course this is a totally contrived example, but if you've built out a large system with a <a href="http://www.corej2eepatterns.com/Patterns2ndEd/ServiceFacade.htm">Service Facade</a> and <a href="http://www.corej2eepatterns.com/Patterns2ndEd/DataAccessObject.htm">DAOs</a> these kinds of things can easily be hidden deep in the application where it would be hard to know whether a call would trigger a database call or not. So be very conscious of using HQL queries and the consequences of using them.</p></p>
+<p>Hibernate rewards you for using natural relationships in your Objects. It rewards you with performance for building a POJO based Object Oriented system.</p></p>
+<h3>Hibernate HQL Rules</h3></p>
+<p>Rule #1: Don't use HQL.
+Rule #2: If you really need to use HQL, see Rule #1.
+Rule #3: If you really, really need HQL and you know what you're doing, then carefully use HQL.</p></p>
+<p>Ok, so if I'm right about this, why is this not at the top of the HQL documentation? Don't you think they should talk about this as a method of last resort?</p></p>
+<p>Time to start reading <a href="http://www.manning.com/crichardson/">POJOs in Action</a> again.</p></p>
+<p>[ad name="image-banner"]</p></p>

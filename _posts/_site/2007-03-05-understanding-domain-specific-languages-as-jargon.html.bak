@@ -1,0 +1,83 @@
+<p>Domain Specific Languages (DSLs) are the idea of creating syntaxes that model a very specific problem domain. Domain Specific Languages are not a new concept. Some people call them 'little languages'. The Unix world has a bunch of little languages. Grep, awk, sed, lex, and yacc all exhibit features of these domain specific languages. They are little tools that do one thing well. In these cases they are often highly encoded and not in  natural language of any sort. Modern domain specific languages should aim to be humane and literate in the language of the user.</p>
+<p>Domain Specific Languages should be expressed in the language of the problem being solved. They are a higher level of abstraction than for loops and object instantiation. They are at the level of abstraction of the problem space. <a href="http://www.nealford.com/">Neal Ford</a> uses the example of "venti nonfat decaf whip latte". What am I talking about if I use those terms? If you guessed coffee, then you know the Jargon of one coffee chain out there. The person listening to the order understands that you are ordering a decaf coffee drink of a certain size, with non-fat milk and whipped cream. There is a lot of shared context in the Jargon of the coffee drinker and the coffee order taker. This shared context sets the stage for a rich conversation without a lot of unnecessary noise. This is true of all Jargon.</p>
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1"># CoffeeDSL.rb</span>
+<span class="c1"># This is the input from the user, likely read from a file</span>
+<span class="c1"># or input through a user interface of some sort</span>
+<span class="no">CoffeeInput</span> <span class="o">=</span> <span class="s2">"venti nonfat decaf whip latte"</span>
+<span class="k">class</span> <span class="nc">Coffee</span>
+    <span class="k">def</span> <span class="nf">method_missing</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+        <span class="nb">name</span> <span class="o">=</span> <span class="n">symbol</span><span class="p">.</span><span class="nf">to_s</span>
+        <span class="k">if</span> <span class="sx">%w(venti grande)</span><span class="p">.</span><span class="nf">include?</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
+            <span class="vi">@size</span> <span class="o">=</span> <span class="nb">name</span>
+        <span class="k">elsif</span> <span class="sx">%w(whip nowhip)</span><span class="p">.</span><span class="nf">include?</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
+            <span class="vi">@whip</span> <span class="o">=</span> <span class="s1">'whip'</span><span class="p">.</span><span class="nf">eql?</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
+        <span class="k">elsif</span> <span class="sx">%w(caf decaf halfcaf)</span><span class="p">.</span><span class="nf">include?</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
+            <span class="vi">@caf</span> <span class="o">=</span> <span class="nb">name</span>
+        <span class="k">elsif</span> <span class="sx">%w(regular latte cappachino)</span><span class="p">.</span><span class="nf">include?</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
+            <span class="vi">@type</span> <span class="o">=</span> <span class="nb">name</span>
+        <span class="k">elsif</span> <span class="sx">%w(milk nonfat)</span><span class="p">.</span><span class="nf">include?</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
+            <span class="vi">@milk</span> <span class="o">=</span> <span class="nb">name</span>
+        <span class="k">else</span>
+            <span class="k">raise</span> <span class="no">ArgumentError</span><span class="p">,</span> <span class="s2">"Unknown coffee informantion: </span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">."</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+    <span class="k">def</span> <span class="nf">order</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="s1">''</span>
+        <span class="n">params</span> <span class="o">+=</span> <span class="vi">@milk</span> <span class="o">+</span> <span class="s1">' '</span> <span class="k">if</span> <span class="vi">@milk</span>
+        <span class="n">params</span> <span class="o">+=</span> <span class="vi">@caf</span> <span class="o">+</span> <span class="s1">' '</span> <span class="k">if</span> <span class="vi">@caf</span>
+        <span class="n">params</span> <span class="o">+=</span>  <span class="s1">'whip '</span> <span class="k">if</span> <span class="vi">@whip</span>
+        <span class="nb">print</span> <span class="s2">"Ordering coffee: </span><span class="si">#{</span><span class="vi">@size</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">params</span><span class="si">}#{</span><span class="vi">@type</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+    <span class="k">end</span>
+    <span class="k">def</span> <span class="nf">load</span>
+        <span class="c1"># turn one line into multi-line "method calls"</span>
+        <span class="n">cleaned</span> <span class="o">=</span> <span class="no">CoffeeInput</span><span class="p">.</span><span class="nf">gsub</span><span class="p">(</span><span class="sr">/\s+/</span><span class="p">,</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+        <span class="nb">self</span><span class="p">.</span><span class="nf">instance_eval</span><span class="p">(</span><span class="n">cleaned</span><span class="p">)</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+<span class="c1"># this is your code which loads the DSL input and executes it</span>
+<span class="n">coffee</span> <span class="o">=</span> <span class="no">Coffee</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">coffee</span><span class="p">.</span><span class="nf">load</span>       <span class="c1"># load the user input</span>
+<span class="n">coffee</span><span class="p">.</span><span class="nf">order</span>      <span class="c1"># submit the order</span></code></pre></figure>
+<p><a href="http://en.wikipedia.org/wiki/Jargon">Jargon</a> is the terminology of a specific proffession or   group. Does your user community or problem space have a vocabulary? Can they express the things they want out of a system using that vocabulary or Jargon? If so, there is a very real possibility that you could utilize a DSL to solve some set of problems for those users.</p>
+<p>What about field validation?
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1"># ValidationDSL.rb</span>
+<span class="c1"># Input from the user that would be read in</span>
+<span class="no">Input</span> <span class="o">=</span> <span class="o">&lt;&lt;</span><span class="no">EOF</span><span class="sh">
+min_length  2
+max_length 5
+</span><span class="no">EOF</span>
+<span class="k">class</span> <span class="nc">Module</span>
+    <span class="k">def</span> <span class="nf">dsl_accessor</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+        <span class="n">define_method</span><span class="p">(</span><span class="s2">"</span><span class="si">#{</span><span class="n">symbol</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">v</span><span class="o">|</span>
+            <span class="nb">instance_eval</span>
+            <span class="sx">%{
+                 @#{symbol} = v
+            }</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+<span class="k">class</span> <span class="nc">ValidateDSL</span>
+    <span class="n">dsl_accessor</span> <span class="ss">:max_length</span>
+    <span class="n">dsl_accessor</span> <span class="ss">:min_length</span>
+    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+        <span class="k">if</span> <span class="vi">@max_length</span> <span class="n">and</span> <span class="n">field</span><span class="p">.</span><span class="nf">length</span> <span class="o">&gt;</span> <span class="vi">@max_length</span>
+            <span class="k">return</span> <span class="kp">false</span>
+        <span class="k">end</span>
+        <span class="k">if</span> <span class="vi">@min_length</span> <span class="n">and</span> <span class="n">field</span><span class="p">.</span><span class="nf">length</span> <span class="o">&lt;</span> <span class="vi">@min_length</span>
+            <span class="k">return</span> <span class="kp">false</span>
+        <span class="k">end</span>
+        <span class="k">return</span> <span class="kp">true</span>
+    <span class="k">end</span>
+    <span class="k">def</span> <span class="nf">load</span>
+        <span class="nb">self</span><span class="p">.</span><span class="nf">instance_eval</span><span class="p">(</span><span class="no">Input</span><span class="p">)</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+<span class="n">val</span> <span class="o">=</span> <span class="no">ValidateDSL</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">val</span><span class="p">.</span><span class="nf">load</span>
+<span class="nb">print</span> <span class="n">val</span><span class="p">.</span><span class="nf">validate</span><span class="p">(</span><span class="s1">'foo'</span><span class="p">)</span>
+<span class="nb">print</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span>
+<span class="nb">print</span> <span class="n">val</span><span class="p">.</span><span class="nf">validate</span><span class="p">(</span><span class="s1">''</span><span class="p">)</span>
+<span class="nb">print</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span>
+<span class="nb">print</span> <span class="n">val</span><span class="p">.</span><span class="nf">validate</span><span class="p">(</span><span class="s1">'abbbbbbbbbbbbbbbbbbbbbb'</span><span class="p">)</span>
+<span class="nb">print</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span></code></pre></figure></p>
+<p>How does your user community talk about a problem? Can they easily express what they intend with simple Jargon that they already know? Is that more natural for a power user than some complicated UI with buttons and checkboxes? Then you might have a good place to use a DSL.</p>

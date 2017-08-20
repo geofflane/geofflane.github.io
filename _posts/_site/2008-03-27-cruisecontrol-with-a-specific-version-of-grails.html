@@ -1,0 +1,64 @@
+<p><a href="http://martinfowler.com/articles/continuousIntegration.html">Continuous Integration</a> is a good practice in software development. It helps catch problems early to prevent them from becoming bigger problems later. It helps to reinforce other practices like frequent checkins and unit testing as well. I'm using <a href="http://cruisecontrol.sourceforge.net/">CruiseControl</a> (CC) for Continuous Integration at the moment.</p>
+<p>One of the things about <a href="http://grails.org">Grails</a> is that it is really run through a series of scripts and classes that set up the environment. The <a href="http://ant.apache.org">Ant</a> scripts really just delegate the work to those grails scripts. To run properly, the GRAILS_HOME environment needs to be set so that it can find the proper classes, etc. This is not a problem if you are running a single Grails application in Continuous Integration. The issue arises when you want to run multiple against different version of Grails. A project I'm working on uncovered a bug in the 1.0.2 release of Grails. The code worked fine on 1.0.1 so I wanted to run against that specific version of Grails.</p>
+<p>It ends up this is not to hard with a few small changes to your Ant build.xml file.</p>
+<p>First you can declares some properties that have the paths to the Grails directory and the grails executable (the .bat version if your CC server is on Windows).
+<figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;/p&gt;</span>
+<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"cc-grails.home"</span> <span class="na">value=</span><span class="s">"C:\grails-1.0.1"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"cc-grails"</span> <span class="na">value=</span><span class="s">"${cc-grails.home}\bin\grails.bat"</span> <span class="nt">/&gt;</span></code></pre></figure></p>
+<p>Next you can declare a custom target to execute on the CC server. You reference the 'cc-grails' property declared. The key is that you must override the GRAILS_HOME when you execute the grails script.</p>
+<p><figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;target</span> <span class="na">name=</span><span class="s">"cc-test"</span> <span class="na">description=</span><span class="s">"--&gt; Run a Grails applications unit tests"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;exec</span> <span class="na">executable=</span><span class="s">"${cc-grails}"</span> <span class="na">failonerror=</span><span class="s">"true"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;env</span> <span class="na">key=</span><span class="s">"GRAILS_HOME"</span> <span class="na">value=</span><span class="s">"${cc-grails.home}"</span><span class="nt">/&gt;</span>
+	<span class="nt">&lt;arg</span> <span class="na">value=</span><span class="s">"test-app"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;/exec&gt;</span>
+<span class="nt">&lt;/target&gt;</span></code></pre></figure></p>
+<p>Now the Continuous Integration of your Grails app runs against a specific version of Grails.</p>
+<h3>The Full build.xml</h3>
+<figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;/p&gt;</span>
+<span class="nt">&lt;project</span> <span class="na">name=</span><span class="s">"project"</span> <span class="na">default=</span><span class="s">"test"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;p&gt;</span>    <span class="nt">&lt;condition</span> <span class="na">property=</span><span class="s">"grails"</span> <span class="na">value=</span><span class="s">"grails.bat"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;os</span> <span class="na">family=</span><span class="s">"windows"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;/condition&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"grails"</span> <span class="na">value=</span><span class="s">"grails"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"cc-grails.home"</span> <span class="na">value=</span><span class="s">"C:\grails-1.0.1"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">"cc-grails"</span> <span class="na">value=</span><span class="s">"${cc-grails.home}\bin\grails.bat"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;p&gt;</span>	<span class="c">&lt;!-- =================================
+          target: clean
+         ================================= --&gt;</span>
+    <span class="nt">&lt;target</span> <span class="na">name=</span><span class="s">"clean"</span> <span class="na">description=</span><span class="s">"--&gt; Cleans a Grails application"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;exec</span> <span class="na">executable=</span><span class="s">"${grails}"</span> <span class="na">failonerror=</span><span class="s">"true"</span><span class="nt">&gt;</span>
+			<span class="nt">&lt;arg</span> <span class="na">value=</span><span class="s">"clean"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;/exec&gt;</span>
+    <span class="nt">&lt;/target&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span>	<span class="c">&lt;!-- =================================
+          target: war
+         ================================= --&gt;</span>
+    <span class="nt">&lt;target</span> <span class="na">name=</span><span class="s">"war"</span> <span class="na">description=</span><span class="s">"--&gt; Creates a WAR of a Grails application"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;exec</span> <span class="na">executable=</span><span class="s">"${grails}"</span> <span class="na">failonerror=</span><span class="s">"true"</span><span class="nt">&gt;</span>
+			<span class="nt">&lt;arg</span> <span class="na">value=</span><span class="s">"war"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;/exec&gt;</span>
+    <span class="nt">&lt;/target&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span>	<span class="c">&lt;!-- =================================
+          target: test
+         ================================= --&gt;</span>
+    <span class="nt">&lt;target</span> <span class="na">name=</span><span class="s">"test"</span> <span class="na">description=</span><span class="s">"--&gt; Run a Grails applications unit tests"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;exec</span> <span class="na">executable=</span><span class="s">"${grails}"</span> <span class="na">failonerror=</span><span class="s">"true"</span><span class="nt">&gt;</span>
+			<span class="nt">&lt;arg</span> <span class="na">value=</span><span class="s">"test-app"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;/exec&gt;</span>
+    <span class="nt">&lt;/target&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span>    <span class="c">&lt;!-- =================================
+      target: cc-test
+     ================================= --&gt;</span>
+    <span class="nt">&lt;target</span> <span class="na">name=</span><span class="s">"cc-test"</span> <span class="na">description=</span><span class="s">"--&gt; Run a Grails applications unit tests in Continuous Integration mode"</span><span class="nt">&gt;</span>
+		<span class="nt">&lt;exec</span> <span class="na">executable=</span><span class="s">"${cc-grails}"</span> <span class="na">failonerror=</span><span class="s">"true"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;env</span> <span class="na">key=</span><span class="s">"GRAILS_HOME"</span> <span class="na">value=</span><span class="s">"${cc-grails.home}"</span><span class="nt">/&gt;</span>
+			<span class="nt">&lt;arg</span> <span class="na">value=</span><span class="s">"test-app"</span><span class="nt">/&gt;</span>
+		<span class="nt">&lt;/exec&gt;</span>
+    <span class="nt">&lt;/target&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span>	<span class="c">&lt;!-- =================================
+          target: deploy
+         ================================= --&gt;</span>
+    <span class="nt">&lt;target</span> <span class="na">name=</span><span class="s">"deploy"</span> <span class="na">depends=</span><span class="s">"war"</span> <span class="na">description=</span><span class="s">"--&gt; The deploy target (initially empty)"</span><span class="nt">&gt;</span>
+        <span class="c">&lt;!-- TODO --&gt;</span>
+    <span class="nt">&lt;/target&gt;</span>
+<span class="nt">&lt;/project&gt;</span></code></pre></figure></p>

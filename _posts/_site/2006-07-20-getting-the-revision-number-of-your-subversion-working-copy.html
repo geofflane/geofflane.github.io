@@ -1,0 +1,25 @@
+<p>I was asked today "How do I find out the revision number of my Subversion
+  directory?" and I didn't know the answer. The good news is there is an easy
+  answer:
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">svnversion . </code></pre></figure></p></p>
+<p>From the <figure class="highlight"><pre><code class="language-bash" data-lang="bash">svnversion <span class="nb">help</span></code></pre></figure> command:</p></p>
+<blockquote><p>
+The version number will be a single number if the working
+  copy is single revision, unmodified, not switched and with
+  an URL that matches the TRAIL_URL argument.  If the working
+  copy is unusual the version number will be more complex:
+</blockquote></p>
+<p>This command takes a little while to run, because it runs against the remote
+  repository as well. It gives more detailed results also such as whether or
+  not you have local modifications or if the repository has been changed since
+  your last update. These details can be interesting in certain cases. But
+  sometimes all you want to know is what revision you currently have checked
+  out...</p></p>
+<p>If all you want to do is check on the current revision of your local working copy you can use some Unix magic to do that.
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">grep revision .svn/entries |  awk -F<span class="se">\"</span> <span class="s1">'{print $2}'</span></code></pre></figure></p></p>
+<p>Redirect this output to a file or use it as an argument to a build script and you can have the revision number put into your application.
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">ant -Drevision<span class="o">=</span>grep revision .svn/entries | awk -F<span class="se">\"</span> <span class="s1">'{print $2}'</span></code></pre></figure>
+<small>(notice the backticks ` and this needs to be on one line)</small></p></p>
+<p>A little Unix scripting and voila!</p></p>
+<p><small>(Thanks to Ross Greinke for this little snippet)</small></p></p>
+<p>[ad name="image-banner"]</p></p>

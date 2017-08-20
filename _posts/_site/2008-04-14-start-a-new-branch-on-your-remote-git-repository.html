@@ -1,0 +1,67 @@
+<p><a href="http://git.or.cz/">Git</a> is a <a href="http://www.zorched.net/2005/12/29/what-are-decen&acirc;&euro;&brvbar;ontrol-systems/">distributed version control system</a> so it allows you to create branches locally and commit against them. It also supports a more centralized repository model. When using a centralized repository you can push changes to it so that others can pull them more easily. I have a tendency to work on multiple computers. Because of this, I like to use a centralized repository to track the branches as I work on them. That way no matter what machine I'm on, I can still get at my branches.</p></p>
+<h3>The Workflow</h3></p>
+<p>My workflow is generally something like this:</p></p>
+<ol>
+<li>Create a remote branch</li>
+<li>Create a local branch that tracks it</li>
+<li>Work, Test, Commit (repeat) - this is all local</li>
+<li>Push (pushes commits to the remote repository)</li>
+</ol></p>
+<p>Git commands can be a bit esoteric at times and I can't always seem to remember how to create a remote git branch and then start working on new code. There also seems to be multiple ways of doing it. I'm documenting the way that seem to work for me so that I can remember it. Maybe it will help someone else too.</p></p>
+<h3>Creating a Remote Branch</h3></p>
+<ol>
+<li>
+<p>Create the remote branch
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">git push origin origin:refs/heads/new_feature_name</code></pre></figure></p></li></p>
+<li>
+<p>Make sure everything is up-to-date
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">git fetch origin</code></pre></figure></p></li></p>
+<li>
+<p>Then you can see that the branch is created.
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">git branch -r</code></pre></figure></p></li>
+</ol></p>
+<p>This should show 'origin/new_feature_name'</p></p>
+<ol>
+<li>Start tracking the new branch
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">git checkout --track -b new_feature_name origin/new_feature_name</code></pre></figure></li>
+</ol></p>
+<p>This means that when you do pulls that it will get the latest from that branch as well.</p></p>
+<ol>
+<li>Make sure everything is up-to-date
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">git pull</code></pre></figure></li>
+</ol></p>
+<h3>Cleaning up Mistakes</h3></p>
+<p>If you make a mistake you can always delete the remote branch
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">git push origin :heads/new_feature_name</code></pre></figure>
+<em>(Ok Git'ers - that has to be the least intuitive command ever.)</em></p></p>
+<h3>Use the Branch from Another Location</h3></p>
+<p>When you get to another computer or clone the git repository to a new computer, then you just need to start tracking the new branch again.
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">git branch -r</code></pre></figure> to show all the remote branches
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">git checkout --track -b new_branch origin/new_feature_name</code></pre></figure> to start tracking the new branch</p></p>
+<h3>Automate it A Bit</h3></p>
+<p>That's a pretty easy thing to automate with a small shell script luckily</p></p>
+<p><figure class="highlight"><pre><code class="language-bash" data-lang="bash">&lt;/p&gt;&lt;/p&gt;
+&lt;h1&gt;!/bin/sh&lt;/h1&gt;&lt;/p&gt;
+&lt;h1&gt;git-create-branch &lt;branch_name&gt;&lt;/h1&gt;&lt;/p&gt;
+&lt;p&gt;if <span class="o">[</span> <span class="nv">$# </span>-ne 1 <span class="o">]</span>; <span class="k">then
+         </span><span class="nb">echo </span>1&gt;&amp;amp;2 Usage: <span class="nv">$0</span> branch_name
+         <span class="nb">exit </span>127
+<span class="k">fi</span>&lt;/p&gt;&lt;/p&gt;
+&lt;p&gt;set branch_name <span class="o">=</span> <span class="nv">$1</span>
+git push origin origin:refs/heads/<span class="k">${</span><span class="nv">branch_name</span><span class="k">}</span>
+git fetch origin
+git checkout --track -b <span class="k">${</span><span class="nv">branch_name</span><span class="k">}</span> origin/<span class="k">${</span><span class="nv">branch_name</span><span class="k">}</span>
+git pull</code></pre></figure></p></p>
+<p>For further help, you might want to check out:</p></p>
+<ul>
+<li>
+<a href="http://www.amazon.com/gp/product/1934356158?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1934356158">Pragmatic Version Control Using Git (Pragmatic Starter Kit)</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=1934356158" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
+</li></p>
+<li>
+<a href="http://www.amazon.com/gp/product/0596520123?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0596520123">Version Control with Git: Powerful tools and techniques for collaborative software development</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=0596520123" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
+</li></p>
+<li>
+<a href="http://www.amazon.com/gp/product/1430218339?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1430218339">Pro Git</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=1430218339" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
+</li>
+</ul></p>
+<p>[ad name="image-banner"]</p></p>

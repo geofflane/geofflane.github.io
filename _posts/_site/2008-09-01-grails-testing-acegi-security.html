@@ -1,0 +1,29 @@
+<p>Almost every web application I create needs some form of user authentication and authorization. Grails provides a great plugin system that allows you to extend the base framework to provide these kinds of features. My current favorite security plugin for Grails is the <a href="http://www.grails.org/AcegiSecurity+Plugin">Acegi Security Plugin</a>. It's built using the Spring Security framework and the robust and widely used Acegi framework. I like the fact that it is built on top of existing, well-known frameworks which is the philosophy of Grails itself. It is also a flexible plugin that has a good default object model.</p>
+<p>One of the situations that inevitably arises is how to unit test code that depends on your security framework. Either you will want to test that basic authorization is working, or you might have code that makes decisions based upon who is logged in or what roles they might have. To run those test you have to setup your test cases so that the code that works when the system is running normally is tested.</p>
+<h3>Unit Testing Setup for Testing Acegi Security Code</h3>
+This situation arose for me the other day and so I thought I would share the solution that I came up with.</p>
+<p><figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="kn">import</span> <span class="nn">org.springframework.security.context.SecurityContextHolder</span> <span class="k">as</span> <span class="n">SCH</span>
+<span class="kn">import</span> <span class="nn">org.springframework.security.providers.TestingAuthenticationToken</span>
+<span class="kn">import</span> <span class="nn">org.springframework.security.GrantedAuthority</span>
+<span class="kn">import</span> <span class="nn">org.springframework.security.Authentication</span>
+<span class="kn">import</span> <span class="nn">org.springframework.security.GrantedAuthorityImpl</span>
+<span class="kd">class</span> <span class="nc">AuthenticationBaseTests</span> <span class="kd">extends</span> <span class="n">GroovyTestCase</span> <span class="o">{</span>
+  <span class="kt">def</span> <span class="nf">setUp</span><span class="o">()</span> <span class="o">{</span>
+      <span class="kt">def</span> <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>    <span class="c1">// or create a new one if one doesn't exist</span>
+      <span class="n">authenticate</span><span class="o">(</span><span class="n">user</span><span class="o">,</span> <span class="s2">"abc123"</span><span class="o">,</span> <span class="o">[</span><span class="k">new</span> <span class="n">GrantedAuthorityImpl</span><span class="o">(</span><span class="s1">'ROLE_ADMIN'</span><span class="o">)])</span>
+  <span class="o">}</span>
+  <span class="kd">protected</span> <span class="n">Authentication</span> <span class="nf">authenticate</span><span class="o">(</span><span class="n">user</span><span class="o">,</span> <span class="n">credentials</span><span class="o">,</span> <span class="n">authorities</span><span class="o">)</span> <span class="o">{</span>
+      <span class="kt">def</span> <span class="n">principal</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Expando</span><span class="o">()</span>
+      <span class="n">principal</span><span class="o">.</span><span class="na">domainClass</span> <span class="o">=</span> <span class="n">user</span>
+      <span class="n">Authentication</span> <span class="n">authentication</span> <span class="o">=</span> <span class="k">new</span> <span class="n">TestingAuthenticationToken</span><span class="o">(</span><span class="n">principal</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="n">authorities</span> <span class="k">as</span> <span class="n">GrantedAuthority</span><span class="o">[])</span>
+      <span class="n">authentication</span><span class="o">.</span><span class="na">authenticated</span> <span class="o">=</span> <span class="kc">true</span>
+      <span class="n">SCH</span><span class="o">.</span><span class="na">context</span><span class="o">.</span><span class="na">authentication</span> <span class="o">=</span> <span class="n">authentication</span>
+      <span class="k">return</span> <span class="n">authentication</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<h4>setUp()</h4>
+The <em>setUp()</em> method will get executed prior to your tests being run. So if you want to do different things for each test you would want to move this code to a more appropriate place. In the setup method we are creating our Principle class, in this case, the User. Next we pass the user along with all of the roles we want the user to have for the given test case.</p>
+<h4>authenticate(user, credentials, authorities)</h4>
+The real setup work is done in the <em>authenticate()</em> method. This method does the real work of setting up the Authentication Token and setting it in the static context, which is a thread local variable I think, that is used by the framework to determine who is making the request and what rights they have.</p>
+<p>The fun thing about this message is the use of the Expando class. Expando allows you to create a class on the fly. This is a really interesting way to do a Mock object on-the-fly in Groovy. In this case we're creating a Mock authentication principle. We know, by looking at the Acegi Security code, that the security framework expects an object that will call <em>domainClass</em> to get the underlying implementation of the User (or Principle) implemented in the application. That will return us the <em>User</em> object that we are setting.</p>
+<p>This simple method can be added to a base class and then inherited from any tests that need user authentication to run successfully.</p>

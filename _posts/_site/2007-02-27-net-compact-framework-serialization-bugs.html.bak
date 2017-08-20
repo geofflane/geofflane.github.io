@@ -1,0 +1,81 @@
+<p>XML Serialization in the .NET Compact Framework seems to be buggy enough
+  that it is generally not useful if you need to serialize a class that
+  conforms to a schema of some sort. If all you need to do is serialize and
+  deserialize representations of a class you are probably fine. But if you need
+  to use the serialized data to interoperate with a service (for example) it
+  likely will not work.</p>
+<h3>Enums</h3>
+I wrote previously about <a
+  href="http://www.zorched.net/2006/12/21/bug-in-the-net-compactframework-xmlenum-with-whitespace/">Problems
+  with Enum Serialization</a> on the .NET compact framework. To summarize: The
+XmlEnum attribute allows you to change the value that is serialized. One of the
+reasons to do this is to limit the valid values in the document. Of course,
+Enums have naming restrictions such as not being able to have spaces in them.
+So, one of the main reasons you would do this would be to put spaces in the
+name that was serialized.</p>
+<p>The problem is that the XmlEnum under the .NET Compact Framework truncates
+  the value at the first space. So, in the example below your Enums would
+  serialize to "Some" and "Another" instead of the correct "Some Value" and
+  "Another Value".</p>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">public</span> <span class="k">enum</span> <span class="n">Foo</span> <span class="p">{</span>
+    <span class="p">[</span><span class="nf">XmlEnum</span><span class="p">(</span><span class="s">"Some Value"</span><span class="p">)</span>
+    <span class="n">Some</span><span class="p">,</span>
+    <span class="p">[</span><span class="nf">XmlEnum</span><span class="p">(</span><span class="s">"Another Value"</span><span class="p">)]</span>
+    <span class="n">Other</span>
+<span class="p">}</span></code></pre></figure>
+<h3>Controlling Serialization of Value Types</h3>
+.NET has reference types and value types. Reference types are stored on the
+heap and can be null. Value types are stored on the stack and can not be null.
+What is a value type and what is a reference type is not always obvious. <code
+  class="inline">int</code> and <code class="inline">double</code> are value
+types but so is <code class="inline">DateTime</code>. <code
+  class="inline">string</code> is a reference type though.</p>
+<p>The serialization code is smart enough to not serialize null values. But
+  what about those value types? They can not be null, so how do you determine
+  if they should be serialized or not? There are two ways you can do it.</p>
+<ol>
+<li>DefaultValue</li>
+<li><em>Property</em>Specified</em></li>
+</ol> </p>
+<h3>DefaultValue</h3>
+One way is to specify a default value. If the property has that default value it will not be serialized.</p>
+<p>Example:
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="na">[XmlAttribute("age"), DefaultValue(-1)]</span>
+<span class="k">public</span> <span class="kt">int</span> <span class="n">Age</span><span class="p">;</span></code></pre></figure></p>
+<p>I have not found any problem with this on the .NET Compact Framework, but I haven't used it extensively.
+DefaultValue really does not make sense for every case. What about a value
+where negative, positive and zero all make sense? What about a boolean value
+where true and false are both meaningful and different from null? Valid values
+are really a business concept and many business concepts will not constrain
+them in such a way that you can specify a DefaultValue to control
+serialization, so this is not always useful.</p>
+<p><em>See: <a href="http://www.distribucon.com/blog/PermaLink,guid,6bb6b064-6d03-4485-949c-04e679e51f5f.aspx">more information on DefaultValue</a></em>.</p>
+<h3><em>Property</em>Specified</em></h3>
+.NET serialization also allows you to specify a control value to check to see
+if a property should be serialized. The form of the control value is
+<em>propertyname</em>Specified. It is a boolean value. If the value is false,
+then the property it controls will not be serialized. If the value, is true
+then it will be serialized.</p>
+<p>Example:
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="na">[XmlIgnore]</span>
+<span class="k">public</span> <span class="kt">bool</span> <span class="n">FooSpecified</span> <span class="p">=</span> <span class="k">false</span><span class="p">;&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;[</span><span class="nf">XmlElement</span><span class="p">(</span><span class="s">"foo)]
+</span><span class="k">public</span> <span class="kt">int</span> <span class="n">Foo</span> <span class="p">{</span>
+    <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="n">foo</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">set</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">foo</span> <span class="p">=</span> <span class="k">value</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">FooSpecified</span> <span class="p">=</span> <span class="k">true</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure></p>
+<p>This is fine in the full framework. The problem is with the .NET Compact
+  Framework. When the serializer comes across a <em>propertyname</em>Specified
+  value that is false, the serialization of that class stops. This means if you
+  have 5 properties and the second property has a control value set to false,
+  only the first value will be serialized!</p>
+<h4>Coming Soon</h4>
+In a future post, I will write about how you can relatively easily write your
+own XML Serializer for the .NET Compact Framework in about 500 lines of
+code.</p>
+<p><strong><em>Update:</em></strong> follow-up post on <a
+    href="http://www.zorched.net/2007/02/28/custom-xml-serialization-for-the-net-compact-framework/">Writing
+    a Custom XML Serializer</a> has been posted.</p>

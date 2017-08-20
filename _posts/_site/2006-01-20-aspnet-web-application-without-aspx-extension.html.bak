@@ -1,0 +1,55 @@
+<h3>The Problem</h3>
+Ok, let's say you want to create an application in ASP.NET. That application should be able to execute .NET code regardless of the path that is requested. You don't want to map the .NET execution to a specific extension and you want handle all requests in a simple manner. Well, I think I figured out how.</p>
+<p>In the Java Servlet world, you can easily map arbitrary paths to a servlet handler, such that all request to '/somedirectory' are handled by your 'SomeDirectoryServlet'. <a href="http://www.rubyonrails.com">Ruby on Rails</a> uses a controller as well and you can do URL rewriting with that controller very easily to support arbitrary path schemes. But in the .NET/IIS world, all of the configuration for handling is based solely on file extensions.</p>
+<h3>An Actual Project That Needs This</h3>
+At <a href="http://www.spiderlogic.com">SpiderLogic</a> (where I work), we are working on a client project where their current infrastructure is all .NET. Their current application is entirely web based. It allows users to (among other things) upload files and share them among a group of users. Now they want to allow users to access files on a Windows desktop and interact with them in a much more natural way, by dragging and dropping, etc. Windows Explorer has the ability to mount <a href="http://www.webdav.org">WebDAV</a> paths the same as it can with windows file sharing. So, basically we wanted to see if we could build a virtual WebDAV server that would allow us to read file meta-data from a Database and then expose that over the web as a WebDAV share.</p>
+<p>WebDAV is an extension to HTTP that allows for Distributed Authoring and Versioning. Basically it looks a lot like HTTP, where it has verbs and requests files.</p>
+<p>A WebDAV header might look something like:</p>
+<p>PROPFIND /some/path/
+HOST www.example.com</p>
+<h3>The Solution</h3>
+As I said above, IIS exclusively uses file extensions to map files to code to execute the file. .NET provides HTTP Handlers and HTTP Modules that allow you to handle requests that should not be handled by a traditional Page. A Module registers itself when it is loaded to respond to specific events in the HTTP Request life-cycle. Sometimes this is called an <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dnpatterns/html/DesInterceptingFilter.asp">Intercepting Filter</a>. Modules listen to events and can respond to that event. They can do many things, check security, add content to the response, transform an XML response into an appropriate form based on the calling device, etc. They can also take over the entire request-response and handle it in its entirety.</p>
+<p>For our example, we want to respond to a very early event - BeginRequest and fulfill the request ourselves. </p>
+<p><figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Web</span><span class="p">;&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span><span class="k">public</span> <span class="k">class</span> <span class="nc">DavModule</span> <span class="p">:</span> <span class="n">IHttpModule</span> <span class="p">{&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="k">private</span> <span class="n">HttpApplication</span> <span class="n">context</span> <span class="p">=</span> <span class="k">null</span><span class="p">;&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="k">public</span> <span class="k">void</span> <span class="nf">Dispose</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">context</span><span class="p">.</span><span class="n">BeginRequest</span> <span class="p">-=</span> <span class="k">new</span> <span class="nf">EventHandler</span><span class="p">(</span><span class="n">context_BeginRequest</span><span class="p">);</span>
+    <span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="k">public</span> <span class="k">void</span> <span class="nf">Init</span><span class="p">(</span><span class="n">HttpApplication</span> <span class="n">context</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">context</span> <span class="p">=</span> <span class="n">context</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">context</span><span class="p">.</span><span class="n">BeginRequest</span> <span class="p">+=</span> <span class="k">new</span> <span class="nf">EventHandler</span><span class="p">(</span><span class="n">context_BeginRequest</span><span class="p">);</span>
+    <span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="k">void</span> <span class="nf">context_BeginRequest</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">HttpApplication</span> <span class="n">app</span> <span class="p">=</span> <span class="p">(</span><span class="n">HttpApplication</span><span class="p">)</span> <span class="n">sender</span><span class="p">;</span>
+        <span class="n">app</span><span class="p">.</span><span class="n">Response</span><span class="p">.</span><span class="n">ContentType</span> <span class="p">=</span> <span class="s">"text/plain"</span><span class="p">;&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>        <span class="k">if</span> <span class="p">(</span><span class="n">app</span><span class="p">.</span><span class="n">Request</span><span class="p">.</span><span class="n">Path</span><span class="p">.</span><span class="nf">EndsWith</span><span class="p">(</span><span class="s">"Help"</span><span class="p">))</span>
+            <span class="n">app</span><span class="p">.</span><span class="n">Server</span><span class="p">.</span><span class="nf">Transfer</span><span class="p">(</span><span class="s">"Help.aspx"</span><span class="p">);</span>
+        <span class="k">else</span> <span class="p">{</span>
+            <span class="n">app</span><span class="p">.</span><span class="n">Response</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="s">"Path: "</span> <span class="p">+</span> <span class="n">app</span><span class="p">.</span><span class="n">Request</span><span class="p">.</span><span class="n">Path</span><span class="p">);</span>
+            <span class="n">app</span><span class="p">.</span><span class="n">Response</span><span class="p">.</span><span class="nf">End</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure></p>
+<p>The IHttpModule responds to begin request events and takes over handling the fulfillment of the HTTP response. The example demonstrates that you can get the request path and then parse it to handle different cases. One use would be for doing internal URL rewriting (although I suspect that this kind of URL rewriting would break the post-back of .aspx files). As I said at the start, we plan on trying to implement a virtual directory using WebDAV. The possibilities are limited only by your imagination.</p>
+<p>The handler itself is made available to a web application by registering it in the Web.config file for the application.</p>
+<p>Web.config configuration:
+<figure class="highlight"><pre><code class="language-xml" data-lang="xml">    <span class="nt">&lt;system.web&gt;</span>
+      <span class="nt">&lt;httpModules&gt;</span>
+        <span class="nt">&lt;add</span> <span class="na">name=</span><span class="s">"DavModule"</span> <span class="na">type=</span><span class="s">"DavModule"</span><span class="nt">/&gt;</span>
+      <span class="nt">&lt;/httpModules&gt;</span>
+    <span class="nt">&lt;/system.web&gt;</span></code></pre></figure></p>
+<p>Of course if that was all there was too it, this would be a much less interesting article. The trick to making this all work is to properly configure IIS. We want to handle all requests to our application using the .NET code that we have written. We don't want IIS to return 404s (Not Found) for files that don't exist since we want to implement a dynamic, virtual directory and not just deal with files on the file system.</p>
+<p>To do this, you have to remove all of the existing handlers under the Application Configuration. Then you want to map all extensions (.*) and in our case all Verbs (GET, POST, PROPFIND, MKCOL - which allows us to hopefully respond to WebDAV verbs as well) to the aspnet_isapi.dll.
+
+<img src="http://www.zorched.net/wp-content/uploads/2006/01/iis_config1.png" alt="Overview of ISS configuration."/>
+
+Here's the editing screen that you will see:
+
+<img src="http://www.zorched.net/wp-content/uploads/2006/01/iis_config2.png" alt="Details of ISS configuration."/></p>
+<p>This was Step 1 of the proof of concept to see if we can make the WebDAV system work. Hopefully a future posting will be about the success of the implementation.</p>
+<p>This is a very non-obvious thing to do in IIS/ASP.NET, but for some applications it is a necessary thing. Of course if you have more control over the tools and language you use to implement it, then maybe you could choose something that was better suited for this application. Maybe someone else will find this useful? What do you think?</p>
+<p>Thanks to <a href="http://brennan.offwhite.net/blog/">Brennan</a> and <a href="http://www.devspot.com">Oliver</a> who work at SpiderLogic for their help with this. </p>
+<p><em>Update</em>
+Under Windows Server 2003: .* is not allowed in the mapping , there is an extra &acirc;&euro;&tilde;all extensions&acirc;&euro;&trade; section where you can add the aspnet_isapi.dll.</p>

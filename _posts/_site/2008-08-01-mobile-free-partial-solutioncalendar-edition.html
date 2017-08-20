@@ -1,0 +1,45 @@
+<p>The holy grail is to have a computer at home, a computer at work and a computer (or a phone) in your pocket. Those things have calendars and contacts and email on them. You might use them at different times, but in the end, you want to know what you need to do tomorrow while you're sitting on the couch surfing the web on your MacBook Pro. And you want to know if you have plans tonight while your at work figuring out if you have time to start one more thing.</p>
+<p><a href="http://www.apple.com/mobileme/">MobileMe</a> seemed like a promising service that would do all of this, allowing you to sync all of your computers with the data on your <a href="http://www.apple.com/iphone/">iPhone</a>. It happened over-the-air and gave all of the systems the same, unified view. And it works. Sort of. As long as you're just using a Mac and an iPhone. Usually.</p>
+<p>Outlook support seems to be incredibly hit and miss. To the point where it's just not worth the hassle. You can read <a href="http://discussions.apple.com/forum.jspa?forumID=1266">the forums</a> about all the trouble people are having syncing with Outlook. Some people blame it on having Outlook hooked up to Exchange. Hello? That's like saying your browser won't work hooked up to the web? Who uses Outlook willingly without Exchange involved?</p>
+<h3>Partial Solution - WebDAV</h3></p>
+<h4>Setup a WebDAV Server</h4>
+There are plenty of Web Servers out there and plenty of hosting services. Many of them can support WebDAV. I'm using <a href="http://httpd.apache.org">Apache 2.2</a> as my Web Server so I setup WebDAV there. Your configuration might vary based on what you are using of course.</p>
+<h5>Apache Configuration</h5>
+I created a new virtual host for my WebDAV server and configured it as such:
+<figure class="highlight"><pre><code class="language-apache" data-lang="apache"><span class="p">&lt;</span><span class="nl">VirtualHost</span><span class="sr"> *:80</span><span class="p">&gt;
+</span>    <span class="nc">ServerName</span> dav.zorched.net&lt;/p&gt;
+<span class="p">&lt;</span>p<span class="p">&gt;</span>    <span class="nc">DavLockDB</span> /var/www/var/DavLock
+    <span class="nc">DocumentRoot</span> /var/www/dav
+    <span class="p">&lt;</span><span class="nl">Directory</span><span class="sr"> /</span><span class="p">&gt;
+</span>        <span class="nc">AuthType</span> <span class="ss">Basic</span>
+        <span class="nc">AuthName</span> "Zorched.net DAV"
+        <span class="nc">AuthUserFile</span> /etc/apache2/dav_svn.passwd
+        <span class="nc">Require</span> valid-user&lt;/p&gt;
+<span class="p">&lt;</span>p<span class="p">&gt;</span>        <span class="nc">Dav</span> On
+    <span class="p">&lt;/</span><span class="nl">Directory</span><span class="p">&gt;&lt;/</span>p<span class="p">&gt;
+&lt;</span>p<span class="p">&gt;</span>    <span class="nc">ErrorLog</span> /var/log/apache2/dav_error.log&lt;/p&gt;
+<span class="p">&lt;</span>p<span class="p">&gt;</span>    <span class="c"># Possible values include: debug, info, notice, warn, error, crit,</span>
+    <span class="c"># alert, emerg.</span>
+    <span class="nc">LogLevel</span> warn&lt;/p&gt;
+<span class="p">&lt;</span>p<span class="p">&gt;</span>    <span class="nc">CustomLog</span> /var/log/apache2/dav_access.log combined
+    <span class="nc">ServerSignature</span> On
+<span class="p">&lt;/</span><span class="nl">VirtualHost</span><span class="p">&gt;</span></code></pre></figure></p>
+<h4>Publish your Outlook 2007 Work Calendar to WebDAV</h4>
+In Outlook. Right click on a Calendar and Choose <em>Publish to Internet -> Publish to WebDAV Server</em></p>
+<p>[caption id="attachment_135" align="aligncenter" width="300" caption="Publish Outlook Calendar to WebDAV"]<a href="http://www.zorched.net/wp-content/uploads/2008/07/publish_from_outlook.png"><img src="http://www.zorched.net/wp-content/uploads/2008/07/publish_from_outlook-300x201.png" alt="Publish Outlook Calendar to WebDAV" title="publish_from_outlook" width="300" height="201" class="size-medium wp-image-135" /></a>[/caption]</p>
+<p>Enter in a path to an existing directory on the WebDAV server. This copies an ics file out to your WebDAV server and will periodically update it out on the server.</p>
+<h4>Publish your Apple iCal Calendar to WebDAV</h4>
+In Apple iCal. Right click on your calendar and choose <em>Publish</em>. In the <em>Publish on</em> drop down, choose <em>a Private Server</em> and enter in the proper details.</p>
+<p>[caption id="attachment_145" align="alignnone" width="300" caption="Publish your home calendar from Apple iCal"]<a href="http://www.zorched.net/wp-content/uploads/2008/08/publish_from_ical.png"><img src="http://www.zorched.net/wp-content/uploads/2008/08/publish_from_ical-300x175.png" alt="Publish your home calendar from Apple iCal" title="publish_from_ical" width="300" height="175" class="size-medium wp-image-145" /></a>[/caption]</p>
+<p>This will push the calendar out to the server so that you can subscribe to it from Outlook.</p>
+<h4>Subscribe to your Home Calendar in Outlook 2007</h4>
+In Outlook. Choose <em>Tools -> Account Settings</em> from the toolbar. Then choose the <em>Internet Calendars</em> tab. Click the <em>New...</em> button.</p>
+<p>[caption id="attachment_136" align="aligncenter" width="300" caption="Subscribe to a WebDAV calendar in Outlook"]<a href="http://www.zorched.net/wp-content/uploads/2008/07/subscribe_to_outlook.png"><img src="http://www.zorched.net/wp-content/uploads/2008/07/subscribe_to_outlook-300x215.png" alt="Subscribe to a WebDAV calendar in Outlook" title="subscribe_to_outlook" width="300" height="215" class="size-medium wp-image-136" /></a>[/caption]</p>
+<p>Enter in the full path to the shared ics file on the WebDAV server.</p>
+<h4>Subscribe to your Work Calendar in Apple iCal</h4>
+In Apple iCal. Choose the menu <em>Calendar -> Subscribe</em> and enter in the URL of the work calendar.
+[caption id="attachment_146" align=
+"aligncenter" width="300" caption="Subscribe to a shared Calendar in iCal"]<a href="http://www.zorched.net/wp-content/uploads/2008/08/subscribe_from_ical.png"><img src="http://www.zorched.net/wp-content/uploads/2008/08/subscribe_from_ical-300x109.png" alt="Subscribe to a shared Calendar in iCal" title="subscribe_from_ical" width="300" height="109" class="size-medium wp-image-146" /></a>[/caption]</p>
+<h3>Limitations</h3>
+Now I sync my iPhone with my MacBook pro and all of the info gets onto the iPhone. Any changes on the iPhone to the Home calendar get pushed into iCal and get synced up to the WebDAV server. So the next day when I come into the office they show up in Outlook when it pulls down the changes from the Home calendar.</p>
+<p>This is not MobileMe though. There is no over-the-air syncing. Each of the calendars is still only editable from its origin. (You can only edit the Work calendar from Outlook and the Home calendar from iCal.) But it works.</p>

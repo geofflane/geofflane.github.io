@@ -1,0 +1,85 @@
+<h2>Background</h2>
+The command <a href="http://en.wikipedia.org/wiki/Regsvr32">regsvr32</a> is used to register a native, unmanaged code DLL so that it is available via COM. With a registered DLL you can use COM Interop to call that code from .NET Managed code.</p>
+<p>Regsvr32 is unmanaged code and as such makes use of some existing functions that are defined in the <em>kernel32.dll</em>. Fortunately .NET makes available a pretty easy to use <a href="http://en.wikipedia.org/wiki/Foreign_function_interface">foreign function interface (FFI)</a> in the form of <a href="http://en.wikipedia.org/wiki/P/Invoke">P/Invoke</a>. </p>
+<p>In general to call an unmanaged function you just need to use the <em>DllImport</em> annotation on an extern function to tell the CLR how to access the function.</p>
+<p>e.g.:
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="na">[DllImport("shell32.dll")]</span>
+<span class="k">static</span> <span class="k">extern</span> <span class="kt">int</span> <span class="nf">DllGetVersion</span><span class="p">(</span><span class="k">ref</span> <span class="n">DLLVERSIONINFO</span> <span class="n">pdvi</span><span class="p">);</span></code></pre></figure></p>
+<h2>Registering an Unmanaged DLL with C# Code</h2></p>
+<p>regsvr32 actually calls functions defined within the DLL itself in what is known as a self-registering DLL. So assuming your DLL is self-registering then you should be able to use this approach as well. The only thing we need to do is figure out what functions to call.</p>
+<p>It ends up there are 2 basic functions: <em>LoadLibrary</em> and <em>GetProcAddress</em>.</p>
+<h3>LoadLibrary</h3>
+<a href="http://msdn.microsoft.com/en-us/library/ms684175.aspx">LoadLibrary</a> returns a handle the module (a pointer to a structure).</p>
+<p>After you are done with you library you can clean up by calling <em>FreeLibrary</em> passing it the handle that was returned from <em>LoadLibrary</em>.</p>
+<h3>GetProcAddress</h3>
+<a href="http://msdn.microsoft.com/en-us/library/ms683212(VS.85).aspx">GetProcAddress</a> finds a function defined in a module and returns a pointer to that function. A function pointer allows you to call a method in a dynamic way. It is functionally equivalent to a <a href="http://msdn.microsoft.com/en-us/library/ms173171(VS.80).aspx">delegate</a> in managed code.</p>
+<p>In C e.g.:
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="p">(</span><span class="o">*</span><span class="n">some_func</span><span class="p">)();</span></code></pre></figure></p>
+<h3>Put it All Together</h3>
+Now we have a basic algorithm to register a DLL:</p>
+<ol>
+<li>LoadLibrary to get a handle to the library</li>
+<li>GetProcAddress to get a function pointer to the proper function to register the DLL</li>
+<li>Call the function returned from GetProcAddress</li>
+<li>Cleanup</li>
+</ol></p>
+<p>Mix that in with some error checking code and I got the following:
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">public</span> <span class="k">class</span> <span class="nc">Registrar</span> <span class="p">:</span> <span class="n">IDisposable</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="n">IntPtr</span> <span class="n">hLib</span><span class="p">;&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="p">[</span><span class="nf">DllImport</span><span class="p">(</span><span class="s">"kernel32.dll"</span><span class="p">,</span> <span class="n">CharSet</span> <span class="p">=</span> <span class="n">CharSet</span><span class="p">.</span><span class="n">Ansi</span><span class="p">,</span> <span class="n">ExactSpelling</span> <span class="p">=</span> <span class="k">true</span><span class="p">,</span> <span class="n">SetLastError</span> <span class="p">=</span> <span class="k">true</span><span class="p">)]</span>
+    <span class="k">internal</span> <span class="k">static</span> <span class="k">extern</span> <span class="n">IntPtr</span> <span class="nf">GetProcAddress</span><span class="p">(</span><span class="n">IntPtr</span> <span class="n">hModule</span><span class="p">,</span> <span class="kt">string</span> <span class="n">procName</span><span class="p">);&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="p">[</span><span class="nf">DllImport</span><span class="p">(</span><span class="s">"kernel32.dll"</span><span class="p">,</span> <span class="n">SetLastError</span> <span class="p">=</span> <span class="k">true</span><span class="p">)]</span>
+    <span class="k">internal</span> <span class="k">static</span> <span class="k">extern</span> <span class="n">IntPtr</span> <span class="nf">LoadLibrary</span><span class="p">(</span><span class="kt">string</span> <span class="n">lpFileName</span><span class="p">);&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="p">[</span><span class="nf">DllImport</span><span class="p">(</span><span class="s">"kernel32.dll"</span><span class="p">,</span> <span class="n">SetLastError</span> <span class="p">=</span> <span class="k">true</span><span class="p">)]</span>
+    <span class="k">internal</span> <span class="k">static</span> <span class="k">extern</span> <span class="kt">bool</span> <span class="nf">FreeLibrary</span><span class="p">(</span><span class="n">IntPtr</span> <span class="n">hModule</span><span class="p">);&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="k">internal</span> <span class="k">delegate</span> <span class="kt">int</span> <span class="nf">PointerToMethodInvoker</span><span class="p">();&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="k">public</span> <span class="nf">Registrar</span><span class="p">(</span><span class="kt">string</span> <span class="n">filePath</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">hLib</span> <span class="p">=</span> <span class="nf">LoadLibrary</span><span class="p">(</span><span class="n">filePath</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">IntPtr</span><span class="p">.</span><span class="n">Zero</span> <span class="p">==</span> <span class="n">hLib</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="kt">int</span> <span class="n">errno</span> <span class="p">=</span> <span class="n">Marshal</span><span class="p">.</span><span class="nf">GetLastWin32Error</span><span class="p">();</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">Win32Exception</span><span class="p">(</span><span class="n">errno</span><span class="p">,</span> <span class="s">"Failed to load library."</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="k">public</span> <span class="k">void</span> <span class="nf">RegisterComDLL</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nf">CallPointerMethod</span><span class="p">(</span><span class="s">"DllRegisterServer"</span><span class="p">);</span>
+    <span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="k">public</span> <span class="k">void</span> <span class="nf">UnRegisterComDLL</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="nf">CallPointerMethod</span><span class="p">(</span><span class="s">"DllUnregisterServer"</span><span class="p">);</span>
+    <span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="k">private</span> <span class="k">void</span> <span class="nf">CallPointerMethod</span><span class="p">(</span><span class="kt">string</span> <span class="n">methodName</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">IntPtr</span> <span class="n">dllEntryPoint</span> <span class="p">=</span> <span class="nf">GetProcAddress</span><span class="p">(</span><span class="n">hLib</span><span class="p">,</span> <span class="n">methodName</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">IntPtr</span><span class="p">.</span><span class="n">Zero</span> <span class="p">==</span> <span class="n">dllEntryPoint</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">Win32Exception</span><span class="p">(</span><span class="n">Marshal</span><span class="p">.</span><span class="nf">GetLastWin32Error</span><span class="p">());</span>
+        <span class="p">}</span>
+        <span class="n">PointerToMethodInvoker</span> <span class="n">drs</span> <span class="p">=</span>
+               <span class="p">(</span><span class="n">PointerToMethodInvoker</span><span class="p">)</span> <span class="n">Marshal</span><span class="p">.</span><span class="nf">GetDelegateForFunctionPointer</span><span class="p">(</span><span class="n">dllEntryPoint</span><span class="p">,</span>
+                           <span class="k">typeof</span><span class="p">(</span><span class="n">PointerToMethodInvoker</span><span class="p">));</span>
+        <span class="nf">drs</span><span class="p">();</span>
+    <span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="k">public</span> <span class="k">void</span> <span class="nf">Dispose</span><span class="p">()</span>
+    <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">IntPtr</span><span class="p">.</span><span class="n">Zero</span> <span class="p">!=</span> <span class="n">hLib</span><span class="p">)</span>
+      <span class="p">{</span>
+          <span class="nf">UnRegisterComDLL</span><span class="p">();</span>
+          <span class="nf">FreeLibrary</span><span class="p">(</span><span class="n">hLib</span><span class="p">);</span>
+          <span class="n">hLib</span> <span class="p">=</span> <span class="n">IntPtr</span><span class="p">.</span><span class="n">Zero</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure></p>
+<p><strong><em>Note:</em></strong>
+The requirement I was dealing with was a build script so I wanted to register the unmanaged DLL, use it, and then unregister it so the computer would be in its previous state. If you want to leave the DLL registered, such as for an install program, you would need to modify the above example.</p>
+<p>To call this code you just need to pass it a path to the dll that needs to be registered.
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">using</span> <span class="p">(</span><span class="n">Registrar</span> <span class="n">registrar</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Registrar</span><span class="p">(</span><span class="s">"path\\to\\com.dll"</span><span class="p">))</span>
+<span class="p">{</span>
+    <span class="n">registrar</span><span class="p">.</span><span class="nf">RegisterComDLL</span><span class="p">();</span>
+    <span class="k">return</span> <span class="k">base</span><span class="p">.</span><span class="nf">Execute</span><span class="p">();</span>
+<span class="p">}</span></code></pre></figure></p>
+<p><strong><em>Resources:</em></strong>
+Check out <a href="http://pinvoke.net">pinvoke.net</a> for a lot of good documentation and example of how to call native methods from managed code.</p>

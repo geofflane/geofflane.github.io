@@ -1,0 +1,67 @@
+<p>The Struts2 documentation contains examples that are often basic at best which can make it challenging to figure out how to do things sometimes. I was working on creating a form that would allow me to select values from a list to connect 2 objects in a <em>One-to-Many</em> relationship. This is a common relationship for many things. In this example, I'll use a <em>User and Role</em> class to demonstrate the concept.</p>
+<p>For background, here's a JPA mapped User and Role class.
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">javax.persistence.*</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="nd">@Entity</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">User</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>    <span class="kd">private</span> <span class="n">Long</span> <span class="n">id</span><span class="o">;</span>
+    <span class="c1">// ... other member variables</span>
+    <span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Role</span><span class="o">&gt;</span> <span class="n">roles</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>    <span class="nd">@Id</span>
+    <span class="nd">@GeneratedValue</span><span class="o">(</span><span class="n">strategy</span> <span class="o">=</span> <span class="n">GenerationType</span><span class="o">.</span><span class="na">AUTO</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="n">Long</span> <span class="nf">getId</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">id</span><span class="o">;</span>
+    <span class="o">}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setId</span><span class="o">(</span><span class="n">Long</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">id</span> <span class="o">=</span> <span class="n">id</span><span class="o">;</span>
+    <span class="o">}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>    <span class="nd">@OneToMany</span>
+    <span class="nd">@JoinTable</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"UserRoles"</span><span class="o">,</span>
+            <span class="n">joinColumns</span> <span class="o">=</span> <span class="nd">@JoinColumn</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"user_Id"</span><span class="o">),</span>
+            <span class="n">inverseJoinColumns</span> <span class="o">=</span> <span class="nd">@JoinColumn</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"role_Id"</span><span class="o">),</span>
+            <span class="n">uniqueConstraints</span> <span class="o">=</span> <span class="nd">@UniqueConstraint</span><span class="o">(</span><span class="n">columnNames</span> <span class="o">=</span> <span class="o">{</span><span class="s">"user_Id"</span><span class="o">,</span> <span class="s">"role_Id"</span><span class="o">})</span>
+    <span class="o">)</span>
+    <span class="kd">public</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Role</span><span class="o">&gt;</span> <span class="nf">getRoles</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">roles</span><span class="o">;</span>
+    <span class="o">}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setRoles</span><span class="o">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Role</span><span class="o">&gt;</span> <span class="n">roles</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">roles</span> <span class="o">=</span> <span class="n">roles</span><span class="o">;</span>
+    <span class="o">}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>    <span class="c1">// ... other properties</span>
+<span class="o">}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="nd">@Entity</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Role</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>    <span class="kd">private</span> <span class="n">Long</span> <span class="n">id</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>    <span class="nd">@Id</span>
+    <span class="nd">@GeneratedValue</span><span class="o">(</span><span class="n">strategy</span> <span class="o">=</span> <span class="n">GenerationType</span><span class="o">.</span><span class="na">AUTO</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="n">Long</span> <span class="nf">getId</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">id</span><span class="o">;</span>
+    <span class="o">}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setId</span><span class="o">(</span><span class="n">Long</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">id</span> <span class="o">=</span> <span class="n">id</span><span class="o">;</span>
+    <span class="o">}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>    <span class="c1">// ... other properties</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>A list of Roles exists in the database. When a User is created, they are assigned one or more Roles. The User and Roles are connected in the Database through a join table as defined in the mapping.  At this point I created some DAO Repository classes to manage the persistence and an Action to handle the form values. (The details of JPA, setting up Persistence and Actions are beyond the scope of this post.)</p>
+<p>The part that caused me the most grief ended up being the form. I wanted to add a checkbox list that contained all of the Roles. The example on the Struts site for <a href="http://struts.apache.org/2.x/docs/checkboxlist.html">checkboxlist</a>, a control with 43 documented properties is:
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;s:checkboxlist</span> <span class="na">name=</span><span class="s">"foo"</span> <span class="na">list=</span><span class="s">"bar"</span><span class="nt">/&gt;</span></code></pre></figure>
+Needless to say, there was some 'figuring out' to be done.</p>
+<p>The form itself is pretty vanilla for the most part. The <em>checkboxlist</em> is the interesting part because it's what allows us to map the User to the Roles.  I knew that I was looking for something to put into the <em>value</em> property of the control that would tell it to pre-select the Role values that were already associated with the User. </p>
+<p>I started out with something like:
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;s:checkboxlist</span> <span class="na">name=</span><span class="s">"user.roles.id"</span>
+                    <span class="na">list=</span><span class="s">"roles"</span>
+                    <span class="na">listKey=</span><span class="s">"id"</span>
+                    <span class="na">listValue=</span><span class="s">"name"</span>
+                    <span class="na">label=</span><span class="s">"%{getText('label.roles')}"</span>
+                    <span class="na">value=</span><span class="s">"user.roles"</span><span class="nt">/&gt;</span></code></pre></figure></p>
+<p>That didn't work. When you think about it, that makes sense because the keys in the list are ids and the values supplied are Role objects. So I needed to figure out how to get the Ids from the Roles. I could have done that in the Action class, but it seemed like there should be a better way. A way that would allow me to continue in more of a Domain fashion.</p>
+<p>Doing some research into <a href="http://www.opensymphony.com/ognl/">OGNL</a>, I came upon the <a href="http://www.opensymphony.com/ognl/html/LanguageGuide/projection.html">list projections</a> section which was the key...</p>
+<p>The OGNL projection syntax gives us <em>user.roles.{id}</em>. Basically that is a list comprehension that takes of list of Role objects and turns it into a list of Role Ids. That list of Ids becomes the list of values that will be preselected.</p>
+<p>Knowing that I can now create a select box that will include the pre-selected values on an edit form:
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;s:checkboxlist</span> <span class="na">name=</span><span class="s">"user.roles.id"</span>
+                    <span class="na">list=</span><span class="s">"roles"</span>
+                    <span class="na">listKey=</span><span class="s">"id"</span>
+                    <span class="na">listValue=</span><span class="s">"name"</span>
+                    <span class="na">label=</span><span class="s">"%{getText('label.roles')}"</span>
+                    <span class="na">value=</span><span class="s">"user.roles.{id}"</span><span class="nt">/&gt;</span></code></pre></figure></p>
+<p>Enjoy.</p>

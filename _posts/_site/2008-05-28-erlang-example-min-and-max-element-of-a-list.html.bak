@@ -1,0 +1,34 @@
+<p>This is part of a series on the <a href="http://www.erlang.org/course/exercises.html">Erlang Exercises</a> which is a great set of programming problems that challenge you to implement solutions to some common Erlang problems. I'm going to share some of my solutions to these problems.</p>
+<h2>Simple recursive programs</h2>
+1. Write a function lists1:min(L) which returns the mini- mum element of the list L.
+2. Write a function lists1:max(L) which returns the maximum element of the list L.</p>
+<p><em>(I'm only showing the max version since the min is basically just the change of the guard clause.)</em></p>
+<p><figure class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="p">-</span><span class="ni">module</span><span class="p">(</span><span class="n">mylists</span><span class="p">).</span>
+<span class="p">-</span><span class="ni">export</span><span class="p">([</span><span class="n">max</span><span class="o">/</span><span class="mi">1</span><span class="p">]).</span>
+<span class="nf">max</span><span class="p">([</span><span class="nv">H</span><span class="p">|</span><span class="nv">T</span><span class="p">])</span> <span class="o">-&gt;</span>
+    <span class="nf">max</span><span class="p">(</span><span class="nv">H</span><span class="p">,</span> <span class="nv">T</span><span class="p">).</span>
+<span class="nf">max</span><span class="p">(</span><span class="nv">M</span><span class="p">,</span> <span class="p">[])</span> <span class="o">-&gt;</span>
+    <span class="nv">M</span><span class="p">;</span>
+<span class="nf">max</span><span class="p">(</span><span class="nv">M</span><span class="p">,</span> <span class="p">[</span><span class="nv">H</span><span class="p">|</span><span class="nv">L</span><span class="p">])</span> <span class="k">when</span> <span class="nv">M</span> <span class="o">&gt;</span> <span class="nv">H</span> <span class="o">-&gt;</span>
+    <span class="nf">max</span><span class="p">(</span><span class="nv">M</span><span class="p">,</span> <span class="nv">L</span><span class="p">);</span>
+<span class="nf">max</span><span class="p">(_</span><span class="nv">M</span><span class="p">,</span> <span class="p">[</span><span class="nv">H</span><span class="p">|</span><span class="nv">L</span><span class="p">])</span> <span class="o">-&gt;</span>
+    <span class="nf">max</span><span class="p">(</span><span class="nv">H</span><span class="p">,</span><span class="nv">L</span><span class="p">).</span></code></pre></figure></p>
+<h3>Explanation</h3>
+<strong>max([H|T])</strong>
+This code is composed of a public, exported function and a private function. <strong>max([H|T])</strong> defines a function that takes a list. The slightly funny notation <strong>[H|T]</strong> is an operation that removes the head value (the zeroth element] from a list and assigns the head value to H and the remainder of the list to T. Think of the list as a stack, and you've just popped the stack. This method then delegates the remainder of the work to the internal, 2 value max function.</p>
+<p><strong>max(M, [H|L]) when M > H -></strong>
+This method is the main part of the internal, 2 value max function. The interesting piece here is <strong>when M > H</strong which in Erlang is known as a guard clause. This has to do with the pattern matching style of matching Erlang functions. It says "when M is less than H, call this function". It work in concert with <strong>max(_M, [H|L]) -></strong> which acts as a fall-through because the ones that don't match the first will call this. You can see those two functions take either M or H and pass that as the current Max value.</p>
+<p><strong>max(M, []) -></strong>
+The final piece of the internal max function is <strong>max(M, []) -></strong>. This is the end state of the function. The <em>[]</em> clause in the function arguments pattern matches an empty list. Based on those previous 2 parts of the function definition this is fulfilling the final case where the current max value has been compared to the last element in the list.</p>
+<h3>Example</h3>
+<figure class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="nv">List</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">5</span><span class="p">].</span>
+<span class="nn">mylists</span><span class="p">:</span><span class="nf">max</span><span class="p">(</span><span class="nv">List</span><span class="p">).</span></code></pre></figure></p>
+<p>So what happens is:</p>
+<ol>
+<li>max([1 | [2,4,6,5]])</li>
+<li>max(1, [2 | [4,6,5]])</li>
+<li>max(2, [4 | [6,5]])</li>
+<li>max(4, [6 | [5]])</li>
+<li>max(6, [5 | []]) when M > H</li>
+<li>max(6, [])</li>
+</ol></p>

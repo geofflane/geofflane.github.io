@@ -1,0 +1,47 @@
+<p>With Java 5 having been out for a while now, I started to think about what might be next for the Java language. I'm not thinking about what might change with JEE (nee J2EE), or the extensions or libraries or anything like that. I'm thinking about the core language itself. There were not a lot of changes between Java 1.1 and Java 1.4. The <code>assert</code> keyword was added and there were a number of additions to the core libraries such as NIO, but again, I wanted to think about the language itself and not the libraries so much.</p>
+<h3>What's New in Java 5</h3>
+Java 5 saw a lot of changes many of which, at least on appearances, seem to be a response to the .NET platform and the C# language. A little bit of healthy competition spurred on some advancements in the language. To start, I wanted to think a little about these recent changes because there are some really great language enhancements in Java 1.5.</p>
+<h4>Type safe Enums</h4>
+<em>Type safe Enums</em> have added a full-class citizen of the Enum Pattern to the Java language. This is in many ways a better implementation than the C# version in that they are full classes that can have methods and data that belong to them as well. As is often the case with Enum types there are a number of associated helper methods that pertain to the Enum and the class itself is the most logical place for it to live.</p>
+<h4>Generics</h4>
+<em>Generics</em> offer compile time checking that allows you to create type safe but generic classes. The most often used example of this is type safe collections classes.</p>
+<h4>Varargs</h4>
+<em>Varargs</em> allows a method creator to accept a variable number of arguments to a method. This means the the user of the method does not have to manually create an array of arguments (it lets the compiler do the work for you). This is a handy extension.</p>
+<h4>Annotations</h4>
+<em>Annotations</em> allow for an easy way to add metadata to classes, methods, etc. This is great for tools and frameworks such as unit testing and extensions like aspect-oriented programming.</p>
+<h4>'Enhanced' for loop (read foreach loops)</h4>
+The new for loop provides an easy way to iterate over a collection without having to manually test exit conditions or do type casting.</p>
+<h4>Autoboxing</h4>
+The automatic conversion of Objects to primitive scalar types and vice-versa.</p>
+<p><small>
+(Most of the features are backwards compatible with previous JVM versions once they are compiled, but they are also areas where there is potential for non-backwards compatible optimizations in the future.)
+</small></p>
+<h3>What's Next for Java 6?</h3>
+I won't claim all of these are likely or for that matter even good ideas. This is my attempt to brainstorm some possibilities for discussion purposes.</p>
+<h4>Full Closures</h4>
+Java has support for a form of closure using anonymous classes, but <em>Full Closure</em> support is not there. Full Closures are similar to pointers to functions in some ways. It allows libraries to allow for the customization of behavior by passing a closure as an argument to a method call. A common example of this is a filter passed to a method that iterates over a collection to return a sub-collection. Full Closures also allow the sharing of variables both in a code block and out of the code block (so changes in one area effect the other). With anonymous classes in Java, the variables passed into the method have to be final to that method. Full Closures have been re-popularized by languages like <a href="http://www.braithwaite-lee.com/tips/closures.html">Ruby</a> and Python and of course older languages like Lisp.</p>
+<h5>Functions as First-Class Citizens</h5>
+Full Closures often are implemented as functions. This might require the idea of having functions as first-class objects. This is not as crazy as it sounds, this is done in other programming languages such as <a href="http://builder.com.com/5100-6371-1044599.html">JavaScript</a>. Of course with functions as first-class objects it also opens up the possibilities of dynamically adding methods to an object or class, like JavaScript or delegation features like many other languages including C#.</p>
+<h4>Coroutines</h4>
+Subroutines are a special case of a <em>Coroutine</em> that have only a single entry and exit point. Coroutines on the other hand have multiple potential entry points. A Coroutine will "remember" where it last left the routine and will begin just after that point when the routine is again invoked. This is a very helpful way to build things like state machines without having to do a bunch of if-then conditionals in a method. See the <a href="http://docs.python.org/ref/yield.html">yield statement in Python</a> as an example.</p>
+<h4>Allowing the Separation of Object Allocation and Initialization</h4>
+The <code>new</code> keyword in languages like Java and C# perform two functions:</p>
+<ol>
+<li>Allocate memory on the heap for the object to live.</li>
+<li>Initialize the object</li>
+</ol></p>
+<p>A constructor only allows you to control the initialization of the object, not the allocation aspects of that object. The allocation is a low-level routine that is done for you. Some languages like Objective C separate these constructs <code>[[Object alloc] init]</code>. Allowing some control over the allocation would allow for built-in support for things like <a href="http://en.wikipedia.org/wiki/Abstract_factory_pattern">Factory patterns</a> and even for things like distributed objects by instantiating an instance on a remote system and returning a Proxy to that object.
+<small>(I think this one probably falls into the ABSOLUTE least likely to happen, but it's cool to think about.)</small></p>
+<h4>Deterministic Disposal</h4>
+Java has the <code>finalize()</code> method which is called prior to garbage collection of an object. Garbage collection is not deterministic in that you can not know when a specific object will be <acronym title="Garbage Collected">GC</acronym>ed. The <code>finalize()</code> method is therefore only useful for special cases regarding memory cleanup.</p>
+<p>Disposal (ala C# IDisposable interface) on the other hand can be used to cleanup any resource because the <code>dispose()</code> method is called when an object goes out of scope. This can be used to cleanup non-memory resources like IO or SQL connections, rollback uncommitted transaction, whatever you want.</p>
+<h3>Some Things I Hope They Leave Out</h3></p>
+<h4>C#-esque Properties</h4>
+<em>Properties</em> are a shortcut for creating accessors and mutators (getters and setters) in C#. Properties are really compiled into methods behind the scenes. Why does this matter? Because implementation sometimes matters and can have side effects. Direct access to an object variable is not the same as accessing an object through a method. Going through a method the object is accessed through a copy of a pointer (pass by reference vs pass by value issues). While this is not a common issue you would run into, if you ever did figuring out these interactions could be much more difficult.</p>
+  <figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="n">x</span><span class="p">.</span><span class="n">Arg</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Object</span><span class="p">():</span>
+<span class="n">Object</span> <span class="n">y</span> <span class="p">=</span> <span class="n">x</span><span class="p">.</span><span class="n">Arg</span><span class="p">;</span>
+<span class="n">x</span><span class="p">.</span><span class="n">Arg</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Object</span><span class="p">();</span></code></pre></figure>
+<p>If <code>x.Arg</code> is a direct variable access, then <code>Arg</code> and <code>y</code> will be the same value in the end because they point to the same memory location. If they are methods, then they will be two different objects. Weird huh?</p>
+<h3>What Else?</h3>
+There's a constant battle between extending the language with useful functionality and keeping the implementation clean and true to a coherent design philosophy.</p>
+<p>What am I missing? What can or should be added to Java that would improve the language, but not destroy it's nature?</p>

@@ -1,0 +1,54 @@
+<p>Ruby on Rails is implemented as the Model View Controller (MVC) pattern. This pattern separates the context of the Web Application (in the Controller and the View) from the core Model of the application. The Model contains the Domain objects which encapsulate business logic, data retrieval, etc. The View displays information to the user and allows them to provide input to the application. The Controller handles the interactions between the View and the Model.</p>
+<p>This separation is a very good design principle that generally helps prevent <a href="http://en.wikipedia.org/wiki/Spaghetti_code">spaghetti code</a>. Sometimes though the separation might break down.</p>
+<p><strong><em>
+The following is really an alternative to using the <a href="http://api.rubyonrails.com/classes/ActionController/Caching/Sweeping.html">ActionController::Caching::Sweeper</a> which is a hybrid Model/Controller scoped Observer really. It seems to me, based on the name, that the intent is much more specific than giving Observers access to session data. Which do you prefer?
+</em></strong></p>
+<p>Rails provides the concept of a Model Observer. This Observer allows you to write code that will respond to the lifecycle events of the Model objects. For example you could log information every time a specific kind of Model object is saved. For example you could record some information every time an Account changed using the following Observer:
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">class</span> <span class="nc">AccountObserver</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Observer</span>
+  <span class="k">def</span> <span class="nf">after_update</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+    <span class="no">Audit</span><span class="p">.</span><span class="nf">audit_change</span><span class="p">(</span><span class="n">record</span><span class="p">.</span><span class="nf">account_id</span><span class="p">,</span> <span class="n">record</span><span class="p">.</span><span class="nf">new_balance</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure></p>
+<p>You might have noticed a limitation with the previous API though. You didn't notice? The only information passed to the Observer is the Object that is being changed. What if you want more context than this? For example, what if you want to audit not only the values that changed them, but the user who made the change?
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">class</span> <span class="nc">AccountObserver</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Observer</span>
+  <span class="k">def</span> <span class="nf">after_update</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+    <span class="no">Audit</span><span class="p">.</span><span class="nf">audit_change</span><span class="p">(</span><span class="n">current_user</span><span class="p">,</span> <span class="n">record</span><span class="p">.</span><span class="nf">account_id</span><span class="p">,</span> <span class="n">record</span><span class="p">.</span><span class="nf">new_balance</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure></p>
+<p>How do you get the current_user value? Well, you have to plan ahead a little bit. The User in this application is stored in the HTTP Session when the user is authenticated. The session isn't directly available to the Model level (including the Observers) so you have to figure out a way around this. One way to accomplish this is by using a named <a href="http://www.ruby-doc.org/core/classes/Thread.html#M000484">Thread local variable</a>. Using <a href="http://mongrel.rubyforge.org/">Mongrel</a> as a web server, each HTTP request is served by its own thread. That means that a variable stored as thread local will be available for the entire processing of a request.</p>
+<p>The UserInfo module encapsulates reading and writing the User object from/to the Thread local. This module can then be mixed in with other objects for easy access.
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">module</span> <span class="nn">UserInfo</span>
+  <span class="k">def</span> <span class="nf">current_user</span>
+    <span class="no">Thread</span><span class="p">.</span><span class="nf">current</span><span class="p">[</span><span class="ss">:user</span><span class="p">]</span>
+  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;
+  def self.current_user=(user)
+    Thread.current[:user] = user
+  end
+end</span></code></pre></figure></p>
+<p>A <em>before_filter</em> set in the ApplicationController will be called before any action is called in any controller. You can take advantage of this to copy a value out of the HTTP session and set it in the Thread local:</p>
+<p><figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span>
+  <span class="kp">include</span> <span class="no">UserInfo</span>
+  <span class="c1"># Pick a unique cookie name to distinguish our session data from others'</span>
+  <span class="n">session</span> <span class="ss">:session_key</span> <span class="o">=&gt;</span> <span class="s1">'_app_session_id'</span>
+  <span class="n">before_filter</span> <span class="ss">:set_user</span>
+  <span class="kp">protected</span>
+  <span class="k">def</span> <span class="nf">authenticate</span>
+    <span class="k">unless</span> <span class="n">session</span><span class="p">[</span><span class="ss">:user</span><span class="p">]</span>
+      <span class="n">redirect_to</span> <span class="ss">:controller</span> <span class="o">=&gt;</span> <span class="s2">"login"</span>
+      <span class="k">return</span> <span class="kp">false</span>
+    <span class="k">end</span>
+  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;
+  # Sets the current user into a named Thread location so that it can be accessed
+  # by models and observers
+  def set_user
+    UserInfo.current_user = session[:user]
+  end
+end</span></code></pre></figure></p>
+<p>At any point in an Observer of a Model class that you need to have access to those values you can just mixin the helper module and then use its methods to access the data. In this final example we mixin the UserInfo module to our AccountObserver and it will now have access to the current_user method:
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">class</span> <span class="nc">AccountObserver</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Observer</span>
+  <span class="kp">include</span> <span class="no">UserInfo</span>
+  <span class="k">def</span> <span class="nf">after_update</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+    <span class="no">Audit</span><span class="p">.</span><span class="nf">audit_change</span><span class="p">(</span><span class="n">current_user</span><span class="p">,</span> <span class="n">record</span><span class="p">.</span><span class="nf">account_id</span><span class="p">,</span> <span class="n">record</span><span class="p">.</span><span class="nf">new_balance</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure></p>
+<p>You generally shouldn't need this kind of trick outside of an Observer. In most cases the Controller should pass all of the information needed by a Model object to it through its methods. That will allow the Model objects to interact and the Controller to do the orchestration needed. But in a few special cases, this trick might be handy.</p>

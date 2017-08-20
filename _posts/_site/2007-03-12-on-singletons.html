@@ -1,0 +1,56 @@
+<p>The <a href="http://en.wikipedia.org/wiki/Singleton_pattern">Singleton Pattern</a> is one of the most widely used patterns from the <a href="http://www.amazon.com/gp/redirect.html?ie=UTF8&location=http%3A%2F%2Fwww.amazon.com%2FDesign-Patterns-Object-Oriented-Addison-Wesley-Professional%2Fdp%2F0201633612%3Fie%3DUTF8%26s%3Dbooks%26qid%3D1173656107%26sr%3D8-1&tag=zorchednet-20&linkCode=ur2&camp=1789&creative=9325"> Gang of Four (GoF) Desgin Patterns Book</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&amp;l=ur2&amp;o=1" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />. One the reasons that it's so widely used, I think, is because it's also very easy to understand. The basic idea is that you control the creation of an object so that it will only ever have one instance. This is achieved by having a private constructor and a static instance that is accessed through a static method on the Class. </p>
+<p>Singleton Example:
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">FirstSingleton</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">FirstSingleton</span> <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">FirstSingleton</span><span class="o">();</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">FirstSingleton</span> <span class="nf">instance</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">instance</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="kd">private</span> <span class="nf">FirstSingleton</span><span class="o">()</span> <span class="o">{</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<h3>Reasons to Avoid the Singleton Pattern</h3></p>
+<h4>Practical Limitations</h4>
+There are some practical limitations of the Singleton pattern though. With modern VM based languages like Java there can be multiple classloaders in a given application. A Singleton then is no longer a Singleton as there will be an instance-per-classloader. So if you can't enforce an actual single instance why use the Singleton Pattern? You might answer that the classloader case is a rare one and that in a "normal" application your not going to run into that. And you would be right. But I still think that you should avoid the Singleton</p>
+<h4>Multiple Concerns</h4>
+Fundamentally a Class in Object Oriented Programming should have one and only one responsibility. The <a href="http://en.wikipedia.org/wiki/Single_responsibility_principle">Single Responsibility Principle</a> often leads to good design and the benefits of a highly-cohesive system such as being easily understood and being easier to change and maintain over time.</p>
+<p>The Singleton, by its very definition, has multiple responsibilities. The primary responsibility defined in the pattern is controlling constructions of Objects of this Class. Of course from an application point of view, this is pretty weak. What you really want from a class is a useful service. So if you have a Singleton Data Access class which is more important? The Singularity of the instance or the ability to get at data in your data store? I really hope you picked the latter.</p>
+<p>There are a number of ways that you can control access to the construction of a class that do not rely on the Singleton pattern. A Factory or a Container for example can be used to get at an instance in such a way that the calling code doesn't care about the implementation of the construction of the class. Whether a new instance is created or a single instance returned should be immaterial to the user of that instance. This also does a good job of dealing with our Single Responsibility concern raised earlier. Now the inforcement of a single instance is handled by another class whose sole responsibility is  that singleton enforcement.</p>
+<h4>Testability</h4>
+One consideration that must be made when you are designing software is: How are you going to test the code? If no consideration is given, then often the code will be very difficult to test and quality will suffer. </p>
+<p>The example of a Singleton above is relatively simple. But what happens if you introduce a dependency to your Singleton? Now you have a tight-coupling between two classes. If the dependent class does something like access the database or call a web service or itself has a bunch of dependencies then all of a sudden the code becomes very hard to test.</p>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SecondSingleton</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">SecondSingleton</span> <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SecondSingleton</span><span class="o">();</span>
+    <span class="kd">private</span> <span class="n">SomeDependency</span> <span class="n">myDependency</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">SecondSingleton</span> <span class="nf">instance</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">instance</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="kd">private</span> <span class="nf">SecondSingleton</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">myDependency</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SomeDependency</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>I've written previously about <a href="http://www.zorched.net/tag/mock-objects/">Mock Objects</a> for testing. Mock Objects allow you to create dummy implementations of dependencies to make testing a Class much easier. In the Singleton example here, you can see that there would be no way to inject a Mock instance into the SecondSingleton class.</p>
+<h3>Factories or Containers to Enforce Single Instances</h3>
+One of the best ways to access dependencies in a class is through <a href="http://en.wikipedia.org/wiki/Dependency_injection">Constructor based Dependency Injection</a>. This can be done through a container like <a href="http://www.springframework.org/">Spring</a> or <a href="http://www.picocontainer.org/">Pico Container</a>. </p>
+<p>You can of course do this yourself as well. If you are using a Factory for object creation, then the singleton enforcement and the dependency injection can happen in the same class (whose sole responsibility is to manage the construction of objects).</p>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">NotSingleton</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="n">SomeDependency</span> <span class="n">myDependency</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nf">NotSingleton</span><span class="o">(</span><span class="n">SomeDependency</span> <span class="n">depends</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">myDependency</span> <span class="o">=</span> <span class="n">depends</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Factory</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="n">NotSingleton</span> <span class="n">notsingleInstance</span>
+    <span class="o">=</span> <span class="k">new</span> <span class="n">NotSingleton</span><span class="o">(</span>
+      <span class="o">(</span><span class="n">SomeDependency</span><span class="o">)</span> <span class="n">lookupType</span><span class="o">(</span><span class="n">SomeDependency</span><span class="o">.</span><span class="na">class</span><span class="o">));</span>
+  <span class="kd">public</span> <span class="n">NotSingleton</span> <span class="nf">getNotSingleton</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">notsingleInstance</span><span class="o">;</span>
+  <span class="o">}</span>
+  <span class="cm">/**
+   * Get an instance for a given Interface
+   * @param interface The interface for which you want the instance
+   */</span>
+  <span class="kd">public</span> <span class="n">Object</span> <span class="nf">lookupType</span><span class="o">(</span><span class="n">Class</span> <span class="n">clazz</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">// ...</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>With this structure you can now independently test all of your classes without worrying about the interactions of dependent objects. You also have not structured the code in such a way that having multiple instances should cause any problems, so your code won't break if the classloader case ever comes up.</p>

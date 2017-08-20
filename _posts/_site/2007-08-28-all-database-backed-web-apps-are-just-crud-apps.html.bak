@@ -1,0 +1,20 @@
+<p>It's time to end the debate between "Just simple CRUD Apps" and "more complex" apps. </p>
+<p>Very complex behavior can be expressed through a small set of fairly simple rules. This is often described as <a href="http://en.wikipedia.org/wiki/Emergence">emergent behavior or just emergence</a>. The general idea is that simple building blocks can construct complex systems - atoms form molecules, molecules form proteins form cells, forms a human. Each of the building blocks is simple, but the end result is an amazingly complex organism.</p>
+<p>The same use of sets of simple commands often is expressed in software development. In object-oriented development, groups of simple methods are used to create more complex behavior. Likewise simple objects collaborate to form more complex behavior. Likewise all of the databases in the world answering questions about all kinds of things, aggregating and filtering, are being manipulated by four simple statements. To access data using SQL, you use four simple commands:</p>
+<h4>SQL</h4></p>
+<ul title="SQL Commands">
+<li>SELECT</li>
+<li>INSERT</li>
+<li>UPDATE</li>
+<li>DELETE</li>
+</ul></p>
+<p>What other SQL operations are there? None. The only other things you can do are <acronym title="Data Definition Language">DDL</a> operations to modify a database schema. Every operation that can be done to manipulate data in a schema can be expressed by some combination of these four simple statements.</p>
+<h4>REST/HTTP</h4></p>
+<ul title="HTTP Verbs">
+<li>GET</li>
+<li>POST</li>
+<li>PUT</li>
+<li>DELETE</li>
+</ul></p>
+<p>HTTP happens to map the same concepts as SQL to simple Verbs. While HTTP supports a few other Verbs - OPTIONS, HEAD, TRACE, and CONNECT - these methods are generally for diagnostics, discovery and proxy support. Two independent protocols have defined the same set of general purpose actions and have decided that they are the only ones needed. I would hazard a guess that this is not a coincidence.</p>
+<p>The input from the user and the storage of the system can only be manipulated using four simple commands that correspond to Create, Read, Update and Delete. These simple, constrained sets of operations allows you to build  systems that solve complex problems. As a software developer you're doing something wrong if the way that you are building an application doesn't allow you to start simple and only add complexity as needed. Software is at its best when it is only as complex as it needs to be to solve the problem at hand. Software is also at its best when it can easily be modified to add complexity as needed without drastic rework. Intentionally imposing some constraints on a design can help enforce a consistent, simple design through the entire system.</p>

@@ -1,0 +1,54 @@
+<p>I thought I'd follow up with my previous post with the  <a href="http://www.zorched.net/2007/03/05/understanding-domain-specific-languages-as-jargon/">Coffee Domain Specific Language</a> in the Groovy Language.</p>
+<p>This is really one of my first forays into Groovy, so it's pretty rough. It's really just a direct translation of the Ruby code and not what I would expect to be 'idiomatic Groovy'. I'll try and update this once I learn some more Groovy.</p>
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="sr">//</span> <span class="no">CoffeeDSL</span><span class="p">.</span><span class="nf">groovy</span>
+<span class="sr">//</span> <span class="no">This</span> <span class="n">is</span> <span class="n">the</span> <span class="n">input</span> <span class="n">from</span> <span class="n">the</span> <span class="n">user</span><span class="p">,</span> <span class="n">likely</span> <span class="n">read</span> <span class="n">from</span> <span class="n">a</span> <span class="n">file</span>
+<span class="sr">//</span> <span class="n">or</span> <span class="n">input</span> <span class="n">through</span> <span class="n">a</span> <span class="n">user</span> <span class="n">interface</span> <span class="n">of</span> <span class="n">some</span> <span class="n">sort</span>
+<span class="no">CoffeeInput</span> <span class="o">=</span> <span class="s2">"venti nonfat decaf whip latte"</span>
+<span class="k">class</span> <span class="nc">Coffee</span>
+<span class="p">{</span>
+  <span class="k">def</span> <span class="nf">size</span>
+  <span class="k">def</span> <span class="nf">whip</span>
+  <span class="k">def</span> <span class="nf">caf</span>
+  <span class="k">def</span> <span class="nf">type</span>
+  <span class="k">def</span> <span class="nf">milk</span>
+  <span class="kp">public</span> <span class="n">invokeMethod</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">([</span><span class="s1">'venti'</span><span class="p">,</span> <span class="s1">'grande'</span><span class="p">].</span><span class="nf">contains</span><span class="p">(</span><span class="nb">name</span><span class="p">))</span>
+      <span class="n">size</span> <span class="o">=</span> <span class="nb">name</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="s1">'whip'</span><span class="p">,</span> <span class="s1">'nowhip'</span><span class="p">].</span><span class="nf">contains</span><span class="p">(</span><span class="nb">name</span><span class="p">))</span>
+      <span class="n">whip</span> <span class="o">=</span> <span class="s1">'whip'</span><span class="p">.</span><span class="nf">equals</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="s1">'caf'</span><span class="p">,</span> <span class="s1">'decaf'</span><span class="p">,</span> <span class="s1">'halfcaf'</span><span class="p">].</span><span class="nf">contains</span><span class="p">(</span><span class="nb">name</span><span class="p">))</span>
+      <span class="n">caf</span> <span class="o">=</span> <span class="nb">name</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="s1">'regular'</span><span class="p">,</span> <span class="s1">'latte'</span><span class="p">,</span> <span class="s1">'cappachino'</span><span class="p">].</span><span class="nf">contains</span><span class="p">(</span><span class="nb">name</span><span class="p">))</span>
+      <span class="n">type</span> <span class="o">=</span> <span class="nb">name</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="s1">'milk'</span><span class="p">,</span> <span class="s1">'nonfat'</span><span class="p">].</span><span class="nf">contains</span><span class="p">(</span><span class="nb">name</span><span class="p">))</span>
+      <span class="n">milk</span> <span class="o">=</span> <span class="nb">name</span>
+    <span class="k">else</span>
+    <span class="kp">throw</span> <span class="kp">new</span> <span class="no">Exception</span><span class="p">(</span><span class="s2">"Unknown coffee informantion: ${name}."</span><span class="p">)</span>
+  <span class="p">}</span>
+  <span class="kp">public</span> <span class="n">order</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">def</span> <span class="nf">params</span> <span class="o">=</span> <span class="s1">''</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">milk</span><span class="p">)</span>
+      <span class="n">params</span> <span class="o">+=</span> <span class="n">milk</span> <span class="o">+</span> <span class="s1">' '</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">caf</span><span class="p">)</span>
+      <span class="n">params</span> <span class="o">+=</span> <span class="n">caf</span> <span class="o">+</span> <span class="s1">' '</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">whip</span><span class="p">)</span>
+      <span class="n">params</span> <span class="o">+=</span>  <span class="s1">'whip '</span>
+    <span class="n">println</span><span class="p">(</span><span class="s2">"Ordering coffee: ${size} ${params}${type}</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+  <span class="p">}</span>
+  <span class="kp">public</span> <span class="nb">load</span><span class="p">(</span><span class="n">input</span><span class="p">)</span> <span class="p">{</span>
+    <span class="sr">//</span> <span class="n">turn</span> <span class="n">one</span> <span class="n">line</span> <span class="n">into</span> <span class="n">multi</span><span class="o">-</span><span class="n">line</span> <span class="s2">"method calls"</span>
+    <span class="k">def</span> <span class="nf">cleaned</span> <span class="o">=</span> <span class="n">input</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sr">/\s+/</span><span class="p">)</span>
+    <span class="nb">instance_eval</span><span class="p">(</span><span class="n">cleaned</span><span class="p">)</span>
+  <span class="p">}</span>
+  <span class="kp">public</span> <span class="nb">instance_eval</span><span class="p">(</span><span class="nb">methods</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nb">method</span> <span class="k">in</span> <span class="nb">methods</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">this</span><span class="p">.</span><span class="nf">invokeMethod</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+<span class="sr">//</span> <span class="n">this</span> <span class="n">is</span> <span class="n">your</span> <span class="n">code</span> <span class="n">which</span> <span class="n">loads</span> <span class="n">the</span> <span class="no">DSL</span> <span class="n">input</span> <span class="n">and</span> <span class="n">executes</span> <span class="n">it</span>
+<span class="n">coffee</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Coffee</span><span class="p">()</span>
+<span class="n">coffee</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="no">CoffeeInput</span><span class="p">)</span>    <span class="o">/</span><span class="sr">/ load the user input
+coffee.order()                 /</span><span class="o">/</span> <span class="n">submit</span> <span class="n">the</span> <span class="n">order</span></code></pre></figure>
+This isn't even metaprogramming. You could do this in any language, Java, C#, whatever. Everyone talks about metaprogramming in Groovy, but I have not yet found a lot of information on it. Does anyone have any pointers?</p>

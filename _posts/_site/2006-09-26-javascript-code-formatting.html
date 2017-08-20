@@ -1,0 +1,18 @@
+<p>Seek and ye shall find.
+I posted yesterday about the trials and tribulations of <a href="http://www.zorched.net/2006/09/25/wordpress-code-formatting/">code formatting</a>. While I've solved the basic problems of displaying code, we spoiled programmers have gotten really used to syntax highlighting. Syntax highlighting offers a lot of visual differentiation of text which makes it a lot easer to read code.</p>
+<p><a href="http://brennan.offwhite.net/blog/">Brennan</a> posted a comment about adding syntax highlighting, possibly with Javascript. I thought that was a great idea and was all ready to jump in and write the code. As a precursor though (all good programmers are lazy remember) I decided to see if anything already existed.</p>
+<p>And I nearly found perfection in <a href="http://www.dreamprojections.com/SyntaxHighlighter/Default.aspx">dp.SyntaxHighlighter</a>. It's a Javascript library for syntax highlighting code snipits in HTML. It's beautifully written code that takes advantage of cool javascript features like <a href="http://en.wikipedia.org/wiki/Prototype-based_programming">prototyping</a>. Each language syntax is abstracted out into its own file with it's own keyword definitions and comment definitions. As I said, it's a beautifully engineered piece of code and really shows off the power and elegance of the much maligned Javascript language.</p>
+<p>The only tweak I had to make to the code was that it had been hardcoded to
+  work with <textarea> tags and was referencing the "value" attribute of that
+    tag. I added a parameter to pass to the <code
+      class="inline">dp.sh.HighlightAll</code> to set the parameter
+      name to something else. That way I could make it work with the more <a
+        href="http://brainstormsandraves.com/articles/semantics/structure/">semantically
+        correct</a> &lt;code&gt; tag.</p>
+<p>Anyway I'm going to start playing with this and see if I can implement it on
+  my blog. Check back soon for an update.</p>
+<p><strong><em>Update</em></strong>:
+Well my little change didn't work so well after all. Things like generics don't
+work well within the &lt;code&gt; block. I think the browsers are trying to turn them
+  into tags. Inside a <textarea> that doesn't happen. So I guess you get to
+    choose between semantic markup and pretty viewing.</p>

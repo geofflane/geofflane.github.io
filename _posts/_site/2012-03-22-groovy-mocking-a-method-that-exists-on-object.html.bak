@@ -1,0 +1,18 @@
+<p>In Groovy, the find method exists on Object. The find method is also an instance method on EntityManager which is commonly used in JPA to get an instance based on a database id. I was trying to create a Mock of EntityManager like:
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="kt">def</span> <span class="n">emMock</span> <span class="o">=</span> <span class="k">new</span> <span class="n">MockFor</span><span class="o">(</span><span class="n">EntityManager</span><span class="o">)</span>
+<span class="n">emMock</span><span class="o">.</span><span class="na">demand</span><span class="o">.</span><span class="na">find</span> <span class="o">{</span> <span class="n">Class</span> <span class="n">clazz</span><span class="o">,</span> <span class="n">Object</span> <span class="n">rquid</span> <span class="o">-&gt;</span> <span class="k">return</span> <span class="k">new</span> <span class="n">Request</span><span class="o">(</span><span class="nl">rqUID:</span> <span class="n">rquid</span><span class="o">)</span> <span class="o">}</span>
+<span class="kt">def</span> <span class="n">em</span> <span class="o">=</span> <span class="n">emMock</span><span class="o">.</span><span class="na">proxyDelegateInstance</span><span class="o">()</span></code></pre></figure></p>
+<p>This gave me an error though:
+<code>
+groovy.lang.MissingMethodException: No signature of method: com.onelinefix.services.RequestRepositoryImplTest$_2_get_closure1.doCall() is applicable for argument types: (groovy.mock.interceptor.Demand) values: [groovy.mock.interceptor.Demand@a27ebd9]
+Possible solutions: doCall(java.lang.Class, java.lang.Object), findAll(), findAll(), isCase(java.lang.Object), isCase(java.lang.Object)
+  at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:264) ~[groovy-all-1.8.6.jar:1.8.6]
+  at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:877) ~[groovy-all-1.8.6.jar:1.8.6]
+  at groovy.lang.Closure.call(Closure.java:412) ~[groovy-all-1.8.6.jar:1.8.6]
+  at groovy.lang.Closure.call(Closure.java:425) ~[groovy-all-1.8.6.jar:1.8.6]
+</code>
+It ends up that <em>find</em> is a DefaultGroovyMethod that's added to all Objects and this was causing the mock.demand to get confused because it thought I was trying to call the Object.find.</p>
+<p>Luckily there is a workaround and that's to use the ordinal argument for find.</p>
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="n">emMock</span><span class="o">.</span><span class="na">demand</span><span class="o">.</span><span class="na">find</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span> <span class="o">{</span> <span class="n">Class</span> <span class="n">clazz</span><span class="o">,</span> <span class="n">Object</span> <span class="n">rquid</span> <span class="o">-&gt;</span> <span class="k">return</span> <span class="k">new</span> <span class="n">Request</span><span class="o">(</span><span class="nl">rqUID:</span> <span class="n">rquid</span><span class="o">)</span> <span class="o">}</span></code></pre></figure>
+<p>That's enough of a change to invoke mock version instead of the DefaultGroovyMethod version.
+Now if I only knew why....</p>

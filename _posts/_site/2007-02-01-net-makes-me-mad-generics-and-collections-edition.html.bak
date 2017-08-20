@@ -1,0 +1,52 @@
+<p>Ok, so I've decided I need to rant a little bit about .NET. This ends up in part being, "What I like about Java that I don't like about C#". I think this is fair though. It's not like C# and .NET were developed in a vacuum. It's not like C# is the first Object Oriented, VM run language. As such I think it's fair to point out where they should have learned from others.</p>
+<h2>Generics Don't Fully Support Covariant Types</h2>
+Generic collections in .NET can only handle a single type of object well. You can add a sub-type to a Collection, but if you have two Collections with <a href="http://en.wikipedia.org/wiki/Covariance_and_contravariance_%28computer_science%29">covariant types</a>, you can not mix them without jumping through hoops.</p>
+<h4>Example</h4>
+The simple case of adding a single Covariant type works, but when dealing with a Generic Collection of  covariant types, it does not.
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">abstract</span> <span class="k">class</span> <span class="nc">Vehicle</span> <span class="p">{</span>
+<span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span><span class="k">class</span> <span class="nc">Car</span> <span class="p">:</span> <span class="n">Vehicle</span> <span class="p">{</span>
+<span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span><span class="k">class</span> <span class="nc">MotorCycle</span> <span class="p">:</span> <span class="n">Vehicle</span> <span class="p">{</span>
+<span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span><span class="n">List</span><span class="p">&lt;</span><span class="n">Vehicle</span><span class="p">&gt;</span> <span class="n">vehicles</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">Vehicle</span><span class="p">&gt;();</span>
+<span class="n">vehicles</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="k">new</span> <span class="nf">Car</span><span class="p">());</span>    <span class="c1">// This is OK&lt;/p&gt;
+</span><span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span><span class="n">List</span><span class="p">&lt;</span><span class="n">MotorCycle</span><span class="p">&gt;</span> <span class="n">motorCycles</span> <span class="p">=</span> <span class="nf">LoadMotorCycles</span><span class="p">();</span>
+<span class="n">vehicles</span><span class="p">.</span><span class="nf">AddRange</span><span class="p">(</span><span class="n">motorCycles</span><span class="p">);</span>    <span class="p">//</span> <span class="n">This</span> <span class="n">does</span> <span class="n">not</span> <span class="n">work</span><span class="p">!</span></code></pre></figure></p>
+<p>To make it work with AddRange, you have to perform a manual conversion
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">public</span> <span class="n">IList</span><span class="p">&lt;</span><span class="n">Vehicle</span><span class="p">&gt;</span> <span class="n">AllVehicles</span>
+<span class="p">{</span>
+    <span class="k">get</span>
+    <span class="p">{</span>
+         <span class="n">List</span><span class="p">&lt;</span><span class="n">Vehicle</span><span class="p">&gt;</span> <span class="n">vehicleList</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">Vehicle</span><span class="p">&gt;();</span>
+         <span class="n">vehicleList</span>
+             <span class="p">.</span><span class="nf">AddRange</span><span class="p">(</span><span class="n">AllCars</span><span class="p">.</span><span class="nf">ConvertAll</span><span class="p">(</span>
+                 <span class="k">new</span> <span class="n">Converter</span><span class="p">&lt;</span><span class="n">Car</span><span class="p">,</span> <span class="n">LocationContainer</span><span class="p">&gt;(</span><span class="n">ToVehicle</span><span class="p">)));</span>
+         <span class="n">vehicleList</span>
+             <span class="p">.</span><span class="nf">AddRange</span><span class="p">(</span><span class="n">AllCycles</span><span class="p">.</span><span class="nf">ConvertAll</span><span class="p">(</span>
+                <span class="k">new</span> <span class="n">Converter</span><span class="p">&lt;</span><span class="n">MotorCycle</span><span class="p">,</span> <span class="n">LocationContainer</span><span class="p">&gt;(</span><span class="n">ToVehicle</span><span class="p">)));</span>
+         <span class="k">return</span> <span class="n">vehicleList</span> <span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span><span class="k">private</span> <span class="k">static</span> <span class="n">Vehicle</span> <span class="n">ToVehicle</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">T</span> <span class="n">vehic</span><span class="p">)</span> <span class="k">where</span> <span class="n">T</span> <span class="p">:</span> <span class="n">Vehicle</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">vehic</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure></p>
+<h2>What's Good About .NET Generics</h2>
+.NET Generic type information is available at runtime. In Java Generics are implemented as an erasure. Basically this means all of the type checking is done at compile time. The compiler then inserts explicit casts into the code for you. At runtime the code looks the same as if generics were never used. .NET chose not to use erasures but to make the type information available at runtime. This is generally more efficient and less prone to errors or problems with reflections. So good work there. </p>
+<p><em>Note: (The Java folks did this so as not to break backwards compatibility. I think that major revisions should be allowed to break backwards compatibility when there are compelling reasons to do so.)</em></p>
+<h2>.NET Collections</h2>
+Are collections classes such a mysterious art?</p>
+<p>.NET does not have a Set or a Bag. These are generally useful and very common collections. A Set guarantees the uniqueness of elements in List like interface. A Bag can contain any objects. The unique thing about it is that it keeps a  count of the same objects.</p>
+<h4>Example of a Bag</h4>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="n">Bag</span> <span class="n">fruitBag</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Bag</span><span class="p">();</span>
+<span class="n">Banana</span> <span class="n">b</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Banana</span><span class="p">();</span>
+<span class="n">Apple</span> <span class="n">a</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Apple</span><span class="p">();</span>
+<span class="n">fruitBag</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
+<span class="n">fruitBag</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
+<span class="n">fruitBag</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">a</span><span class="p">);&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span><span class="kt">int</span> <span class="n">bananas</span> <span class="p">=</span> <span class="n">fruitBag</span><span class="p">.</span><span class="nf">GetCount</span><span class="p">(</span><span class="n">b</span><span class="p">);</span></code></pre></figure></p>
+<p>The SortedList and the SortedDictionary both have a Dictionary interface. Why wouldn't the SortedList have an, uhh maybe, a List interface?</p>
+<p>The IList interface is so anemic as to be basically worthless. IList does not even have an AddRange method (or an AddAll) to merge the values in one collection into another. It's so limited that it makes it very hard to return interfaces from classes which is a good idea to encapsulate the implementation details of methods.</p>
+<h2>What Do You Think</h2>
+Do you have things about .NET that annoy you? If so, leave a comment and let me know what it is.</p>

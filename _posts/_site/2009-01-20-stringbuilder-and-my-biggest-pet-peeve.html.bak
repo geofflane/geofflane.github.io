@@ -1,0 +1,21 @@
+<h2>What You Should Know About Strings</h2>
+In both Java and .NET (and other languages) String objects are <a href="http://en.wikipedia.org/wiki/Immutable_object">immutable</a>. They don't change. Period. If you "change" a String, it creates a new String. That includes String concatenation using a <em>+</em></p>
+<p><figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="c1">// One string created "foo"</span>
+<span class="n">String</span> <span class="n">foo</span> <span class="o">=</span> <span class="s">"foo"</span><span class="o">;</span>
+<span class="c1">// foo exists, "bar" is created and the combination of foo and "bar" is a third string</span>
+<span class="n">String</span> <span class="n">bar</span> <span class="o">=</span> <span class="n">foo</span> <span class="o">+</span> <span class="s">" bar"</span><span class="o">;</span></code></pre></figure></p>
+<p>Ok, if you don't know this, fine. But if you don't know this, why would you EVER use a <em>StringBuilder</em>?</p>
+<h2>Why Does StringBuilder Exist?</h2>
+We know that Strings are immutable. If you need to do a bunch of string modification, concatenation, replacement - you will create a bunch of strings. Ok, great...why do I care? We care because we are told that creating a lot of Objects (and then later having to Garbage Collect them) is inefficient. To start with, I will guarantee right now that concatenating strings WILL NOT be the thing that prevents your application from performing. Guaranteed. Period.</p>
+<p>Ok fine, it's not going to be a problem. But you want to be a responsible coder and not do things that are intentionally inefficient if you can help it.</p>
+<p>So you use a StringBuilder. StringBuilder is implemented internally as an array of characters. The code manages the allocation and copying of data to new arrays if the buffer gets filled. It sometimes over allocates the new buffer so that it has to perform allocations less often. You sacrifice a bit of memory overhead to avoid some Object creation and Garbage Collection later.</p>
+<h2>My Biggest Pet Peeve</h2>
+Your use of StringBuilder is a <a href="http://en.wikipedia.org/wiki/Optimization_(computer_science)">premature optimization</a> but probably a forgivable one.</p>
+<p>So, WHY, OH WHY do you do this:
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="c1">// One string created "foo"</span>
+<span class="n">StringBuilder</span> <span class="n">sb</span> <span class="o">=</span> <span class="k">new</span> <span class="n">StringBuilder</span><span class="o">();</span>
+<span class="n">sb</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="s">"Foo: "</span> <span class="o">+</span> <span class="n">fooValue</span> <span class="o">+</span> <span class="s">" \n"</span><span class="o">);</span>
+<span class="n">sb</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="s">"Bar: "</span> <span class="o">+</span> <span class="n">barValue</span> <span class="o">+</span> <span class="s">"\n"</span><span class="o">);</span></code></pre></figure></p>
+<p>It makes me have violent thoughts. Please stop.</p>
+<p><strong><em>Update:</em></strong>
+For some of the reasons why Strings are immutable, see <a href="http://mindprod.com/jgloss/immutable.html">this post on immutability</a> and its positive qualities.</p>

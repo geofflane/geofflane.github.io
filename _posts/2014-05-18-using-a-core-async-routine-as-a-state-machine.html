@@ -11,15 +11,11 @@ author:
 author_login: admin
 author_email: geoff@zorched.net
 author_url: http://www.zorched.net
-wordpress_id: 626
-wordpress_url: http://www.zorched.net/?p=626
 date: '2014-05-18 09:00:56 -0400'
 date_gmt: '2014-05-18 15:00:56 -0400'
-categories:
-- Code
-- Clojure
 tags:
-- asynchronous
+- code
+- clojure
 ---
 <p>Clojure has a library called Core.Async that it allows you to model your system as a set of independent processes that pass messages to each other through channels. Each process is responsible for running itself, managing its own state, etc. But how do you manage state in a language where everything is immutable? Well there are many ways to do that using Atoms, Refs, and Agents. But those constructs are mostly about sharing mutable state between processes, and in many cases end up being more complex than you would need to implement state machine that entirely encapsulated its own state transitions. Fortunately there's another way.</p></p>
 <p>The go block is the basis of each of the independent processes. These blocks define a unit of asynchronous work. The go block is generally implemented in a loop/recur fashion where a message is received from a channel, processed, and then the recur is called to loop back and wait for another message to be received. This looping gives the go block an opportunity to transform itself into a new state after each message is processed.</p></p>

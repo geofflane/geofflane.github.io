@@ -1,0 +1,46 @@
+<p>.NET has had DBNull since the beginning. With the release of .NET 2.0 it has also gained the Nullable type. DBNull is used to represent a null value returned from a database or a dataset. The Nullable type was added to give the ability to have null types for integral types. You might ask, "What's going on here? We can already have a null reference to class instance."</p>
+<h3>Background</h3>
+.NET has 2 kinds of types. It has Classes and it has Structs. Classes are known as "reference types" and stored in an area of memory called the heap. Structs are known as value types and stored in an area of memory known as the stack. What's the difference? Well for one, the stack is a faster form of memory allocation because it doesn't require dereferencing a pointer to get to an object type. The second difference is that stack based, value types can not be null.</p>
+<p>This value type is a performance optimzation, but I think it was a bad choice. </p>
+<h3>Rationale</h3>
+As you can see, we can't have a <code class="inline">null</code> value type. So, you can see why the <code class="inline">DBNull</code> was added, because .NET needed a way to represent a NULL database value. The bad part is that <code class="inline">DBNull.Value != null</code> so you have to check for <code class="inline">DBNull</code> in many cases. It is also a problem because setting <code class="inline">null</code> into a ADO.NET parameter will cause an error. This is a really terrible semantic for the language. Wouldn't they be able to hide <code class="inline">DBNull</code> within the ADO.NET classes and convert <code class="inline">null</code> to DBNulls within the code? Yes, IF it was possible to have a null value type.</p>
+<p>This also wouldn't be a problem if all of the Value types had a corresponding Reference type. int has Int32, string has String, etc. But what about DateTime? DateTime is a struct (a value type) with no corresponding reference type. So you can't have a <code class="inline">null</code> DateTime. Its default value is represented as DateTime.MinValue so you have to compare with that.</p>
+<p>What else? Well Value types can not be inherited and can't inherit from other Classes or Structs. They can implement Interfaces, but you no longer get little <abbr title="Object Oriented">OO</abbr> things like inheritance. What where they thinking?</p>
+<p>Yet another problem with this optimization is that it is only a half optimization. Methods in .NET are by default pass-by-value which means that a copy of a value is passed to the method. (In the case of an Object/Class  instance passed to a method, a copy of the pointer to the instance is passed, so it's a small value that is copied.) With value types, because the pointer represents all of the memory space for the values contained in the Struct, when a Struct/Value Object is passed to a method, the entire memory space is copied to a new location. This increases the amount of memory used. So you gain some speed, and lose some memory. Is that a good tradeoff? Depends a lot on where your constraints are</p>
+<p>In addition, because of the differences in that pass-by-value behavior, you get differences in the behavior of calling methods, or setting parameters from within a method.</p>
+<p><figure class="highlight"><pre><code class="language-csharp" data-lang="csharp">    <span class="k">class</span> <span class="nc">Program</span> <span class="p">{</span>
+          <span class="k">class</span> <span class="nc">MyClass</span> <span class="p">{</span>
+            <span class="k">public</span> <span class="kt">string</span> <span class="n">SomeValue</span><span class="p">;</span>
+        <span class="p">}</span>
+          <span class="k">struct</span> <span class="nc">ValueType</span> <span class="p">{</span>
+            <span class="k">public</span> <span class="kt">string</span> <span class="n">SomeValue</span><span class="p">;</span>
+        <span class="p">}</span>
+          <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">(</span><span class="kt">string</span><span class="p">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">MyClass</span> <span class="n">mc</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">MyClass</span><span class="p">();</span>
+            <span class="n">mc</span><span class="p">.</span><span class="n">SomeValue</span> <span class="p">=</span> <span class="s">"MyClass: out of method"</span><span class="p">;</span>
+            <span class="n">Console</span><span class="p">.</span><span class="n">Out</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="n">mc</span><span class="p">.</span><span class="n">SomeValue</span><span class="p">);</span>
+            <span class="nf">Change</span><span class="p">(</span><span class="n">mc</span><span class="p">);</span>
+            <span class="n">Console</span><span class="p">.</span><span class="n">Out</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="n">mc</span><span class="p">.</span><span class="n">SomeValue</span><span class="p">);</span>
+              <span class="n">ValueType</span> <span class="n">vt</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ValueType</span><span class="p">();</span>
+            <span class="n">vt</span><span class="p">.</span><span class="n">SomeValue</span> <span class="p">=</span> <span class="s">"ValueType: out of method"</span><span class="p">;</span>
+            <span class="n">Console</span><span class="p">.</span><span class="n">Out</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="n">vt</span><span class="p">.</span><span class="n">SomeValue</span><span class="p">);</span>
+            <span class="nf">Change</span><span class="p">(</span><span class="n">vt</span><span class="p">);</span>
+            <span class="n">Console</span><span class="p">.</span><span class="n">Out</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="n">vt</span><span class="p">.</span><span class="n">SomeValue</span><span class="p">);</span>
+        <span class="p">}</span>
+          <span class="k">private</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">Change</span><span class="p">(</span><span class="n">MyClass</span> <span class="n">cl</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">cl</span><span class="p">.</span><span class="n">SomeValue</span> <span class="p">=</span> <span class="s">"MyClass: in method"</span><span class="p">;</span>
+        <span class="p">}</span>
+          <span class="k">private</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">Change</span><span class="p">(</span><span class="n">ValueType</span> <span class="n">vt</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">vt</span><span class="p">.</span><span class="n">SomeValue</span> <span class="p">=</span> <span class="s">"ValueType: in method"</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span></code></pre></figure></p>
+<p>What's the output?:
+<samp>
+MyClass: out of method
+MyClass: in method
+ValueType: out of method
+ValueType: out of method
+</samp></p>
+<p>Surprised? I was once I realized that was what would happen. These kinds of hidden semantic differences cause a lot of surprise. Surprise like that is not good in programming.</p>
+<h3>Conclusion</h3>
+Non-nullable, surprising and different behaviors, inconsistent performance optmizations, extra hoops to jump through to do things like DBNulls. These kinds of things lead to developer frustration. All said, I don't think that the performance gain is enough to warrant this kind of trouble. I would have preferred to see a better design, one in which these kinds of optimizations were implemented in the compiler. Optimize developer productivity, not just runtime performance.</p>

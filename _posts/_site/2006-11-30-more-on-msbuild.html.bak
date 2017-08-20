@@ -1,0 +1,3 @@
+<p>On the heels of my article on using <a href="http://www.zorched.net/2006/11/28/msbuild-with-nunit/">MSBuild with NUnit</a>, I've been totally outdone by <a href="http://brennan.offwhite.net/blog/">Brennan</a>. Check out his  <a href="http://brennan.offwhite.net/blog/2006/11/30/7-steps-to-msbuild/">series on MSBuild</a>. </p>
+<p>He covers Unit testing with NUnit (naturally), but starts with the basics, and gets into everything from Packaging to Web Deployments. All with nice screenshots! He also digs into some things like <em>ItemGroup</em> and <em>CreateItem</em>, which exhibit some rather unintuitive behavior in my opinion.</p>
+<p>Check it out...</p>

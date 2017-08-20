@@ -1,0 +1,37 @@
+<p><a href="http://www.htdp.org/">How to Design Programs (HtDP)</a> provides a series of unit testing functions that allow you to test the output of any kind of function. The current version talks about testing your code, but doesn't offer a lot of guidance into how to do that. Everything you need is there though, so in case you are doing this on your own and don't have a teacher to tell you to do this, here's some explanation that I hope helps.</p>
+<h3>check-expect</h3>
+<em>check-expect</em> takes the results of a function and the expected value. This is the simplest of the testing constructs which answers the question "Does the expected result of a function call equal the result returned by the function?". It handles all of the details about types of values returned, so it can work with a simple value like a number, a complex value like a structure or a list, or even a picture.</p>
+<p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme"><span class="c1">;; add: number number -&gt; number</span>
+<span class="c1">;; add two numbers together</span>
+<span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">add</span> <span class="nv">n</span> <span class="nv">m</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">+</span> <span class="nv">n</span> <span class="nv">m</span><span class="p">))</span><span class="nv">&lt;/p&gt;</span>
+<span class="nv">&lt;p&gt;</span><span class="c1">;; Tests</span>
+<span class="p">(</span><span class="nf">check-expect</span> <span class="p">(</span><span class="nf">add</span> <span class="mi">1</span> <span class="mi">1</span><span class="p">)</span> <span class="mi">2</span><span class="p">)</span></code></pre></figure></p>
+<h3>check-within</h3>
+<em>check-within</em> is similar to check-expect, but it allows for a third argument to tell wether or not the result is within a certain difference of the actual answer. This is good for certain functions that might produce random results, but the most common case is when dealing with floating point numbers. Floating point numbers are not always represented precisely, so there needs to be some "room for error" so to speak.</p>
+<p>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">PI</span> <span class="mf">3.14</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">check-within</span> <span class="p">(</span><span class="nb">/</span> <span class="mi">22</span> <span class="mi">7</span><span class="p">)</span> <span class="nv">PI</span> <span class="o">.</span><span class="mi">003</span><span class="p">)</span><span class="nv">&lt;/p&gt;</span>
+<span class="nv">&lt;p&gt;</span><span class="p">(</span><span class="nf">check-within</span> <span class="p">(</span><span class="nf">random</span> <span class="mi">10</span><span class="p">)</span> <span class="mi">0</span> <span class="mi">9</span><span class="p">)</span></code></pre></figure></p>
+<h3>check-error</h3>
+Finally, you can use <em>check-error</em> to test cases where your function throws an error. Those error conditions are an important part of a function contract, so testing them should be done just like any other possible conditions.</p>
+<p>One of the things that threw me at first was what to use as the expected value of a <em>check-error</em> test.</p>
+<p>An error is HtDP is "throw" by a function like:
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme"><span class="p">(</span><span class="nf">error</span> <span class="ss">'function-name</span> <span class="s">"some message"</span><span class="p">)</span></code></pre></figure></p>
+<p>After a bit of trial and error, I found out the expected result is a string like:
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme"><span class="c1">; "function-name: some message"</span>
+<span class="p">(</span><span class="nf">check-error</span> <span class="p">(</span><span class="nf">error</span> <span class="ss">'list-pick</span> <span class="s">"list too short"</span><span class="p">)</span>  <span class="s">"list-pick: list too short"</span><span class="p">)</span></code></pre></figure></p>
+<h3>More Realistic Example</h3>
+<figure class="highlight"><pre><code class="language-scheme" data-lang="scheme"><span class="c1">;; list-pick : list-of-symbols N[&gt;= 0]  -&gt;  symbol</span>
+<span class="c1">;; to determine the nth symbol from alos, counting from 0;</span>
+<span class="c1">;; signals an error if there is no nth item</span>
+<span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">list-pick</span> <span class="nv">alos</span> <span class="nv">n</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">cond</span>
+    <span class="err">[</span><span class="p">(</span><span class="nf">empty?</span> <span class="nv">alos</span><span class="p">)</span> <span class="p">(</span><span class="nf">error</span> <span class="ss">'list-pick</span> <span class="s">"list too short"</span><span class="p">)</span><span class="err">]</span>
+    <span class="err">[</span><span class="p">(</span><span class="nb">=</span> <span class="nv">n</span> <span class="mi">0</span><span class="p">)</span> <span class="p">(</span><span class="nf">first</span> <span class="nv">alos</span><span class="p">)</span><span class="err">]</span>
+    <span class="err">[</span><span class="p">(</span><span class="nb">&gt;</span> <span class="nv">n</span> <span class="mi">0</span><span class="p">)</span> <span class="p">(</span><span class="nf">list-pick</span> <span class="p">(</span><span class="nf">rest</span> <span class="nv">alos</span><span class="p">)</span> <span class="p">(</span><span class="nf">sub1</span> <span class="nv">n</span><span class="p">))</span><span class="err">]</span><span class="p">))</span><span class="nv">&lt;/p&gt;</span>
+<span class="nv">&lt;p&gt;</span><span class="c1">;; Tests</span>
+<span class="p">(</span><span class="nf">check-error</span> <span class="p">(</span><span class="nf">list-pick</span> <span class="nv">empty</span> <span class="mi">1</span><span class="p">)</span>  <span class="s">"list-pick: list too short"</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">check-expect</span> <span class="p">(</span><span class="nf">list-pick</span> <span class="p">(</span><span class="nb">list</span> <span class="ss">'a</span> <span class="ss">'b</span> <span class="ss">'c</span> <span class="ss">'d</span><span class="p">)</span> <span class="mi">3</span><span class="p">)</span> <span class="ss">'d</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">check-error</span> <span class="p">(</span><span class="nf">list-pick</span> <span class="p">(</span><span class="nb">list</span> <span class="ss">'a</span> <span class="ss">'b</span> <span class="ss">'c</span> <span class="ss">'d</span><span class="p">)</span> <span class="mi">4</span><span class="p">)</span> <span class="s">"list-pick: list too short"</span><span class="p">)</span></code></pre></figure>

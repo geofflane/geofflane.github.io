@@ -1,0 +1,28 @@
+<p>In a previous post, I discussed <a href="http://www.zorched.net/2006/10/29/oracle-materialized-views/">materialized views</a> in Oracle. I wanted to share a relatively simple technique that can be used to create similar functionality in Oracle or another database.</p>
+<h2>Why Use Something Else?</h2>
+Materialized Views are a feature available in Oracle. If you're not using Oracle, then that's reason enough on its own. Materialized Views also have limitations in terms of how they are refreshed. Refreshing is the concept of updating the contents of the view. This can be done as a fast refresh when the base tables that it relies on changes. Certain things like <em>union</em> or other more "complex" SQL prevents any sort of fast refreshing from going on. The other option for updating the materialized view is a periodic update. Every <em>n minute</em> you can have the view refreshed. This is fine in certain circumstances, but there are use cases where this will be a show stopper. So what do you do?</p>
+<p><small><em>Yes, I ran into the refreshing problem and had to work with a DBA to figure out another way to accomplish the same thing.</em></small></p>
+<h2>Table, View, Trigger</h2>
+A materialized view is an object in the database that is backed by a table behind the scenes. We often want to use them as a way to denormalize data for reporting or performance reasons. Knowing this, you can create a structure that is a directly a table instead. This table will be the structure that you query against. To keep the data up to date you can implement a trigger that responds to changes in the base table to keep the dernomalized table up-to-date.</p>
+<p>The simplest way to do this is to create a regular database view of the data that you want. Why not use the view directly? When you query a view it re-runs the query against the base table. This can be an expensive operation and put a lot of load on your database. Once you have a view containing the data that you want, you can then "copy" the data into your table for day-to-day querying.</p>
+<h3>Example</h3>
+<figure class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">create</span> <span class="k">or</span> <span class="k">replace</span> <span class="k">view</span> <span class="n">V</span><span class="err">$</span><span class="n">MY_VIEW</span> <span class="k">AS</span>
+<span class="k">select</span> <span class="n">table1</span><span class="p">.</span><span class="n">v1</span><span class="p">,</span> <span class="n">table2</span><span class="p">.</span><span class="n">v2</span><span class="p">,</span> <span class="n">table2</span><span class="p">.</span><span class="n">v3</span>
+<span class="k">from</span> <span class="k">Table</span> <span class="k">as</span> <span class="n">table1</span>
+    <span class="k">inner</span> <span class="k">join</span> <span class="n">Child_Table</span> <span class="n">table2</span>
+        <span class="k">on</span> <span class="n">table1</span><span class="p">.</span><span class="n">id</span><span class="o">=</span><span class="n">table2</span><span class="p">.</span><span class="n">parent_id</span><span class="p">;</span></code></pre></figure></p>
+<figure class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">create</span> <span class="k">table</span> <span class="n">MY_TABLE</span>
+    <span class="n">value1</span> <span class="n">varchar2</span><span class="p">(</span><span class="mi">32</span><span class="p">),</span>
+    <span class="n">value2</span> <span class="n">varchar2</span><span class="p">(</span><span class="mi">128</span><span class="p">),</span>
+    <span class="n">value3</span> <span class="n">int</span><span class="p">;</span>
+<span class="k">insert</span> <span class="k">into</span> <span class="n">MY_TABLE</span> <span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">V</span><span class="err">$</span><span class="n">MY_VIEW</span><span class="p">;</span>
+
+<span class="k">create</span> <span class="k">trigger</span> <span class="n">UPDATE_MY_TABLE</span>
+<span class="k">after</span> <span class="k">insert</span> <span class="k">or</span> <span class="k">update</span> <span class="k">or</span> <span class="k">delete</span> <span class="k">on</span> <span class="k">Table</span>
+<span class="k">begin</span>
+    <span class="k">delete</span> <span class="k">from</span> <span class="n">MY_TABLE</span><span class="p">;</span>
+    <span class="k">insert</span> <span class="k">into</span> <span class="n">MY_TABLE</span> <span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">V</span><span class="err">$</span><span class="n">MY_VIEW</span><span class="p">;</span>
+<span class="k">end</span><span class="p">;</span></code></pre></figure>
+<h2>Conclusion</h2>
+This is a denormalization technique that you can use for some read performance benefits in certain scenarios. Of course you will likely suffer from write performance when you do this. This particular technique is likely only useful if there are relatively few rows in your dependent tables, otherwise the performance will probably degrade quickly.</p>
+<p>Obviously this is a pretty simple example, but hopefully it would help give you some inspiration if you need a similar solution.</p>

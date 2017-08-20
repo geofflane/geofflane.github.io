@@ -1,0 +1,24 @@
+<p>Dan wrote a <a href="http://www.distribucon.com/blog/PermaLink,guid,8d7106a3-0697-4fe8-8bb7-04bb88f8f80d.aspx">post about ALT.NET in Milwaukee</a>. Basically the idea of <a href="http://www.altdotnet.org/">ALT.NET</a> is to take the best practices from software development, to find the best tools available in .NET regardless of the vendor and to use them when they make sense. Some people see the term as divisive. As and us vs. them sort of thing. I don't really agree.</p>
+<p>ALT.NET is not a divisive term to me. It's a distinct and simple name. There might be other alternatives like INDY.NET? As in indy music? I don't think that would be terrible, but it doesn't have the same connotation as an indy film or an indy band. What it generally comes down to often is "I know more than one programming language".NET. We've done Java and Ruby (and/or Python, perl, Delphi, Scheme) and seen what those languages and frameworks have to offer.</p>
+<p>Microsoft provides a "full stack", OS, Database, IDE, Language and some frameworks in there. This is very helpful. It makes getting started with the .NET platform very easy because you don't have to make a lot of choices up front. Their goal is to get developers to use their tools, solutions and practices. There is nothing wrong with that. Their target market is mostly dominated by mid-sized companies, often with an average talent (don't take that the wrong way, there are obviously exceptions). This is why they focus so much on RAD development and click and run kind of development. It makes sense for a certain market.</p>
+<p>But is it right for every market, for every developer, or as a solution to every problem. I think the obvious answer is no. Just because the whole solution is not right for every scenario doesn't mean you can't use parts of it, or can't go to the buffet instead of ordering off of the set menu though. That is ALT.NET.</p>
+<p>Because of this full stack mentality at MS, I think almost by definition, anything not provided by Microsoft is "alternative" in the .NET world. Scrum and XP are not MSF, so you've chosen to use an alternative process in the .NET world. The tools we use in those disciples are generally not developed by Microsoft. That's ok. We want to use the right tools for the job and the right tools to support the ways that we want to work. We're comfortable with open source and a bit of trial and error. We're comfortable with support via email and forums. We're comfortable with a bit of ambiguity and living with the consequences of our decisions.</p>
+<p>Alternatives and choices are not about "us vs. them" or "elite vs. noobs" it's just about...choice. Use the right tool for the job, fit the tools and frameworks to the problem at hand and not the other way around.</p>
+<p>I think ALT.NET is a valuable idea. It takes the best ideas from other development languages and cultures and brings them to the .NET world. It makes available a broader set of tools and techniques that can help better solve some problems.</p>
+<p>What ALT.NET do I use?</p>
+<ul>
+<li>CruiseControl.NET for continuous integration</li>
+<li>log4net for logging</li>
+<li>NUnit for unit tests</li>
+<li>NCover for code coverage of those unit tests</li>
+<li>Resharper for awesome refactoring support in Visual Studio</li>
+</ul></p>
+<p>What am I looking at and hopeful about?</p>
+<ul>
+<li>ORM - such as NHibernate</li>
+<li>Dependency Injection - such as Spring.NET</li>
+<li>MVC frameworks</li>
+<li>Front Controller frameworks for web development</li>
+</ul></p>
+<p>What do you use that's off the garden path?</p>
+<p>Check out Dan's blog and help get some ideas going for ALT.NETers in the Milwaukee area.</p>

@@ -1,0 +1,147 @@
+<p>.NET provides a whole slew of utilities for serializing objects into an XML form. But as I wrote in my previous post, <a href="http://www.zorched.net/2007/02/27/net-compact-framework-serialization-bugs/">.NET Compact Framework has serious problems with this serialization</a>. The good news is that you can leverage all of the existing Attributes and tricks that you think should work (if it weren't so buggy) and use them in your own serialization scheme.</p>
+<h3>Get Started</h3>
+For example I want to know if I should skip a given member? There are a number of different things I can check. Is a Reference type null? Is there and XmlIgnore attribute? Is there a <em>PropertyName</em>Specified value set to false? All of those questions can easily be answered using reflection.</p>
+<p>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="c1">/// &lt;summary&gt;
+/// Should the current property be skipped based on rules
+/// such as the existence of a propertySpecified value set to false?
+/// &lt;/summary&gt;
+/// &lt;param name="member"&gt;The MemberInfo to check&lt;/param&gt;
+/// &lt;param name="o"&gt;The object that contained this member&lt;/param&gt;
+/// &lt;returns&gt;true if this member should be skipped&lt;/returns&gt;
+</span><span class="k">public</span> <span class="kt">bool</span> <span class="nf">SkipMember</span><span class="p">(</span><span class="n">MemberInfo</span> <span class="n">member</span><span class="p">,</span> <span class="kt">object</span> <span class="n">o</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">object</span> <span class="n">val</span> <span class="p">=</span> <span class="k">null</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">member</span><span class="p">.</span><span class="n">MemberType</span> <span class="p">==</span> <span class="n">MemberTypes</span><span class="p">.</span><span class="n">Field</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">val</span> <span class="p">=</span> <span class="p">((</span><span class="n">FieldInfo</span><span class="p">)</span><span class="n">member</span><span class="p">).</span><span class="nf">GetValue</span><span class="p">(</span><span class="n">o</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">member</span><span class="p">.</span><span class="n">MemberType</span> <span class="p">==</span> <span class="n">MemberTypes</span><span class="p">.</span><span class="n">Property</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">val</span> <span class="p">=</span> <span class="p">((</span><span class="n">PropertyInfo</span><span class="p">)</span><span class="n">member</span><span class="p">).</span><span class="nf">GetValue</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="k">null</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">null</span> <span class="p">==</span> <span class="n">val</span><span class="p">)</span>
+      <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+
+    <span class="kt">string</span> <span class="n">propertyToTest</span> <span class="p">=</span> <span class="n">member</span><span class="p">.</span><span class="n">Name</span> <span class="p">+</span> <span class="s">"Specified"</span><span class="p">;</span>
+    <span class="n">PropertyInfo</span> <span class="n">specifiedProperty</span> <span class="p">=</span> <span class="n">o</span><span class="p">.</span><span class="nf">GetType</span><span class="p">().</span><span class="nf">GetProperty</span><span class="p">(</span><span class="n">propertyToTest</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">((</span><span class="k">null</span> <span class="p">!=</span> <span class="n">specifiedProperty</span> <span class="p">&amp;&amp;</span> <span class="p">!(</span><span class="kt">bool</span><span class="p">)</span><span class="n">specifiedProperty</span><span class="p">.</span><span class="nf">GetValue</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="k">null</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+
+    <span class="n">FieldInfo</span> <span class="n">specifiedField</span> <span class="p">=</span> <span class="n">o</span><span class="p">.</span><span class="nf">GetType</span><span class="p">().</span><span class="nf">GetField</span><span class="p">(</span><span class="n">propertyToTest</span><span class="p">,</span> <span class="n">FIELD_BINDING_FLAGS</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">((</span><span class="k">null</span> <span class="p">!=</span> <span class="n">specifiedField</span> <span class="p">&amp;&amp;</span> <span class="p">!(</span><span class="kt">bool</span><span class="p">)</span><span class="n">specifiedField</span><span class="p">.</span><span class="nf">GetValue</span><span class="p">(</span><span class="n">o</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="n">member</span><span class="p">.</span><span class="nf">IsDefined</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">XmlIgnoreAttribute</span><span class="p">),</span> <span class="k">false</span><span class="p">);</span>
+<span class="p">}</span></code></pre></figure></p>
+<p>I can use a similar "fall-through" strategy to determine the name of the element to write using the XmlElement attribute for example. Now that I know I can answer some basic questions about an Object using the built-in mechanisms that .NET uses for serialization I can get down to serious serialization.</p>
+<p>We're all Object-Oriented programmers these days right? Right!? So to start I decided that the best way to handle this problem was to decompose it into a bunch of simpler problems.</p>
+<h3>ITagWriter</h3>
+There are two things that we can write in XML. Either an XML Element or an XML Attribute. So, I created an interface <code class="inline">ITagWriter</code> with two concrete implementations to correspond to these two XML types: <code class="inline">AttributeTagWriter</code> and <code class="inline">ElementTagWriter</code>. These classes allow me to write the structure of the XML Document.</p>
+<p>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="c1">/// &lt;summary&gt;
+/// Interface to implement to write different Xml tags
+/// Either Elements or Attributes.
+/// &lt;/summary&gt;
+</span><span class="k">internal</span> <span class="k">interface</span> <span class="n">ITagWriter</span>
+<span class="p">{</span>
+    <span class="c1">/// &lt;summary&gt;
+</span>    <span class="c1">/// Write the opening Xml tag with the given name
+</span>    <span class="c1">/// &lt;/summary&gt;
+</span>    <span class="c1">/// &lt;param name="doc"&gt;The XML Document to write the tage to.&lt;/param&gt;
+</span>    <span class="c1">/// &lt;param name="tagName"&gt;The name of the tag&lt;/param&gt;
+</span>    <span class="k">void</span> <span class="nf">WriteStart</span><span class="p">(</span><span class="n">XmlWriter</span> <span class="n">doc</span><span class="p">,</span> <span class="kt">string</span> <span class="n">tagName</span><span class="p">);</span>
+    <span class="c1">/// &lt;summary&gt;
+</span>    <span class="c1">/// Write the appropriate end tag
+</span>    <span class="c1">/// &lt;/summary&gt;
+</span>    <span class="c1">/// &lt;param name="doc"&gt;The XML Document to write the tage to.&lt;/param&gt;
+</span>    <span class="k">void</span> <span class="nf">WriteEnd</span><span class="p">(</span><span class="n">XmlWriter</span> <span class="n">doc</span><span class="p">);</span>
+<span class="p">}</span></code></pre></figure></p>
+<h3>IValueWriter</h3>
+With the ability to write the structure, I then need to be able to write out the values of the various objects and their properties. Just like with the <code class="inline">ITagWriter</code> interface, I decided to create an <code class="inline">IValueWriter</code> for the various kinds of values that I would need to write. The types I came up with were <code class="inline">ObjectWriter</code>, <code class="inline">CollectionValueWriter</code>, <code class="inline">EnumValueWriter</code>, <code class="inline">SimpleValueWriter</code>, and <code class="inline">XmlElementValueWriter</code>.</p>
+<p>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="c1">/// &lt;summary&gt;
+/// Interface to implement to write different kinds of values.
+/// &lt;/summary&gt;
+</span><span class="k">internal</span> <span class="k">interface</span> <span class="n">IValueWriter</span>
+<span class="p">{</span>
+    <span class="c1">/// &lt;summary&gt;
+</span>    <span class="c1">/// Write the Entry value to the XmlDocument
+</span>    <span class="c1">/// &lt;/summary&gt;
+</span>    <span class="c1">/// &lt;param name="doc"&gt;The XML Document to write the tage to.&lt;/param&gt;
+</span>    <span class="c1">/// &lt;param name="entry"&gt;The meta-information and value to write.&lt;/param&gt;
+</span>    <span class="k">void</span> <span class="nf">Write</span><span class="p">(</span><span class="n">XmlWriter</span> <span class="n">doc</span><span class="p">,</span> <span class="n">CustomSerializationEntry</span> <span class="n">entry</span><span class="p">);</span>
+<span class="p">}</span></code></pre></figure></p>
+<p>You'll notice the <code class="inline">CustomSerializationEntry</code> class
+  is the parameter for the <code class="inline">IValueWriter.Write()</code>
+  method. This class contains all of the metadata and the
+    value about the various properties of an Object. This alows us an easy way
+    to ask questions about a given property. Is it a Collection? Is it an Enum?
+    Is there a sort order? Basically the idea is to encapsulate all of the
+    things that are interesting from a serialization point of view.</p>
+  <p>To help manage the interaction I also created a basic <code
+      class="inline">TypeLookup</code> class. The job of this class is to
+    determine what type of <code class="inline">ITagWriter</code>
+    and <code class="inline">IValueWriter</code> to use for a
+    given <code class="inline">CustomSerializationEntry</code>
+          instance. This allows us to centralize that decision making in a
+          single class. The centralized knowledge keeps the individual writer
+          implementations much simpler. They just need to ask for the correct
+          writer and then call the methods defined in the interface. They don't
+          need to care what type they are writing. All hail power of
+          encapsulation and abstraction!</p>
+<h3>Start Serializing</h3>
+I bootstrap the serialization by creating an ObjectWriter to handle the
+outermost object. From there, the ObjectWriter takes over, constructing
+CustomSerializationEntry objects for each of the serialized object's
+properties. The type of the property determines the type of IValueWriter that
+is used to write the property value.</p>
+<p>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="c1">/// &lt;summary&gt;
+/// Serialize an object using the given
+/// &lt;paramref name="xmlRoot"&gt;xmlRoot&lt;/paramref&gt; as the root element name.
+/// &lt;/summary&gt;
+/// &lt;param name="o"&gt;&lt;/param&gt;
+/// &lt;param name="xmlRoot"&gt;&lt;/param&gt;
+/// &lt;returns&gt;&lt;/returns&gt;
+</span><span class="k">public</span> <span class="kt">string</span> <span class="nf">Serialize</span><span class="p">(</span><span class="kt">object</span> <span class="n">o</span><span class="p">,</span> <span class="kt">string</span> <span class="n">xmlRoot</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">StringBuilder</span> <span class="n">sb</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">StringBuilder</span><span class="p">();</span>
+    <span class="k">using</span> <span class="p">(</span><span class="n">XmlTextWriter</span> <span class="n">writer</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">XmlTextWriter</span><span class="p">(</span><span class="k">new</span> <span class="nf">StringWriter</span><span class="p">(</span><span class="n">sb</span><span class="p">)))</span>
+    <span class="p">{</span>
+        <span class="n">writer</span><span class="p">.</span><span class="n">Formatting</span> <span class="p">=</span> <span class="n">Formatting</span><span class="p">.</span><span class="n">Indented</span><span class="p">;</span>
+        <span class="n">XmlWriter</span> <span class="n">xmlDoc</span> <span class="p">=</span> <span class="n">XmlWriter</span><span class="p">.</span><span class="nf">Create</span><span class="p">(</span><span class="n">writer</span><span class="p">);</span>
+        <span class="nf">WriteRootElement</span><span class="p">(</span><span class="n">xmlDoc</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">xmlRoot</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">sb</span><span class="p">.</span><span class="nf">ToString</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="k">private</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">WriteRootElement</span><span class="p">(</span><span class="n">XmlWriter</span> <span class="n">doc</span><span class="p">,</span> <span class="kt">object</span> <span class="n">o</span><span class="p">,</span> <span class="kt">string</span> <span class="n">rootElement</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">doc</span><span class="p">.</span><span class="nf">WriteStartDocument</span><span class="p">();</span>
+    <span class="n">ObjectWriter</span> <span class="n">writer</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">ObjectWriter</span><span class="p">(</span><span class="k">new</span> <span class="nf">TypeLookup</span><span class="p">());</span>
+    <span class="n">writer</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">rootElement</span><span class="p">);</span>
+    <span class="n">doc</span><span class="p">.</span><span class="nf">WriteEndDocument</span><span class="p">();</span>
+<span class="p">}</span></code></pre></figure></p>
+<p>The ObjectWriter itself creates a CustomSerializationEntry for all the
+  properties that should be written. It then loops over the properties. Notice
+  how it uses the TypeLookup (lookup) to ask for the proper value writer for
+  each of the properties.
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="c1">// ...
+</span>        <span class="k">public</span> <span class="k">void</span> <span class="nf">Write</span><span class="p">(</span><span class="n">XmlWriter</span> <span class="n">doc</span><span class="p">,</span> <span class="kt">object</span> <span class="n">o</span><span class="p">,</span> <span class="kt">string</span> <span class="n">elementName</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">doc</span><span class="p">.</span><span class="nf">WriteStartElement</span><span class="p">(</span><span class="n">elementName</span><span class="p">);</span>
+            <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">CustomSerializationEntry</span><span class="p">&gt;</span> <span class="n">entries</span> <span class="p">=</span> <span class="nf">GetMemberInfo</span><span class="p">(</span><span class="n">o</span><span class="p">);</span>
+            <span class="k">foreach</span> <span class="p">(</span><span class="n">CustomSerializationEntry</span> <span class="n">currentEntry</span> <span class="k">in</span> <span class="n">entries</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="n">lookup</span><span class="p">.</span><span class="nf">GetValueWriter</span><span class="p">(</span><span class="n">currentEntry</span><span class="p">).</span><span class="nf">Write</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">currentEntry</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="n">doc</span><span class="p">.</span><span class="nf">WriteEndElement</span><span class="p">();</span>
+        <span class="p">}</span>
+<span class="p">//</span> <span class="p">...</span></code></pre></figure></p>
+<h3>Conclusion</h3>
+OK, so I left out a lot of details! But If I gave you all of the answers it
+wouldn't be any fun now would it. I hope you can see how decomposing the
+problem of serialization turns it a series of relatively simple problems that
+you can answer. So, if I can do this in about 500 lines of code, how come
+Microsoft can't implement a decent XML Serializer for the .NET Compact
+Framework.</p>

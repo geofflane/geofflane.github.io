@@ -1,0 +1,50 @@
+<p>It's been a long time since I've done any C programming (the only C I ever really did was in school 10+ years ago) and I've never done it outside of school. I figure since I look at and study languages that are pretty esoteric, it's only fair to throw in a language that is really widely used. It should make my Objective-C better (which probably isn't saying much). It also gives me a chance to go "a little closer to the metal" I guess. Hey look, a Bus Error!</p>
+<p>Anyway, one of the things that I love/hate about C are the little tricks that people often use. Sometimes they're really fun but often they take a bit of thinking to understand if you're not familiar with them. One of those that I ran across again was swapping values without a temp variable.</p>
+<h3>How Normal People Swap Values</h3>
+The simplest way of swapping two values is ususally accomplished using a temp variable to hold one of the values for a moment.
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">temp</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">temp</span> <span class="o">=</span> <span class="n">a</span><span class="p">;</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">b</span><span class="p">;</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">temp</span><span class="p">;</span></code></pre></figure></p>
+<h3>And Another Way</h3>
+But you can accomplish the same thing using an <a href="http://en.wikipedia.org/wiki/Exclusive_or">Exclusive Or (XOR)</a> operation.</p>
+<p>To review bitwise operations:</p>
+<pre>
+& AND
+  0101 (5)
+  1100 (12)
+  ----
+& 0100 (4)</p>
+<p>| OR
+  0101 (5)
+  1100 (12)
+  ----
+| 1101 (13)</p>
+<p>^ XOR
+  0101 (5)
+  1100 (12)
+  ----
+| 1001 (9)
+</pre></p>
+<p>The <em>^=</em> just combines the XOR with an Assignment.
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">a</span> <span class="o">^=</span> <span class="n">b</span><span class="p">;</span>
+<span class="n">b</span> <span class="o">^=</span> <span class="n">a</span><span class="p">;</span>
+<span class="n">a</span> <span class="o">^=</span> <span class="n">b</span><span class="p">;</span></code></pre></figure>
+Now isn't that totally intuitive? Yeah, not to me either. Technically once you know this piece of trivia, you don't really need to think about it. You'll just recognize the pattern and understand what's going on. But understanding why it works is probably a good thing.</p>
+<p>So, I just came up with an example that shows what's happening:
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>  <span class="c1">// 0010
+</span><span class="kt">int</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>  <span class="c1">// 0101&lt;/p&gt;
+</span><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">a</span> <span class="o">^=</span> <span class="n">b</span><span class="p">;</span>     <span class="c1">// 0111 = 0010 ^ 0101
+</span><span class="n">b</span> <span class="o">^=</span> <span class="n">a</span><span class="p">;</span>     <span class="c1">// 0010 = 0101 ^ 0111
+</span><span class="n">a</span> <span class="o">^=</span> <span class="n">b</span><span class="p">;</span>     <span class="o">//</span> <span class="mo">0101</span> <span class="o">=</span> <span class="mo">0111</span> <span class="o">^</span> <span class="mo">0010</span></code></pre></figure></p>
+<p>What are some of the principles in why this works?:
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">a</span> <span class="o">^</span> <span class="n">b</span> <span class="o">==</span> <span class="n">b</span> <span class="o">^</span> <span class="n">a</span></code></pre></figure></p>
+<p>XOR is a reversible binary operation.
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">a</span> <span class="o">=</span> <span class="n">a</span> <span class="o">^</span> <span class="n">b</span>  <span class="c1">// now a is some other value
+</span><span class="n">b</span> <span class="o">=</span> <span class="n">a</span> <span class="o">^</span> <span class="n">b</span>  <span class="c1">// now b is the original value of a
+</span><span class="n">a</span> <span class="o">=</span> <span class="n">a</span> <span class="o">^</span> <span class="n">b</span>  <span class="o">//</span> <span class="n">now</span> <span class="n">a</span> <span class="n">is</span> <span class="n">the</span> <span class="n">original</span> <span class="n">value</span> <span class="n">of</span> <span class="n">b</span></code></pre></figure></p>
+<p>This isn't a proof of any sort, but hopefully it will help you understand why it actually works. If you want even more of an explanation, and a proof, check out the article on Wikipedia: <a href="http://en.wikipedia.org/wiki/XOR_swap_algorithm">XOR Swap Algorithm</a></p>

@@ -1,0 +1,11 @@
+<p>In my previous post I wrote about <a href="http://www.zorched.net/2008/01/25/build-a-custom-validator-in-grails-with-a-plugin/">Building a Custom Validator in Grails using a Plugin</a>. That's a great way to build a reusable Constraint that will allow you to share your code among multiple projects. But often you only have one application that you are building, or a validator is a very domain specific thing that will only make sense in a single app.</p>
+<h3>Building the Constraint in a Single App</h3>
+<em>Please look at the previous post for the details of the Plugin.</em>
+As I mentioned in that post a plugin looks almost exactly like a Grails App. Just like in the plugin case, your grails app has a <em>src/groovy</em> and a <em>src/java</em> directory where you can put general code. In this case I wrote the Constraint in the <em>src/groovy</em> directory as I wanted to use the Groovy language and some of the fun dynamic techniques it offers.</p>
+<h3>Hook it into the App</h3>
+Here's the simple part. The goal, as we saw in the plugin example, is to register your custom Constraint with the Grails <em>ConstrainedProperty</em> class. I just took a guess on this one and it worked. Grails provides the
+<em>Config.groovy</em> class to setup a bunch of things in your application. So all you need to do is add the <en>ConstraintProperty</em> configuration to your <em>Config.groovy</em> script and your application will have a new constraint:</p>
+<p><strong>Config.groovy</strong>
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="n">org</span><span class="o">.</span><span class="na">codehaus</span><span class="o">.</span><span class="na">groovy</span><span class="o">.</span><span class="na">grails</span><span class="o">.</span><span class="na">validation</span><span class="o">.</span><span class="na">ConstrainedProperty</span><span class="o">.</span><span class="na">registerNewConstraint</span><span class="o">(</span>
+    <span class="n">PostalCodeConstraint</span><span class="o">.</span><span class="na">POSTAL_CODE_CONSTRAINT</span><span class="o">,</span> <span class="n">PostalCodeConstraint</span><span class="o">.</span><span class="na">class</span><span class="o">)</span></code></pre></figure></p>
+<p>Have fun building your own Constraints!</p>

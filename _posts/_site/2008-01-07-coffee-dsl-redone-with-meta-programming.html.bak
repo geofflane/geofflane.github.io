@@ -1,0 +1,82 @@
+<p>In a <a href="http://www.zorched.net/2007/03/05/understanding-domain-specific-languages-as-jargon/">previous post I wrote about DSLs as Jargon</a>. I implemented a simple Coffee DSL that would allow code to parse an order written by a human and turn it into a domain model. I used a fairly basic method_missing structure to capture the values.</p>
+<p>There's a much better way to do it in Ruby with meta-programming. Meta-programming allows you to write code to write code. You program your programming. In this case we can create the syntax of Coffee using a meta-programming technique.</p>
+<p><em>dsl_attr :size, %w(venti grande tall)</em></p>
+<p>This is us programming the class to say: "If someone calls a method venti, grande, or tall on our object they mean that they are telling us the size of the coffee, so store that value as the size". So now we can write our Coffee class like this:
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1"># CoffeeDSL.rb</span>
+<span class="c1"># This is the input from the user, likely read from a file</span>
+<span class="c1"># or input through a user interface of some sort</span>
+<span class="no">CoffeeInput</span> <span class="o">=</span> <span class="s2">"venti nonfat whip latte"</span>
+<span class="k">class</span> <span class="nc">Coffee</span>
+    <span class="n">dsl_attr</span> <span class="ss">:size</span><span class="p">,</span> <span class="sx">%w(venti grande tall)</span>
+    <span class="n">dsl_attr</span> <span class="ss">:whipped</span><span class="p">,</span> <span class="sx">%w(whip nowhip)</span>
+    <span class="n">dsl_attr</span> <span class="ss">:caffinated</span><span class="p">,</span> <span class="sx">%w(caf decaf halfcaf)</span>
+    <span class="n">dsl_attr</span> <span class="ss">:type</span><span class="p">,</span> <span class="sx">%w(regular latte cappachino)</span>
+    <span class="n">dsl_attr</span> <span class="ss">:milks</span><span class="p">,</span> <span class="sx">%w(milk nonfat soy)</span>
+    <span class="k">def</span> <span class="nf">order</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="s1">''</span>
+        <span class="n">params</span> <span class="o">+=</span> <span class="n">milks</span> <span class="o">+</span> <span class="s1">' '</span> <span class="k">if</span> <span class="n">milks?</span>
+        <span class="n">params</span> <span class="o">+=</span> <span class="n">caffinated</span> <span class="o">+</span> <span class="s1">' '</span> <span class="k">if</span> <span class="n">caffinated?</span>
+        <span class="n">params</span> <span class="o">+=</span> <span class="n">whipped</span> <span class="o">+</span> <span class="s1">' '</span> <span class="k">if</span> <span class="n">whipped?</span>
+        <span class="nb">print</span> <span class="s2">"Ordering coffee: </span><span class="si">#{</span><span class="n">size</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">params</span><span class="si">}#{</span><span class="n">type</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+    <span class="k">end</span>
+    <span class="k">def</span> <span class="nf">load</span>
+        <span class="c1"># turn one line into multi-line "method calls"</span>
+        <span class="n">cleaned</span> <span class="o">=</span> <span class="no">CoffeeInput</span><span class="p">.</span><span class="nf">gsub</span><span class="p">(</span><span class="sr">/\s+/</span><span class="p">,</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+        <span class="nb">self</span><span class="p">.</span><span class="nf">instance_eval</span><span class="p">(</span><span class="n">cleaned</span><span class="p">)</span>
+    <span class="k">end</span>
+<span class="k">end</span></code></pre></figure></p>
+<p>We are essentially configuring the class in code. We could add extra values as well, such as a default value, required validation, any number of things. We then just need to implement the <em>dsl_attr</em> using meta-programming. That can be done in the Module in Ruby which makes that available to all classes in the system.</p>
+<p>
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">class</span> <span class="nc">Module</span>
+    <span class="k">def</span> <span class="nf">dsl_attr</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+        <span class="kp">attr</span> <span class="n">param_name</span>
+        <span class="nb">class_eval</span> <span class="s2">"def </span><span class="si">#{</span><span class="n">param_name</span><span class="si">}</span><span class="s2">?; @</span><span class="si">#{</span><span class="n">param_name</span><span class="si">}</span><span class="s2">; end"</span>
+        <span class="n">values</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">val</span><span class="o">|</span>
+            <span class="n">define_method</span><span class="p">(</span><span class="s2">"</span><span class="si">#{</span><span class="n">val</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="k">do</span>
+                <span class="nb">instance_eval</span> <span class="sx">%{
+                    @#{param_name} = '#{val}'
+                }</span>
+            <span class="k">end</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+<span class="k">end</span></code></pre></figure></p>
+<p>Now when you run the code it captures all of the values that are parsed from the input and puts them into your object as meaningful values.
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">c</span> <span class="o">=</span> <span class="no">Coffee</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">c</span><span class="p">.</span><span class="nf">load</span>
+<span class="n">c</span><span class="p">.</span><span class="nf">order</span></code></pre></figure></p>
+<p>I did the same <a href="http://www.zorched.net/2007/03/08/coffee-dsl-in-groovy/">DSL in Groovy</a> and thought I could attempt to do it more justice using meta-programming as well. In <a href="http://groovy.codehaus.org">Groovy</a>, meta-programming is done with the ExpandoMetaClass - no, I didn't make that up. Each Class has a metaClass property that gets you access to that types' ExpandoMetaClass instance. You can then add properties and methods and whatnot to it. This has the effect of making the properties or methods callable on an instance of that type.</p>
+<p>
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="no">ExpandoMetaClass</span><span class="p">.</span><span class="nf">enableGlobally</span><span class="p">()</span>   <span class="o">/</span><span class="sr">/ have to do this to get inheritance of dslAttr
+Object.metaClass.dslAttr &lt;&lt; {String param_name, values -&gt;
+    def clazz = delegate
+    clazz.metaClass."${param_name}" = null
+    values.each() { val -&gt;
+        clazz.metaClass."${val}" &lt;&lt; {-&gt; clazz."${param_name}" = "${val}" }
+    }
+}
+class Coffee {
+    def Coffee() {
+        dslAttr("size", ['venti', 'tall', 'grande'])
+        dslAttr("whipped", ['whip', 'nowhip'])
+        dslAttr("caffinated", ['caf', 'decaf', 'halfcaf'])
+        dslAttr("type", ['regular', 'latte', 'cappachino'])
+        dslAttr("milks", ['milk', 'nonfat', 'soy'])
+    }
+    def order() {
+        def params = ''
+        if (null != getMilks()) params += "${getMilks()} "
+        if (null != getCaffinated()) params += "${getCaffinated()} "
+        if (null != getWhipped()) params += "${getWhipped()} "
+        println "Ordering coffee: ${getSize()} ${params}${getType()}\n"
+    }
+    def load(String input) {
+        /</span><span class="o">/</span> <span class="n">turn</span> <span class="n">one</span> <span class="n">line</span> <span class="n">into</span> <span class="n">multi</span><span class="o">-</span><span class="n">line</span> <span class="s2">"method calls"</span>
+        <span class="k">def</span> <span class="nf">cleaned</span> <span class="o">=</span> <span class="n">input</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sr">/\s+/</span><span class="p">)</span>
+        <span class="n">cleaned</span><span class="p">.</span><span class="nf">each</span><span class="p">()</span> <span class="p">{</span> <span class="n">meth</span> <span class="o">-&gt;</span> <span class="n">this</span><span class="p">.</span><span class="nf">&amp;</span><span class="s2">"${meth}"</span><span class="p">()</span> <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="k">def</span> <span class="nf">c</span> <span class="o">=</span> <span class="kp">new</span> <span class="no">Coffee</span><span class="p">()</span>
+<span class="n">c</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="s2">"venti nonfat whip latte"</span><span class="p">)</span>
+<span class="n">c</span><span class="p">.</span><span class="nf">order</span><span class="p">()</span></code></pre></figure></p>
+<p>I'm not sure if there is a better way to do this or not. Ideally I would like to have the dslAttr add something to the Coffee metaClass instead of just adding stuff to the instances, but this seems to do the trick for now.</p>
+<p>The Ruby and Groovy implementations become fairly similar at this point. It's a great way to reduce the amount of boilerplate code you would need to normally write to implement this kind of thing in less dynamic languages.</p>

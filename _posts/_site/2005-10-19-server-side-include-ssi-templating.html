@@ -1,0 +1,34 @@
+<p>Templating for web pages is a method to separate form from content. Just like HTML and CSS separate form from content, a templating system allows you to further separate the common structure of a page from the "Stuff" that people want to read. Is there a best way to do templating? I don't know, but here's a way that I think is good:</p>
+<p>Often times when people do templating they include a common header, a common footer and possibly navigation in each of their source HTML files. Over time the size of the site grows and the number of pages becomes large. If you ever want to change the layout of the site, you often find that there are changes that you have to make in each file because the layout has creeped into each one.</p>
+<p>By thinking about Templating in a slightly different way, you can turn the problem on it's head and never worry about it again. Rather than having 4 files: </p>
+<ol>
+<li>page.html</li>
+<li>header.html</li>
+<li>footer.html</li>
+<li>nav.html</li>
+</ol></p>
+<p>(page.html includes header.html, footer.html and nav.html)</p>
+<p>You can have 3 files:</p>
+<ol>
+<li>page.html</li>
+<li>page.body.html</li>
+<li>template.html</li>
+</ol></p>
+<p>In this scheme page.html is a level of indirection that looks like:</p>
+<p>
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="c">&lt;!--#set var="body" value="index.body.html" --&gt;</span>
+<span class="c">&lt;!--#set var="page.title" value="Hi, I'm a Title" --&gt;</span>
+<span class="c">&lt;!--#include file="template.shtml" --&gt;</span></code></pre></figure></p>
+<p>What you see with the above code is that the main included file is the template.shtml page. The other 2 directives are setting parameters that will be used in the template to load the proper body content and set the title. You can create more variables like this if you need to.</p>
+<p>page.body.html will have just the main content of the page.</p>
+<p><code class="block">Blah, blah, I'm the content of the page.</code></p>
+<p>template.html will then have the entire markup of the site except for the body. It can have includes if need be, but its main purpose is to contain the structure of the site including common elements like headers, footers, navigation, etc. The template.html page will include the value from the body variable set in the page.html (as described above) and include it in the proper place:</p>
+<p>
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;head&gt;</span>
+<span class="nt">&lt;title&gt;</span>Common Title | <span class="nt">&lt;--</span><span class="err">#</span><span class="na">echo</span> <span class="na">var=</span><span class="s">"page.title"</span> <span class="na">--</span><span class="nt">&gt;&lt;/title&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+    ...<span class="nt">&lt;/p&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"primaryContent"</span><span class="nt">&gt;</span>
+<span class="c">&lt;!--#include virtual="${body}" --&gt;</span>
+<span class="nt">&lt;/div&gt;</span></code></pre></figure></p>
+<p>This lets you focus on the content when you want to worry about content and focus on layout when you want to worry about that.</p>

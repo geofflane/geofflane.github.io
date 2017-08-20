@@ -1,0 +1,54 @@
+<h3>Be Smart</h3>
+Databases are smart. Relational theory is based in math. The people who invented the relational theory and the people who design and build databases are smart. There is all kinds of really hard math that goes into proving algorithmic efficiency in database development. The people that do that are smart. They are a lot smarter than you (unless you are one of those people - then they are as smart as you). You should use the work of smart people because it will make your work better and your life easier.</p>
+<p>Seriously though. As software developers we think about Objects and procedures and abstractions and all the kind of things that we love to do when we write software. Encapsulation, generalization and abstraction aren't just fun to think about - they make building, maintaining and understanding systems much easier. What we often don't think about is the database. </p>
+<p>I've seen a number of systems that treat databases as not much more than a simple flat file store. Oracle, IBM, the open source world, and even Microsoft have hired a bunch of smart people and spent HUGE amounts of time and money to make their databases robust, correct, atomic and all kinds of other good adjectives. They contain stored procedures, user defined functions, views, indexes and all kinds of tools that you can use to maintain data. Please learn and use the database. Don't waste all that work and talent.</p>
+<h3>An Appeal by Example</h3>
+(This is foreshadowing)</p>
+<p>Let's say you're writing a function:
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isCreditCardNumberValid</span><span class="o">(</span><span class="n">String</span> <span class="n">ccNumber</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">ccNumber</span> <span class="o">||</span> <span class="s">""</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">ccNumber</span><span class="o">))</span>
+        <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+    <span class="k">return</span> <span class="nf">performLuhnCheck</span><span class="o">(</span><span class="n">ccNumber</span><span class="o">);</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">performLuhnCheck</span><span class="o">(</span><span class="n">String</span> <span class="n">number</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+    <span class="kt">boolean</span> <span class="n">alternate</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">number</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">-</span> <span class="mi">1</span><span class="o">;</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">--)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">number</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="n">i</span><span class="o">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="o">));</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">alternate</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">n</span> <span class="o">*=</span> <span class="mi">2</span><span class="o">;</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">n</span> <span class="o">&gt;</span> <span class="mi">9</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="o">(</span><span class="n">n</span> <span class="o">%</span> <span class="mi">10</span><span class="o">)</span> <span class="o">+</span> <span class="mi">1</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="n">sum</span> <span class="o">+=</span> <span class="n">n</span><span class="o">;</span>
+        <span class="n">alternate</span> <span class="o">=</span> <span class="o">!</span><span class="n">alternate</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="o">(</span><span class="n">sum</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="o">);</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>This method is an example of encapsulating a complicated algorithm in a descriptive method name. Understanding what the <em>isCreditCardNumberValid</em> method does does not require that you understand the implementation of the <a href="http://en.wikipedia.org/wiki/Luhn_algorithm">Luhn algorithm</a>. With a fairly simple method like <em>isCreditCardNumberValid</em> this is a moderately valuable thing. With a more complicated method, with many steps, this kind of clarity becomes priceless. </p>
+<p>Image instead you saw:
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">validate</span><span class="o">(</span><span class="n">String</span> <span class="n">str</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+    <span class="kt">boolean</span> <span class="n">alternate</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">str</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">-</span> <span class="mi">1</span><span class="o">;</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">--)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">str</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="n">i</span><span class="o">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="o">));</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">alternate</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">n</span> <span class="o">*=</span> <span class="mi">2</span><span class="o">;</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">n</span> <span class="o">&gt;</span> <span class="mi">9</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="o">(</span><span class="n">n</span> <span class="o">%</span> <span class="mi">10</span><span class="o">)</span> <span class="o">+</span> <span class="mi">1</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="n">sum</span> <span class="o">+=</span> <span class="n">n</span><span class="o">;</span>
+        <span class="n">alternate</span> <span class="o">=</span> <span class="o">!</span><span class="n">alternate</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="o">(</span><span class="n">sum</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="o">);</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>Without knowing that the method is a Credit Card validation routine and without a nice name referencing Luhn, I dare you to figure out that this is a Luhn check. I hope it's obvious to see what a small change can make in terms of clarity.</p>
+<h3>Why You Should Love Foreign Keys</h3>
+Foreign Keys provide data integrity to your database. It is one of those smart things that allows a database to protect itself from application bugs and user errors. That on it's own should be enough to make you like foreign keys. But I said Love, as in, want to marry them.</p>
+<p>The other thing that Foreign Keys do is document the relationships of the tables in the database. They are the equivalent of a bit of encapsulation and good naming - they make the entire database easier to understand. They often even let tools generate ERD diagrams for people that come after you so that they can understand your intent. Anything that lets someone later generate a picture is worth doing because it replaces reams of handwritten documentation.</p>
+<p>Just like with code, naming conventions can go a long way to providing clarity in a data model. I would encourage sticking to some reasonable naming conventions in all of the development that you do. But naming conventions can't generate diagrams and naming conventions need someone to enforce them.</p>
+<p>Foreign keys in this case are somewhat like Unit Tests. They're functional, but they are also there to document the intent of the designers and developers of the system. You can not ignore them or forget about them if the rules change. As with unit tests, you have to keep them up to date with the system as a whole or they will break. As with Unit Tests you might not see a huge value in them today when you are certain (right?) that your code works. But they play a huge rule in keeping a system running and allowing people to make changes with the confidence that if they did something wrong, they will know it quickly.</p>
+<p>Do you love Foreign Keys? I Do!</p>

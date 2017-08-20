@@ -1,0 +1,85 @@
+<p>Certain data stored as plain text in a database is just asking for trouble these days. We hear too often about misplaced and stolen computers that contain databases full of Social Security numbers and other information that can lead to identity theft. We can help avoid these situations by encrypting those fields in a database so that if someone happens to get the data that they will have a difficult time getting the sensitive data.</p>
+<h3>Codecs</h3>
+Grails provides a very good mechanism for this encryption in its <a href="http://grails.org/doc/1.0.x/ref/Plug-ins/codecs.html">Codec support</a>. Codecs allow you to create encoders and decoders that become very easy to use in your application. Grails comes with a few useful ones built in to do things like Base64, URL, HTML, and Javascript Encoding.</p>
+<p>Anywhere you have a string you can call the encodeAs<em>CodecName</em> or decode<em>CodecName</em> to perform the encoding or decoding:
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="k">assert</span> <span class="s2">"apples &amp;amp; oranges "</span> <span class="o">==</span> <span class="s2">"apples &amp; oranges"</span><span class="o">.</span><span class="na">encodeAsHTML</span><span class="o">()</span>
+<span class="k">assert</span> <span class="s2">"apples &amp; oranges "</span> <span class="o">==</span> <span class="s2">"apples &amp;amp; oranges"</span><span class="o">.</span><span class="na">decodeHTML</span><span class="o">()</span></code></pre></figure></p>
+<p>This is a nice, generally useful utility that can be used for any kind of string conversion really. There's nothing from stopping you from creating your <em>encodeAsInteger</em> or <em>decodeShortDate</em> if that's something you need a lot of in your application.</p>
+<p>The basic format of a Codec is simple. You can create your new Codec in the <em>grails-app/utils</em> directory and it will be found automatically by Grails based on the naming convention.
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="kd">class</span> <span class="nc">MyCodec</span> <span class="o">{</span>
+    <span class="kd">static</span> <span class="n">encode</span> <span class="o">=</span> <span class="o">{</span> <span class="n">str</span> <span class="o">-&gt;</span>
+        <span class="c1">// Implement encoding here</span>
+    <span class="o">}</span>
+    <span class="kd">static</span> <span class="n">decode</span> <span class="o">=</span> <span class="o">{</span> <span class="n">str</span> <span class="o">-&gt;</span>
+        <span class="c1">// Implement decoding here</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<h3>Encryption Codec</h3>
+In my case I wanted to create something to do encryption. Luckily this is not so hard with the javax.crypto classes. The crypto API is not the most straight forward to use in the world, but with a little bit of reading you can figure out how to encrypt and decrypt data without a lot of hassle. Basically what you see is a fairly simple encryption routine wrapped in the Grails Codec standard.</p>
+<p>As you saw from previous example, the Codec standard is really simple, so all of the complexity here is really just the encryption code.</p>
+<p><figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="kn">import</span> <span class="nn">javax.crypto.spec.SecretKeySpec</span>
+<span class="kn">import</span> <span class="nn">javax.crypto.Cipher</span>
+<span class="kn">import</span> <span class="nn">javax.crypto.spec.IvParameterSpec</span>
+<span class="kn">import</span> <span class="nn">sun.misc.BASE64Encoder</span>
+<span class="kn">import</span> <span class="nn">sun.misc.BASE64Decoder</span>
+<span class="kn">import</span> <span class="nn">org.codehaus.groovy.grails.commons.ConfigurationHolder</span>
+<span class="cm">/**
+* Used for encrypting things to store in the database
+*/</span>
+<span class="kd">class</span> <span class="nc">SecureCodec</span> <span class="o">{</span>
+    <span class="kd">static</span> <span class="n">BASE64Decoder</span> <span class="n">decoder</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BASE64Decoder</span><span class="o">()</span>
+    <span class="kd">static</span> <span class="n">BASE64Encoder</span> <span class="n">encoder</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BASE64Encoder</span><span class="o">()</span>
+    <span class="kd">static</span> <span class="n">encode</span> <span class="o">=</span> <span class="o">{</span> <span class="n">str</span> <span class="o">-&gt;</span>
+        <span class="n">Cipher</span> <span class="n">cipher</span> <span class="o">=</span> <span class="n">setupCipher</span><span class="o">(</span><span class="n">Cipher</span><span class="o">.</span><span class="na">ENCRYPT_MODE</span><span class="o">,</span> <span class="n">getPassword</span><span class="o">())</span>
+        <span class="k">return</span> <span class="n">encoder</span><span class="o">.</span><span class="na">encode</span><span class="o">(</span><span class="n">cipher</span><span class="o">.</span><span class="na">doFinal</span><span class="o">(</span><span class="n">str</span><span class="o">.</span><span class="na">getBytes</span><span class="o">()));</span>
+    <span class="o">}</span>
+    <span class="kd">static</span> <span class="n">decode</span> <span class="o">=</span> <span class="o">{</span> <span class="n">str</span> <span class="o">-&gt;</span>
+        <span class="n">Cipher</span> <span class="n">cipher</span> <span class="o">=</span> <span class="n">setupCipher</span><span class="o">(</span><span class="n">Cipher</span><span class="o">.</span><span class="na">DECRYPT_MODE</span><span class="o">,</span> <span class="n">getPassword</span><span class="o">())</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">String</span><span class="o">(</span><span class="n">cipher</span><span class="o">.</span><span class="na">doFinal</span><span class="o">(</span><span class="n">decoder</span><span class="o">.</span><span class="na">decodeBuffer</span><span class="o">(</span><span class="n">str</span><span class="o">)));</span>
+    <span class="o">}</span>
+    <span class="kd">static</span> <span class="nf">getPassword</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">ConfigurationHolder</span><span class="o">.</span><span class="na">config</span><span class="o">.</span><span class="na">encryption</span><span class="o">.</span><span class="na">password</span>
+    <span class="o">}</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nf">setupCipher</span><span class="o">(</span><span class="n">mode</span><span class="o">,</span> <span class="n">password</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">Cipher</span> <span class="n">cipher</span> <span class="o">=</span> <span class="n">Cipher</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="s2">"AES/CBC/PKCS5Padding"</span><span class="o">);</span>
+        <span class="c1">// setup key</span>
+        <span class="kt">byte</span><span class="o">[]</span> <span class="n">keyBytes</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">16</span><span class="o">];</span>
+        <span class="kt">byte</span><span class="o">[]</span> <span class="n">b</span> <span class="o">=</span> <span class="n">password</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(</span><span class="s2">"UTF-8"</span><span class="o">);</span>
+        <span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">len</span> <span class="o">&gt;</span> <span class="n">keyBytes</span><span class="o">.</span><span class="na">length</span><span class="o">)</span>
+            <span class="n">len</span> <span class="o">=</span> <span class="n">keyBytes</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
+        <span class="n">System</span><span class="o">.</span><span class="na">arraycopy</span><span class="o">(</span><span class="n">b</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">keyBytes</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">len</span><span class="o">);</span>
+        <span class="n">SecretKeySpec</span> <span class="n">keySpec</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SecretKeySpec</span><span class="o">(</span><span class="n">keyBytes</span><span class="o">,</span> <span class="s2">"AES"</span><span class="o">);</span>
+        <span class="n">IvParameterSpec</span> <span class="n">ivSpec</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IvParameterSpec</span><span class="o">(</span><span class="n">keyBytes</span><span class="o">);</span>
+        <span class="n">cipher</span><span class="o">.</span><span class="na">init</span><span class="o">(</span><span class="n">mode</span><span class="o">,</span> <span class="n">keySpec</span><span class="o">,</span> <span class="n">ivSpec</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">cipher</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>Another handy thing to notice is the <em>ConfigurationHolder.config</em>. This is the way to access application properties defined in Config.groovy. In a Domain class or a Controller you can get those values using <em>grailsApplication.config</em> but the grailsApplication variable is not available in Codecs or other classes. I use the Config.groovy to define an application specific secret to use for the encryption.</p>
+<h3>Testing Your Codec</h3>
+Now to confirm that the code works we can write a Unit Tests. Encryption and Codecs are the perfect example of checking an Inverse Relationships to confirm the functionality of the Codec. Basically just encode it and decode it and compare the original value to the decoded value. If they match, it worked! </p>
+<h4>As a Unit Test</h4>
+Outside the context of your running Grails application your Codec is just another Groovy class. Testing it in a Unit Test is easy though. You can just instantiate an instance of it and call the closures like they are methods.
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="kd">class</span> <span class="nc">SecureCodecTests</span> <span class="kd">extends</span> <span class="n">GroovyTestCase</span> <span class="o">{</span>
+    <span class="kt">void</span> <span class="nf">test_roundtrip_decodes_to_the_same_thing</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">SecureCodec</span> <span class="n">codec</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SecureCodec</span><span class="o">()</span>
+        <span class="kt">def</span> <span class="n">original</span> <span class="o">=</span> <span class="s2">"secret"</span>
+        <span class="kt">def</span> <span class="n">encoded</span> <span class="o">=</span> <span class="n">codec</span><span class="o">.</span><span class="na">encode</span><span class="o">(</span><span class="n">original</span><span class="o">)</span>
+        <span class="kt">def</span> <span class="n">decoded</span> <span class="o">=</span> <span class="n">codec</span><span class="o">.</span><span class="na">decode</span><span class="o">(</span><span class="n">encoded</span><span class="o">)</span>
+        <span class="k">assert</span> <span class="n">original</span> <span class="o">!=</span> <span class="n">encoded</span>
+        <span class="k">assert</span> <span class="n">encoded</span> <span class="o">!=</span> <span class="n">decoded</span>
+        <span class="k">assert</span> <span class="n">original</span> <span class="o">==</span> <span class="n">decoded</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<h4>As an Integration Test</h4>
+If you want to be able to test it as it will be used in your Grails application though, you will need to run it as an integration test. The integration tests are loaded, instrumented and run just like they would be by the real Grails application. To do that, you just have to create the test under the <em>tests/integration</em> directory of your Grails application.
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="kd">class</span> <span class="nc">SecureCodecTests</span> <span class="kd">extends</span> <span class="n">GroovyTestCase</span> <span class="o">{</span>
+    <span class="kt">void</span> <span class="nf">test_roundtrip_decodes_to_the_same_thing</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kt">def</span> <span class="n">original</span> <span class="o">=</span> <span class="s2">"secret"</span>
+        <span class="kt">def</span> <span class="n">encoded</span> <span class="o">=</span> <span class="n">original</span><span class="o">.</span><span class="na">encodeAsSecure</span><span class="o">()</span>
+        <span class="kt">def</span> <span class="n">decoded</span> <span class="o">=</span> <span class="n">encoded</span><span class="o">.</span><span class="na">decodeSecure</span><span class="o">()</span>
+        <span class="k">assert</span> <span class="n">original</span> <span class="o">!=</span> <span class="n">encoded</span>
+        <span class="k">assert</span> <span class="n">encoded</span> <span class="o">!=</span> <span class="n">decoded</span>
+        <span class="k">assert</span> <span class="n">original</span> <span class="o">==</span> <span class="n">decoded</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>

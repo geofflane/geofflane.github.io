@@ -1,0 +1,114 @@
+<p><a href="http://www.codeplex.com/ObjectBuilder">ObjectBuilder</a> is a .NET framework made for building <a href="http://www.martinfowler.com/articles/injection.html">Inversion of Control or Dependency Injection</a> containers. Unlike Spring or Pico, ObjectBuilder is not a full DI framework, instead it's a framework for building DI solutions. Yes, that's incredibly weird to me too.</p>
+<h3>Why Use Object Builder?</h3>
+Why would you use ObjectBuilder instead of a fully baked DI solution? In the .NET world it seems like if it's not built by Microsoft then it's not on the table. People really are looking for the "garden path". So in part it's really a psychological thing. On the other hand the Microsoft Application Blocks and <a href="http://www.codeplex.com/entlib">Enterprise Library</a> are built using ObjectBuilder. So, if you are already using some of those solutions, then you already have a dependency on ObjectBuilder. It is natural to try to control the number of dependencies that a project relies upon. In this case, you have a simple solution that just requires a bit of custom code.</p>
+<p>In addition to the fact that it's basically a roll-your-own DI framework, the other downside of ObjectBuilder is that the documentation is non-existent. It's said 'Under construction...' sine July of 2006, so don't get your hopes up if you don't want to look at the API and read the source.</p>
+<h3>Wire Together Services</h3>
+If you are going to build a service you could do property based injection. What this means is that in your service layer all of the dependencies are passed into a service via property setters. This keeps the code clean and makes changing the implementation of a dependency very easy. If you have a hardcoded constructor for your dependency in a class then making this kind of change will be harder. It also makes Unit Testing very easy because you can mock out dependencies and isolate the layers of your code.</p>
+<p><figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">public</span> <span class="k">class</span> <span class="nc">SomeService</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="n">SomeDAO</span> <span class="n">someDao</span><span class="p">;</span>
+    <span class="p">[</span><span class="n">Dependency</span><span class="p">]</span>
+    <span class="k">public</span> <span class="n">SomeDAO</span> <span class="n">SomeDAO</span>
+    <span class="p">{</span>
+        <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="n">someDao</span><span class="p">;</span> <span class="p">}</span>
+        <span class="k">set</span> <span class="p">{</span> <span class="n">someDao</span> <span class="p">=</span> <span class="k">value</span><span class="p">;</span> <span class="p">}</span>
+    <span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="k">public</span> <span class="k">void</span> <span class="nf">Save</span><span class="p">(</span><span class="n">SomeObject</span> <span class="n">o</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">o</span><span class="p">.</span><span class="n">IsValid</span><span class="p">)</span>
+            <span class="n">SomeDAO</span><span class="p">.</span><span class="nf">Save</span><span class="p">(</span><span class="n">o</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure></p>
+<h3>ASP.NET</h3>
+Most of the examples you can find on the web dealing with ObjectBuilder are about how to use ObjectBuilder as a ServiceBroker where you instantiate a service type object in a view.</p>
+<p><figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">public</span> <span class="k">partial</span> <span class="k">class</span> <span class="nc">SomePage</span> <span class="p">:</span> <span class="n">System</span><span class="p">.</span><span class="n">Web</span><span class="p">.</span><span class="n">UI</span><span class="p">.</span><span class="n">Page</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="n">SomeService</span> <span class="n">someService</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="k">void</span> <span class="nf">Page_Load</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">Builder</span> <span class="n">builder</span> <span class="p">=</span> <span class="nf">NewBuilder</span><span class="p">();</span>
+        <span class="n">someService</span> <span class="p">=</span> <span class="n">builder</span><span class="p">.</span><span class="n">BuildUp</span><span class="p">&lt;</span><span class="n">SomeService</span><span class="p">&gt;(</span><span class="k">null</span><span class="p">,</span> <span class="k">null</span><span class="p">,</span> <span class="k">null</span><span class="p">);</span>
+    <span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="k">private</span> <span class="n">Builder</span> <span class="nf">NewBuilder</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="c1">// Create a Builder
+</span>    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure></p>
+<p>While that's ok, I think it's a pretty limiting way to do things. Once you get to any sort of complex object construction, you are going to have to create another class to encapsulate all of the policies and strategies for building objects. The other issue is that using the Services in UI code is very different than compositing the services themselves. It also stands in stark contrast to the clean implementation of the Service layer.</p>
+<p>I want to make my pages look more like my Service layer.</p>
+<p><figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">public</span> <span class="k">partial</span> <span class="k">class</span> <span class="nc">SomePage</span> <span class="p">:</span> <span class="n">System</span><span class="p">.</span><span class="n">Web</span><span class="p">.</span><span class="n">UI</span><span class="p">.</span><span class="n">Page</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="n">SomeService</span> <span class="n">someService</span><span class="p">;</span>
+    <span class="k">protected</span> <span class="k">void</span> <span class="nf">Page_Load</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
+    <span class="p">{</span>
+    <span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="p">[</span><span class="n">Dependency</span><span class="p">]</span>
+    <span class="k">public</span> <span class="n">SomeService</span> <span class="nf">SomeService</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="n">someService</span><span class="p">;</span> <span class="p">}</span>
+        <span class="k">set</span> <span class="p">{</span> <span class="n">someService</span> <span class="p">=</span> <span class="k">value</span><span class="p">;</span> <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure></p>
+<h3>IHttpModules to the Rescue</h3>
+Page lifecycles are handled by the ASP.NET worker processes so there is no way to construct your own pages and do the Dependency Injection. I immediately went to the idea of a filter (which is how this is done in the Java world). The filter concept in ASP.NET is implemented as an IHttpModule.</p>
+<p>The module should do 2 main things:</p>
+<ul>
+<li>Construct and manage the DI container</li>
+<li>Inject Properties into the Page object that is going to handle the request</li>
+</ul></p>
+<p>Construct a series of ObjectBuilder classes to create your DI container.
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="n">Locator</span> <span class="n">locator</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Locator</span><span class="p">();</span>
+<span class="n">ILifetimeContainer</span> <span class="n">container</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">LifetimeContainer</span><span class="p">();&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span><span class="c1">// Setup the strategy for how objects can be created
+</span><span class="n">BuilderStrategyChain</span> <span class="n">chain</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">BuilderStrategyChain</span><span class="p">();</span>
+<span class="n">chain</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="k">new</span> <span class="nf">CreationStrategy</span><span class="p">());</span>
+<span class="n">chain</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="k">new</span> <span class="nf">PropertyReflectionStrategy</span><span class="p">());</span>
+<span class="n">chain</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="k">new</span> <span class="nf">PropertySetterStrategy</span><span class="p">());</span>
+<span class="n">locator</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">ILifetimeContainer</span><span class="p">),</span> <span class="n">container</span><span class="p">);&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span><span class="c1">// Create a context to build an object
+</span><span class="n">BuilderContext</span> <span class="n">builderContext</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">BuilderContext</span><span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="n">locator</span><span class="p">,</span> <span class="k">null</span><span class="p">);</span>
+<span class="n">builderContext</span><span class="p">.</span><span class="n">Policies</span><span class="p">.</span><span class="n">SetDefault</span><span class="p">&lt;</span><span class="n">ICreationPolicy</span><span class="p">&gt;(</span><span class="k">new</span> <span class="nf">DefaultCreationPolicy</span><span class="p">());</span></code></pre></figure></p>
+<p>You can access the current Page that will handle the request in an IHttpModule using:
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="n">HttpApplication</span> <span class="n">app</span><span class="p">;</span>
+<span class="n">app</span><span class="p">.</span><span class="n">Context</span><span class="p">.</span><span class="n">CurrentHandler</span><span class="p">;</span> <span class="p">//</span> <span class="n">The</span> <span class="n">Page</span> <span class="n">handler</span></code></pre></figure></p>
+<p>Now to tie it all together we create an IHttpModule that will filter each request and wire up our Pages with their dependencies. IHttpModules are configured to respond to callback events related to the <a href="http://msdn2.microsoft.com/en-us/library/system.web.httpapplication(VS.80).aspx">Life Cycle of a request</a>. In this case we need wire up our Pages after the PostMapRequestHandler because the Page is created prior to this. I set this up on the PreRequestHandlerExecute because everything is setup at this point and it is right before the Page methods are called.</p>
+<p><figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="c1">///
+</span><span class="p">&lt;</span><span class="n">summary</span><span class="p">&gt;</span>
+<span class="c1">/// ObjectBuilderModule handles PropertyBased Injection for ASP.NET Forms.
+/// &lt;/summary&gt;
+</span><span class="k">public</span> <span class="k">class</span> <span class="nc">ObjectBuilderModule</span> <span class="p">:</span> <span class="n">IHttpModule</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="n">HttpApplication</span> <span class="n">app</span><span class="p">;</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="n">Locator</span> <span class="n">locator</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Locator</span><span class="p">();</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="n">ILifetimeContainer</span> <span class="n">container</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">LifetimeContainer</span><span class="p">();</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="n">BuilderStrategyChain</span> <span class="n">chain</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">BuilderStrategyChain</span><span class="p">();</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="n">BuilderContext</span> <span class="n">builderContext</span><span class="p">;</span>
+    <span class="k">public</span> <span class="nf">ObjectBuilderModule</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="n">chain</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="k">new</span> <span class="nf">CreationStrategy</span><span class="p">());</span>
+        <span class="n">chain</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="k">new</span> <span class="nf">PropertyReflectionStrategy</span><span class="p">());</span>
+        <span class="n">chain</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="k">new</span> <span class="nf">PropertySetterStrategy</span><span class="p">());</span>
+        <span class="n">locator</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">ILifetimeContainer</span><span class="p">),</span> <span class="n">container</span><span class="p">);</span>
+        <span class="n">builderContext</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">BuilderContext</span><span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="n">locator</span><span class="p">,</span> <span class="k">null</span><span class="p">);</span>
+        <span class="n">builderContext</span><span class="p">.</span><span class="n">Policies</span><span class="p">.</span><span class="n">SetDefault</span><span class="p">&lt;</span><span class="n">ICreationPolicy</span><span class="p">&gt;(</span><span class="k">new</span> <span class="nf">DefaultCreationPolicy</span><span class="p">());</span>
+    <span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="k">public</span> <span class="k">void</span> <span class="nf">Init</span><span class="p">(</span><span class="n">HttpApplication</span> <span class="n">context</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">app</span> <span class="p">=</span> <span class="n">context</span><span class="p">;</span>
+        <span class="c1">// PreRequestHandler so that everything is setup including the Session, etc
+</span>        <span class="n">app</span><span class="p">.</span><span class="n">PreRequestHandlerExecute</span> <span class="p">+=</span> <span class="n">InjectProperties</span><span class="p">;</span>
+    <span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="k">void</span> <span class="nf">InjectProperties</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">IHttpHandler</span> <span class="n">h</span> <span class="p">=</span> <span class="n">app</span><span class="p">.</span><span class="n">Context</span><span class="p">.</span><span class="n">CurrentHandler</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">h</span> <span class="k">is</span> <span class="n">DefaultHttpHandler</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="n">chain</span><span class="p">.</span><span class="n">Head</span><span class="p">.</span><span class="nf">BuildUp</span><span class="p">(</span><span class="n">builderContext</span><span class="p">,</span> <span class="n">h</span><span class="p">.</span><span class="nf">GetType</span><span class="p">(),</span> <span class="n">h</span><span class="p">,</span> <span class="k">null</span><span class="p">);</span>
+    <span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="k">public</span> <span class="k">void</span> <span class="nf">Dispose</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="n">app</span><span class="p">.</span><span class="n">PostMapRequestHandler</span> <span class="p">-=</span> <span class="n">InjectProperties</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure></p>
+<h3>Conclusion</h3>
+Hopefully this shows you that you can create a powerful, transparent solution for doing Dependency Injection with ASP.NET. This isn't necessarily a complete solution. We could implement many other things like Singleton management for various service classes for example. Now all you have to do is extend it for your application's own needs.</p>

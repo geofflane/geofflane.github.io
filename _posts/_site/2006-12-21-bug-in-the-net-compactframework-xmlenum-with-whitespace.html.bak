@@ -1,0 +1,80 @@
+<p>In .NET you can use Attributes to mark up properties in a class to tell the XmlSerializer how to marshal that class to and from XML. There are a number of different attributes you can use. You can use enums for restricted lists of values.</p>
+<p>E.g:</p>
+<p>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">public</span> <span class="k">enum</span> <span class="n">Foo</span> <span class="p">{</span>
+    <span class="p">[</span><span class="nf">XmlEnum</span><span class="p">(</span><span class="s">"Some Value"</span><span class="p">)</span>
+    <span class="n">Some</span><span class="p">,</span>
+    <span class="p">[</span><span class="nf">XmlEnum</span><span class="p">(</span><span class="s">"Another"</span><span class="p">)]</span>
+    <span class="n">Other</span><span class="p">&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">}</span></code></pre></figure></p>
+<p>To represent something like <element>Some Value</element></p>
+<p>At least that's the idea...
+It seems like XmlEnum marked values with whitespace in their names will not be deserialized on the .NET CF 2.0. It throws an InvalidOperationException saying it can't find the enum with value of the part of the string before the space.</p>
+<p>I would expect it to deserialize into the enum Foo.Some. All of this works on the Full Framework.</p>
+<h3>Workaround</h3></p>
+<p>If you control the schema you can workaround this issue by changing the allowed values not to have spaces in them. But in many cases you might be trying to integrate with an existing service or schema that you do not control and as such, you won't have  the ability to change it. If that's the case what do you do?</p>
+<p>Luckily I found some code to help me <a href="http://www.wackylabs.net/2006/06/getting-the-xmlenumattribute-value-for-an-enum-field/">get the XmlEnumAttribute value for an Enum field</a> (thanks for sharing).</p>
+<p>I made some slight modifications to it, so that it was a little safer (I think).
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="c1">/// &lt;summary&gt;
+/// Convert an Enum value to a string representation using the XmlEnum value if
+/// it is appropriate.
+/// &lt;/summary&gt;
+</span><span class="k">public</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">ConvertToString</span><span class="p">(</span><span class="n">Enum</span> <span class="n">e</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">null</span> <span class="p">==</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="s">"Enum type can not be null."</span><span class="p">);</span>
+      <span class="c1">// Get the Type of the enum
+</span>    <span class="n">Type</span> <span class="n">t</span> <span class="p">=</span> <span class="n">e</span><span class="p">.</span><span class="nf">GetType</span><span class="p">();</span>
+      <span class="c1">// Get the FieldInfo for the member field with the enums name
+</span>    <span class="n">FieldInfo</span> <span class="n">info</span> <span class="p">=</span> <span class="n">t</span><span class="p">.</span><span class="nf">GetField</span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="nf">ToString</span><span class="p">(</span><span class="s">"G"</span><span class="p">));</span>
+      <span class="c1">// Check to see if the XmlEnumAttribute is defined on this field
+</span>    <span class="k">if</span> <span class="p">(</span><span class="k">null</span> <span class="p">!=</span> <span class="n">info</span> <span class="p">&amp;&amp;</span> <span class="n">info</span><span class="p">.</span><span class="nf">IsDefined</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">XmlEnumAttribute</span><span class="p">),</span> <span class="k">false</span><span class="p">))</span>
+    <span class="p">{</span>
+        <span class="c1">// Get the XmlEnumAttribute
+</span>        <span class="kt">object</span><span class="p">[]</span> <span class="n">attrs</span> <span class="p">=</span> <span class="n">info</span><span class="p">.</span><span class="nf">GetCustomAttributes</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">XmlEnumAttribute</span><span class="p">),</span> <span class="k">false</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">attrs</span><span class="p">.</span><span class="n">Length</span> <span class="p">&gt;</span> <span class="m">0</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">XmlEnumAttribute</span> <span class="n">att</span> <span class="p">=</span> <span class="p">(</span><span class="n">XmlEnumAttribute</span><span class="p">)</span><span class="n">attrs</span><span class="p">[</span><span class="m">0</span><span class="p">];</span>
+            <span class="k">return</span> <span class="n">att</span><span class="p">.</span><span class="n">Name</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+      <span class="c1">// If no XmlEnumAttribute was found then return the string version of the enum.
+</span>    <span class="k">return</span> <span class="n">e</span><span class="p">.</span><span class="nf">ToString</span><span class="p">(</span><span class="s">"G"</span><span class="p">);</span>
+<span class="p">}</span></code></pre></figure></p>
+<p>I also needed to go the other way then, and convert a String back into an Enum so that I can support deserializing from XML into the object model.
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="c1">/// &lt;summary&gt;
+/// Get an Enum value for a given type of Enum based on the String name of the Enum
+/// itself or the XmlEnum element that it has.
+/// &lt;/summary&gt;
+</span><span class="k">public</span> <span class="k">static</span> <span class="n">Enum</span> <span class="nf">ConvertToEnum</span><span class="p">(</span><span class="n">Type</span> <span class="n">enumType</span><span class="p">,</span> <span class="kt">string</span> <span class="n">name</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// Look for an XmlEnumAttribute with the given name
+</span>    <span class="k">foreach</span> <span class="p">(</span><span class="n">FieldInfo</span> <span class="n">fi</span> <span class="k">in</span> <span class="n">enumType</span><span class="p">.</span><span class="nf">GetFields</span><span class="p">())</span>
+    <span class="p">{</span>
+        <span class="kt">object</span><span class="p">[]</span> <span class="n">attrs</span> <span class="p">=</span> <span class="n">fi</span><span class="p">.</span><span class="nf">GetCustomAttributes</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">XmlEnumAttribute</span><span class="p">),</span> <span class="k">false</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">((</span><span class="n">attrs</span><span class="p">.</span><span class="n">Length</span> <span class="p">&gt;</span> <span class="m">0</span> <span class="p">&amp;&amp;</span> <span class="p">((</span><span class="n">XmlEnumAttribute</span><span class="p">)</span><span class="n">attrs</span><span class="p">[</span><span class="m">0</span><span class="p">]).</span><span class="n">Name</span> <span class="p">==</span> <span class="n">name</span> <span class="p">)</span>
+            <span class="p">||</span> <span class="n">fi</span><span class="p">.</span><span class="n">Name</span> <span class="p">==</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">Enum</span><span class="p">)</span> <span class="n">Enum</span><span class="p">.</span><span class="nf">Parse</span><span class="p">(</span><span class="n">enumType</span><span class="p">,</span> <span class="n">fi</span><span class="p">.</span><span class="n">Name</span><span class="p">,</span> <span class="k">false</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="k">return</span> <span class="k">null</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure></p>
+<p>Using this code, you can offer an API to client code that uses the strongly-typed Enum, but does a manual conversion for the serialization process.
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">class</span> <span class="nc">Bar</span> <span class="p">{</span>
+    <span class="k">private</span> <span class="n">Foo</span> <span class="n">fooType</span><span class="p">;</span>
+    <span class="c1">// The code called by the application
+</span>    <span class="p">[</span><span class="n">XmlIgnore</span><span class="p">]</span>
+    <span class="k">public</span> <span class="n">Foo</span> <span class="n">FooType</span> <span class="p">{</span>
+        <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="n">fooType</span><span class="p">;</span> <span class="p">}</span>
+        <span class="k">set</span> <span class="p">{</span> <span class="n">fooType</span> <span class="p">=</span> <span class="k">value</span><span class="p">;</span> <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="c1">// The code used to manage serialization
+</span>    <span class="c1">// Ideally this could be private, but that doesn't work with the serializer
+</span>    <span class="p">[</span><span class="nf">XmlElement</span><span class="p">(</span><span class="s">"baz"</span><span class="p">)]</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">FooTypeForSerializer</span> <span class="p">{</span>
+        <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="nf">ConvertToString</span><span class="p">(</span><span class="n">fooType</span><span class="p">);</span> <span class="p">}</span>
+        <span class="k">set</span> <span class="p">{</span> <span class="n">fooType</span> <span class="p">=</span> <span class="p">(</span><span class="n">Foo</span><span class="p">)</span> <span class="nf">ConvertToEnum</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">Foo</span><span class="p">),</span> <span class="k">value</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure></p>
+<h3>Conclusion</h3>
+One big workaround for what seems to me to be a bug. But it works, and I can continue to get work done. It should also be easy to refactor this workaround out if the bug ever gets fixed. Just change the [XmlIgnore] tag and delete the ForSerializer methods.</p>
+<p>I hope that helps if you run into a similar problem.</p>

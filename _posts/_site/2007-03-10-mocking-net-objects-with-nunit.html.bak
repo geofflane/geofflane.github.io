@@ -1,0 +1,157 @@
+<p>NUnit is my Unit Testing tool of choice for .NET development. Microsoft provides a unit testing framework but it only works with some higher-end versions of Visual Studio. They're so similar that it's almost ridiculous that Microsoft created their own version.
+(See one of my previous posts for more information on <a href="http://www.zorched.net/2006/11/28/msbuild-with-nunit/">Automating NUnit with MSBuild</a>.) In the Java world it's fairly common to do Mocking to help make unit testing easier. I've written about <a href="http://www.zorched.net/2006/09/24/jmock-for-mocking-unit-tests/">using JMock for Unit Tesing</a> in Java. In this post, I'd like to talk about a relatively new feature of NUnit which now supports Mocks out of the box.</p></p>
+<h3>What Are Mock Objects</h3></p>
+<p>Mock Objects are a technique that allow you to isolate classes from their dependencies for testing purposes. This isolation allows for fine-grained testing of single methods in a single class, possibly even before the dependent classes are fully implemented. This isolation allows your tests to run quickly and it makes testing small pieces of functionality much easier. When you've tested individual pieces of code in isolation you can have much higher confidence in larger-grained tests. This isolation becomes even more interesting when you are dealing with dependencies such as a data layer or a web service layer. External calls like that can be very time consuming or could fail if the remote system is down for maintenance.</p></p>
+<p>One of the great things about using Mock Objects is that they force you to think about the dependencies that your classes and methods have. It forces you to think about the coupling between your classes. If you have high coupling then your code is often harder to test. If you have a loosely coupled design then testing and using Mock Objects is very much easier. Thinking about those design notions early can help you more easily manage change over time.</p></p>
+<p>Maxims:</p></p>
+<ul>
+<li>Good design is better than bad design</li>
+<li>Loosely coupled objects are usually a better design than tightly coupled objects</li>
+<li>Testing improves code quality and developer efficiency over time</li>
+<li>Testing is easier with a loosely coupled designs</li>
+</ul></p>
+<h3>A Sample Project</h3></p>
+<p>We're going to start with some simple code. We create a Domain object called Person and an interface for a Data Access object called IPersonRepository. Pretty simple at this point.
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">public</span> <span class="k">class</span> <span class="nc">Person</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Id</span><span class="p">;</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">FirstName</span><span class="p">;</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">LastName</span><span class="p">;</span>
+    <span class="k">public</span> <span class="nf">Person</span><span class="p">(</span><span class="kt">string</span> <span class="n">newId</span><span class="p">,</span> <span class="kt">string</span> <span class="n">fn</span><span class="p">,</span> <span class="kt">string</span> <span class="n">ln</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">Id</span> <span class="p">=</span> <span class="n">newId</span><span class="p">;</span>
+        <span class="n">FirstName</span> <span class="p">=</span> <span class="n">fn</span><span class="p">;</span>
+        <span class="n">LastName</span> <span class="p">=</span> <span class="n">ln</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure></p></p>
+<p><figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">public</span> <span class="k">interface</span> <span class="n">IPersonRepository</span>
+<span class="p">{</span>
+    <span class="n">List</span><span class="p">&lt;</span><span class="n">Person</span><span class="p">&gt;</span> <span class="nf">GetPeople</span><span class="p">();</span>
+    <span class="n">Person</span> <span class="nf">GetPersonById</span><span class="p">(</span><span class="kt">string</span> <span class="n">id</span><span class="p">);</span>
+<span class="p">}</span></code></pre></figure></p></p>
+<p>Next we create a PersonService object. This would represent all of the business logic in our application. It would interact with the Data Access tier and return information to the UI layer for display.</p></p>
+<p>We wire together our objects using Constructor based <a href="http://en.wikipedia.org/wiki/Dependency_injection">Dependency Injection</a>. All of the dependent Objects are sent in through the constructor. This allows for the loose coupling since the PersonService doesn't know about the Implementing class, but only the interface. Since it's done in the constructor we can also never have an invalid PersonService as would be the case if there was a setter for the IPersonRepository implementation.</p></p>
+<p>This is again a fairly straightforward implementation, but I hope enough to display the issue at hand.
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">public</span> <span class="k">class</span> <span class="nc">PersonService</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="n">IPersonRepository</span> <span class="n">personRepos</span><span class="p">;</span>
+    <span class="k">public</span> <span class="nf">PersonService</span><span class="p">(</span><span class="n">IPersonRepository</span> <span class="n">repos</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">personRepos</span> <span class="p">=</span> <span class="n">repos</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">public</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">Person</span><span class="p">&gt;</span> <span class="nf">GetAllPeople</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">personRepos</span><span class="p">.</span><span class="nf">GetPeople</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">public</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">Person</span><span class="p">&gt;</span> <span class="nf">GetAllPeopleSorted</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="n">List</span><span class="p">&lt;</span><span class="n">Person</span><span class="p">&gt;</span> <span class="n">people</span> <span class="p">=</span> <span class="n">personRepos</span><span class="p">.</span><span class="nf">GetPeople</span><span class="p">();</span>
+        <span class="n">people</span><span class="p">.</span><span class="nf">Sort</span><span class="p">(</span><span class="k">delegate</span><span class="p">(</span><span class="n">Person</span> <span class="n">lhp</span><span class="p">,</span> <span class="n">Person</span> <span class="n">rhp</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">lhp</span><span class="p">.</span><span class="n">LastName</span><span class="p">.</span><span class="nf">CompareTo</span><span class="p">(</span><span class="n">rhp</span><span class="p">.</span><span class="n">LastName</span><span class="p">);</span>
+        <span class="p">});</span>
+        <span class="k">return</span> <span class="n">people</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">public</span> <span class="n">Person</span> <span class="nf">GetPerson</span><span class="p">(</span><span class="kt">string</span> <span class="n">id</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">try</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="n">personRepos</span><span class="p">.</span><span class="nf">GetPersonById</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">catch</span> <span class="p">(</span><span class="n">ArgumentException</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="k">null</span><span class="p">;</span> <span class="c1">// no person with that id was found
+</span>        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure></p></p>
+<h3>Using Mocks with NUnit</h3></p>
+<p>Now we can start testing our PersonService. Notice that we haven't even implemented the IPersonRepository yet. That way we can make sure that everything in our PersonService class works as expected without having to think about other layers of the application.</p></p>
+<p><figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">NUnit.Framework</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">NUnit.Mocks</span><span class="p">;</span>
+<span class="na">[TestFixture]</span>
+<span class="k">public</span> <span class="k">class</span> <span class="nc">PersonServiceTest</span>
+<span class="p">{</span>
+    <span class="c1">// The dynamic mock proxy that we will use to implement IPersonRepository
+</span>    <span class="k">private</span> <span class="n">DynamicMock</span> <span class="n">personRepositoryMock</span><span class="p">;</span>
+    <span class="c1">// Set up some testing data
+</span>    <span class="k">private</span> <span class="n">Person</span> <span class="n">onePerson</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Person</span><span class="p">(</span><span class="s">"1"</span><span class="p">,</span> <span class="s">"Wendy"</span><span class="p">,</span> <span class="s">"Whiner"</span><span class="p">);</span>
+    <span class="k">private</span> <span class="n">Person</span> <span class="n">secondPerson</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Person</span><span class="p">(</span><span class="s">"2"</span><span class="p">,</span> <span class="s">"Aaron"</span><span class="p">,</span> <span class="s">"Adams"</span><span class="p">);</span>
+    <span class="k">private</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">Person</span><span class="p">&gt;</span> <span class="n">peopleList</span><span class="p">;</span>
+    <span class="p">[</span><span class="n">SetUp</span><span class="p">]</span>
+    <span class="k">public</span> <span class="k">void</span> <span class="nf">TestInit</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="n">peopleList</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">Person</span><span class="p">&gt;();</span>
+        <span class="n">peopleList</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">onePerson</span><span class="p">);</span>
+        <span class="n">peopleList</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">secondPerson</span><span class="p">);</span>
+        <span class="c1">// Construct a Mock Object of the IPersonRepository Interface
+</span>        <span class="n">personRepositoryMock</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">DynamicMock</span><span class="p">(</span><span class="k">typeof</span> <span class="p">(</span><span class="n">IPersonRepository</span><span class="p">));</span>
+    <span class="p">}</span>
+    <span class="p">[</span><span class="n">Test</span><span class="p">]</span>
+    <span class="k">public</span> <span class="k">void</span> <span class="nf">TestGetAllPeople</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="c1">// Tell that mock object when the "GetPeople" method is
+</span>        <span class="c1">// called to return a predefined list of people
+</span>        <span class="n">personRepositoryMock</span><span class="p">.</span><span class="nf">ExpectAndReturn</span><span class="p">(</span><span class="s">"GetPeople"</span><span class="p">,</span> <span class="n">peopleList</span><span class="p">);</span>
+        <span class="c1">// Construct a Person service with the Mock IPersonRepository
+</span>        <span class="n">PersonService</span> <span class="n">service</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">PersonService</span><span class="p">(</span>
+             <span class="p">(</span><span class="n">IPersonRepository</span><span class="p">)</span> <span class="n">personRepositoryMock</span><span class="p">.</span><span class="n">MockInstance</span><span class="p">);</span>
+        <span class="c1">// Call methods and assert tests
+</span>        <span class="n">Assert</span><span class="p">.</span><span class="nf">AreEqual</span><span class="p">(</span><span class="m">2</span><span class="p">,</span> <span class="n">service</span><span class="p">.</span><span class="nf">GetAllPeople</span><span class="p">().</span><span class="n">Count</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="p">[</span><span class="n">Test</span><span class="p">]</span>
+    <span class="k">public</span> <span class="k">void</span> <span class="nf">TestGetAllPeopleSorted</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="c1">// Tell that mock object when the "GetPeople" method is called to
+</span>        <span class="c1">// return a predefined list of people
+</span>        <span class="n">personRepositoryMock</span><span class="p">.</span><span class="nf">ExpectAndReturn</span><span class="p">(</span><span class="s">"GetPeople"</span><span class="p">,</span> <span class="n">peopleList</span><span class="p">);</span>
+        <span class="n">PersonService</span> <span class="n">service</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">PersonService</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">IPersonRepository</span><span class="p">)</span> <span class="n">personRepositoryMock</span><span class="p">.</span><span class="n">MockInstance</span><span class="p">);</span>
+        <span class="c1">// This method really has "business logic" in it - the sorting of people
+</span>        <span class="n">List</span><span class="p">&lt;</span><span class="n">Person</span><span class="p">&gt;</span> <span class="n">people</span> <span class="p">=</span> <span class="n">service</span><span class="p">.</span><span class="nf">GetAllPeopleSorted</span><span class="p">();</span>
+        <span class="n">Assert</span><span class="p">.</span><span class="nf">IsNotNull</span><span class="p">(</span><span class="n">people</span><span class="p">);</span>
+        <span class="n">Assert</span><span class="p">.</span><span class="nf">AreEqual</span><span class="p">(</span><span class="m">2</span><span class="p">,</span> <span class="n">people</span><span class="p">.</span><span class="n">Count</span><span class="p">);</span>
+        <span class="c1">// Make sure the first person returned is the correct one
+</span>        <span class="n">Person</span> <span class="n">p</span> <span class="p">=</span> <span class="n">people</span><span class="p">[</span><span class="m">0</span><span class="p">];</span>
+        <span class="n">Assert</span><span class="p">.</span><span class="nf">AreEqual</span><span class="p">(</span><span class="s">"Adams"</span><span class="p">,</span> <span class="n">p</span><span class="p">.</span><span class="n">LastName</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="p">[</span><span class="n">Test</span><span class="p">]</span>
+    <span class="k">public</span> <span class="k">void</span> <span class="nf">TestGetSinglePersonWithValidId</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="c1">// Tell that mock object when the "GetPerson" method is called to
+</span>        <span class="c1">// return a predefined Person
+</span>        <span class="n">personRepositoryMock</span><span class="p">.</span><span class="nf">ExpectAndReturn</span><span class="p">(</span><span class="s">"GetPersonById"</span><span class="p">,</span> <span class="n">onePerson</span><span class="p">,</span> <span class="s">"1"</span><span class="p">);</span>
+        <span class="n">PersonService</span> <span class="n">service</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">PersonService</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">IPersonRepository</span><span class="p">)</span> <span class="n">personRepositoryMock</span><span class="p">.</span><span class="n">MockInstance</span><span class="p">);</span>
+        <span class="n">Person</span> <span class="n">p</span> <span class="p">=</span> <span class="n">service</span><span class="p">.</span><span class="nf">GetPerson</span><span class="p">(</span><span class="s">"1"</span><span class="p">);</span>
+        <span class="n">Assert</span><span class="p">.</span><span class="nf">IsNotNull</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+        <span class="n">Assert</span><span class="p">.</span><span class="nf">AreEqual</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">Id</span><span class="p">,</span> <span class="s">"1"</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="p">[</span><span class="n">Test</span><span class="p">]</span>
+    <span class="k">public</span> <span class="k">void</span> <span class="nf">TestGetSinglePersonWithInalidId</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="c1">// Tell that mock object when the "GetPersonById" is called with a null
+</span>        <span class="c1">// value to throw an ArgumentException
+</span>        <span class="n">personRepositoryMock</span><span class="p">.</span><span class="nf">ExpectAndThrow</span><span class="p">(</span><span class="s">"GetPersonById"</span><span class="p">,</span>
+             <span class="k">new</span> <span class="nf">ArgumentException</span><span class="p">(</span><span class="s">"Invalid person id."</span><span class="p">),</span> <span class="k">null</span><span class="p">);</span>
+        <span class="n">PersonService</span> <span class="n">service</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">PersonService</span><span class="p">(</span>
+                 <span class="p">(</span><span class="n">IPersonRepository</span><span class="p">)</span> <span class="n">personRepositoryMock</span><span class="p">.</span><span class="n">MockInstance</span><span class="p">);</span>
+        <span class="c1">// The only way to get null is if the underlying IPersonRepository
+</span>        <span class="c1">// threw an ArgumentException
+</span>        <span class="n">Assert</span><span class="p">.</span><span class="nf">IsNull</span><span class="p">(</span><span class="n">service</span><span class="p">.</span><span class="nf">GetPerson</span><span class="p">(</span><span class="k">null</span><span class="p">));</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure></p></p>
+<p>The PersonService doesn't have a lot of logic in it, but I hope this illustrates how you easily can test various conditions using Mock objects. It also illustrates the idea of testing early by allowing you to test some code before all of the dependent objects are implemented.</p></p>
+<p>While the Mocks built into NUnit might not be the most powerful or complete Mocking library out there, it should be sufficient for most uses. I'm sure they will continue to improve them over time as well, so I look forward to them becoming more powerful (and having better documentation) in the future.</p></p>
+<p>Download Code Example:
+<a href='http://www.zorched.net/wp-content/uploads/2007/03/nmock-example.zip' title='NMock C# Example Project'>NMock C# Example Project</a></p></p>
+<p>For more on NUnit you might like to check out:</p></p>
+<ul>
+<li>
+<a href="http://www.amazon.com/gp/product/0974514020?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0974514020">Pragmatic Unit Testing in C# with Nunit (Pragmatic Programmers)</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=0974514020" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
+</li></p>
+<li>
+<a href="http://www.amazon.com/gp/product/0596007396?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0596007396">NUnit Pocket Reference (Pocket Reference (O'Reilly))</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=0596007396" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
+</li>
+</ul></p>
+<p>[ad name="image-banner"]</p></p>

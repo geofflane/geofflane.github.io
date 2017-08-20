@@ -1,0 +1,139 @@
+<p><a href="http://www.playframework.com/documentation/2.1.1/ScalaAnorm">Anorm</a> is a <a href="http://www.scala-lang.org/">Scala</a> framework that is a fairly thin veneer over <a href="https://en.wikipedia.org/wiki/Java_Database_Connectivity">JDBC</a> that allows you to write SQL queries and map results into Scala objects. The examples easily found on the web have a tendency to be fairly simple. One of the first problems I ran into was mapping a Parent-Child hierarchy where the parent has a collection of values from a different table.</p>
+<p>For this post, I'm using a simple, contrived schema that looks like the following:</p>
+<figure class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="k">user</span> <span class="p">(</span>
+  <span class="n">id</span>         <span class="n">SERIAL</span><span class="p">,</span>
+  <span class="n">user_name</span>  <span class="n">varchar</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span>
+  <span class="k">CONSTRAINT</span> <span class="n">pk_user</span> <span class="k">PRIMARY</span> <span class="k">KEY</span> <span class="p">(</span><span class="n">id</span><span class="p">)</span>
+<span class="p">);</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">email</span> <span class="p">(</span>
+  <span class="n">user_id</span>    <span class="n">LONG</span><span class="p">,</span>
+  <span class="n">email</span>      <span class="n">varchar</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span>
+  <span class="k">CONSTRAINT</span> <span class="n">pk_email</span> <span class="n">PRIMARY_KEY</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">email</span><span class="p">)</span>
+<span class="p">);</span>
+<span class="k">ALTER</span> <span class="k">TABLE</span> <span class="n">email</span> <span class="k">ADD</span> <span class="k">CONSTRAINT</span> <span class="n">fk_email_user</span> <span class="n">FOREIGN_KEY</span> <span class="p">(</span><span class="n">user_id</span><span class="p">)</span> <span class="k">REFERENCES</span> <span class="k">user</span> <span class="p">(</span><span class="n">id</span><span class="p">);</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">phone</span> <span class="p">(</span>
+  <span class="n">user_id</span>    <span class="n">LONG</span><span class="p">,</span>
+  <span class="n">phone</span>      <span class="n">varchar</span><span class="p">(</span><span class="mi">11</span><span class="p">),</span>
+<span class="k">CONSTRAINT</span> <span class="n">pk_phone</span> <span class="n">PRIMARY_KEY</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">phone</span><span class="p">)</span>
+<span class="p">);</span>
+<span class="k">ALTER</span> <span class="k">TABLE</span> <span class="n">phone</span> <span class="k">ADD</span> <span class="k">CONSTRAINT</span> <span class="n">fk_phone_user</span> <span class="n">FOREIGN_KEY</span> <span class="p">(</span><span class="n">user_id</span><span class="p">)</span> <span class="k">REFERENCES</span> <span class="k">user</span> <span class="p">(</span><span class="n">id</span><span class="p">);</span></code></pre></figure>
+<h3>The Simple Case</h3>
+In the simplest case, Anorm allows you to map the results of a query to a Scala case class like the following:
+<figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">case</span> <span class="k">class</span> <span class="nc">User</span><span class="o">(</span><span class="n">id</span><span class="k">:</span><span class="kt">Long</span><span class="o">,</span> <span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
+<span class="k">object</span> <span class="nc">User</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">rowMapper</span> <span class="k">=</span> <span class="o">{</span>
+      <span class="n">long</span><span class="o">(</span><span class="s">"id"</span><span class="o">)</span> <span class="o">~</span>
+      <span class="n">str</span><span class="o">(</span><span class="s">"user_name"</span><span class="o">)</span> <span class="n">map</span> <span class="o">{</span>
+        <span class="k">case</span> <span class="n">id</span> <span class="o">~</span> <span class="n">name</span> <span class="k">=&gt;</span> <span class="nc">User</span><span class="o">(</span><span class="n">id</span><span class="o">,</span> <span class="n">name</span><span class="o">)</span>
+      <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">def</span> <span class="n">getUser</span><span class="o">(</span><span class="n">id</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">User</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+  <span class="nc">DB</span><span class="o">.</span><span class="n">withConnection</span> <span class="o">{</span>
+    <span class="k">implicit</span> <span class="n">conn</span> <span class="k">=&gt;</span>
+      <span class="nc">SQL</span><span class="o">(</span><span class="s">"SELECT id, user_name FROM user WHERE user.id = {id}"</span><span class="o">)</span>
+        <span class="o">.</span><span class="n">on</span><span class="o">(</span><span class="s">"id"</span> <span class="o">-&gt;</span> <span class="n">id</span><span class="o">)</span>
+        <span class="o">.</span><span class="n">as</span><span class="o">(</span><span class="nc">User</span><span class="o">.</span><span class="n">rowMapper</span> <span class="n">singleOpt</span><span class="o">)</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>The query is executed and the results of the query are mapped to the User using a RowMapper which converts the result columns into Scala types and ultimately to a Scala User object that you've defined.</p>
+<h3>Joins</h3>
+<p>But what if you want a more complex object, such as adding Phone numbers and
+  Email addresses to your user object? Lets say you want something more like
+  the following:
+</p>
+<figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">case</span> <span class="k">class</span> <span class="nc">User</span><span class="o">(</span><span class="n">id</span><span class="k">:</span><span class="kt">Long</span><span class="o">,</span> <span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">emails</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">String</span><span class="o">],</span> <span class="n">phones</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span>
+<span class="k">object</span> <span class="nc">User</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">rowMapper</span> <span class="k">=</span> <span class="o">{</span>
+      <span class="n">long</span><span class="o">(</span><span class="s">"id"</span><span class="o">)</span> <span class="o">~</span>
+      <span class="n">str</span><span class="o">(</span><span class="s">"user_name"</span><span class="o">)</span> <span class="o">~</span>
+      <span class="o">(</span><span class="n">str</span><span class="o">(</span><span class="s">"email"</span><span class="o">)</span> <span class="o">?)</span> <span class="o">~</span>
+      <span class="o">(</span><span class="n">str</span><span class="o">(</span><span class="s">"number"</span><span class="o">)</span> <span class="o">?)</span> <span class="n">map</span> <span class="o">{</span>
+        <span class="k">case</span> <span class="n">id</span> <span class="o">~</span> <span class="n">name</span> <span class="o">~</span> <span class="n">email</span> <span class="o">~</span> <span class="n">number</span> <span class="k">=&gt;</span> <span class="o">((</span><span class="n">id</span><span class="o">,</span> <span class="n">name</span><span class="o">),</span> <span class="n">email</span><span class="o">,</span> <span class="n">number</span><span class="o">)</span>
+      <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+<p>This row mapper doesn't return a User object directly, but rather the columns grouped into a Triple (with id and name as the first part of the Triple).</p>
+<p>Anorm doesn't have a lot of support for that out of the box, but Scala's built in functions for dealing with Lists and Maps have the tools that you need. Take a look at the following example. If you're new to Scala, good luck wrapping your brain around it.
+<figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">def</span> <span class="n">getUser</span><span class="o">(</span><span class="n">id</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">User</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+  <span class="nc">DB</span><span class="o">.</span><span class="n">withConnection</span> <span class="o">{</span>
+    <span class="k">implicit</span> <span class="n">conn</span> <span class="k">=&gt;</span>
+      <span class="nc">SQL</span><span class="o">(</span>
+        <span class="s">"""SELECT user_name, email.email, phone.number
+          |FROM user
+          |LEFT JOIN email ON email.user_id = user.id
+          |LEFT JOIN phone ON phone.user_id = user.id
+          |WHERE user.id = {id}"""</span><span class="o">.</span><span class="n">stripMargin</span><span class="o">)</span>
+        <span class="o">.</span><span class="n">on</span><span class="o">(</span><span class="s">"id"</span> <span class="o">-&gt;</span> <span class="n">id</span><span class="o">)</span>
+        <span class="o">.</span><span class="n">as</span><span class="o">(</span><span class="nc">User</span><span class="o">.</span><span class="n">rowMapper</span> <span class="o">*)</span>
+        <span class="o">.</span><span class="n">groupBy</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">_1</span><span class="o">)</span>
+        <span class="o">.</span><span class="n">map</span> <span class="o">{</span>
+          <span class="k">case</span> <span class="o">((</span><span class="n">dbId</span><span class="o">,</span> <span class="n">name</span><span class="o">),</span> <span class="n">rest</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="nc">User</span><span class="o">(</span><span class="n">dbId</span><span class="o">,</span> <span class="n">name</span><span class="o">,</span> <span class="n">rest</span><span class="o">.</span><span class="n">unzip3</span><span class="o">.</span><span class="n">_2</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">orNull</span><span class="o">),</span> <span class="n">rest</span><span class="o">.</span><span class="n">unzip3</span><span class="o">.</span><span class="n">_3</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">orNull</span><span class="o">))</span>
+        <span class="o">}.</span><span class="n">headOption</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>But we can break down those steps a little bit, include the type declarations of what happens at each step to make it more clear as to what's being done. Using those type declarations you end up with something like the following.
+<figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">def</span> <span class="n">getUser</span><span class="o">(</span><span class="n">id</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">User</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+  <span class="nc">DB</span><span class="o">.</span><span class="n">withConnection</span> <span class="o">{</span>
+    <span class="k">implicit</span> <span class="n">conn</span> <span class="k">=&gt;</span>
+      <span class="k">val</span> <span class="n">result</span><span class="k">:</span> <span class="kt">List</span><span class="o">[((</span><span class="kt">Long</span>, <span class="kt">String</span><span class="o">)</span>, <span class="kt">Option</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span>, <span class="kt">Option</span><span class="o">[</span><span class="kt">String</span><span class="o">])]</span> <span class="k">=</span> <span class="nc">SQL</span><span class="o">(</span>
+        <span class="s">"""SELECT user_name, email.email, phone.number
+          |FROM user
+          |LEFT JOIN email ON email.user_id = user.id
+          |LEFT JOIN phone ON phone.user_id = user.id
+          |WHERE user.id = {id}"""</span><span class="o">.</span><span class="n">stripMargin</span><span class="o">)</span>
+        <span class="o">.</span><span class="n">on</span><span class="o">(</span><span class="s">"id"</span> <span class="o">-&gt;</span> <span class="n">id</span><span class="o">)</span>
+        <span class="o">.</span><span class="n">as</span><span class="o">(</span><span class="nc">User</span><span class="o">.</span><span class="n">rowMapper</span> <span class="o">*)</span>
+        <span class="k">val</span> <span class="n">queryGroupedByUser</span><span class="k">:</span> <span class="kt">Map</span><span class="o">[(</span><span class="kt">Long</span>, <span class="kt">String</span><span class="o">)</span>, <span class="kt">List</span><span class="o">[((</span><span class="kt">Long</span>, <span class="kt">String</span><span class="o">)</span>, <span class="kt">Option</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span>, <span class="kt">Option</span><span class="o">[</span><span class="kt">String</span><span class="o">])]]</span>
+        <span class="k">=</span> <span class="n">result</span><span class="o">.</span><span class="n">groupBy</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">_1</span><span class="o">)</span>
+        <span class="k">val</span> <span class="n">listOfUser</span><span class="k">:</span> <span class="kt">Iterable</span><span class="o">[</span><span class="kt">User</span><span class="o">]</span> <span class="k">=</span> <span class="n">queryGroupedByUser</span><span class="o">.</span><span class="n">map</span> <span class="o">{</span>
+        <span class="k">case</span> <span class="o">((</span><span class="n">dbId</span><span class="o">,</span> <span class="n">name</span><span class="o">),</span> <span class="n">rest</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="o">{</span>
+          <span class="k">val</span> <span class="n">emails</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="n">rest</span><span class="o">.</span><span class="n">unzip3</span><span class="o">.</span><span class="n">_2</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">orNull</span><span class="o">)</span> <span class="c1">// convert Option[String]s to List[String] where Some[String]
+</span>          <span class="k">val</span> <span class="n">phones</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="n">rest</span><span class="o">.</span><span class="n">unzip3</span><span class="o">.</span><span class="n">_3</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">orNull</span><span class="o">)</span> <span class="c1">// convert Option[String]s to List[String] where Some[String]
+</span>          <span class="nc">User</span><span class="o">(</span><span class="n">dbId</span><span class="o">,</span> <span class="n">name</span><span class="o">,</span> <span class="n">emails</span><span class="o">,</span> <span class="n">phones</span><span class="o">)</span>
+        <span class="o">}</span>
+      <span class="o">}</span>
+      <span class="n">listOfUser</span><span class="o">.</span><span class="n">headOption</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>Let's break that down a little more:</p>
+<figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">val</span> <span class="n">result</span><span class="k">:</span> <span class="kt">List</span><span class="o">[((</span><span class="kt">Long</span>, <span class="kt">String</span><span class="o">)</span>, <span class="kt">Option</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span>, <span class="kt">Option</span><span class="o">[</span><span class="kt">String</span><span class="o">])]</span> <span class="k">=</span> <span class="nc">SQL</span><span class="o">(</span>
+  <span class="s">"""SELECT user_name, email.email, phone.number
+    |FROM user
+    |LEFT JOIN email ON email.user_id = user.id
+    |LEFT JOIN phone ON phone.user_id = user.id
+    |WHERE user.id = {id}"""</span><span class="o">.</span><span class="n">stripMargin</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">on</span><span class="o">(</span><span class="s">"id"</span> <span class="o">-&gt;</span> <span class="n">id</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">as</span><span class="o">(</span><span class="nc">User</span><span class="o">.</span><span class="n">rowMapper</span> <span class="o">*)</span></code></pre></figure>
+<p>This code creates a List as you can see from the type declaration. The List contains an entry for each row returned in the result set. Because we used JOIN clauses, we might have gotten back many rows. For example, if a user had 2 emails the results might have looked like:</p>
+<pre>
+id, name, email, number
+1, Geoff, geoff@example.com, 15135551212
+1, Geoff, geoff2@example.com, 15135551212
+</pre>
+<p>The resulting Scala List that directly contains the data from that result
+  set. But we take an extra step of grouping the basic User data (the parent)
+  into its own Tuple which we'll use later to identify the unique Users. The
+  Scala list of the above result set would contain:</p>
+<figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="nc">List</span><span class="o">(((</span><span class="mi">1</span><span class="o">,</span> <span class="s">"Geoff"</span><span class="o">),</span> <span class="nc">Some</span><span class="o">(</span><span class="s">"geoff@example.com"</span><span class="o">),</span> <span class="nc">Some</span><span class="o">(</span><span class="s">"15135551212"</span><span class="o">)),</span>
+     <span class="o">((</span><span class="mi">1</span><span class="o">,</span> <span class="s">"Geoff"</span><span class="o">),</span> <span class="nc">Some</span><span class="o">(</span><span class="s">"geoff2@example.com"</span><span class="o">),</span> <span class="nc">Some</span><span class="o">(</span><span class="s">"15135551212"</span><span class="o">)))</span></code></pre></figure>
+<p>Next we create a map of the results where the key to the map is the unique users:</p>
+<figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">val</span> <span class="n">queryGroupedByUser</span><span class="k">:</span> <span class="kt">Map</span><span class="o">[(</span><span class="kt">Long</span>, <span class="kt">String</span><span class="o">)</span>, <span class="kt">List</span><span class="o">[((</span><span class="kt">Long</span>, <span class="kt">String</span><span class="o">)</span>, <span class="kt">Option</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span>, <span class="kt">Option</span><span class="o">[</span><span class="kt">String</span><span class="o">])]]</span>
+  <span class="k">=</span> <span class="n">result</span><span class="o">.</span><span class="n">groupBy</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">_1</span><span class="o">)</span></code></pre></figure>
+<p>From that list, we create a map, where the keys of the map are the unique
+  parent objects. This turns the list shown above into a map like:</p>
+<figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="nc">Map</span><span class="o">((</span><span class="mi">1</span><span class="o">,</span> <span class="s">"Geoff"</span><span class="o">),</span>
+  <span class="nc">List</span><span class="o">(((</span><span class="mi">1</span><span class="o">,</span> <span class="s">"Geoff"</span><span class="o">),</span> <span class="nc">Some</span><span class="o">(</span><span class="s">"geoff@example.com"</span><span class="o">),</span> <span class="nc">Some</span><span class="o">(</span><span class="s">"15135551212"</span><span class="o">)),</span>
+       <span class="o">((</span><span class="mi">1</span><span class="o">,</span> <span class="s">"Geoff"</span><span class="o">),</span> <span class="nc">Some</span><span class="o">(</span><span class="s">"geoff2@example.com"</span><span class="o">),</span> <span class="nc">Some</span><span class="o">(</span><span class="s">"15135551212"</span><span class="o">)))</span>
+<span class="o">)</span></code></pre></figure>
+<p>This mapping will work if there are many keys returned as well (assuming you were querying by something non-unique). In that case your map will contain one entry for each of the unique parents.</p>
+<p>Finally, we need to take apart the Map and turn it into our domain object:</p>
+<figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">val</span> <span class="n">listOfUser</span><span class="k">:</span> <span class="kt">Iterable</span><span class="o">[</span><span class="kt">User</span><span class="o">]</span> <span class="k">=</span> <span class="n">queryGroupedByUser</span><span class="o">.</span><span class="n">map</span> <span class="o">{</span>
+  <span class="k">case</span> <span class="o">((</span><span class="n">dbId</span><span class="o">,</span> <span class="n">name</span><span class="o">),</span> <span class="n">rest</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="o">{</span>
+    <span class="k">val</span> <span class="n">emails</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="n">rest</span><span class="o">.</span><span class="n">unzip3</span><span class="o">.</span><span class="n">_2</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">orNull</span><span class="o">)</span> <span class="c1">// convert Option[String]s to List[String] where not null
+</span>    <span class="k">val</span> <span class="n">phones</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="n">rest</span><span class="o">.</span><span class="n">unzip3</span><span class="o">.</span><span class="n">_3</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">orNull</span><span class="o">)</span> <span class="c1">// convert Option[String]s to List[String] where not null
+</span>    <span class="nc">User</span><span class="o">(</span><span class="n">dbId</span><span class="o">,</span> <span class="n">name</span><span class="o">,</span> <span class="n">emails</span><span class="o">,</span> <span class="n">phones</span><span class="o">)</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+<p>The case statement destructures the Map back into the key containing the basic user information and then the list of all the other data associated with that user. <em>rest.unzip3</em> turns the <em>List(A, B, C)</em> into (List[A], List[B], List[C]). <em>_.2</em> takes the second element out of the Triple, in this case the List[String] containing the emails. We then map over them to get the value or null from the Option[String] to create a list of the items that are not null. The same process is done for emails and phones. Those values along with the key from the map are used to create the instances of our Users. In this case, since we only expect one based on an id, we also use <em>listOfUser.headOption</em> to get the first element of the list (or None if the list is empty).</p>
+<p>Hopefully breaking down the Scala into smaller chunks will help some people understand how this stuff works.</p>

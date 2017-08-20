@@ -1,0 +1,54 @@
+<p>Web Services are about sharing. SOAP Web Services are about interoperability. If you don't need to share information or services and if you don't need to interoperate with other systems or other programming languages, then why incur the overhead of doing Service Oriented Architecture (SOA)? If you don't need to share services or data, save yourself a bunch of trouble and save yourself the performance penalty and build a monolithic application. There will always be systems that need to be built to share their services with other systems though.</p>
+<p>I've (along with a <a href="http://brennan.offwhite.net/blog/">colleague</a>) been working on an example of Contract First Web Service design for a presentation. In doing so, I wanted to provide some examples in different languages (remember interoperable) to show users different ways of interacting with the service. I chose to build the service in Java using <a href="http://ws.apache.org/axis/">Apache Axis</a>. We're building a client in in ASP.NET to use the service. When it comes down to it though Java and .NET are very similar though, so I thought I would choose another language that was very different from those too.</p>
+<p>Ruby is pretty different, so I chose that.</p>
+<h3>Using SOAP4R</h3>
+Ruby comes with a package called <a href="http://dev.ctor.org/soap4r">SOAP4R</a> that handles all of the complexity of dealing with Web Services.</p>
+<p>SOAP4R offers a couple of different ways to create a web service client. I chose to use the WSDLDriverFactory which parses a WSDL file and dynamically generates service classes at runtime. </p>
+<p>
+  <figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">service</span> <span class="o">=</span> <span class="no">SOAP</span><span class="o">::</span><span class="no">WSDLDriverFactory</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="no">WSDL_URL</span><span class="p">).</span><span class="nf">create_rpc_driver</span>
+<span class="n">service</span><span class="p">.</span><span class="nf">generate_explicit_type</span> <span class="o">=</span> <span class="kp">true</span>
+<span class="n">service</span><span class="p">.</span><span class="nf">wiredump_dev</span> <span class="o">=</span> <span class="no">STDOUT</span> <span class="k">if</span> <span class="vg">$DEBUG</span></code></pre></figure></p>
+<p>
+  <figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">result</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="no">SearchContacts</span><span class="p">(</span><span class="ss">:search</span> <span class="o">=&gt;</span> <span class="s1">'some_name'</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">result</span><span class="p">.</span><span class="nf">contacts</span><span class="p">.</span><span class="nf">length</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">result</span><span class="p">.</span><span class="nf">contacts</span><span class="p">.</span><span class="nf">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span> <span class="n">print_contact</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="p">}</span>
+<span class="k">else</span>
+    <span class="nb">puts</span> <span class="s2">"No contacts found..."</span>
+<span class="k">end</span></code></pre></figure></p>
+<p>Ruby is a highly dynamic language which is one of its huge strengths. SOAP4R utilizes this by generating service bindings at runtime. This is a really cool feature but it can also make it difficult to figure out exactly what's going on. To get around this I ended up doing a lot of inspection of the runtime classes that were generated. This kind of inspection can be a bit tedious.</p>
+<p>Luckily the SOAP4R package also includes some handy utilities for generating code from XSD and WSDL files. </p>
+<ul>
+<li>xsd2ruby - A tool that will read an XML Schema Definition (XSD) and create classes from the defined entities.</li>
+<li>wsdl2ruby - This tool extends the xsd2ruby tool to include creating wrapper classes for the service calls.</li>
+</ul></p>
+<p>Using these tools gives you a file/files that contain the definitions for the business entities and services so that you have something to reference as you write code. The following isn't so different, but it uses generated code from the xsd2ruby tool.</p>
+<p>The generated code will look something like:
+  <figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1"># {urn:spiderlogic-com:contacts:service:v1}SearchContactsRequest</span>
+<span class="k">class</span> <span class="nc">SearchContactsRequest</span>
+  <span class="vc">@@schema_type</span> <span class="o">=</span> <span class="s2">"SearchContactsRequest"</span>
+  <span class="vc">@@schema_ns</span> <span class="o">=</span> <span class="s2">"urn:spiderlogic-com:contacts:service:v1"</span>
+  <span class="vc">@@schema_qualified</span> <span class="o">=</span> <span class="s2">"true"</span>
+  <span class="vc">@@schema_element</span> <span class="o">=</span> <span class="p">[[</span><span class="s2">"query"</span><span class="p">,</span> <span class="s2">"SOAP::SOAPString"</span><span class="p">]]</span></code></pre></figure></p>
+<p>
+  <figure class="highlight"><pre><code class="language-ruby" data-lang="ruby">  <span class="kp">attr_accessor</span> <span class="ss">:query</span></code></pre></figure></p>
+<p>
+  <figure class="highlight"><pre><code class="language-ruby" data-lang="ruby">  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">query</span> <span class="o">=</span> <span class="kp">nil</span><span class="p">)</span>
+    <span class="vi">@query</span> <span class="o">=</span> <span class="n">query</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure></p>
+<p>As you can see, it adds in extra information that SOAP will need to map it to the proper schema elements.</p>
+<p>Using this generated code, you get code like:
+  <figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="nb">require</span> <span class="s1">'service'</span></code></pre></figure></p>
+<p>
+  <figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">service</span> <span class="o">=</span> <span class="no">SOAP</span><span class="o">::</span><span class="no">WSDLDriverFactory</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="no">WSDL_URL</span><span class="p">).</span><span class="nf">create_rpc_driver</span>
+<span class="n">service</span><span class="p">.</span><span class="nf">generate_explicit_type</span> <span class="o">=</span> <span class="kp">true</span>
+<span class="n">service</span><span class="p">.</span><span class="nf">wiredump_dev</span> <span class="o">=</span> <span class="no">STDOUT</span> <span class="k">if</span> <span class="vg">$DEBUG</span></code></pre></figure></p>
+<p>
+  <figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">result</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="no">SearchContacts</span><span class="p">(</span><span class="no">SearchContactsRequest</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s1">'some_name'</span><span class="p">))</span>
+<span class="k">if</span> <span class="n">result</span><span class="p">.</span><span class="nf">contacts</span><span class="p">.</span><span class="nf">length</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">result</span><span class="p">.</span><span class="nf">contacts</span><span class="p">.</span><span class="nf">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span> <span class="n">print_contact</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="p">}</span>
+<span class="k">else</span>
+    <span class="nb">puts</span> <span class="s2">"No contacts found..."</span>
+<span class="k">end</span></code></pre></figure></p>
+<h3>One Problem I found</h3>
+SOAP4R was originally built to support RPC Literal encoded Web Services. Support for Document Literal services is more recent. To get the service to work, I had to update to the latest trunk version from their Subversion server. Before the update I was not able to send Arrays of objects to my service. Document Literal services are preferred for Contract First design because it offers full schema validation of the soap message. Document Literal support is still a little bit rough around the edges, but I got it to work successfully.</p>

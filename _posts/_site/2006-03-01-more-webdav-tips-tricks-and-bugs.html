@@ -1,0 +1,26 @@
+<p><em>My WebDAV with ASP.NET post has proved to be very popular and gets me emails, so I figured I'd share some more tidbits that I've picked up along the way.</em></p>
+<p>What do you learn when you write your own server to implement a standard protocol? Well you learn that protocols share a lot in common with legal contracts. People interpret them in different ways, often in the way that is most advantageous to what they are doing.  In writing a WebDAV server, I've found out a lot more about Windows than I think I ever wanted to know. I figured I'd write down some of that stuff so that I could remember it, and maybe someone out there on the internet will find it useful as well.</p>
+<h3>There is not 1 WebDAV for Windows</h3>
+You can't really say Microsoft Windows supports WebDAV and think of a monolithic chunk of code that everything uses to talk WebDAV. Windows Explorer uses what's called the Mini-Redirector. The min-redirector allows you to map a WebDAV location to a Drive letter the same as if you were using a Windows File Sharing/<a href="http://www.samba.com">SMB</a>/CIFS share. The mini-redirector has some limitations though.</p>
+<p>The Mini-Redirector:</p>
+<ul>
+<li>No support for HTTPS</li>
+<li>No support for declared ports <em>(http://example.com:8080/path)</em></li>
+<li>No support for LOCK and UNLOCK commands</li>
+</ul></p>
+<p>There is also a system called Web Folders. Web Folders is the WebDAV implementation for Microsoft Office products. Web Folders supports all of the things that the Mini-Redirector doesn't, including SSL, file locking, etc.</p>
+<p><em>Right now, you might find yourself asking: "If there are two implementations and one is really limited and one is more featured, then why not just replace the worse version with the better?". Yeah, I asked the same question and don't know the answer.</em></p>
+<p>When you map a WebDAV drive in Windows and want to open a Microsoft Office document, you get the distinct pleasure of using both WebDAV implementations. The Mini-Redirector asks the server for the file and once it gets it it opens Office and then Office re-asks the server for the same file again after doing some server discovery and file locking. The hand-off means that Office has to re-authenticate if your WebDAV server uses Digest Authentication, so you get to see a login dialog again. What fun!?</p>
+<h3>Server Discovery</h3>
+Office uses the OPTIONS command do to Server discovery. Server discovery is basically the process of trying to figure out what kind of server it is and what protocols it supports.</p>
+<p>The Office Web Folders always requests OPTIONS from the root (/) of the web server making a horrible assumption that any any server that supports WebDAV must support all the way to the root of the server.</p>
+<p>Often when you are allowing users to manipulate files and folders across the internet you might want to use some form of authentication. Digest Authentication is more secure than Basic Authentication which sends the user name and password in plain-text form, so it is a good choice for authentication if you are not going to use a secure (HTTPS) connection. There's only one small problem with this. There is a bug in the Web Folders implementation so it will not send Authentication headers on OPTIONS requests. That means you have to return an OPTIONS response regardless of what lives at a URL or whether a user is authenticated or they can't properly open Office documents.</p>
+<p>The Office Web Folders support does not just do WebDAV, it can also use Front Page Extensions. Since Front Page is a Microsoft proprietary product, Office prefers to use Front Page over WebDAV. In fact, it prefers it so much, that one of the only ways to get Office to use WebDAV is to use a custom header in OPTIONS requests: <strong>MS-Author-Via: DAV</strong>
+The MS-Author-Via header tells Office that you don't care how bad it wants to try Front Page, just use WebDAV.</p>
+<h3>Some Other Resources</h3>
+Mini-Redirector Issues:
+<a href="http://greenbytes.de/tech/webdav/webdav-redirector-list.html">http://greenbytes.de/tech/webdav/webdav-redirector-list.html</a></p>
+<p>Web Folder Client Issues:
+<a href="http://greenbytes.de/tech/webdav/webfolder-client-list.html">http://greenbytes.de/tech/webdav/webfolder-client-list.html</a></p>
+<p>WebDAV Reference Book:
+<a href="http://www.amazon.com/gp/redirect.html?ie=UTF8&location=http%3A%2F%2Fwww.amazon.com%2FWebDAV-Next-Generation-Collaborative-Web-Authoring%2Fdp%2F0130652083%3Fie%3DUTF8%26s%3Dbooks%26qid%3D1178055436%26sr%3D8-1&tag=zorchednet-20&linkCode=ur2&camp=1789&creative=9325">WebDAV: Next-Generation Collaborative Web Authoring</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&amp;l=ur2&amp;o=1" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /> by Lisa Dusseault</p>

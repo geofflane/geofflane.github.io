@@ -1,0 +1,77 @@
+<p>I posted previously on a <a href="http://www.zorched.net/2006/12/21/bug-in-the-net-compactframework-xmlenum-with-whitespace/">Bug in the .NET Compact Framework with the XmlEnum Attribute</a> with whitespace in the name. Well I've run into some other interesting "features".</p>
+<p>The first thing to realize is that the things that work on the Full framework don't work on the Compact Framework.</p>
+<h2>What Works With Serialization</h2>
+First thing is the good news: Arrays work everywhere. They work on the Compact Framework and the Full Framework. The downside of course is that Arrays are very inconvenient. You have to manually resize them yourself for example.</p>
+<p>The second thing that works are regular <a href="http://msdn2.microsoft.com/en-us/library/system.collections.ilist.aspx">ILists</a>. When you map them a collection will be used. Of course one of the big improvements in .NET 2.0 was the introduction of Generics. Generics allow you to have strongly-typed collections without manually implementing them for each specific type.</p>
+<h2>More Generics Problems</h2>
+Xml Serialization works if you use IList. But there are <a href="http://www.srtsolutions.com/public/item/149270?model=user/myst/user-srt-corporate-comments&style=user/myst/srt-corporate&scheme=gray">problems with Generics interfaces</a>. I guess there are more than problems. Short story is that you can not use IList<T> for XML serialization, it plain just doesn't work.</p>
+<p>Here's where the difference between the Full Framework and the Compact Framework come into play. On the Full Framework, you can map to a concrete collection wether it's generic or not. So List<T> will work. Unfortunately this does not work in the Compact Framework. </p>
+<p><figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="na">[XmlElement(Name="foo")]</span>
+<span class="k">public</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">Foos</span>
+<span class="p">{</span>
+     <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="n">foos</span> <span class="p">}</span>
+     <span class="k">set</span> <span class="p">{</span> <span class="k">this</span><span class="p">.</span><span class="n">foos</span> <span class="p">=</span> <span class="k">value</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span></code></pre></figure></p>
+<p>You end up with an exception:</p>
+<pre>
+Two mappings for string[].</p>
+<p>Stack Trace:
+at System.Xml.Serialization.TypeContainer.AddType()
+at System.Xml.Serialization.TypeContainer.AddType()
+at System.Xml.Serialization.XmlSerializationReflector.AddIXmlSerializableType()
+at System.Xml.Serialization.XmlSerializationReflector.AddType()
+at System.Xml.Serialization.XmlSerializationReflector.FindType()
+at System.Xml.Serialization.XmlSerializationReflector.FindType()
+.....
+</pre></p>
+<h2>So What Do You Do About It</h2>
+You basically have 2 options:</p>
+<ol>
+<li>Use Arrays</li>
+<li>Create your own custom, strongly-typed collections classes</li>
+</ol></p>
+<h3>Arrays</h3>
+The advantage is that this is very simple and requires no extra code. The downside as I said above is that you have to write code to manually do array resizing.</p>
+<p><figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">public</span> <span class="n">T</span><span class="p">[]</span> <span class="n">AppendItem</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="n">T</span><span class="p">[]</span> <span class="n">theArray</span><span class="p">,</span> <span class="n">T</span> <span class="n">newItem</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">T</span><span class="p">[]</span> <span class="n">newArray</span> <span class="p">=</span> <span class="k">new</span> <span class="n">T</span><span class="p">[</span><span class="n">theArray</span><span class="p">.</span><span class="n">Length</span> <span class="p">+</span> <span class="m">1</span><span class="p">];</span>
+    <span class="n">Array</span><span class="p">.</span><span class="nf">Copy</span><span class="p">(</span><span class="n">theArray</span><span class="p">,</span> <span class="n">newArray</span><span class="p">,</span> <span class="n">theArray</span><span class="p">.</span><span class="n">Length</span><span class="p">);</span>
+    <span class="n">newArray</span><span class="p">[</span><span class="n">newArray</span><span class="p">.</span><span class="n">Length</span> <span class="p">-</span> <span class="m">1</span><span class="p">]</span> <span class="p">=</span> <span class="n">newItem</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">newArray</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure></p>
+<h3>Custom, Strongly-Typed Collections</h3>
+If you don't want to use Arrays and deal with manually resizing them, you can build your own Collections classes for each of your types.</p>
+<p>Create your strongly-typed collection:
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="na">[Serializable]</span>
+<span class="na">[EditorBrowsable(EditorBrowsableState.Advanced)]</span>
+<span class="k">public</span> <span class="k">class</span> <span class="nc">EmployeeCollection</span> <span class="p">:</span> <span class="n">ArrayList</span> <span class="p">{</span>
+    <span class="k">public</span> <span class="n">Employee</span> <span class="nf">Add</span><span class="p">(</span><span class="n">Employee</span> <span class="n">obj</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">base</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
+       <span class="k">return</span> <span class="n">obj</span><span class="p">;</span>
+    <span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>   <span class="k">public</span> <span class="n">Employee</span> <span class="nf">Add</span><span class="p">()</span> <span class="p">{</span>
+       <span class="k">return</span> <span class="nf">Add</span><span class="p">(</span><span class="k">new</span> <span class="nf">Employee</span><span class="p">());</span>
+   <span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>   <span class="k">public</span> <span class="k">void</span> <span class="nf">Insert</span><span class="p">(</span><span class="kt">int</span> <span class="n">index</span><span class="p">,</span> <span class="n">Employee</span> <span class="n">obj</span><span class="p">)</span> <span class="p">{</span>
+       <span class="k">base</span><span class="p">.</span><span class="nf">Insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">obj</span><span class="p">);</span>
+   <span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>   <span class="k">public</span> <span class="k">void</span> <span class="nf">Remove</span><span class="p">(</span><span class="n">Employee</span> <span class="n">obj</span><span class="p">)</span> <span class="p">{</span>
+       <span class="k">base</span><span class="p">.</span><span class="nf">Remove</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
+   <span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>   <span class="k">new</span> <span class="k">public</span> <span class="n">Employee</span> <span class="k">this</span><span class="p">[</span><span class="kt">int</span> <span class="n">index</span><span class="p">]</span> <span class="p">{</span>
+       <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="p">(</span><span class="n">Employee</span><span class="p">)</span> <span class="k">base</span><span class="p">[</span><span class="n">index</span><span class="p">];</span> <span class="p">}</span>
+       <span class="k">set</span> <span class="p">{</span> <span class="k">base</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="p">=</span> <span class="k">value</span><span class="p">;</span> <span class="p">}</span>
+   <span class="p">}</span>
+<span class="p">}</span></code></pre></figure></p>
+<p>Then use that collection in your class to map:
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="na">[XmlRoot("company")]</span>
+<span class="k">class</span> <span class="nc">Company</span> <span class="p">{</span>
+    <span class="k">private</span> <span class="n">EmployeeCollection</span> <span class="n">employees</span><span class="p">;&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span>    <span class="p">[</span><span class="nf">XmlElement</span><span class="p">(</span><span class="n">Type</span><span class="p">=</span><span class="k">typeof</span><span class="p">(</span><span class="n">Employee</span><span class="p">),</span><span class="n">ElementName</span><span class="p">=</span><span class="s">"employee"</span><span class="p">,</span><span class="n">IsNullable</span><span class="p">=</span><span class="k">false</span><span class="p">)]</span>
+    <span class="p">[</span><span class="nf">EditorBrowsable</span><span class="p">(</span><span class="n">EditorBrowsableState</span><span class="p">.</span><span class="n">Advanced</span><span class="p">)]</span>
+    <span class="k">public</span> <span class="n">EmployeeCollection</span> <span class="n">Employees</span> <span class="p">{</span>
+        <span class="k">get</span> <span class="p">{</span> <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="n">employees</span><span class="p">;</span> <span class="p">}</span>
+        <span class="k">set</span> <span class="p">{</span> <span class="k">this</span><span class="p">.</span><span class="n">employees</span> <span class="p">=</span> <span class="k">value</span><span class="p">;</span> <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure></p>
+<h2>Pick Your Poison</h2>
+The problems with Generics collections in the .NET Compact Framework seem like yet another bug. So, pick your poison and choose a workaround. Whichever seems simpler to you. Hope that helps someone out.</p>

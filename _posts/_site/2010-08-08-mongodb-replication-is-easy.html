@@ -1,0 +1,40 @@
+<p>Database replication with MongoDB is easy to setup. Replication duplicates
+  all of the data from a master to one or more slave instances and allows for
+  safety and quick recovery in case of a problem with your master database.
+  Here is an example of how quick and easy it is to test out replication in
+  MongoDB. Create a couple of directories for holding your mongo databases.
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">mkdir master slave</code></pre></figure>
+Start by running an instance of the "master" database.
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cd </span>master
+mongod  --master --dbpath .</code></pre></figure>
+Start a new terminal window and continue by running an instance of a "slave"
+database. This example is running on the same machine as master which is great
+for testing, but wouldn't be a good setup if you were really trying to
+implement replication in a production environment since you would still have a
+single-point-of-failure in the single server case.
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cd </span>slave
+mongod --slave --port 27018 --dbpath . --source localhost</code></pre></figure>
+And start another terminal window to use as the client
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">mongo</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">person</span><span class="p">.</span><span class="nx">save</span><span class="p">(</span> <span class="p">{</span><span class="na">name</span><span class="p">:</span><span class="s1">'Geoff Lane'</span><span class="p">}</span> <span class="p">)</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">person</span><span class="p">.</span><span class="nx">save</span><span class="p">(</span> <span class="p">{</span><span class="na">name</span><span class="p">:</span><span class="s1">'Joe Smith'</span><span class="p">}</span> <span class="p">)</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">person</span><span class="p">.</span><span class="nx">find</span><span class="p">()</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">person</span><span class="p">.</span><span class="nx">save</span><span class="p">(</span> <span class="p">{</span><span class="na">name</span><span class="p">:</span><span class="s1">'Jim Johnson'</span><span class="p">,</span> <span class="na">age</span><span class="p">:</span> <span class="mi">65</span><span class="p">}</span> <span class="p">)</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">person</span><span class="p">.</span><span class="nx">find</span><span class="p">()</span></code></pre></figure>
+Now kill the master instance in your terminal with Control+C. This simulates
+the the master server dying. Lastly connect to the slave instance with a mongo
+client by specifying the port.
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">mongo --port 27018
+db.person.find<span class="o">()</span></code></pre></figure>
+As you can see, <code>the db.person.find()</code> returns all of the values
+that were saved in the master list as well which shows that replication is
+working. One of the other interesting facts is that you can start a slave
+instance even after the mongod master is already running and has data and all
+of the data will be replicated over to the slave instance as well. This all
+works without ever shutting down your mongod master instance. This allows you
+to add replication after the fact with no downtime. For more on MongoDB check
+out these books:
+
+*   <a href="http://www.amazon.com/gp/product/1449381561?ie=UTF8&amp;tag=zorchednet-20&amp;linkCode=as2&amp;camp=1789&amp;creative=390957&amp;creativeASIN=1449381561">MongoDB: The Definitive Guide</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=1449381561" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
+*   <a href="http://www.amazon.com/gp/product/1430230517?ie=UTF8&amp;tag=zorchednet-20&amp;linkCode=as2&amp;camp=1789&amp;creative=390957&amp;creativeASIN=1430230517">The Definitive Guide to MongoDB: The NoSQL Database for Cloud and Desktop Computing</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=1430230517" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
+*   <a href="http://www.amazon.com/gp/product/0321705335?ie=UTF8&amp;tag=zorchednet-20&amp;linkCode=as2&amp;camp=1789&amp;creative=390957&amp;creativeASIN=0321705335">MongoDB for Web Development (Developer's Library)</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=0321705335" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /></p></p>

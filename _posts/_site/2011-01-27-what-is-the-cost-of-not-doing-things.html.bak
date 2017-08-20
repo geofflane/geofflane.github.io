@@ -1,0 +1,4 @@
+<p>We're really good at measuring the cost of some things. We're good at measuring the cost of a new computers for everyone on the team, we're good at measuring the cost per hour of a resource on a project and we're good at measuring the time it will take to complete a new feature.</p>
+<p>It seems like people are not good at is measuring the cost of not doing things. What is the cost of maintaining an application on 10 year old technology instead of upgrading it to newer versions as they come out? What is the cost of not having unit tests and automated test suites? What is the cost of running many different versions of a framework or a virtual machine? </p>
+<p>Unfortunately this leaves us with a problem. When we cannot quantify the cost of inaction it often looks like a reasonable choice because we assume that it's free. That assumption is the root of a lot of problems.</p>
+<p>This post is just me ranting, I wish I had the answer.</p>

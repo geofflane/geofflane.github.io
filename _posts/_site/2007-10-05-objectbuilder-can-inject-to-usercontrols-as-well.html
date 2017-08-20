@@ -1,0 +1,38 @@
+<p>This is a followup to my previous post on <a href="http://www.zorched.net/2007/09/10/integrating-objectbuilder-with-aspnet/">integrating ObjectBuilder and ASP.NET</a>. As I was playing around with the solution I hit on the fact that I was only injecting at the Page level. As ASP.NET is a component model, you can end up with custom User Controls that would need injected properties as well. There is a relatively simple, if not entirely obvious way to do that as well.</p>
+<p>Building on the previous example, you can hook into the lifecycle of a page that you are injecting. You can not access the controls directly in the PreRequestHandlerExecute of the IHttpModule because they have not been instantiated yet. Instead, you can create a callback event handler for the Page.InitComplete event and inject properties at that point.</p>
+<p><figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">void</span> <span class="nf">InjectProperties</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">IHttpHandler</span> <span class="n">h</span> <span class="p">=</span> <span class="n">app</span><span class="p">.</span><span class="n">Context</span><span class="p">.</span><span class="n">CurrentHandler</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">h</span> <span class="k">is</span> <span class="n">DefaultHttpHandler</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="n">chain</span><span class="p">.</span><span class="n">Head</span><span class="p">.</span><span class="nf">BuildUp</span><span class="p">(</span><span class="n">builderContext</span><span class="p">,</span> <span class="n">h</span><span class="p">.</span><span class="nf">GetType</span><span class="p">(),</span> <span class="n">h</span><span class="p">,</span> <span class="k">null</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">h</span> <span class="k">is</span> <span class="n">Page</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="c1">// Register a page lifecycle event handler to inject
+</span>        <span class="c1">// user controls on the page itself
+</span>        <span class="n">page</span> <span class="p">=</span> <span class="p">(</span><span class="n">Page</span><span class="p">)</span> <span class="n">h</span><span class="p">;</span>
+        <span class="n">page</span><span class="p">.</span><span class="n">InitComplete</span> <span class="p">+=</span> <span class="n">InjectControls</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span><span class="k">private</span> <span class="k">void</span> <span class="nf">InjectControls</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">EventArgs</span> <span class="n">e</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="nf">InjectControls</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">null</span> <span class="p">!=</span> <span class="n">page</span><span class="p">.</span><span class="n">Form</span><span class="p">)</span>
+        <span class="nf">InjectControls</span><span class="p">(</span><span class="n">page</span><span class="p">.</span><span class="n">Form</span><span class="p">);</span>
+<span class="p">}&lt;/</span><span class="n">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="n">p</span><span class="p">&gt;</span><span class="k">private</span> <span class="k">void</span> <span class="nf">InjectControls</span><span class="p">(</span><span class="n">Control</span> <span class="n">mainControl</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">mainControl</span><span class="p">.</span><span class="n">Controls</span> <span class="p">!=</span> <span class="k">null</span> <span class="p">&amp;&amp;</span> <span class="n">mainControl</span><span class="p">.</span><span class="n">Controls</span><span class="p">.</span><span class="n">Count</span> <span class="p">&gt;</span> <span class="m">0</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">foreach</span> <span class="p">(</span><span class="n">Control</span> <span class="n">c</span> <span class="k">in</span> <span class="n">mainControl</span><span class="p">.</span><span class="n">Controls</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">c</span> <span class="k">is</span> <span class="n">UserControl</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="n">chain</span><span class="p">.</span><span class="n">Head</span><span class="p">.</span><span class="nf">BuildUp</span><span class="p">(</span><span class="n">builderContext</span><span class="p">,</span> <span class="n">c</span><span class="p">.</span><span class="nf">GetType</span><span class="p">(),</span> <span class="n">c</span><span class="p">,</span> <span class="k">null</span><span class="p">);</span>
+                <span class="nf">InjectControls</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></figure></p>
+<p>As you see with this example, you need to recursively inject the objects into all of the controls. That's in case there are any nested controls that might need injecting. The other thing to notice is that the controls in the top-level Page doe not contain all of the controls that are also declared in a Form on the page, so you need to handle both of those paths.</p>
+<p>Hopefully this will get you further along the path to being able to do dependency injection in your ASP.NET application.</p>

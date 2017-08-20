@@ -1,0 +1,26 @@
+<p>Currently I have a whole bunch of <a href="http://mercurial.selenic.com/">Mercurial</a> repositories in a directory. All of these are cloned from a central repository that the team pushes their changes to. I like to generally keep my local repositories up-to-date so that I can review changes. Manually running <em>hg incoming -R some_directory</em> on 20 different projects is a lot of work. So I automated it with a simple shell script.</p>
+<p>This script will run incoming (or outgoing) on all of the local repositories and print the results to the console. Then I can manually sync the ones that have changed if I want.</p>
+<p>I called this file <em>hgcheckall.sh</em> and run it like: <em>./hgcheckall.sh incoming</em>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash&lt;/p&gt;</span>
+<span class="gp">&lt;p&gt;# </span>Find all the directories that are mercurial repos
+<span class="nb">dirs</span><span class="o">=(</span><span class="sb">`</span>find . -name <span class="s2">".hg"</span><span class="sb">`</span><span class="o">)</span>
+<span class="c"># Remove the /.hg from the path and that's the base repo dir</span>
+<span class="nv">merc_dirs</span><span class="o">=(</span> <span class="s2">"</span><span class="k">${</span><span class="nv">dirs</span><span class="p">[@]//\/.hg/</span><span class="k">}</span><span class="s2">"</span> <span class="o">)</span>&lt;/p&gt;
+&lt;p&gt;case <span class="nv">$1</span> <span class="k">in
+    </span>incoming<span class="o">)</span>
+    <span class="k">for </span>indir <span class="k">in</span> <span class="k">${</span><span class="nv">merc_dirs</span><span class="p">[@]</span><span class="k">}</span>; <span class="k">do
+        </span><span class="nb">echo</span> <span class="s2">"Checking: </span><span class="k">${</span><span class="nv">indir</span><span class="k">}</span><span class="s2">"</span>
+        hg -R <span class="s2">"</span><span class="nv">$indir</span><span class="s2">"</span> incoming
+    <span class="k">done</span>
+    ;;
+    outgoing<span class="o">)</span>
+    <span class="k">for </span>outdir <span class="k">in</span> <span class="k">${</span><span class="nv">merc_dirs</span><span class="p">[@]</span><span class="k">}</span>; <span class="k">do
+        </span><span class="nb">echo</span> <span class="s2">"Checking: </span><span class="k">${</span><span class="nv">outdir</span><span class="k">}</span><span class="s2">"</span>
+        hg -R <span class="s2">"</span><span class="nv">$outdir</span><span class="s2">"</span> outgoing
+    <span class="k">done</span>
+    ;;
+    <span class="k">*</span><span class="o">)</span>
+    <span class="nb">echo</span> <span class="s2">"Usage: hgcheckall.sh [incoming|outgoing]"</span>
+    ;;
+<span class="k">esac</span></code></pre></figure></p>
+<p>I guess the next major improvement would be to capture the output and then automatically sync the ones that have changed, but I haven't gotten around to that yet.</p>

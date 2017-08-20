@@ -1,0 +1,56 @@
+<p>With the recent release of <a href="http://subversion.tigris.org/svn_1.4_releasenotes.html">Subversion 1.4</a> I'm going through the process of updating repositories. I often like to use multiple repositories because Subversion versions the entire repository with each checkin (Atomic commits rule!). When I do that, I group all of the repositories in the same directory. It makes it really easy to configure Apache with the SVNParentPath directive. And if you're using svn+ssh or something like that, then it's just easier to remember where they are.</p>
+<h3>SVNParentPath Example</h3>
+With this configuration it's very easy to bring new repositories up because it doesn't require any configuration change in Apache.</p>
+<p><figure class="highlight"><pre><code class="language-apache" data-lang="apache"><span class="p">&lt;</span><span class="nl">Location</span><span class="sr"> /svn</span><span class="p">&gt;
+</span>    <span class="nc">DAV</span> svn
+    SVNParentPath s:/svn
+    SVNListParentPath <span class="ss">on</span>
+    SVNAutoversioning on&lt;/p&gt;
+    <span class="c"># authentication</span>
+    <span class="nc">AuthType</span> <span class="ss">Basic</span>
+    <span class="nc">AuthName</span> "Subversion Access"
+    <span class="nc">AuthUserFile</span> s:/logins.txt
+    <span class="c"># Access is configured in the access file.</span>
+    AuthzSVNAccessFile s:/access.txt
+    <span class="nc">Require</span> <span class="ss">valid-user</span>
+<span class="p">&lt;/</span><span class="nl">Location</span><span class="p">&gt;</span></code></pre></figure></p>
+<p>The one obvious downside to having multiple repositories is managing things like backups and upgrades. You have a lot more to do than just dump and load a single repository. So to help handle that task, I created some simple shell scripts.</p>
+<h3>Dump All Repositories</h3>
+This script will dump all of the SVN repositories in a given directory.</p>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/sh&lt;/p&gt;</span>
+<span class="c"># Assumes each directory is an SVN repository</span>
+<span class="c"># and creates a dump file for each of them.&lt;/p&gt;</span>
+<span class="k">for </span>i <span class="k">in</span> <span class="k">*</span>; <span class="k">do
+    </span>svnadmin dump <span class="nv">$i</span> &gt; <span class="k">${</span><span class="nv">i</span><span class="k">}</span>.dump;
+<span class="k">done</span>;</code></pre></figure></p>
+<h3>Recreate/Load All Dump Files</h3>
+This script will take all of the dump files and create new repositories and then load the dump file into them. This is good for major revision changes such as to 1.4 where they have changed some structures and improved the efficiency of storing binary files for example.</p>
+<p><figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/sh&lt;/p&gt;</span>
+<span class="gp">&lt;p&gt;# </span>Assumes a directory full of dump files
+<span class="c"># Creates a new SVN repository and loads the dump file into it&lt;/p&gt;</span>
+&lt;p&gt;for i <span class="k">in</span> <span class="k">*</span>.dump; <span class="k">do</span>
+    <span class="c"># The %% syntax is a substring command in bash to strip off the</span>
+    <span class="c"># last occurrence of the string that follows so Foo.dump -&gt; Foo</span>
+    <span class="nv">repos</span><span class="o">=</span><span class="k">${</span><span class="nv">i</span><span class="p">%%.dump</span><span class="k">}</span>;
+    svnadmin create <span class="nv">$repos</span>;
+    svnadmin load <span class="nv">$repos</span> &lt; <span class="nv">$i</span>;
+<span class="k">done</span></code></pre></figure></p>
+<h3>Create New Repository Script</h3>
+This is a handy one I keep around to make it easy to help enforce best practices. This creates a repository and then automatically creates the trunk/ branches/ and tags/ directories.</p>
+<p><figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/sh&lt;/p&gt;</span>
+&lt;p&gt;if <span class="o">[</span> -z <span class="s2">"</span><span class="nv">$1</span><span class="s2">"</span> <span class="o">]</span>
+<span class="k">then
+    </span><span class="nb">echo</span> <span class="s2">"Usage: </span><span class="nv">$0</span><span class="s2"> &lt;repository&gt;"</span>;
+    <span class="nb">exit </span>1;
+<span class="k">fi</span>&lt;/p&gt;
+<span class="gp">&lt;p&gt;# </span><span class="nb">set </span>up directories
+<span class="nv">cur_dir</span><span class="o">=</span><span class="sb">`</span><span class="nb">pwd</span><span class="sb">`</span>
+<span class="c"># use these 2 if you're running on Cygwin under Windows</span>
+<span class="c"># cur_cyg_dir=`pwd`</span>
+<span class="c"># cur_dir=`cygpath -m $cur_cyg_dir`</span>
+<span class="nv">svn_dir</span><span class="o">=</span><span class="k">${</span><span class="nv">cur_dir</span><span class="k">}</span>/<span class="k">${</span><span class="nv">1</span><span class="k">}</span>&lt;/p&gt;
+&lt;p&gt;svnadmin create <span class="s2">"</span><span class="nv">$1</span><span class="s2">"</span>
+svn -m <span class="s2">"Create default structure."</span> mkdir file:///<span class="k">${</span><span class="nv">svn_dir</span><span class="k">}</span>/trunk file:///<span class="k">${</span><span class="nv">svn_dir</span><span class="k">}</span>/tags file:///<span class="k">${</span><span class="nv">svn_dir</span><span class="k">}</span>/branches&lt;/p&gt;
+&lt;p&gt;echo <span class="s2">"done"</span></code></pre></figure></p>
+<p>Not that these are incredibly complex shell scripts, but they can do a lot of work while you do other things (like post to your blog). I hope they'll help someone out there.</p>
+<p>And just to be warned, if you're doing this on a bunch of big repositories it can take some time!</p>

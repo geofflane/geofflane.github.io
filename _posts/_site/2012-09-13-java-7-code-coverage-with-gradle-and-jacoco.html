@@ -1,0 +1,53 @@
+<h3>Thanks</h3>
+Steven Dicks' post on <a href="http://stevendick.github.com/blog/2012/01/22/jacoco-and-gradle/">Jacoco and Gradle</a> is a great start to integrating Jacoco and Gradle, this is a small iteration on top of that work.</p>
+<h3>Java 7 Code Coverage</h3>
+The state of Code Coverage took a serious turn for the worst when Java 7 came out. The byte-code changes in Java 7 effectively made Emma and Cobertura defunct. They will not work with Java 7 constructs. Fortunately there is a new player in town called <a href="http://www.eclemma.org/jacoco/">JaCoCo</a> (for Java Code Coverage). JaCoCo is the successor to Emma which is being built on the knowledge gained over the years by the Eclipse and Emma teams on how best to do code coverage. And works with Java 7 out-of-the-box.</p>
+<p>The advantage of using established tools is that they generally are well supported across your toolchain. JaCoCo is fairly new and so support in <a href="http://gradle.org">Gradle</a> isn't so smooth. Fortunately Steven's post got me started down the right path. The one thing that I wanted to improve right away was to use transitive dependency declarations as opposed to having local jar files in my source repository. JaCoCo is now available in the Maven repos so we can do that. <em>One thing to note is that the default files build in the Maven repo are Eclipse plugins, so we need to reference the "runtime" classifier in our dependency</em></p>
+<h3>The Gradle Script</h3>
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="n">configurations</span> <span class="o">{</span>
+    <span class="n">codeCoverage</span>
+    <span class="n">codeCoverageAnt</span>
+<span class="o">}</span>
+<span class="n">dependencies</span> <span class="o">{</span>
+    <span class="n">codeCoverage</span> <span class="s1">'org.jacoco:org.jacoco.agent:0.5.10.201208310627:runtime@jar'</span>
+    <span class="n">codeCoverageAnt</span> <span class="s1">'org.jacoco:org.jacoco.ant:0.5.10.201208310627'</span>
+<span class="o">}</span>
+<span class="n">test</span> <span class="o">{</span>
+    <span class="n">systemProperties</span> <span class="o">=</span> <span class="n">System</span><span class="o">.</span><span class="na">properties</span>
+    <span class="n">jvmArgs</span> <span class="s2">"-javaagent:${configurations.codeCoverage.asPath}=destfile=${project.buildDir.path}/coverage-results/jacoco.exec,sessionid=HSServ,append=false"</span><span class="o">,</span>
+            <span class="s1">'-Djacoco=true'</span><span class="o">,</span>
+            <span class="s1">'-Xms128m'</span><span class="o">,</span>
+            <span class="s1">'-Xmx512m'</span><span class="o">,</span>
+            <span class="s1">'-XX:MaxPermSize=128m'</span>
+<span class="o">}</span>
+<span class="n">task</span> <span class="n">generateCoverageReport</span> <span class="o">&lt;&lt;</span> <span class="o">{</span>
+    <span class="n">ant</span> <span class="o">{</span>
+        <span class="n">taskdef</span><span class="o">(</span><span class="nl">name:</span><span class="s1">'jacocoreport'</span><span class="o">,</span> <span class="nl">classname:</span> <span class="s1">'org.jacoco.ant.ReportTask'</span><span class="o">,</span> <span class="nl">classpath:</span> <span class="n">configurations</span><span class="o">.</span><span class="na">codeCoverageAnt</span><span class="o">.</span><span class="na">asPath</span><span class="o">)</span>
+          <span class="n">mkdir</span> <span class="nl">dir:</span> <span class="s2">"build/reports/coverage"</span>
+          <span class="n">jacocoreport</span> <span class="o">{</span>
+            <span class="n">executiondata</span> <span class="o">{</span>
+                <span class="n">fileset</span><span class="o">(</span><span class="nl">dir:</span> <span class="s2">"build/coverage-results"</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">include</span> <span class="nl">name:</span> <span class="s1">'jacoco.exec'</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+            <span class="n">structure</span><span class="o">(</span><span class="nl">name:</span> <span class="n">project</span><span class="o">.</span><span class="na">name</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">classfiles</span> <span class="o">{</span>
+                    <span class="n">fileset</span><span class="o">(</span><span class="nl">dir:</span> <span class="s2">"build/classes/main"</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="n">exclude</span> <span class="nl">name:</span> <span class="s1">'org/ifxforum/**/*'</span>
+                        <span class="n">exclude</span> <span class="nl">name:</span> <span class="s1">'org/gca/euronet/generated**/*'</span>
+                    <span class="o">}</span>
+                <span class="o">}</span>
+                <span class="n">sourcefiles</span><span class="o">(</span><span class="nl">encoding:</span> <span class="s1">'CP1252'</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">fileset</span> <span class="nl">dir:</span> <span class="s2">"src/main/java"</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+              <span class="n">xml</span>  <span class="nl">destfile:</span> <span class="s2">"build/reports/coverage/jacoco.xml"</span>
+            <span class="n">html</span> <span class="nl">destdir:</span>  <span class="s2">"build/reports/coverage"</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<h3>A Few Details</h3>
+The magic is in the <em>jvmArgs</em> of the test block. JaCoCo is run as a Java Agent which uses the runtime instrumentation feature added in Java 6 to be able to inspect the running code. Extra arguments can be added to JaCoCo there including things like <em>excludes</em> to exclude specific classes from coverage. The available parameters are the same as the <a href="http://www.eclemma.org/jacoco/trunk/doc/prepare-agent-mojo.html">maven JaCoCo parameters</a>.</p>
+<p>The <em>generateCoverageReport</em> task converts the jacoco.exec binary into html files for human consumption. If you're just integrating with a CI tool, like Jenkins, then you probably don't need this, but it's handy for local use and to dig into the details of what's covered.</p>
+<h3>Loose Ends</h3>
+One problem that I ran into was referencing project paths like the project.buildDir from within an Ant task. Hopefully someone will come along and let me know how that's done.</p>

@@ -1,0 +1,101 @@
+<p>When you're writing code, Don't Repeat Yourself. Now say that 5 times. <em>*rimshot*</em> </p>
+<p>One of the things that I find myself repeating a lot of in many business apps is queries. It's common to have a rule or filter that applies to many different cases. I came across such a situation recently and wanted to figure out a way to share that filter across many different queries. This is what I came up with for keeping those Criteria DRY.</p>
+<p>To start with, I'll use an example of an Article. This could be a blog post or a newspaper article. One of the rules of the system is that Articles need to be published before they are visible by end users. Because of this seemingly simple rule, every time we query for Articles, we will need to check the published flag. If you get a lot of queries, that ends up being a lot of repetition.</p>
+<p>Here's our example domain class:
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="kn">package</span> <span class="nn">net.zorched.domain</span>
+<span class="kd">class</span> <span class="nc">Article</span> <span class="o">{</span>
+    <span class="n">String</span> <span class="n">name</span>
+    <span class="n">String</span> <span class="n">slug</span>
+    <span class="n">String</span> <span class="n">category</span>
+    <span class="kt">boolean</span> <span class="n">published</span>
+    <span class="kd">static</span> <span class="n">constraints</span> <span class="o">=</span> <span class="o">{</span>
+        <span class="n">name</span><span class="o">(</span><span class="nl">blank:</span> <span class="kc">false</span><span class="o">)</span>
+        <span class="n">slug</span><span class="o">(</span><span class="nl">nullable:</span> <span class="kc">true</span><span class="o">)</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>Now we need to add a query that will retrieve our domain instance by its <a href="http://en.wikipedia.org/wiki/Slug_(production)">slug</a> (a slug is a publishing term for a short name given to an article, in the web world it has become a term often used for a search engine optimization technique that uses the title instead of an artificial ID). To perform that query we might write something like this on the Article class:
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy">    <span class="kd">static</span> <span class="nf">getBySlug</span><span class="o">(</span><span class="n">String</span> <span class="n">slug</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">withCriteria</span><span class="o">(</span><span class="nl">uniqueResult:</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">and</span> <span class="o">{</span>
+                <span class="n">eq</span><span class="o">(</span><span class="s1">'approved'</span><span class="o">,</span> <span class="kc">true</span><span class="o">)</span>
+                <span class="n">eq</span><span class="o">(</span><span class="s1">' slug'</span><span class="o">,</span>  <span class="n">slug</span><span class="o">)</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span></code></pre></figure></p>
+<p>We want to query based on the slug, but we also want to only allow a published Article to be shown. This would allow us to unpublish an article if necessary. Without the approved filter, if the link had gotten out, people could still view the article.</p>
+<p>Next we decide we want to list all of the Articles in a particular category so we write something like this, again filtering by the approved flag.
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy">    <span class="kd">static</span> <span class="nf">findAllByCategory</span><span class="o">(</span><span class="n">String</span> <span class="n">category</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">withCriteria</span><span class="o">()</span> <span class="o">{</span>
+            <span class="n">and</span> <span class="o">{</span>
+                <span class="n">eq</span><span class="o">(</span><span class="s1">'approved'</span><span class="o">,</span> <span class="kc">true</span><span class="o">)</span>
+                <span class="n">eq</span><span class="o">(</span><span class="s1">'category'</span><span class="o">,</span>  <span class="n">category</span><span class="o">)</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span></code></pre></figure></p>
+<p>Two simple examples like this might not be that big of a deal. But you can easily see how this would grow if you added more custom queries or if you had some more complicated filtering logic.  Another common case would be if you had the same filter across many different domain objects. (What if the Article had attachments and comments all of which needed their own approval?) What you need is a way to share that logic among multiple withCriteria calls.</p>
+<p>The trick to this is understanding how <em>withCriteria</em> and <em>createCriteria</em> work in GORM. They are both implemented using a custom class called <em>HibernateCriteriaBuilder</em>. That class invokes the closures that you pass to it on itself. Sounds confusing. Basically the elements in the closure of your criteria queries get executed as if the were called on an instance of HibernateCriteriaBuilder.</p>
+<p>e.g.
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="n">withCriteria</span> <span class="o">{</span>
+     <span class="n">eq</span><span class="o">(</span><span class="s1">'a'</span><span class="o">,</span> <span class="mi">1</span><span class="o">)</span>
+     <span class="n">like</span><span class="o">(</span><span class="s1">'b'</span><span class="o">,</span> <span class="s1">'%foo%'</span><span class="o">)</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>would be the equivalent of calling something like:</p>
+<p><figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="kt">def</span> <span class="n">builder</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HibernateCriteriaBuilder</span><span class="o">(...)</span>
+<span class="n">builder</span><span class="o">.</span><span class="na">eq</span><span class="o">(</span><span class="s1">'a'</span><span class="o">,</span> <span class="mi">1</span><span class="o">)</span>
+<span class="n">builder</span><span class="o">.</span><span class="na">like</span><span class="o">(</span><span class="s1">'b'</span><span class="o">,</span> <span class="s1">'%foo%'</span><span class="o">)</span></code></pre></figure></p>
+<p>That little bit of knowledge allow you to reach into your meta programming bag of tricks and add new calls to the HibernateCriteriaBuilder. Every Class in groovy has a <em>metaClass</em> that is used to extend types of that Class. In this case we'll add a Closure that will combine our criteria with other criteria like so:
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="n">HibernateCriteriaBuilder</span><span class="o">.</span><span class="na">metaClass</span><span class="o">.</span><span class="na">published</span> <span class="o">=</span> <span class="o">{</span> <span class="n">Closure</span> <span class="n">c</span> <span class="o">-&gt;</span>
+    <span class="n">and</span> <span class="o">{</span>
+        <span class="n">eq</span><span class="o">(</span><span class="s1">'published'</span><span class="o">,</span> <span class="kc">true</span><span class="o">)</span>
+        <span class="n">c</span><span class="o">()</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>This <em>ands</em> together our eq call with all of the other parts of the passed in closure.
+Now we can put the whole thing together into a domain class with a reusable filter.</p>
+<p><figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="kn">package</span> <span class="nn">net.zorched.domain</span>
+<span class="kn">import</span> <span class="nn">grails.orm.HibernateCriteriaBuilder</span>
+<span class="kd">class</span> <span class="nc">Article</span> <span class="o">{</span>
+    <span class="kd">static</span> <span class="o">{</span>
+        <span class="c1">// monkey patch HibernateCriteriaBuilder to have a reusable 'published' filter</span>
+        <span class="n">HibernateCriteriaBuilder</span><span class="o">.</span><span class="na">metaClass</span><span class="o">.</span><span class="na">published</span> <span class="o">=</span> <span class="o">{</span> <span class="n">Closure</span> <span class="n">c</span> <span class="o">-&gt;</span>
+            <span class="n">and</span> <span class="o">{</span>
+                <span class="n">eq</span><span class="o">(</span><span class="s1">'published'</span><span class="o">,</span> <span class="kc">true</span><span class="o">)</span>
+                <span class="n">c</span><span class="o">()</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="n">String</span> <span class="n">name</span>
+    <span class="n">String</span> <span class="n">slug</span>
+    <span class="n">String</span> <span class="n">category</span>
+    <span class="kt">boolean</span> <span class="n">published</span>
+    <span class="n">Date</span> <span class="n">datePublished</span>
+    <span class="kt">def</span> <span class="nf">publish</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">published</span> <span class="o">=</span> <span class="kc">true</span>
+        <span class="n">datePublished</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Date</span><span class="o">()</span>
+    <span class="o">}</span>
+    <span class="kd">static</span> <span class="kt">def</span> <span class="nf">createSlug</span><span class="o">(</span><span class="n">n</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">n</span><span class="o">.</span><span class="na">replaceAll</span><span class="o">(</span><span class="s1">'[^A-Za-z0-9\\s]'</span><span class="o">,</span><span class="s1">''</span><span class="o">)</span>
+                 <span class="o">.</span><span class="na">replaceAll</span><span class="o">(</span><span class="s1">'\\s'</span><span class="o">,</span><span class="s1">'-'</span><span class="o">)</span>
+                 <span class="o">.</span><span class="na">toLowerCase</span><span class="o">()</span>
+    <span class="o">}</span>
+    <span class="kd">static</span> <span class="nf">findAllApprovedByCategory</span><span class="o">(</span><span class="n">String</span> <span class="n">category</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">withCriteria</span> <span class="o">{</span>
+            <span class="n">published</span> <span class="o">{</span>
+                <span class="n">eq</span><span class="o">(</span><span class="s1">'category'</span><span class="o">,</span> <span class="n">category</span><span class="o">)</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="kd">static</span> <span class="nf">getBySlug</span><span class="o">(</span><span class="n">String</span> <span class="n">slug</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">withCriteria</span><span class="o">(</span><span class="nl">uniqueResult:</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">published</span> <span class="o">{</span>
+                <span class="n">eq</span><span class="o">(</span><span class="s1">' slug'</span><span class="o">,</span>  <span class="n">slug</span><span class="o">)</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="kd">static</span> <span class="n">constraints</span> <span class="o">=</span> <span class="o">{</span>
+        <span class="n">name</span><span class="o">(</span><span class="nl">blank:</span> <span class="kc">false</span><span class="o">)</span>
+        <span class="n">datePublished</span><span class="o">(</span><span class="nl">nullable:</span> <span class="kc">true</span><span class="o">)</span>
+        <span class="n">slug</span><span class="o">(</span><span class="nl">nullable:</span> <span class="kc">true</span><span class="o">)</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>And there you have it. Do you have any other techniques that can be used to DRY criteria?</p>

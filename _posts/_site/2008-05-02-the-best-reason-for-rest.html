@@ -1,0 +1,38 @@
+<p><a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST</a> is a popular means of implementing <a href="http://en.wikipedia.org/wiki/Service-oriented_architecture">Service Oriented Architectures</a> (SOA) as well as merely providing simple remote APIs for interacting with systems. REST is a constraint based architecture built on <a href="http://en.wikipedia.org/wiki/HTTP">HTTP</a>, the foundational protocol of the Web. That foundation, its simplicity and the constraints it is built upon are its biggest strengths.</p>
+<h2>1. Simple Foundation</h2>
+URLs and HTTP are the basis of building REST services. </p>
+<h3>1. a. HTTP</h3>
+HTTP is a fairly simple, well understood protocol. Almost any developer who has built a web based application has come to understand the basics of HTTP. It is a stateless protocol with a limited number of request methods it uses. It is made up of 8 total verbs. From a practical point of view, those verbs are broken into Control Methods and Action Methods. The Control Methods are really only there to inspect the HTTP protocol. The Action Methods are the ones that are really used to perform the real work of interacting with a Web server.</p>
+<h4>Control Methods:</h4></p>
+<ol>
+<li>HEAD</li>
+<li>TRACE</li>
+<li>OPTIONS</li>
+<li>CONNECT</li>
+</ol></p>
+<h4>Action Methods:</h4></p>
+<ol>
+<li>GET</li>
+<li>POST</li>
+<li>PUT</li>
+<li>DELETE</li>
+</ol></p>
+<h3>1. b. URLs</h3>
+URLs refer to resources. Those resources are manipulated using HTTP to pass data from client to server.</p>
+<h2>2. Existing Knowledge Base</h2>
+Beyond your average Web Developer there are a large number of people that know HTTP and its semantics. They know how to build scalable solutions. They have knowledge about implementing caching, load-balancing, proxying, etc. In addition there is built up knowledge around network routing, security, DNS, etc. Leveraging existing knowledge in a solution is often a very good idea.</p>
+<h2>3. Constraint Based</h2>
+All resources have to be represented as a URL. Those Action Methods that I referred to above constitute the total number of actions that you can take upon a resource in a RESTful architecture. So you can represent a resource and act upon it with four distinct verbs.</p>
+<h2>The Best Reason</h2>
+The best arguments for REST are SOAP, OASIS and <a href="http://en.wikipedia.org/wiki/WS-*">WS-*</a>. The more I read those specs, the more I think that REST is a better solution. There seems to be a very strong correlation between people who want to build "Enterprise" solutions and people who want those solutions to be complex. It's as if complexity is somehow a valuable attribute. It's as if the only way to solve a complex problem is with a complex solution.</p>
+<p>I believe that complex problems do not always require complex solutions. In fact, managing and hiding complexity is one of the best ways to deal with complex problems. Software developers do it all the time when they program. Whether that's through a shared routine or through Object Oriented techniques like Polymorphism, software developers are constantly striving for simpler solutions to complex problems. In this way we combine small, simple solutions together to solve larger, more complex problems.</p>
+<p>REST is that simple solution. It's based on a simple, well known protocol. There are simple, well known techniques that can be used to solve complex security and scalability issues. The constraints of REST itself largely eliminates the need for complex descriptions of Services like WSDL. XML Schemas of the messages themselves and a list of URLs is generally enough.</p>
+<p>Need to authenticate once and then pass a token on subsequent requests? Use a cookie.
+Need to route messages based on schema version? Use HTTP redirects.
+Need to change the location of an endpoint? Change your DNS entry.
+Need to secure messages in transit? Use SSL.
+Need to secure your endpoints? Use a firewall and/or use Client SSL Certificates.
+Need to audit usage? Use the same tools you do for a web site.
+Need to scale? Implement load balancing, or use caching techniques.</p>
+<h2>Conclusion</h2>
+Sometimes we need to do remoting. Sometimes we would like to build a loosely coupled, distributed architecture. There are quite a few techniques we can use to do that. Sometimes we need to be technology neutral in those implementations. The field is narrowed a bit. I think when I look at REST sometimes I look at it through the lens of alternatives. One of the most common alternatives is SOAP and the WS-* stack. And when I look at REST through that lens, things look quite rosy on the REST side.</p>

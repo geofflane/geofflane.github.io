@@ -1,0 +1,142 @@
+<p><a href="http://grails.org">Grails</a> is a really nice MVC framework inspired by Ruby on Rails. The difference is that Grails is built using Groovy and Java and leverages existing, well known frameworks as it's foundation. It is essentially a fairly thin convention-over-configuration and integration layer on top of Spring and Hibernate. The documentation for common scenarios is pretty good, but once you get outside of the common cases it deteriorates pretty quickly. This is part of my contribution I guess.</p>
+<h3>Constraints and Validation</h3>
+Grails has a fairly good set of built in constraints to use to validate your domain objects. This allows you to decorate your Domain with constraints which are validated prior to persisting the objects.
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="kd">class</span> <span class="nc">Address</span> <span class="o">{</span>
+    <span class="n">String</span> <span class="n">street</span>
+    <span class="n">String</span> <span class="n">city</span>
+    <span class="n">String</span> <span class="n">state</span>
+    <span class="kd">static</span> <span class="n">constraints</span> <span class="o">=</span> <span class="o">{</span>
+        <span class="n">street</span><span class="o">(</span><span class="nl">nullable:</span><span class="kc">true</span><span class="o">)</span>
+        <span class="n">city</span><span class="o">(</span><span class="nl">blank:</span><span class="kc">false</span><span class="o">)</span>
+        <span class="n">state</span><span class="o">(</span><span class="nl">size:</span><span class="mi">2</span><span class="o">..</span><span class="mi">2</span><span class="o">)</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>You can find a comprehensive list of the <a href="http://grails.org/Validation+Reference">built in validations on the Grails website</a>. It includes the ability to create a custom validator for a domain class if the built in ones do not suffice. So you can write a validator inline to your domain object.</p>
+<p><figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="kd">class</span> <span class="nc">Student</span> <span class="o">{</span>
+    <span class="n">String</span> <span class="n">name</span>
+    <span class="n">Calendar</span> <span class="n">dateOfBirth</span>
+    <span class="n">Calendar</span> <span class="n">enrollmentDate</span>
+    <span class="kd">static</span> <span class="n">constraints</span> <span class="o">=</span> <span class="o">{</span>
+        <span class="n">name</span><span class="o">(</span><span class="nl">blank:</span><span class="kc">false</span><span class="o">)</span>
+        <span class="n">dateOfBirth</span><span class="o">(</span><span class="nl">blank:</span><span class="kc">false</span><span class="o">,</span> <span class="nl">validator:</span> <span class="o">{</span> <span class="n">val</span><span class="o">,</span> <span class="n">obj</span> <span class="o">-&gt;</span>
+            <span class="c1">// Ensure that the date of birth is before the enrollment date</span>
+            <span class="k">return</span> <span class="o">!</span> <span class="n">val</span><span class="o">.</span><span class="na">after</span><span class="o">(</span><span class="n">obj</span><span class="o">.</span><span class="na">enrollmentDate</span><span class="o">)</span>
+        <span class="o">}))</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>This validator is just a closure, so you could write it external to the class and reuse it among many different domain classes. I was interested to know how to create a "first-class" validator though that looked and acted just like the built in ones.</p>
+<h3>Create a Plugin</h3>
+Grails is essentially built as a series of plugins. Everything from Hibernate support to Service Injection is implemented as a Plugin. Because of this it obviously must have a strong plugin system that allows you to do almost anything. So I decided to look at using a plugin to create a shared validation.</p>
+<p>So, first: Generate a plugin.
+On the command line issue the command <em>grails create-plugin MyApp</em>. This will create a directory containing everything you need to construct a new plugin. The directory really looks like a mini Grails application. In fact you can run it exactly as a grails app which is great for testing.</p>
+<p>This will create a <em>src/</em> directory in the plugin as well. We can create our validator in there. You can create some directories under <em>src/groovy</em> or <em>src/java</em> to create a package. Use groovy or java depending on which language you want to use to implement your validator.</p>
+<h3>Create your Validator</h3>
+Grails provides <em>org.codehaus.groovy.grails.validation.AbstractConstraint</em> as a simple base class to inherit from to get the basic functionality. Of course if you want to implement the whole thing yourself you just need to implement the interface
+<em>org.codehaus.groovy.grails.validation.Constraint</em>. That would be a lot of work, so just inherit from the AbstractConstraint.</p>
+<p>Here's an example of a constraint used to validate a Postal Code (or zip code). This is a simple implementation that supports validating Canadian and US postal codes.
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="kn">package</span> <span class="nn">net.zorched.validation</span>
+<span class="kn">import</span> <span class="nn">org.codehaus.groovy.grails.validation.AbstractConstraint</span>
+<span class="kn">import</span> <span class="nn">org.springframework.validation.Errors</span>
+<span class="kd">class</span> <span class="nc">PostalCodeConstraint</span> <span class="kd">extends</span> <span class="n">AbstractConstraint</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">DEFAULT_NOT_POSTAL_CODE_MESSAGE_CODE</span> <span class="o">=</span> <span class="s2">"default.not.postalCode.message"</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">POSTAL_CODE_CONSTRAINT</span> <span class="o">=</span> <span class="s2">"postalCode"</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kt">boolean</span> <span class="n">postalCode</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="n">US</span> <span class="o">=</span> <span class="o">{</span> <span class="n">postalCode</span><span class="o">-&gt;</span>
+        <span class="n">postalCode</span> <span class="o">==~</span> <span class="s">/\d{5}/</span>
+    <span class="o">}</span>
+    <span class="kd">private</span> <span class="n">CA</span> <span class="o">=</span> <span class="o">{</span> <span class="n">postalCode</span><span class="o">-&gt;</span>
+        <span class="n">postalCode</span> <span class="o">==~</span> <span class="s">/[A-Z]\d[A-Z] \d[A-Z]\d/</span>
+    <span class="o">}</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setParameter</span><span class="o">(</span><span class="n">Object</span> <span class="n">constraintParameter</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span><span class="o">(!(</span><span class="n">constraintParameter</span> <span class="k">instanceof</span> <span class="n">Boolean</span><span class="o">))</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nf">IllegalArgumentException</span><span class="o">(</span><span class="s2">"Parameter for constraint ["</span>
+               <span class="o">+</span><span class="n">POSTAL_CODE_CONSTRAINT</span><span class="o">+</span><span class="s2">"] of property ["</span>
+               <span class="o">+</span><span class="n">constraintPropertyName</span><span class="o">+</span><span class="s2">"] of class ["</span>
+               <span class="o">+</span><span class="n">constraintOwningClass</span><span class="o">+</span><span class="s2">"] must be a boolean value"</span><span class="o">);</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">postalCode</span> <span class="o">=</span> <span class="o">((</span><span class="n">Boolean</span><span class="o">)</span><span class="n">constraintParameter</span><span class="o">).</span><span class="na">booleanValue</span><span class="o">();</span>
+        <span class="kd">super</span><span class="o">.</span><span class="na">setParameter</span><span class="o">(</span><span class="n">constraintParameter</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">processValidate</span><span class="o">(</span><span class="n">Object</span> <span class="n">target</span><span class="o">,</span> <span class="n">Object</span> <span class="n">propertyValue</span><span class="o">,</span> <span class="n">Errors</span> <span class="n">errors</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(!</span> <span class="n">validPostalCode</span><span class="o">(</span><span class="n">target</span><span class="o">,</span> <span class="n">propertyValue</span><span class="o">))</span> <span class="o">{</span>
+            <span class="kt">def</span> <span class="n">args</span> <span class="o">=</span> <span class="o">(</span><span class="n">Object</span><span class="o">[])</span> <span class="o">[</span><span class="n">constraintPropertyName</span><span class="o">,</span> <span class="n">constraintOwningClass</span><span class="o">,</span>
+            <span class="n">propertyValue</span><span class="o">]</span>
+            <span class="kd">super</span><span class="o">.</span><span class="na">rejectValue</span><span class="o">(</span><span class="n">target</span><span class="o">,</span> <span class="n">errors</span><span class="o">,</span> <span class="n">DEFAULT_NOT_POSTAL_CODE_MESSAGE_CODE</span><span class="o">,</span>
+                <span class="s2">"not."</span> <span class="o">+</span> <span class="n">POSTAL_CODE_CONSTRAINT</span><span class="o">,</span> <span class="n">args</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="kt">boolean</span> <span class="nf">supports</span><span class="o">(</span><span class="n">Class</span> <span class="n">type</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">type</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">String</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">isAssignableFrom</span><span class="o">(</span><span class="n">type</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="n">String</span> <span class="nf">getName</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">POSTAL_CODE_CONSTRAINT</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="kt">boolean</span> <span class="nf">validPostalCode</span><span class="o">(</span><span class="n">target</span><span class="o">,</span> <span class="n">propertyValue</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">def</span> <span class="n">country</span> <span class="o">=</span> <span class="s2">"US"</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">target</span><span class="o">.</span><span class="na">metaClass</span><span class="o">.</span><span class="na">hasMetaProperty</span><span class="o">(</span><span class="s2">"country"</span><span class="o">))</span> <span class="o">{</span>
+            <span class="n">country</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="na">country</span>
+        <span class="o">}</span>
+        <span class="n">println</span> <span class="n">country</span>
+        <span class="k">this</span><span class="o">.</span><span class="s2">"$country"</span><span class="o">(</span><span class="n">propertyValue</span><span class="o">)</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>The name property is the key used to match your validator in your domain class to this Constraint instance.
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="kd">class</span> <span class="nc">Address</span> <span class="o">{</span>
+    <span class="n">String</span> <span class="n">street</span>
+    <span class="n">String</span> <span class="n">city</span>
+    <span class="n">String</span> <span class="n">state</span>
+    <span class="n">String</span> <span class="n">postalCode</span>
+    <span class="n">String</span> <span class="n">country</span> <span class="o">=</span> <span class="s2">"US"</span>
+    <span class="kd">static</span> <span class="n">constraints</span> <span class="o">=</span> <span class="o">{</span>
+        <span class="n">street</span><span class="o">(</span><span class="nl">nullable:</span><span class="kc">true</span><span class="o">)</span>
+        <span class="n">city</span><span class="o">(</span><span class="nl">blank:</span><span class="kc">false</span><span class="o">)</span>
+        <span class="n">state</span><span class="o">(</span><span class="nl">size:</span><span class="mi">2</span><span class="o">..</span><span class="mi">2</span><span class="o">)</span>
+        <span class="n">postalCode</span><span class="o">(</span><span class="nl">blank:</span><span class="kc">false</span><span class="o">,</span><span class="nl">postalCode:</span><span class="kc">true</span><span class="o">)</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<h3>Unit Test It</h3></p>
+<p>You'll notice that I wrote the main algorithm for doing the validation as its own method. That will make it easy for me to write Unit Tests to confirm the functionality of my validator before I implement it in a domain class. So, now when someone comes back and wants to support Zip+4 in the US, I'll can write a test, see that it fails and then fix my Constraint to support that case as well.</p>
+<p><figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="kd">class</span> <span class="nc">PostalCodeConstraintTests</span> <span class="kd">extends</span> <span class="n">GroovyTestCase</span> <span class="o">{</span>
+  <span class="kt">void</span> <span class="nf">test_us_postal_code_succeeds_for_valid</span><span class="o">()</span> <span class="o">{</span>
+    <span class="kt">def</span> <span class="n">postalCodeConstraint</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PostalCodeConstraint</span><span class="o">()</span>
+    <span class="kt">def</span> <span class="n">address</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Address</span><span class="o">(</span><span class="nl">country:</span><span class="s2">"US"</span><span class="o">,</span> <span class="nl">postalCode:</span><span class="s2">"53212"</span><span class="o">)</span>
+    <span class="k">assert</span> <span class="n">postalCodeConstraint</span><span class="o">.</span><span class="na">validPostalCode</span><span class="o">(</span><span class="n">address</span><span class="o">,</span> <span class="n">address</span><span class="o">.</span><span class="na">postalCode</span><span class="o">)</span>
+  <span class="o">}</span>
+  <span class="kt">void</span> <span class="nf">test_us_postal_code_fails_for_canada</span><span class="o">()</span> <span class="o">{</span>
+    <span class="kt">def</span> <span class="n">postalCodeConstraint</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PostalCodeConstraint</span><span class="o">()</span>
+    <span class="kt">def</span> <span class="n">address</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Address</span><span class="o">(</span><span class="nl">country:</span><span class="s2">"US"</span><span class="o">,</span> <span class="nl">postalCode:</span><span class="s2">"A1A 3E3"</span><span class="o">)</span>
+    <span class="k">assert</span> <span class="o">!</span> <span class="n">postalCodeConstraint</span><span class="o">.</span><span class="na">validPostalCode</span><span class="o">(</span><span class="n">address</span><span class="o">,</span> <span class="n">address</span><span class="o">.</span><span class="na">postalCode</span><span class="o">)</span>
+  <span class="o">}</span>
+  <span class="kt">void</span> <span class="nf">test_ca_postal_code_succeeds_for_valid</span><span class="o">()</span> <span class="o">{</span>
+    <span class="kt">def</span> <span class="n">postalCodeConstraint</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PostalCodeConstraint</span><span class="o">()</span>
+    <span class="kt">def</span> <span class="n">address</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Address</span><span class="o">(</span><span class="nl">country:</span><span class="s2">"CA"</span><span class="o">,</span> <span class="nl">postalCode:</span><span class="s2">"A1A 1D3"</span><span class="o">)</span>
+    <span class="k">assert</span> <span class="n">postalCodeConstraint</span><span class="o">.</span><span class="na">validPostalCode</span><span class="o">(</span><span class="n">address</span><span class="o">,</span> <span class="n">address</span><span class="o">.</span><span class="na">postalCode</span><span class="o">)</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+<span class="kd">class</span> <span class="nc">Address</span> <span class="o">{</span>
+  <span class="n">String</span> <span class="n">country</span>
+  <span class="n">String</span> <span class="n">postalCode</span>
+<span class="o">}</span></code></pre></figure></p>
+<h3>Wire It Into Grails</h3>
+The only thing left to do is to register your Constraint so that Grails knows about it. When you created the plugin, grails generated a plugin "bootstrap" class for you. You can do that by registering your class with the <em>ConstrainedProperty</em> class provided by the Grails framework.</p>
+<p><figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="kn">import</span> <span class="nn">net.zorched.validation.PostalCodeConstraint</span>
+<span class="kn">import</span> <span class="nn">org.codehaus.groovy.grails.validation.ConstrainedProperty</span>
+<span class="kd">class</span> <span class="nc">MyAppPlugin</span> <span class="o">{</span>
+    <span class="kt">def</span> <span class="n">version</span> <span class="o">=</span> <span class="mf">0.1</span>
+    <span class="kt">def</span> <span class="n">author</span> <span class="o">=</span> <span class="s2">"Geoff Lane"</span>
+    <span class="kt">def</span> <span class="n">description</span> <span class="o">=</span> <span class="s1">'''
+This plugin adds specific functionality to the application for my app.
+'''</span>
+    <span class="kt">def</span> <span class="n">dependsOn</span> <span class="o">=</span> <span class="o">[:]</span>
+  <span class="kt">def</span> <span class="n">loadAfter</span> <span class="o">=</span> <span class="o">[</span><span class="s1">'controllers'</span><span class="o">]</span>
+    <span class="kt">def</span> <span class="n">doWithSpring</span> <span class="o">=</span> <span class="o">{</span>
+        <span class="n">ConstrainedProperty</span><span class="o">.</span><span class="na">registerNewConstraint</span><span class="o">(</span>
+            <span class="n">PostalCodeConstraint</span><span class="o">.</span><span class="na">POSTAL_CODE_CONSTRAINT</span><span class="o">,</span>
+            <span class="n">PostalCodeConstraint</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>ConstrainedProperty basically keeps a map of the constraint keys to the class type that implements the constraint. </p>
+<h3>Conclusion</h3>
+Grails Plugins basically allow you to do anything that you might want to create an easily packaged piece of reusable functionality. I didn't find a anything in the documentation about how to build validators like the built in ones, so I read a bunch of source code. Now you don't have to, except for fun.</p>
+<p><strong><em>
+UPDATE: Please check out the Grails Custom Constraints plugin that automates all of this at <a href="http://grails.org/plugin/constraints">http://grails.org/plugin/constraints</a>
+</em></strong></p>

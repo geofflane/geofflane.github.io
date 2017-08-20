@@ -1,0 +1,11 @@
+<p>Visual Studio is known for its WYSIWYG, drag-and-drop user interface creation. But when it comes to actually writing code, it's fairly anemic. Sure it has code completion (Intellisense &trade;) and syntax highlighting and a few things like that, but it doesn't offer support for more advanced functionality that many people, especially those from the Java world, have come to know and love. </p>
+<p>Features such as:</p>
+<ol>
+<li>refactoring support</li>
+<li>finding usages of classes, methods, and variables</li>
+<li>code generation for things like property getters and setters</li>
+<li>real-time error highlighting</li>
+</ol></p>
+<p>As you probably figured out by the title, there is hope! The makers of IntelliJ (a Java IDE) have a plugin for Visual Studio.NET 2003 called <a href="http://www.jetbrains.com/resharper/">ReSharper</a>. I highly recommend it if you are doing anything serious in .NET. It is a huge productivity booster and really helps with refactoring tasks and things of that nature. You will be thrilled if you are using any sort of Agile processes that require you to do regular refactoring.</p>
+<p>While Visual Studio.NET 2005 has addressed some of these issues, I think the ReSharper tool adds a lot of functionality that is very useful. 2005 is also not out of beta yet, so if you are working on production code, most likely you'll be using 2003 for a while. I highly recommend that you try it out!</p>
+<p>(I don't work for Jetbrains and never have, I am just a huge fan of ReSharper and want to spread the love.)</p>

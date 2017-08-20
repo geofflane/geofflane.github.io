@@ -1,0 +1,148 @@
+<p><em>Don't Repeat Yourself (DRY)</em> is one of the principles of good software development. The idea is that there should ideally be one and only one "source of knowledge" for a particular fact or calculation in a system. Basically it comes down to not copying-and-pasting code around or duplicating code if at all possible. The advantages of this are many.</p>
+<h3>Advantages of DRY</h3></p>
+<ul title="Advantages of DRY Principle">
+<li>There will be less code to maintain</li>
+<li>If a bug is found, it should only have to be fixed in one place</li>
+<li>If an algorithm or process is changed, it only needs to be changed in one place</li>
+<li>More of the code should become reusable because as you do this you will parameterize methods to make them flexible for more cases</li>
+</ul></p>
+<p>If it's good for code isn't it good for other things like configuration? Why yes it is.</p>
+<h3>Using CruiseControl.NET Configuration Builder</h3>
+The Configuration Preprocessor allows you to define string properties and full blocks of XML to use for substitution and replacement.  To start using the Configuration Preprocessor, you add <em>xmlns:cb="urn:ccnet.config.builder"</em>, an xml namespace, to your document to tell the config parser that you plan to do this.</p>
+<p>From there you can define a simple property like:
+<figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;cb:define</span> <span class="na">client=</span><span class="s">"xxx"</span><span class="nt">/&gt;</span></code></pre></figure></p>
+<p>Or you can make it a full block of XML:
+<figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;cb:define</span> <span class="na">name=</span><span class="s">"svn-block"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;sourcecontrol</span> <span class="na">type=</span><span class="s">"svn"</span><span class="nt">&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;trunkUrl&gt;</span>http://svn.example.com/svn/$(client)/$(project)/trunk<span class="nt">&lt;/trunkUrl&gt;</span>
+        <span class="nt">&lt;workingDirectory&gt;</span>D:\Builds-Net\projects\$(client)\$(project)\trunk<span class="nt">&lt;/workingDirectory&gt;</span>
+        <span class="nt">&lt;executable&gt;</span>svn.exe<span class="nt">&lt;/executable&gt;</span>
+        <span class="nt">&lt;autoGetSource&gt;</span>true<span class="nt">&lt;/autoGetSource&gt;</span>
+    <span class="nt">&lt;/sourcecontrol&gt;</span>
+<span class="nt">&lt;/cb:define&gt;</span></code></pre></figure></p>
+<h4>Defining Reusable Blocks</h4>
+Using these ideas I wanted to come up with a templated approach that would allow me to share configuration among multiple projects. That way, if I added new statistics or change the layout of my build server, I would only have to change it in a single place. Thus keeping things DRY. It also encourages more consistency across multiple projects making things easier to understand.</p>
+<p>So, I started defining some reusable blocks in the main <em>ccnet.config file</em> which you can see below. The exact details will depend on your configuration of course.</p>
+<h4>Full Example of <em>config.xml</em></h4>
+<figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="c">&lt;!--
+How to add a new project:
+Step 1. Create a config file named "&lt;config&gt;-project.xml"
+Step 2. Add the project reference below
+--&gt;</span><span class="nt">&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;&lt;cruisecontrol</span> <span class="na">xmlns:cb=</span><span class="s">"urn:ccnet.config.builder"</span><span class="nt">&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span>    <span class="c">&lt;!-- cb defines to compose reusable blocks of configuration --&gt;</span>
+    <span class="c">&lt;!-- use &lt;cb:define client="xxx"/&gt; and &lt;cb:define project="yyy"/&gt; to use these --&gt;</span><span class="nt">&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span>    <span class="nt">&lt;cb:define</span> <span class="na">name=</span><span class="s">"svn-block"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;sourcecontrol</span> <span class="na">type=</span><span class="s">"svn"</span><span class="nt">&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;trunkUrl&gt;</span>http://svn.example.com/svn/$(client)/$(project)/trunk<span class="nt">&lt;/trunkUrl&gt;</span>
+            <span class="nt">&lt;workingDirectory&gt;</span>D:\Builds-Net\projects\$(client)\$(project)\trunk<span class="nt">&lt;/workingDirectory&gt;</span>
+            <span class="nt">&lt;executable&gt;</span>svn.exe<span class="nt">&lt;/executable&gt;</span>
+            <span class="nt">&lt;autoGetSource&gt;</span>true<span class="nt">&lt;/autoGetSource&gt;</span>
+        <span class="nt">&lt;/sourcecontrol&gt;</span>
+    <span class="nt">&lt;/cb:define&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span>    <span class="nt">&lt;cb:define</span> <span class="na">name=</span><span class="s">"msbuild-20-block"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;msbuild&gt;</span>
+            <span class="nt">&lt;executable&gt;</span>C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727\MSBuild.exe<span class="nt">&lt;/executable&gt;</span>
+            <span class="nt">&lt;workingDirectory&gt;</span>D:\Builds-Net\projects\$(client)\$(project)\trunk<span class="nt">&lt;/workingDirectory&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;projectFile&gt;</span>build.proj<span class="nt">&lt;/projectFile&gt;</span>
+            <span class="nt">&lt;buildArgs&gt;</span>$(build-args) <span class="nt">&lt;/buildArgs&gt;</span>
+            <span class="nt">&lt;targets&gt;</span>$(build-targets)<span class="nt">&lt;/targets&gt;</span>
+            <span class="nt">&lt;timeout&gt;</span>600<span class="nt">&lt;/timeout&gt;</span>
+            <span class="nt">&lt;logger&gt;</span>D:\Program Files\CruiseControl.NET\server\Rodemeyer.MsBuildToCCNet.dll<span class="nt">&lt;/logger&gt;</span>
+        <span class="nt">&lt;/msbuild&gt;</span>
+    <span class="nt">&lt;/cb:define&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span>    <span class="nt">&lt;cb:define</span> <span class="na">name=</span><span class="s">"msbuild-35-block"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;msbuild&gt;</span>
+            <span class="nt">&lt;executable&gt;</span>C:\WINDOWS\Microsoft.NET\Framework\v3.5\MSBuild.exe<span class="nt">&lt;/executable&gt;</span>
+            <span class="nt">&lt;workingDirectory&gt;</span>D:\Builds-Net\projects\$(client)\$(project)\trunk<span class="nt">&lt;/workingDirectory&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;projectFile&gt;</span>build.proj<span class="nt">&lt;/projectFile&gt;</span>
+            <span class="nt">&lt;buildArgs&gt;</span>$(build-args) <span class="nt">&lt;/buildArgs&gt;</span>
+            <span class="nt">&lt;targets&gt;</span>$(build-targets)<span class="nt">&lt;/targets&gt;</span>
+            <span class="nt">&lt;timeout&gt;</span>600<span class="nt">&lt;/timeout&gt;</span>
+            <span class="nt">&lt;logger&gt;</span>D:\Program Files\CruiseControl.NET\server\Rodemeyer.MsBuildToCCNet.dll<span class="nt">&lt;/logger&gt;</span>
+        <span class="nt">&lt;/msbuild&gt;</span>
+    <span class="nt">&lt;/cb:define&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span>    <span class="nt">&lt;cb:define</span> <span class="na">name=</span><span class="s">"merge-block"</span><span class="nt">&gt;</span>
+        <span class="c">&lt;!-- Merge the output of tests, code coverage and fxcop --&gt;</span>
+        <span class="nt">&lt;merge&gt;</span>
+            <span class="nt">&lt;files&gt;</span>
+                <span class="nt">&lt;file&gt;</span>D:\Builds-Net\projects\$(client)\$(project)\trunk\*.Test.xml<span class="nt">&lt;/file&gt;</span>
+                <span class="nt">&lt;file&gt;</span>D:\Builds-Net\projects\$(client)\$(project)\trunk\*.CoverageMerge.xml<span class="nt">&lt;/file&gt;</span>
+                <span class="nt">&lt;file&gt;</span>D:\Builds-Net\projects\$(client)\$(project)\trunk\*.CoverageSummary.xml<span class="nt">&lt;/file&gt;</span>
+                <span class="nt">&lt;file&gt;</span>D:\Builds-Net\projects\$(client)\$(project)\trunk\*.FxCop.xml<span class="nt">&lt;/file&gt;</span>
+            <span class="nt">&lt;/files&gt;</span>
+        <span class="nt">&lt;/merge&gt;</span>
+    <span class="nt">&lt;/cb:define&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span>    <span class="nt">&lt;cb:define</span> <span class="na">name=</span><span class="s">"loggers-block"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;xmllogger&gt;</span>
+            <span class="nt">&lt;logDir&gt;</span>D:\Builds-Net\projects\$(client)\$(project)\logs<span class="nt">&lt;/logDir&gt;</span>
+        <span class="nt">&lt;/xmllogger&gt;</span>
+        <span class="nt">&lt;rss/&gt;</span>
+        <span class="nt">&lt;modificationHistory</span>  <span class="na">onlyLogWhenChangesFound=</span><span class="s">"true"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;/cb:define&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span>    <span class="nt">&lt;cb:define</span> <span class="na">name=</span><span class="s">"stats-block"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;statistics&gt;</span>
+            <span class="nt">&lt;statisticList&gt;</span>
+                <span class="nt">&lt;firstMatch</span> <span class="na">name=</span><span class="s">"Svn Revision"</span> <span class="na">xpath=</span><span class="s">"//modifications/modification/changeNumber"</span> <span class="nt">/&gt;</span>
+                <span class="nt">&lt;firstMatch</span> <span class="na">name=</span><span class="s">"Coverage"</span> <span class="na">xpath=</span><span class="s">"//coverageReport/project/@coverage"</span> <span class="na">generateGraph=</span><span class="s">"true"</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;firstMatch</span> <span class="na">name=</span><span class="s">"Warnings"</span> <span class="na">xpath=</span><span class="s">"//msbuild/@warning_count"</span> <span class="na">generateGraph=</span><span class="s">"true"</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;firstMatch</span> <span class="na">name=</span><span class="s">"Errors"</span> <span class="na">xpath=</span><span class="s">"//msbuild/@error_count"</span> <span class="na">generateGraph=</span><span class="s">"true"</span><span class="nt">/&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span>                <span class="c">&lt;!-- NDepend --&gt;</span>
+                <span class="c">&lt;!--
+                &lt;firstMatch name="ILInstructions" xpath="//ApplicationMetrics/@NILInstruction" /&gt;
+                &lt;firstMatch name="Avgerage Complexity" xpath="//ApplicationMetrics/MethodCC/@Avg" /&gt;
+                &lt;firstMatch name="Max Complexity" xpath="//ApplicationMetrics/MethodCC/@MaxVal" /&gt;
+                &lt;firstMatch name="LinesOfCode" xpath="//ApplicationMetrics/@NbLinesOfCode" generateGraph="true"/&gt;
+                &lt;firstMatch name="LinesOfComment" xpath="//ApplicationMetrics/@NbLinesOfComment" generateGraph="true"/&gt;
+                --&gt;</span>
+            <span class="nt">&lt;/statisticList&gt;</span>
+        <span class="nt">&lt;/statistics&gt;</span>
+    <span class="nt">&lt;/cb:define&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span>    <span class="nt">&lt;cb:include</span> <span class="na">href=</span><span class="s">"config-client-project.xml"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;cb:include</span> <span class="na">href=</span><span class="s">"config-client2-project-trunk.xml"</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;/cruisecontrol&gt;</span></code></pre></figure></p>
+<p>At the end of the file you can see the <em>cb:include</em> references. Those are one-line includes to include the configuration of each project. This makes things easier to manage, I think, because you only have to look at the individual project configuration.</p>
+<h4>Using Reusable Blocks in Individual Configuration Files</h4></p>
+<p>From there I need to make use of those defined blocks in in individual file. The first thing I needed to do was to set the parameters that I had defined as simple string replacements in the reusable blocks. Normally you would do that with <em>cb:define</em> as I showed above. But the trick is that you can only have one property with a given name defined. If you include multiple project configurations that doesn't work. What does work is using <em>cb:scope</em> definitions. This allows for a value to be defined only within a specific scope. </p>
+<p><figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;cb:scope</span>
+         <span class="na">client=</span><span class="s">"ExampleClient"</span>
+         <span class="na">project=</span><span class="s">"SpecialProject"</span>
+         <span class="na">build-args=</span><span class="s">"/p:Configuration=Debug"</span>
+         <span class="na">build-targets=</span><span class="s">"Clean;Test"</span><span class="nt">&gt;</span>
+ ...
+<span class="nt">&lt;/cb:scope&gt;</span></code></pre></figure></p>
+<p>From there you just need to start including the blocks that you defined in the main <em>ccnet.confg</em> within the scope block.</p>
+<h4>Full Example of Project Configuration</h4>
+<figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span><span class="c">&lt;!-- CruiseControl.NET configuration --&gt;</span><span class="nt">&lt;/p&gt;</span>
+<span class="nt">&lt;project</span> <span class="na">name=</span><span class="s">"ExampleClient SpecialProject"</span> <span class="na">xmlns:cb=</span><span class="s">"urn:ccnet.config.builder"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;p&gt;</span>    <span class="nt">&lt;cb:scope</span>
+         <span class="na">client=</span><span class="s">"ExampleClient"</span>
+         <span class="na">project=</span><span class="s">"SpecialProject"</span>
+         <span class="na">build-args=</span><span class="s">"/p:Configuration=Debug"</span>
+         <span class="na">build-targets=</span><span class="s">"Clean;Test"</span><span class="nt">&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span>        <span class="nt">&lt;cb:svn-block/&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span>        <span class="nt">&lt;tasks&gt;</span>
+            <span class="nt">&lt;cb:msbuild-35-block/&gt;</span>
+        <span class="nt">&lt;/tasks&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;publishers&gt;</span>
+<span class="nt">&lt;p&gt;</span>            <span class="nt">&lt;cb:merge-block/&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span>            <span class="c">&lt;!-- Enable collection of project statistics --&gt;</span>
+            <span class="nt">&lt;cb:stats-block/&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span>            <span class="nt">&lt;cb:loggers-block/&gt;&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span>            <span class="nt">&lt;email</span> <span class="na">mailhost=</span><span class="s">"smtp.example.com"</span> <span class="na">from=</span><span class="s">"ccnet@example.com"</span> <span class="na">includeDetails=</span><span class="s">"true"</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;users&gt;</span>
+                    <span class="nt">&lt;user</span> <span class="na">name=</span><span class="s">"Developer One"</span> <span class="na">group=</span><span class="s">"buildmaster"</span> <span class="na">address=</span><span class="s">"dev1@example.com"</span> <span class="nt">/&gt;</span>
+                    <span class="nt">&lt;user</span> <span class="na">name=</span><span class="s">"Developer Two"</span> <span class="na">group=</span><span class="s">"developers"</span> <span class="na">address=</span><span class="s">"dev2@example.com"</span> <span class="nt">/&gt;</span>
+                <span class="nt">&lt;/users&gt;</span>
+                <span class="nt">&lt;groups&gt;</span>
+                    <span class="nt">&lt;group</span> <span class="na">name=</span><span class="s">"developers"</span> <span class="na">notification=</span><span class="s">"change"</span> <span class="nt">/&gt;</span>
+                    <span class="nt">&lt;group</span> <span class="na">name=</span><span class="s">"buildmaster"</span> <span class="na">notification=</span><span class="s">"change"</span> <span class="nt">/&gt;</span>
+                <span class="nt">&lt;/groups&gt;</span>
+            <span class="nt">&lt;/email&gt;</span>
+        <span class="nt">&lt;/publishers&gt;</span>
+    <span class="nt">&lt;/cb:scope&gt;</span>
+<span class="nt">&lt;/project&gt;</span></code></pre></figure></p>
+<p>As you can see, the only one I didn't template out was the <em>email</em> block because that depends on the developers working on each project.</p>
+<p>Have fun bringing simplicity and consistency to your Cruise Control.NET configuration!</p>
+<p><em>For the full details see the <a href="http://confluence.public.thoughtworks.org/display/CCNET/Configuration+Preprocessor">CruiseControl.NET Configuration Preprocessor</a> documentation.</p>

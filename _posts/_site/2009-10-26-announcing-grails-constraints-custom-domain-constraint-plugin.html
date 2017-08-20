@@ -1,0 +1,32 @@
+<p>I've released my first public Grails Plugin today.</p>
+<p>The Grails Constraint plugin gives you the ability to create custom Constraints that you can apply to your Domain classes to validate them. These are applied and act just like the built in Domain class constraints.</p>
+<h3>Why would you want this?</h3>
+Grails provides two generic, catch-all Constraints in the core application:</p>
+<ul>
+<li>validator - a generic closure mechanism for validation</li>
+<li>matches - a regular expression mechanism</li>
+</ul></p>
+<p>While those work, I find myself often wanting to use the same Constraints on multiple Domain classes (think Social Security Number, Phone Number, Zipcode, etc.) and I don't like to repeat those regular expressions or validations all over the place.</p>
+<h3>What does this plugin do?</h3>
+With the Grails Constraints plugin, you can write a custom Constraint class, drop it in <em>/grails-app/utils/</em> and it will automatically be available to all of your domain classes.</p>
+<h3>Example</h3></p>
+<p>I create a new constrain by hand in <em>/grails-app/utils/ComparisonConstraint.groovy</em>. (You can also use the provided create-constraint script like <em>grails create-constraint com.foo.MyConstraint</em>)
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="kd">class</span> <span class="nc">ComparisonConstraint</span> <span class="o">{</span>
+    <span class="kd">static</span> <span class="n">name</span> <span class="o">=</span> <span class="s2">"compareTo"</span>
+    <span class="kd">static</span> <span class="n">expectsParams</span> <span class="o">=</span> <span class="kc">true</span>
+    <span class="kt">def</span> <span class="n">validate</span> <span class="o">=</span> <span class="o">{</span> <span class="n">val</span><span class="o">,</span> <span class="n">target</span> <span class="o">-&gt;</span>
+        <span class="kt">def</span> <span class="n">compareVal</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="s2">"$params"</span>
+        <span class="k">if</span> <span class="o">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">val</span> <span class="o">||</span> <span class="kc">null</span> <span class="o">==</span> <span class="n">compareVal</span><span class="o">)</span>
+            <span class="k">return</span> <span class="kc">false</span>
+        <span class="k">return</span> <span class="n">val</span><span class="o">.</span><span class="na">compareTo</span><span class="o">(</span><span class="n">compareVal</span><span class="o">)</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>Then you can apply your constraint to your Domain class:
+<figure class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="kd">class</span> <span class="nc">Login</span> <span class="o">{</span>
+    <span class="n">String</span> <span class="n">password</span>
+    <span class="n">String</span> <span class="n">confirm</span>
+    <span class="kd">static</span> <span class="n">constraints</span> <span class="o">=</span> <span class="o">{</span>
+        <span class="n">password</span><span class="o">(</span><span class="nl">compareTo:</span> <span class="s1">'confirm'</span><span class="o">)</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>See <a href="http://github.com/geofflane/grails-constraints">Grails Custom Constraints Plugin</a> for the full documentation on what all of the above means and  the source code.</p>

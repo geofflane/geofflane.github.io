@@ -1,0 +1,72 @@
+<p>Ruby on Rails 1.2 added full support for building RESTful services to the already nice web page support. REST is a conceptually simple idea, yet incredibly powerful. REST is a Web based API to an application. It builds on the basic building blocks of HTTP: URLs and HTTP Methods (think verbs).</p>
+<p>A URL (Uniform Resource Locator) uniquely identifies a resources on the web. HTTP uses the concept of Methods to give context to a request to a URL. Most developers will be familiar with a GET and a POST. These methods are used to get a resource and to modify a resource respectively. But there are <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html">other http verbs</a> as well. The two other interesting ones for a REST service are PUT and DELETE. Both of these are pretty self explanatory. PUT creates a resource at the remote location and DELETE removes one.</p>
+<p>For Example:
+GET
+http://example.com/catalog/item/1</p>
+<p>DELETE
+http://example.com/catalog/item/1</p>
+<p>Both of these use the same URL, but the HTTP Method means different things will happen.</p>
+<h3>Creating A RESTful API with Rails</h3>
+Rails makes it easy to create a RESTful application. The same controllers can be used to render a web page and to provide a programmatic API to your application.</p>
+<p>Rails provides a <em>scaffold_resource</em> generator that creates the skeleton of a resource driven application:
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">./script/generate scaffold_resource order</code></pre></figure></p>
+<p>This creates Model, View and Controllers just like regular scaffold, but unlike scaffold, it adds some extra functionality.
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">class</span> <span class="nc">OrdersController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+  <span class="c1"># GET /orders/1</span>
+  <span class="c1"># GET /orders/1.xml</span>
+  <span class="k">def</span> <span class="nf">show</span>
+    <span class="vi">@order</span> <span class="o">=</span> <span class="no">Order</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:id</span><span class="p">])</span><span class="o">&lt;</span>
+    <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+      <span class="nb">format</span><span class="p">.</span><span class="nf">html</span> <span class="c1"># show.rhtml</span>
+      <span class="nb">format</span><span class="p">.</span><span class="nf">xml</span>  <span class="p">{</span> <span class="n">render</span> <span class="ss">:xml</span> <span class="o">=&gt;</span> <span class="vi">@order</span><span class="p">.</span><span class="nf">to_xml</span> <span class="p">}</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure></p>
+<p>Now if you request a path ending in <em>.xml</em> it will render the response as an XML document that can be consumed by another program.</p>
+<h3>Applying REST as an Ajax solution</h3>
+The great news is that you can use this RESTful API directly as an API to use for building a highly-dynamic Ajax application. (See my post on <a href="http://www.zorched.net/2006/10/30/ajax-with-json-using-php-and-dojo/">using Ajax with PHP</a> for an example). But what's even cooler is that you can use the same technique to build a <a href="http://www.json.org/">JSON</a> API. JSON is much easier and less resource intensive to consume in an Ajax application than XML.</p>
+<p>Changing your controller to support JSON ends up being really easy. All you have to do is add a single line in the respond_to block to support it:
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">class</span> <span class="nc">OrdersController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+  <span class="c1"># GET /orders/1</span>
+  <span class="c1"># GET /orders/1.xml</span>
+  <span class="c1"># GET /orders/1.js</span>
+  <span class="k">def</span> <span class="nf">show</span>
+    <span class="vi">@order</span> <span class="o">=</span> <span class="no">Order</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:id</span><span class="p">])</span>
+    <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+      <span class="nb">format</span><span class="p">.</span><span class="nf">html</span> <span class="c1"># show.rhtml</span>
+      <span class="nb">format</span><span class="p">.</span><span class="nf">xml</span>  <span class="p">{</span> <span class="n">render</span> <span class="ss">:xml</span> <span class="o">=&gt;</span> <span class="vi">@order</span><span class="p">.</span><span class="nf">to_xml</span> <span class="p">}</span>
+      <span class="nb">format</span><span class="p">.</span><span class="nf">js</span> <span class="p">{</span> <span class="n">render</span> <span class="ss">:json</span> <span class="o">=&gt;</span> <span class="vi">@order</span><span class="p">.</span><span class="nf">to_json</span> <span class="p">}</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></figure></p>
+<p>Just like in the XML example, if you make a request that ends in
+  <em>.js</em> then you will get a response rendered as JSON. Consuming that
+  JSON Service with something like Dojo allows you to easily create a dynamic
+  web application.</p>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">dojo</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"dojo.event.*"</span><span class="p">);</span>
+<span class="nx">dojo</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"dojo.io.*"</span><span class="p">);</span>
+<span class="nx">dojo</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"dojo.date.*"</span><span class="p">);</span>
+<span class="nx">dojo</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"dojo.lfx.*"</span><span class="p">);</span>
+<span class="kd">function</span> <span class="nx">getOrder</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">dojo</span><span class="p">.</span><span class="nx">io</span><span class="p">.</span><span class="nx">bind</span><span class="p">({</span><span class="na">url</span><span class="p">:</span> <span class="s2">"/orders/"</span> <span class="o">+</span> <span class="nx">id</span> <span class="o">+</span> <span class="s2">".js"</span><span class="p">,</span> <span class="na">handler</span><span class="p">:</span> <span class="nx">showOrder</span><span class="p">,</span> <span class="na">mimetype</span><span class="p">:</span> <span class="s2">"text/json"</span><span class="p">});</span>
+<span class="p">}</span><span class="o">&lt;</span><span class="sr">/p</span><span class="err">&gt;
+</span><span class="kd">function</span> <span class="nx">showOrder</span><span class="p">(</span><span class="nx">type</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">evt</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">dojo</span><span class="p">.</span><span class="nx">dom</span><span class="p">.</span><span class="nx">removeChildren</span><span class="p">(</span><span class="nx">dojo</span><span class="p">.</span><span class="nx">byId</span><span class="p">(</span><span class="s1">'order'</span><span class="p">));</span>
+    <span class="nx">appendOrderPart</span><span class="p">(</span><span class="s1">'order_number'</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">attributes</span><span class="p">.</span><span class="nx">order_number</span><span class="p">);</span>
+    <span class="nx">appendOrderPart</span><span class="p">(</span><span class="s1">'time'</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">attributes</span><span class="p">.</span><span class="nx">time</span><span class="p">);</span>
+    <span class="nx">dojo</span><span class="p">.</span><span class="nx">lfx</span><span class="p">.</span><span class="nx">highlight</span><span class="p">(</span><span class="nx">dojo</span><span class="p">.</span><span class="nx">byId</span><span class="p">(</span><span class="s1">'order'</span><span class="p">),</span> <span class="nx">dojo</span><span class="p">.</span><span class="nx">lfx</span><span class="p">.</span><span class="nx">Color</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="kd">function</span> <span class="nx">appendOrderPart</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">element</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s2">"div"</span><span class="p">);</span>
+    <span class="nx">element</span><span class="p">.</span><span class="nx">id</span><span class="o">=</span><span class="nx">id</span><span class="p">;</span>
+    <span class="nx">element</span><span class="p">.</span><span class="nx">innerHTML</span><span class="o">=</span><span class="nx">value</span><span class="p">;</span>
+    <span class="nx">dojo</span><span class="p">.</span><span class="nx">byId</span><span class="p">(</span><span class="s1">'order'</span><span class="p">).</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">element</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="kd">function</span> <span class="nx">init</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">getOrder</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="nx">dojo</span><span class="p">.</span><span class="nx">addOnLoad</span><span class="p">(</span><span class="nx">init</span><span class="p">);</span></code></pre></figure></p>
+<h3>Conclusion</h3>
+With a few simple lines of code you can not only render a web page, you can
+also create an XML API and a JSON API. That's what I call developer
+friendly!</p>

@@ -1,0 +1,22 @@
+<p>try...catch...finally is the common idiom in Java for exception handling and cleanup. The thing that people may not know is that returning from within a finally block has the unintended consequence of stoping an exception from propagating up the call stack. It "overrides" the throwing of an exception so that the caller will never get to handle it.</p>
+<p><figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Main</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">Throwable</span> <span class="o">{</span>
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Starting"</span><span class="o">);</span>
+        <span class="n">method</span><span class="o">();</span>
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"No way to know that an exception was thrown"</span><span class="o">);</span>
+    <span class="o">}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">method</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">Throwable</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"In method about to throw an exception."</span><span class="o">);</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Throwable</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Caught exception, maybe log it, and then rethrow it."</span><span class="o">);</span>
+            <span class="k">throw</span> <span class="n">ex</span><span class="o">;</span>
+        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+            <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"return in finally prevents an exception from being passed up the call stack."</span><span class="o">);</span>
+            <span class="k">return</span><span class="o">;</span> <span class="c1">// remove the return to see the real behavior</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure></p>
+<p>I recently came across code like this. This is Real Bad. Returning from within finally prevents the propagation of regular exceptions, which is bad enough, but worse, prevents the propagation of runtime exceptions which are generally programmer errors. This one small mistake can hide programmer errors so that you'll never see them and never know why things aren't working as expected. One of the interesting things is that the Java compiler understands this as well. If you return from within a finally block where an exception would otherwise be thrown, the compiler does not force you to declare that exception in the method's throws declaration.</p>
+<p>Long story short. Don't return from with finally. Ever.</p>

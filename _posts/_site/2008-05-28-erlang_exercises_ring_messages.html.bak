@@ -1,0 +1,37 @@
+<p><a href="http://www.erlang.org/course/exercises.html">Erlang Exercises</a> has a great little series of programming problems that challenge you to implement solutions to some common Erlang problems. It's a great way to learn the language. I'm going to share some of my solutions to these problems. Maybe for some discussion, maybe for some feedback from some people more experienced with Erlang, maybe just to give some new people a flavor of the language.</p>
+<h2>Interaction between processes, Concurrency</h2>
+2) Write a function which starts N processes in a ring, and sends a message M times around all the processes in the ring. After the messages have been sent the processes should terminate gracefully.</p>
+<p><figure class="highlight"><pre><code class="language-erlang" data-lang="erlang"><span class="p">-</span><span class="ni">module</span><span class="p">(</span><span class="n">ring</span><span class="p">).</span>
+<span class="p">-</span><span class="ni">export</span><span class="p">([</span><span class="n">start</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">loop</span><span class="o">/</span><span class="mi">2</span><span class="p">]).</span>
+<span class="nf">start</span><span class="p">(</span><span class="nv">N</span><span class="p">,</span> <span class="nv">M</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="nv">Seq</span> <span class="o">=</span> <span class="nn">lists</span><span class="p">:</span><span class="nf">seq</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nv">N</span><span class="p">),</span>
+    <span class="nv">Messages</span> <span class="o">=</span> <span class="nn">lists</span><span class="p">:</span><span class="nf">reverse</span><span class="p">(</span><span class="nn">lists</span><span class="p">:</span><span class="nf">seq</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nv">M</span><span class="o">-</span><span class="mi">1</span><span class="p">)),</span>
+    <span class="nv">LastP</span> <span class="o">=</span> <span class="nn">lists</span><span class="p">:</span><span class="nf">foldl</span><span class="p">(</span><span class="k">fun</span><span class="p">(</span><span class="nv">S</span><span class="p">,</span> <span class="nv">Pid</span><span class="p">)</span> <span class="o">-&gt;</span>
+                                             <span class="nb">spawn</span><span class="p">(</span><span class="o">?</span><span class="nv">MODULE</span><span class="p">,</span> <span class="n">loop</span><span class="p">,</span> <span class="p">[</span><span class="nv">N</span><span class="o">-</span><span class="nv">S</span><span class="p">,</span> <span class="nv">Pid</span><span class="p">])</span>
+                             <span class="k">end</span><span class="p">,</span> <span class="nf">self</span><span class="p">(),</span> <span class="nv">Seq</span><span class="p">),</span>
+    <span class="nb">spawn</span><span class="p">(</span><span class="k">fun</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="p">[</span> <span class="nv">LastP</span> <span class="o">!</span> <span class="nv">R</span> <span class="p">||</span> <span class="nv">R</span> <span class="o">&lt;-</span> <span class="nv">Messages</span> <span class="p">]</span> <span class="k">end</span><span class="p">).</span>
+<span class="nf">loop</span><span class="p">(</span><span class="nv">N</span><span class="p">,</span> <span class="nv">NextPid</span><span class="p">)</span> <span class="o">-&gt;</span>
+    <span class="k">receive</span>
+        <span class="nv">R</span> <span class="k">when</span> <span class="nv">R</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">-&gt;</span>
+            <span class="nv">NextPid</span> <span class="o">!</span> <span class="nv">R</span><span class="p">,</span>
+            <span class="nn">io</span><span class="p">:</span><span class="nf">format</span><span class="p">(</span><span class="s">": Process: </span><span class="si">~8w</span><span class="s">, Sequence#: </span><span class="si">~w</span><span class="s">, Message#: </span><span class="si">~w</span><span class="s"> ..</span><span class="si">~n</span><span class="s">"</span><span class="p">,</span>
+                          <span class="p">[</span><span class="nf">self</span><span class="p">(),</span> <span class="nv">N</span><span class="p">,</span> <span class="nv">R</span><span class="p">]),</span>
+            <span class="nf">loop</span><span class="p">(</span><span class="nv">N</span><span class="p">,</span> <span class="nv">NextPid</span><span class="p">);</span>
+        <span class="nv">R</span> <span class="k">when</span> <span class="nv">R</span> <span class="o">=:=</span> <span class="mi">0</span> <span class="o">-&gt;</span>
+            <span class="nv">NextPid</span> <span class="o">!</span> <span class="nv">R</span><span class="p">,</span>
+            <span class="nn">io</span><span class="p">:</span><span class="nf">format</span><span class="p">(</span><span class="s">"* Process: </span><span class="si">~8w</span><span class="s">, Sequence#: </span><span class="si">~w</span><span class="s">, Message#: terminate!</span><span class="si">~n</span><span class="s">"</span><span class="p">,</span>
+                            <span class="p">[</span><span class="nf">self</span><span class="p">(),</span> <span class="nv">N</span><span class="p">])</span>
+    <span class="k">end</span><span class="p">.</span></code></pre></figure></p>
+<h3>Explanation</h3>
+<strong>Seq = lists:seq(1, N)</strong> and <strong>Messages = lists:reverse(lists:seq(0, M-1)),</strong>
+These create lists of integers from 1 - N and then from M-1 - 0 (because of the reverse). These lists are used for creating processes and the messages that will be passed to those processes respectively.</p>
+<p><strong>LastP = lists:foldl(...</strong>
+This is an accumulator function. The self() value passed to the function is passed in as Pid on the first iteration, but subsequent iterations get the value computed in the method with the <strong>spawn</strong> function. The final <strong>spawn</strong> Pid is returned from the accumulator and is stored in LastP. The spawn function is setting up new processes which are running the <strong>loop</strong> function with the given values.</p>
+<p><strong>spawn(fun() -> [ LastP ! R || R <- Messages ] end).</strong>
+This is a <a href="http://en.wikipedia.org/wiki/List_comprehension">list comprehension</a> in Erlang. It basically takes each value from the <strong>Messages</strong> list and sends that as a message to the LastP pid which is the beginning of the Ring.</p>
+<p><strong>loop(N, NextPid) -></strong>
+This is the function that is being run as the processes of each of the elements of the ring.</p>
+<p><strong>R when R > 0 -> </strong>
+When this process receives a message where the message is an integer greater than zero then write some info to the console and forward the message to the NextPid and use <a href="http://en.wikipedia.org/wiki/Tail_recursion">tail recursion</a> to start waiting for another message.</p>
+<p><strong>R when R =:= 0 -></strong>
+When this process receives a message where the message is an integer that equals zero then write some info to the console and forward the message to the NextPid, but allow this process to complete naturally.</p>

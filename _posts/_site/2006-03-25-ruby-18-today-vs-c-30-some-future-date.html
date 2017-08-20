@@ -1,0 +1,61 @@
+<p>One of the big features I keep hearing .NET developers talk about is something called <a href="http://msdn.microsoft.com/netframework/future/linq/">Language Integrated Query</a> (LINQ). LINQ is an Object Query Language (OQL) technology that is slated to be integrated into .NET 3.0. In the general sense an OQL allows you to "query" an object graph much the same way you would query a relational database. LINQ querys even look quite a bit like SQL queries.</p>
+<p>The LINQ implementation ends up relying on the introduction of Lambda
+  functions in the core .NET 3.0 language. Lambda functions are a powerful way
+  of encapsulating a (potentially reusable) block of code. The block of code
+  can then be stored in a variable, passed to other methods, etc. As I
+  discussed in a previous post <a
+    href="http://www.zorched.net/2006/02/19/ruby-features-youll-wish-you-had-in-other-languages/">Ruby
+    Features You'll Wish You Had In Other Languages</a>
+  these blocks can be used to implement simple patterns like Observer and
+  Strategy. They also come in real handy for doing things like sorting and
+  filtering lists as you'll see in the example below.</p>
+<p>LINQ Query:
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="kt">string</span><span class="p">[]</span> <span class="n">names</span> <span class="p">=</span> <span class="p">{</span> <span class="s">"Geoff"</span><span class="p">,</span> <span class="s">"Jessica"</span><span class="p">,</span> <span class="s">"Mike"</span><span class="p">,</span> <span class="s">"Megan"</span><span class="p">,</span>
+                                    <span class="s">"Priscilla"</span><span class="p">,</span> <span class="s">"Jack"</span><span class="p">,</span> <span class="s">"Alma"</span> <span class="p">};</span>
+    <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">expr</span> <span class="p">=</span> <span class="k">from</span> <span class="n">s</span> <span class="k">in</span> <span class="n">names</span>
+                               <span class="k">where</span> <span class="n">s</span><span class="p">.</span><span class="n">Length</span> <span class="p">==</span> <span class="m">5</span>
+                               <span class="k">orderby</span> <span class="n">s</span>
+                               <span class="k">select</span> <span class="n">s</span><span class="p">.</span><span class="nf">ToUpper</span><span class="p">();</span>
+    <span class="k">foreach</span> <span class="p">(</span><span class="kt">string</span> <span class="n">item</span> <span class="k">in</span> <span class="n">expr</span><span class="p">)</span>
+      <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="n">item</span><span class="p">);</span></code></pre></figure></p>
+<p>This is a really handy feature.</p>
+<p>Ruby has lambda functions, blocks and procs as well as built in support for a lot of filtering of arrays.</p>
+<p><figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="cp"># define the array
+</span><span class="n">names</span> <span class="p">=</span> <span class="p">[</span> <span class="s">"Geoff"</span><span class="p">,</span> <span class="s">"Jessica"</span><span class="p">,</span> <span class="s">"Mike"</span><span class="p">,</span> <span class="s">"Megan"</span><span class="p">,</span> <span class="s">"Priscilla"</span><span class="p">,</span>
+             <span class="s">"Jack"</span><span class="p">,</span> <span class="s">"Alma"</span> <span class="p">]</span>
+<span class="err">#</span> <span class="n">find</span> <span class="n">all</span> <span class="n">names</span> <span class="n">that</span> <span class="n">are</span> <span class="m">5</span> <span class="n">characters</span> <span class="kt">long</span><span class="p">,</span> <span class="n">sort</span> <span class="n">them</span>
+<span class="err">#</span> <span class="n">alphabetically</span> <span class="n">and</span> <span class="n">make</span> <span class="n">them</span> <span class="n">uppercase</span>
+<span class="n">expr</span> <span class="p">=</span> <span class="n">names</span><span class="p">.</span><span class="k">select</span> <span class="p">{</span>
+    <span class="p">|</span><span class="n">n</span><span class="p">|</span> <span class="n">n</span><span class="p">.</span><span class="n">length</span> <span class="p">==</span> <span class="m">5</span>
+<span class="p">}.</span><span class="n">sort</span><span class="p">.</span><span class="n">collect</span> <span class="p">{</span> <span class="p">|</span><span class="n">n</span><span class="p">|</span> <span class="n">n</span><span class="p">.</span><span class="n">upcase</span> <span class="p">}</span>
+<span class="err">#</span> <span class="n">print</span> <span class="n">the</span> <span class="n">results</span> <span class="n">to</span> <span class="n">standard</span> <span class="n">output</span>
+<span class="n">expr</span><span class="p">.</span><span class="n">each</span> <span class="p">{|</span><span class="n">n</span><span class="p">|</span> <span class="n">puts</span> <span class="n">n</span> <span class="p">}</span></code></pre></figure></p>
+<p>I'm a big fan of Object Oriented languages. The Ruby Way seems much more of
+  a natural OO construct to me than the SQL/LINQ type syntax. Fortunately LINQ
+  also introduces more of an OO syntax along with lambda functions that Ruby
+  people (and Lispers) have come to love.</p>
+<p>
+  <figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="n">Func</span><span class="p">&lt;</span><span class="kt">string</span> <span class="p">,</span> <span class="kt">bool</span><span class="p">&gt;</span>   <span class="n">filter</span>  <span class="p">=</span> <span class="n">s</span> <span class="p">=&gt;</span> <span class="n">s</span><span class="p">.</span><span class="n">Length</span> <span class="p">==</span> <span class="m">5</span><span class="p">;</span>
+<span class="n">Func</span><span class="p">&lt;</span><span class="kt">string</span> <span class="p">,</span> <span class="kt">string</span><span class="p">&gt;</span> <span class="n">extract</span> <span class="p">=</span> <span class="n">s</span> <span class="p">=&gt;</span> <span class="n">s</span><span class="p">;</span>
+<span class="n">Func</span><span class="p">&lt;</span><span class="kt">string</span> <span class="p">,</span> <span class="kt">string</span><span class="p">&gt;</span> <span class="n">project</span> <span class="p">=</span> <span class="n">s</span> <span class="p">=&gt;</span> <span class="n">s</span><span class="p">.</span><span class="nf">ToUpper</span><span class="p">();</span>
+<span class="n">IEnumerable</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">expr</span> <span class="p">=</span> <span class="n">names</span><span class="p">.</span><span class="nf">Where</span><span class="p">(</span><span class="n">filter</span><span class="p">)</span>
+                                <span class="p">.</span><span class="nf">OrderBy</span><span class="p">(</span><span class="n">extract</span><span class="p">)</span>
+                                <span class="p">.</span><span class="nf">Select</span><span class="p">(</span><span class="n">project</span><span class="p">);</span></code></pre></figure></p>
+<p>Or the slightly more compact way:</p>
+<p><figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="n">IEnumerable</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">expr</span> <span class="p">=</span> <span class="n">names</span>
+                           <span class="p">.</span><span class="nf">Where</span><span class="p">(</span><span class="n">s</span> <span class="p">=&gt;</span> <span class="n">s</span><span class="p">.</span><span class="n">Length</span> <span class="p">==</span> <span class="m">5</span><span class="p">)</span>
+                           <span class="p">.</span><span class="nf">OrderBy</span><span class="p">(</span><span class="n">s</span> <span class="p">=&gt;</span> <span class="n">s</span><span class="p">)</span>
+                           <span class="p">.</span><span class="nf">Select</span><span class="p">(</span><span class="n">s</span> <span class="p">=&gt;</span> <span class="n">s</span><span class="p">.</span><span class="nf">ToUpper</span><span class="p">());</span></code></pre></figure></p>
+<p>This code ends up looking remarkably like the Ruby example above doesn't it?</p>
+<p>The power of blocks and lambda functions in Ruby is the fact that they are
+  so widely used in the core libraries of the language. They are an integral
+  and extremely powerful part of the language so people become used to them
+  very quickly. Only time will tell how well integrated the LINQ concepts are
+  into the core .NET languages. Hopefully it will be better integrated than the
+  Generics where in the Collections classes (where they created an entirely new
+  namespace for the Generic collections instead of extending the existing
+  ones). I look forward to this new addition to the .NET family of languages.
+  But you don't have to wait to try these interesting and powerful features if
+  you check out Ruby. Oh, and Ruby runs on the .NET CLR today, so check out <a
+    href="http://www.iunknown.com/articles/2006/03/16/third-drop-of-rubyclr">Ruby
+    CLR</a> too.</p>
