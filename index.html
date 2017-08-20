@@ -14,6 +14,13 @@ description: "Chalk uses all the best tools and merges them into one premium blo
         </h5>
       </a>
       <p>{{ post.description }}</p>
+      <p class="post-excerpt">
+        {% if post.content contains '<!--more-->' %}
+          {{ post.content | split:'<!--more-->' | first }}
+        {% else %}
+          {{ post.content | strip_html | truncatewords: 50 }}
+        {% endif %}
+      </p>
       <div class="article-list-footer">
         <span class="article-list-date">
           {{ post.date | date: "%B %-d, %Y" }}
