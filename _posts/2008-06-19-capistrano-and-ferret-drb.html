@@ -22,32 +22,6 @@ tags:
 - Automation
 - capistrano
 - ferret
-comments:
-- id: 13463
-  author: Brett Veen
-  author_email: veenified@gmail.com
-  author_url: http://lifeascode.blogspot.com
-  date: '2008-07-08 08:55:12 -0400'
-  date_gmt: '2008-07-08 14:55:12 -0400'
-  content: Thank you for that "no such file to load" quick fix. Great post!
-- id: 13492
-  author: John Leach
-  author_email: john@johnleach.co.uk
-  author_url: http://johnleach.co.uk
-  date: '2008-07-28 06:47:49 -0400'
-  date_gmt: '2008-07-28 12:47:49 -0400'
-  content: "hi Geoff,\r\n\r\nI found you can fix this without changing the aaf code.
-    \ Just add the following line to your Capistrano recipe:\r\n\r\ndefault_run_options[:shell]
-    = false\r\n\r\nThis fixes the setting of ENV['_'] and it works again.  Shouldn't
-    affect anything else unless you have a non-POSIX shell by default (unlikely).\r\n\r\nA
-    bit more info here:\r\n\r\nhttp://rubyforge.org/pipermail/ferret-talk/2008-July/004622.html\r\n\r\nJohn."
-- id: 13506
-  author: Geoff Lane
-  author_email: geoff@zorched.net
-  author_url: http://www.zorched.net
-  date: '2008-07-31 15:22:43 -0400'
-  date_gmt: '2008-07-31 21:22:43 -0400'
-  content: "John,\r\nThanks for the tip..."
 ---
 <p>This is a bit of a followup to my previous post on <a href="http://www.zorched.net/2008/06/17/capistrano-deploy-with-git-and-passenger/">Capistrano with Git and Passenger</a>. I decided to use Ferret via the <a href="http://projects.jkraemer.net/acts_as_ferret/">acts_as_ferret</a> (<abbr title="Acts As Ferret">AAF</abbr>) plugin. <a href="http://ferret.davebalmain.com/">Ferret</a> is a full-text search inspired by <a href="http://lucene.apache.org/">Apache's Lucene</a> but written in Ruby.</p>
 <p>Basically Ferret and Lucene keep a full-text index outside of the database that allows it to quickly perform full-text searches and find the identifers of rows in your database. Then you can go get those objects out of the database. It's pretty slick.</p>
@@ -84,4 +58,4 @@ end
 {% endhighlight %}</p>
 <p>With that fix in place, the Capistrano deployment will restart the Ferret DRb server when you deploy your application.</p>
 <p><strong><em>Update</em></strong>
-According to John in the comments below you can fix the AAF problem without changing the code as well. Just add <code class="inline">default_run_options[:shell] = false{% endhighlight %} to your Capistrano script and that will take care of it.</p>
+  According to John in the comments below you can fix the AAF problem without changing the code as well. Just add <code class="inline">default_run_options[:shell] = false</code> to your Capistrano script and that will take care of it.</p>
