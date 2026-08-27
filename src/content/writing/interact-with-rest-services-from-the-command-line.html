@@ -1,0 +1,114 @@
+---
+title: "Interact with REST Services from the Command Line"
+pubDate: "2007-08-10 21:32:32 -0400"
+permalink: "/2007/08/10/interact-with-rest-services-from-the-command-line/"
+tags: ["rails","rest"]
+---
+<p><a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST</a> is becoming more popular as a means of implementing <a href="http://en.wikipedia.org/wiki/Service-oriented_architecture">Service Oriented Architectures</a> (SOA) as well as merely providing simple remote APIs for interacting with systems. The main reason for this is that it provides a very simple means of creating and consuming Services. Contrasted to SOA implementations like SOAP and REST can be a relief of simplicity.</p>
+<p>One of the main advantages of REST is that it requires no tooling to use. Unlike <a href="http://en.wikipedia.org/wiki/SOAP">SOAP</a>, it is very easy to construct ad-hoc clients to consume a RESTful service. These examples use <a href="http://curl.haxx.se/">curl</a> a command-line utility available on Unix systems or using <a href="http://www.cygwin.com/">Cygwin</a> on Windows. The same concepts can be translated to anything that can send HTTP requests.</p>
+<h2>Example REST Service with Ruby on Rails</h2>
+As the example implementation, I'll use a Ruby on Rails controller. Rails has very good support for implementing RESTful services so is easy to show.</p>
+<p>To get started with this example you can generate a Rails project and the Order object with the following commands:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">rails</span><span style="color:#96D0FF"> order_example</span></span>
+<span class="line"><span style="color:#6CB6FF">cd</span><span style="color:#96D0FF"> order_example</span></span>
+<span class="line"><span style="color:#F69D50">./script</span><span style="color:#96D0FF"> generate</span><span style="color:#96D0FF"> resource</span><span style="color:#96D0FF"> order</span><span style="color:#96D0FF"> name:string</span></span></code></pre>
+</p>
+<p>Then you can implement a RESTful controller with the following code:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> OrdersController</span><span style="color:#ADBAC7"> &#x3C; </span><span style="color:#6CB6FF">ApplicationController</span></span>
+<span class="line"><span style="color:#768390">  # GET /orders</span></span>
+<span class="line"><span style="color:#768390">  # GET /orders.xml</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> index</span></span>
+<span class="line"><span style="color:#ADBAC7">    @orders </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> Order</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">find</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">:all</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    respond_to </span><span style="color:#F47067">do</span><span style="color:#ADBAC7"> |format|</span></span>
+<span class="line"><span style="color:#6CB6FF">      format</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">html</span><span style="color:#768390"> # index.rhtml</span></span>
+<span class="line"><span style="color:#6CB6FF">      format</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">xml</span><span style="color:#ADBAC7">  { render </span><span style="color:#6CB6FF">:xml</span><span style="color:#ADBAC7"> => @orders.</span><span style="color:#DCBDFB">to_xml</span><span style="color:#ADBAC7"> }</span></span>
+<span class="line"><span style="color:#F47067">    end</span></span>
+<span class="line"><span style="color:#F47067">  end&#x3C;/</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span><span style="color:#768390">  # GET /orders/1</span></span>
+<span class="line"><span style="color:#768390">  # GET /orders/1.xml</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> show</span></span>
+<span class="line"><span style="color:#ADBAC7">    @order </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> Order</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">find</span><span style="color:#ADBAC7">(params[</span><span style="color:#6CB6FF">:id</span><span style="color:#ADBAC7">])</span></span>
+<span class="line"><span style="color:#ADBAC7">    respond_to </span><span style="color:#F47067">do</span><span style="color:#ADBAC7"> |format|</span></span>
+<span class="line"><span style="color:#6CB6FF">      format</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">html</span><span style="color:#768390"> # index.rhtml</span></span>
+<span class="line"><span style="color:#6CB6FF">      format</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">xml</span><span style="color:#ADBAC7">  { render </span><span style="color:#6CB6FF">:xml</span><span style="color:#ADBAC7"> => @order.</span><span style="color:#DCBDFB">to_xml</span><span style="color:#ADBAC7"> }</span></span>
+<span class="line"><span style="color:#F47067">    end</span></span>
+<span class="line"><span style="color:#F47067">  end&#x3C;/</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span><span style="color:#768390">  # POST /orders</span></span>
+<span class="line"><span style="color:#768390">  # POST /orders.xml</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> create</span></span>
+<span class="line"><span style="color:#ADBAC7">    @order </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> Order</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span><span style="color:#ADBAC7">(params[</span><span style="color:#6CB6FF">:order</span><span style="color:#ADBAC7">])</span></span>
+<span class="line"><span style="color:#ADBAC7">    respond_to </span><span style="color:#F47067">do</span><span style="color:#ADBAC7"> |format|</span></span>
+<span class="line"><span style="color:#F47067">      if</span><span style="color:#ADBAC7"> @order.</span><span style="color:#DCBDFB">save</span></span>
+<span class="line"><span style="color:#ADBAC7">        flash[</span><span style="color:#6CB6FF">:notice</span><span style="color:#ADBAC7">] </span><span style="color:#F47067">=</span><span style="color:#96D0FF"> 'Order was successfully created.'</span></span>
+<span class="line"><span style="color:#6CB6FF">        format</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">html</span><span style="color:#ADBAC7"> { redirect_to </span><span style="color:#DCBDFB">order_url</span><span style="color:#ADBAC7">(@order) }</span></span>
+<span class="line"><span style="color:#6CB6FF">        format</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">xml</span><span style="color:#ADBAC7">  { head </span><span style="color:#6CB6FF">:created</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">:location</span><span style="color:#ADBAC7"> => </span><span style="color:#DCBDFB">order_url</span><span style="color:#ADBAC7">(@order) }</span></span>
+<span class="line"><span style="color:#F47067">      else</span></span>
+<span class="line"><span style="color:#6CB6FF">        format</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">html</span><span style="color:#ADBAC7"> { render </span><span style="color:#6CB6FF">:action</span><span style="color:#ADBAC7"> => </span><span style="color:#96D0FF">"new"</span><span style="color:#ADBAC7"> }</span></span>
+<span class="line"><span style="color:#6CB6FF">        format</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">xml</span><span style="color:#ADBAC7">  { render </span><span style="color:#6CB6FF">:xml</span><span style="color:#ADBAC7"> => @order.</span><span style="color:#DCBDFB">errors</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">to_xml</span><span style="color:#ADBAC7"> }</span></span>
+<span class="line"><span style="color:#F47067">      end</span></span>
+<span class="line"><span style="color:#F47067">    end</span></span>
+<span class="line"><span style="color:#F47067">  end&#x3C;/</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span><span style="color:#768390">  # PUT /orders/1</span></span>
+<span class="line"><span style="color:#768390">  # PUT /orders/1.xml</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> update</span></span>
+<span class="line"><span style="color:#ADBAC7">    @order </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> Order</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">find</span><span style="color:#ADBAC7">(params[</span><span style="color:#6CB6FF">:id</span><span style="color:#ADBAC7">])</span></span>
+<span class="line"><span style="color:#ADBAC7">    respond_to </span><span style="color:#F47067">do</span><span style="color:#ADBAC7"> |format|</span></span>
+<span class="line"><span style="color:#F47067">      if</span><span style="color:#ADBAC7"> @order.</span><span style="color:#DCBDFB">update_attributes</span><span style="color:#ADBAC7">(params[</span><span style="color:#6CB6FF">:order</span><span style="color:#ADBAC7">])</span></span>
+<span class="line"><span style="color:#ADBAC7">        flash[</span><span style="color:#6CB6FF">:notice</span><span style="color:#ADBAC7">] </span><span style="color:#F47067">=</span><span style="color:#96D0FF"> 'Order was successfully updated.'</span></span>
+<span class="line"><span style="color:#6CB6FF">        format</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">html</span><span style="color:#ADBAC7"> { redirect_to </span><span style="color:#DCBDFB">order_url</span><span style="color:#ADBAC7">(@order) }</span></span>
+<span class="line"><span style="color:#6CB6FF">        format</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">xml</span><span style="color:#ADBAC7">  { head </span><span style="color:#6CB6FF">:ok</span><span style="color:#ADBAC7"> }</span></span>
+<span class="line"><span style="color:#F47067">      else</span></span>
+<span class="line"><span style="color:#6CB6FF">        format</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">html</span><span style="color:#ADBAC7"> { render </span><span style="color:#6CB6FF">:action</span><span style="color:#ADBAC7"> => </span><span style="color:#96D0FF">"edit"</span><span style="color:#ADBAC7"> }</span></span>
+<span class="line"><span style="color:#6CB6FF">        format</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">xml</span><span style="color:#ADBAC7">  { render </span><span style="color:#6CB6FF">:xml</span><span style="color:#ADBAC7"> => @order.</span><span style="color:#DCBDFB">errors</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">to_xml</span><span style="color:#ADBAC7"> }</span></span>
+<span class="line"><span style="color:#F47067">      end</span></span>
+<span class="line"><span style="color:#F47067">    end</span></span>
+<span class="line"><span style="color:#F47067">  end&#x3C;/</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span><span style="color:#768390">  # DELETE /orders/1</span></span>
+<span class="line"><span style="color:#768390">  # DELETE /orders/1.xml</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> destroy</span></span>
+<span class="line"><span style="color:#ADBAC7">    @order </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> Order</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">find</span><span style="color:#ADBAC7">(params[</span><span style="color:#6CB6FF">:id</span><span style="color:#ADBAC7">])</span></span>
+<span class="line"><span style="color:#ADBAC7">    @order.</span><span style="color:#DCBDFB">destroy</span></span>
+<span class="line"><span style="color:#ADBAC7">    respond_to </span><span style="color:#F47067">do</span><span style="color:#ADBAC7"> |format|</span></span>
+<span class="line"><span style="color:#6CB6FF">      format</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">html</span><span style="color:#ADBAC7"> { redirect_to orders_url }</span></span>
+<span class="line"><span style="color:#6CB6FF">      format</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">xml</span><span style="color:#ADBAC7">  { head </span><span style="color:#6CB6FF">:ok</span><span style="color:#ADBAC7"> }</span></span>
+<span class="line"><span style="color:#F47067">    end</span></span>
+<span class="line"><span style="color:#F47067">  end</span></span>
+<span class="line"><span style="color:#F47067">end</span></span></code></pre>
+</p>
+<p>This controller allows you respond to all of the Actions that can be taken on a Resource: GET, POST, PUT and DELETE.</p>
+<h2>Command Line Interaction with the Service</h2>
+Start our Rails application and then you can see the following commands at work.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">./script/server</span></span></code></pre>
+</p>
+<h3>Get a list of all of the Orders</h3>
+The first thing you want to do is get a list of all of the orders in the system. To do this we perform a GET command  asking for an XML response. The URI in this case represents a list of all the Orders in the system.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">curl</span><span style="color:#6CB6FF"> -X</span><span style="color:#96D0FF"> GET</span><span style="color:#6CB6FF"> -H</span><span style="color:#96D0FF"> 'Accept: application/xml'</span><span style="color:#96D0FF"> http://localhost:3000/orders</span></span></code></pre>
+</p>
+<h3>Get a single Order</h3>
+If we want to get the XML representation of a single order then we can ask for a specific Order by changing the ID to a URI that represents just one Order.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">curl</span><span style="color:#6CB6FF"> -X</span><span style="color:#96D0FF"> GET</span><span style="color:#6CB6FF"> -H</span><span style="color:#96D0FF"> 'Accept: application/xml'</span><span style="color:#96D0FF"> http://localhost:3000/orders/15</span></span></code></pre>
+</p>
+<h3>Delete an Order</h3>
+REST keeps things simple by having consistent Resource URIs. The URI that represents Order number 15 can also be used to Delete or Modify that Order. In this case the URI for the GET is the same, but we ask it to delete the Order instead.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">curl</span><span style="color:#6CB6FF"> -X</span><span style="color:#96D0FF"> DELETE</span><span style="color:#6CB6FF"> -H</span><span style="color:#96D0FF"> 'Accept: application/xml'</span><span style="color:#96D0FF"> http://localhost:3000/orders/15</span></span></code></pre>
+</p>
+<h3>Modify an existing Order</h3>
+Just as with delete, if we want to modify an Order we use the URI that represents that specific Order. The only difference is that we have to tell the server that we are sending it XML, and then actually send the XML.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">curl</span><span style="color:#6CB6FF"> -i</span><span style="color:#6CB6FF"> -X</span><span style="color:#96D0FF"> PUT</span><span style="color:#6CB6FF"> -H</span><span style="color:#96D0FF"> 'Content-Type: application/xml'</span><span style="color:#6CB6FF"> -H</span><span style="color:#96D0FF"> 'Accept: application/xml'</span><span style="color:#F47067"> \</span></span>
+<span class="line"><span style="color:#ADBAC7">-d </span><span style="color:#96D0FF">'&#x3C;order>&#x3C;name>Foo&#x3C;/name>&#x3C;/order>'</span><span style="color:#96D0FF">  http://localhost:3000/orders/15</span></span></code></pre>
+</p>
+<h3>Create a new Order</h3>
+Creating an Order looks very similar to modifying an Order but the URI changes to the Resource URI for the collection of all Orders. The response to this command will be an HTTP 302 Redirect that gives you the URI of the newly created Order Resource.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">curl</span><span style="color:#6CB6FF"> -i</span><span style="color:#6CB6FF"> -X</span><span style="color:#96D0FF"> POST</span><span style="color:#6CB6FF"> -H</span><span style="color:#96D0FF"> 'Content-Type: application/xml'</span><span style="color:#6CB6FF"> -H</span><span style="color:#96D0FF"> 'Accept: application/xml'</span><span style="color:#F47067"> \</span></span>
+<span class="line"><span style="color:#ADBAC7">-d </span><span style="color:#96D0FF">'&#x3C;order>&#x3C;name>Foo&#x3C;/name>&#x3C;/order>'</span><span style="color:#96D0FF">  http://localhost:3000/orders/</span></span></code></pre>
+</p>
+<h2>Conclusion</h2>
+I think you can see how easily you can interact with a REST service using only the most basic tools available, namely simple Unix command line utilities. This simplicity offers a lot of power, flexibility and interoperability that you lose when you implement services with more complicated implementations such as SOAP. That's not to say that SOAP and all of the WS-* specifications don't have have their place, because they do. When you can implement a simple solution and meet your needs you will often find that solution to have a surprising amount of added benefits such as flexibility.</p>

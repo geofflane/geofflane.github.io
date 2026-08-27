@@ -1,14 +1,13 @@
-# Global
-*.DS_Store
-Desktop.ini
-Thumbs.db
+# Build output
+dist/
+.astro/
 
-# Project
-!.keep
-*.sass-cache
-/_assets/yarn/
-/_site/
-/.asset-cache/
-/.jekyll-metadata
-Gemfile.lock
-yarn.lock
+# Dependencies
+node_modules/
+
+# Design canvas working files: keep the .dc.html sources, not the seeded page
+design/*.html
+!design/*.dc.html
+
+# macOS
+.DS_Store

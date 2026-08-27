@@ -1,0 +1,91 @@
+---
+title: "Start a New Branch on your Remote Git Repository"
+pubDate: "2008-04-14 17:31:11 -0400"
+permalink: "/2008/04/14/start-a-new-branch-on-your-remote-git-repository/"
+tags: ["version-control","git","Automation"]
+---
+<p><a href="http://git.or.cz/">Git</a> is a <a href="/2005/12/29/what-are-decentralized-revision-control-systems/">distributed version control system</a> so it allows you to create branches locally and commit against them. It also supports a more centralized repository model. When using a centralized repository you can push changes to it so that others can pull them more easily. I have a tendency to work on multiple computers. Because of this, I like to use a centralized repository to track the branches as I work on them. That way no matter what machine I'm on, I can still get at my branches.</p>
+<h3>The Workflow</h3></p>
+<p>My workflow is generally something like this:</p>
+<ol>
+<li>Create a remote branch</li>
+<li>Create a local branch that tracks it</li>
+<li>Work, Test, Commit (repeat) - this is all local</li>
+<li>Push (pushes commits to the remote repository)</li>
+</ol></p>
+<p>Git commands can be a bit esoteric at times and I can't always seem to remember how to create a remote git branch and then start working on new code. There also seems to be multiple ways of doing it. I'm documenting the way that seem to work for me so that I can remember it. Maybe it will help someone else too.</p>
+<h3>Creating a Remote Branch</h3></p>
+<ol>
+<li>
+<p>Create the remote branch
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">git</span><span style="color:#96D0FF"> push</span><span style="color:#96D0FF"> origin</span><span style="color:#96D0FF"> origin:refs/heads/new_feature_name</span></span></code></pre>
+</p></li></p>
+<li>
+<p>Make sure everything is up-to-date
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">git</span><span style="color:#96D0FF"> fetch</span><span style="color:#96D0FF"> origin</span></span></code></pre>
+</p></li></p>
+<li>
+<p>Then you can see that the branch is created.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">git</span><span style="color:#96D0FF"> branch</span><span style="color:#6CB6FF"> -r</span></span></code></pre>
+</p></li>
+</ol></p>
+<p>This should show 'origin/new_feature_name'</p>
+<ol>
+<li>Start tracking the new branch
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">git</span><span style="color:#96D0FF"> checkout</span><span style="color:#6CB6FF"> --track</span><span style="color:#6CB6FF"> -b</span><span style="color:#96D0FF"> new_feature_name</span><span style="color:#96D0FF"> origin/new_feature_name</span></span></code></pre>
+</li>
+</ol></p>
+<p>This means that when you do pulls that it will get the latest from that branch as well.</p>
+<ol>
+<li>Make sure everything is up-to-date
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">git</span><span style="color:#96D0FF"> pull</span></span></code></pre>
+</li>
+</ol></p>
+<h3>Cleaning up Mistakes</h3></p>
+<p>If you make a mistake you can always delete the remote branch
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">git</span><span style="color:#96D0FF"> push</span><span style="color:#96D0FF"> origin</span><span style="color:#96D0FF"> :heads/new_feature_name</span></span></code></pre>
+
+<em>(Ok Git'ers - that has to be the least intuitive command ever.)</em></p>
+<h3>Use the Branch from Another Location</h3></p>
+<p>When you get to another computer or clone the git repository to a new computer, then you just need to start tracking the new branch again.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">git</span><span style="color:#96D0FF"> branch</span><span style="color:#6CB6FF"> -r</span></span></code></pre>
+ to show all the remote branches
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">git</span><span style="color:#96D0FF"> checkout</span><span style="color:#6CB6FF"> --track</span><span style="color:#6CB6FF"> -b</span><span style="color:#96D0FF"> new_branch</span><span style="color:#96D0FF"> origin/new_feature_name</span></span></code></pre>
+ to start tracking the new branch</p>
+<h3>Automate it A Bit</h3></p>
+<p>That's a pretty easy thing to automate with a small shell script luckily</p>
+<p>
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">/p>&#x3C;/p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">h</span><span style="color:#F47067">1>!</span><span style="color:#F69D50">/bin/sh</span><span style="color:#ADBAC7">&#x3C;/h1>&#x3C;/p></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">h</span><span style="color:#F47067">1></span><span style="color:#ADBAC7">git-create-branch </span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">branch_name>&#x3C;/h1>&#x3C;/p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">if [ </span><span style="color:#6CB6FF">$#</span><span style="color:#F47067"> -ne</span><span style="color:#6CB6FF"> 1</span><span style="color:#ADBAC7"> ]; </span><span style="color:#F47067">then</span></span>
+<span class="line"><span style="color:#6CB6FF">         echo</span><span style="color:#F47067"> 1>&#x26;</span><span style="color:#96D0FF">amp</span><span style="color:#ADBAC7">;</span><span style="color:#F69D50">2</span><span style="color:#96D0FF"> Usage:</span><span style="color:#F69D50"> $0</span><span style="color:#96D0FF"> branch_name</span></span>
+<span class="line"><span style="color:#6CB6FF">         exit</span><span style="color:#6CB6FF"> 127</span></span>
+<span class="line"><span style="color:#ADBAC7">fi</span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">/p>&#x3C;/p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">set branch_name = </span><span style="color:#F69D50">$1</span></span>
+<span class="line"><span style="color:#F69D50">git</span><span style="color:#96D0FF"> push</span><span style="color:#96D0FF"> origin</span><span style="color:#96D0FF"> origin:refs/heads/</span><span style="color:#ADBAC7">${branch_name}</span></span>
+<span class="line"><span style="color:#F69D50">git</span><span style="color:#96D0FF"> fetch</span><span style="color:#96D0FF"> origin</span></span>
+<span class="line"><span style="color:#F69D50">git</span><span style="color:#96D0FF"> checkout</span><span style="color:#6CB6FF"> --track</span><span style="color:#6CB6FF"> -b</span><span style="color:#ADBAC7"> ${branch_name} </span><span style="color:#96D0FF">origin/</span><span style="color:#ADBAC7">${branch_name}</span></span>
+<span class="line"><span style="color:#F69D50">git</span><span style="color:#96D0FF"> pull</span></span></code></pre>
+</p>
+<p>For further help, you might want to check out:</p>
+<ul>
+<li>
+<a href="http://www.amazon.com/gp/product/1934356158?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1934356158">Pragmatic Version Control Using Git (Pragmatic Starter Kit)</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=1934356158" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
+</li></p>
+<li>
+<a href="http://www.amazon.com/gp/product/0596520123?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0596520123">Version Control with Git: Powerful tools and techniques for collaborative software development</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=0596520123" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
+</li></p>
+<li>
+<a href="http://www.amazon.com/gp/product/1430218339?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1430218339">Pro Git</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=1430218339" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
+</li>
+</ul></p>
+<p>[ad name="image-banner"]</p>

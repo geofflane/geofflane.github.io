@@ -1,0 +1,52 @@
+---
+title: "Scheme/HtDP Unit Testing Functions"
+pubDate: "2008-10-19 17:16:52 -0400"
+permalink: "/2008/10/19/scheme-htdp-unit-testing-functions/"
+tags: ["functional programming","Unit Testing","HTDP"]
+---
+<p><a href="http://www.htdp.org/">How to Design Programs (HtDP)</a> provides a series of unit testing functions that allow you to test the output of any kind of function. The current version talks about testing your code, but doesn't offer a lot of guidance into how to do that. Everything you need is there though, so in case you are doing this on your own and don't have a teacher to tell you to do this, here's some explanation that I hope helps.</p>
+<h3>check-expect</h3>
+<em>check-expect</em> takes the results of a function and the expected value. This is the simplest of the testing constructs which answers the question "Does the expected result of a function call equal the result returned by the function?". It handles all of the details about types of values returned, so it can work with a simple value like a number, a complex value like a structure or a list, or even a picture.</p>
+<p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">;; add: number number -> number</span></span>
+<span class="line"><span style="color:#768390">;; add two numbers together</span></span>
+<span class="line"><span style="color:#ADBAC7">(</span><span style="color:#F47067">define</span><span style="color:#ADBAC7"> (</span><span style="color:#DCBDFB">add</span><span style="color:#ADBAC7"> n m)</span></span>
+<span class="line"><span style="color:#ADBAC7">  (</span><span style="color:#F47067">+</span><span style="color:#ADBAC7"> n m))&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p></span><span style="color:#768390">;; Tests</span></span>
+<span class="line"><span style="color:#ADBAC7">(check-expect (add </span><span style="color:#6CB6FF">1</span><span style="color:#6CB6FF"> 1</span><span style="color:#ADBAC7">) </span><span style="color:#6CB6FF">2</span><span style="color:#ADBAC7">)</span></span></code></pre>
+</p>
+<h3>check-within</h3>
+<em>check-within</em> is similar to check-expect, but it allows for a third argument to tell wether or not the result is within a certain difference of the actual answer. This is good for certain functions that might produce random results, but the most common case is when dealing with floating point numbers. Floating point numbers are not always represented precisely, so there needs to be some "room for error" so to speak.</p>
+<p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">(</span><span style="color:#F47067">define</span><span style="color:#ADBAC7"> PI 3.14)</span></span>
+<span class="line"><span style="color:#ADBAC7">(check-within (</span><span style="color:#F47067">/</span><span style="color:#6CB6FF"> 22</span><span style="color:#6CB6FF"> 7</span><span style="color:#ADBAC7">) PI .003)&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>(check-within (random </span><span style="color:#6CB6FF">10</span><span style="color:#ADBAC7">) </span><span style="color:#6CB6FF">0</span><span style="color:#6CB6FF"> 9</span><span style="color:#ADBAC7">)</span></span></code></pre>
+</p>
+<h3>check-error</h3>
+Finally, you can use <em>check-error</em> to test cases where your function throws an error. Those error conditions are an important part of a function contract, so testing them should be done just like any other possible conditions.</p>
+<p>One of the things that threw me at first was what to use as the expected value of a <em>check-error</em> test.</p>
+<p>An error is HtDP is "throw" by a function like:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">(error </span><span style="color:#6CB6FF">'function-name</span><span style="color:#96D0FF"> "some message"</span><span style="color:#ADBAC7">)</span></span></code></pre>
+</p>
+<p>After a bit of trial and error, I found out the expected result is a string like:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">; "function-name: some message"</span></span>
+<span class="line"><span style="color:#ADBAC7">(check-error (error </span><span style="color:#6CB6FF">'list-pick</span><span style="color:#96D0FF"> "list too short"</span><span style="color:#ADBAC7">)  </span><span style="color:#96D0FF">"list-pick: list too short"</span><span style="color:#ADBAC7">)</span></span></code></pre>
+</p>
+<h3>More Realistic Example</h3>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">;; list-pick : list-of-symbols N[>= 0]  ->  symbol</span></span>
+<span class="line"><span style="color:#768390">;; to determine the nth symbol from alos, counting from 0;</span></span>
+<span class="line"><span style="color:#768390">;; signals an error if there is no nth item</span></span>
+<span class="line"><span style="color:#ADBAC7">(</span><span style="color:#F47067">define</span><span style="color:#ADBAC7"> (</span><span style="color:#DCBDFB">list-pick</span><span style="color:#ADBAC7"> alos n)</span></span>
+<span class="line"><span style="color:#ADBAC7">  (</span><span style="color:#F47067">cond</span></span>
+<span class="line"><span style="color:#FF938A;font-style:italic">    [</span><span style="color:#ADBAC7">(empty? alos) (error </span><span style="color:#6CB6FF">'list-pick</span><span style="color:#96D0FF"> "list too short"</span><span style="color:#ADBAC7">)</span><span style="color:#FF938A;font-style:italic">]</span></span>
+<span class="line"><span style="color:#FF938A;font-style:italic">    [</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> n </span><span style="color:#6CB6FF">0</span><span style="color:#ADBAC7">) (first alos)</span><span style="color:#FF938A;font-style:italic">]</span></span>
+<span class="line"><span style="color:#FF938A;font-style:italic">    [</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">></span><span style="color:#ADBAC7"> n </span><span style="color:#6CB6FF">0</span><span style="color:#ADBAC7">) (list-pick (rest alos) (sub1 n))</span><span style="color:#FF938A;font-style:italic">]</span><span style="color:#ADBAC7">))&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p></span><span style="color:#768390">;; Tests</span></span>
+<span class="line"><span style="color:#ADBAC7">(check-error (list-pick empty </span><span style="color:#6CB6FF">1</span><span style="color:#ADBAC7">)  </span><span style="color:#96D0FF">"list-pick: list too short"</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">(check-expect (list-pick (</span><span style="color:#6CB6FF">list</span><span style="color:#6CB6FF"> 'a</span><span style="color:#6CB6FF"> 'b</span><span style="color:#6CB6FF"> 'c</span><span style="color:#6CB6FF"> 'd</span><span style="color:#ADBAC7">) </span><span style="color:#6CB6FF">3</span><span style="color:#ADBAC7">) </span><span style="color:#6CB6FF">'d</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">(check-error (list-pick (</span><span style="color:#6CB6FF">list</span><span style="color:#6CB6FF"> 'a</span><span style="color:#6CB6FF"> 'b</span><span style="color:#6CB6FF"> 'c</span><span style="color:#6CB6FF"> 'd</span><span style="color:#ADBAC7">) </span><span style="color:#6CB6FF">4</span><span style="color:#ADBAC7">) </span><span style="color:#96D0FF">"list-pick: list too short"</span><span style="color:#ADBAC7">)</span></span></code></pre>

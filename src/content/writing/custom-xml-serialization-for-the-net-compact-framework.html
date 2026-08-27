@@ -1,0 +1,163 @@
+---
+title: "Custom XML Serialization for the .NET Compact Framework"
+pubDate: "2007-02-28 11:25:15 -0500"
+permalink: "/2007/02/28/custom-xml-serialization-for-the-net-compact-framework/"
+tags: ["compact framework","xml","windows-mobile"]
+---
+<p>.NET provides a whole slew of utilities for serializing objects into an XML form. But as I wrote in my previous post, <a href="/2007/02/27/net-compact-framework-serialization-bugs/">.NET Compact Framework has serious problems with this serialization</a>. The good news is that you can leverage all of the existing Attributes and tricks that you think should work (if it weren't so buggy) and use them in your own serialization scheme.</p>
+<h3>Get Started</h3>
+For example I want to know if I should skip a given member? There are a number of different things I can check. Is a Reference type null? Is there and XmlIgnore attribute? Is there a <em>PropertyName</em>Specified value set to false? All of those questions can easily be answered using reflection.</p>
+<p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">/// &#x3C;</span><span style="color:#8DDB8C">summary</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#768390">/// Should the current property be skipped based on rules</span></span>
+<span class="line"><span style="color:#768390">/// such as the existence of a propertySpecified value set to false?</span></span>
+<span class="line"><span style="color:#768390">/// &#x3C;/</span><span style="color:#8DDB8C">summary</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#768390">/// &#x3C;</span><span style="color:#8DDB8C">param</span><span style="color:#6CB6FF"> name</span><span style="color:#768390">=</span><span style="color:#96D0FF">"member"</span><span style="color:#768390">>The MemberInfo to check&#x3C;/</span><span style="color:#8DDB8C">param</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#768390">/// &#x3C;</span><span style="color:#8DDB8C">param</span><span style="color:#6CB6FF"> name</span><span style="color:#768390">=</span><span style="color:#96D0FF">"o"</span><span style="color:#768390">>The object that contained this member&#x3C;/</span><span style="color:#8DDB8C">param</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#768390">/// &#x3C;</span><span style="color:#8DDB8C">returns</span><span style="color:#768390">>true if this member should be skipped&#x3C;/</span><span style="color:#8DDB8C">returns</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> bool</span><span style="color:#DCBDFB"> SkipMember</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">MemberInfo</span><span style="color:#F69D50"> member</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">object</span><span style="color:#F69D50"> o</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#F47067">    object</span><span style="color:#F69D50"> val</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> null</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> (member.MemberType </span><span style="color:#F47067">==</span><span style="color:#ADBAC7"> MemberTypes.Field)</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#ADBAC7">        val </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> ((</span><span style="color:#F69D50">FieldInfo</span><span style="color:#ADBAC7">)member).</span><span style="color:#DCBDFB">GetValue</span><span style="color:#ADBAC7">(o);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#F47067">    else</span><span style="color:#F47067"> if</span><span style="color:#ADBAC7"> (member.MemberType </span><span style="color:#F47067">==</span><span style="color:#ADBAC7"> MemberTypes.Property)</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#ADBAC7">        val </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> ((</span><span style="color:#F69D50">PropertyInfo</span><span style="color:#ADBAC7">)member).</span><span style="color:#DCBDFB">GetValue</span><span style="color:#ADBAC7">(o, </span><span style="color:#6CB6FF">null</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> (</span><span style="color:#6CB6FF">null</span><span style="color:#F47067"> ==</span><span style="color:#ADBAC7"> val)</span></span>
+<span class="line"><span style="color:#F47067">      return</span><span style="color:#6CB6FF"> true</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">    string</span><span style="color:#F69D50"> propertyToTest</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> member.Name </span><span style="color:#F47067">+</span><span style="color:#96D0FF"> "Specified"</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F69D50">    PropertyInfo</span><span style="color:#F69D50"> specifiedProperty</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> o.</span><span style="color:#DCBDFB">GetType</span><span style="color:#ADBAC7">().</span><span style="color:#DCBDFB">GetProperty</span><span style="color:#ADBAC7">(propertyToTest);</span></span>
+<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> ((</span><span style="color:#6CB6FF">null</span><span style="color:#F47067"> !=</span><span style="color:#ADBAC7"> specifiedProperty </span><span style="color:#F47067">&#x26;&#x26;</span><span style="color:#F47067"> !</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">bool</span><span style="color:#ADBAC7">)specifiedProperty.</span><span style="color:#DCBDFB">GetValue</span><span style="color:#ADBAC7">(o, </span><span style="color:#6CB6FF">null</span><span style="color:#ADBAC7">)))</span></span>
+<span class="line"><span style="color:#F47067">        return</span><span style="color:#6CB6FF"> true</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F69D50">    FieldInfo</span><span style="color:#F69D50"> specifiedField</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> o.</span><span style="color:#DCBDFB">GetType</span><span style="color:#ADBAC7">().</span><span style="color:#DCBDFB">GetField</span><span style="color:#ADBAC7">(propertyToTest, FIELD_BINDING_FLAGS);</span></span>
+<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> ((</span><span style="color:#6CB6FF">null</span><span style="color:#F47067"> !=</span><span style="color:#ADBAC7"> specifiedField </span><span style="color:#F47067">&#x26;&#x26;</span><span style="color:#F47067"> !</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">bool</span><span style="color:#ADBAC7">)specifiedField.</span><span style="color:#DCBDFB">GetValue</span><span style="color:#ADBAC7">(o)))</span></span>
+<span class="line"><span style="color:#F47067">        return</span><span style="color:#6CB6FF"> true</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#ADBAC7"> member.</span><span style="color:#DCBDFB">IsDefined</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">typeof</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">XmlIgnoreAttribute</span><span style="color:#ADBAC7">), </span><span style="color:#6CB6FF">false</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>I can use a similar "fall-through" strategy to determine the name of the element to write using the XmlElement attribute for example. Now that I know I can answer some basic questions about an Object using the built-in mechanisms that .NET uses for serialization I can get down to serious serialization.</p>
+<p>We're all Object-Oriented programmers these days right? Right!? So to start I decided that the best way to handle this problem was to decompose it into a bunch of simpler problems.</p>
+<h3>ITagWriter</h3>
+There are two things that we can write in XML. Either an XML Element or an XML Attribute. So, I created an interface <code class="inline">ITagWriter</code> with two concrete implementations to correspond to these two XML types: <code class="inline">AttributeTagWriter</code> and <code class="inline">ElementTagWriter</code>. These classes allow me to write the structure of the XML Document.</p>
+<p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">/// &#x3C;</span><span style="color:#8DDB8C">summary</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#768390">/// Interface to implement to write different Xml tags</span></span>
+<span class="line"><span style="color:#768390">/// Either Elements or Attributes.</span></span>
+<span class="line"><span style="color:#768390">/// &#x3C;/</span><span style="color:#8DDB8C">summary</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#F47067">internal</span><span style="color:#F47067"> interface</span><span style="color:#F69D50"> ITagWriter</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#768390">    /// &#x3C;</span><span style="color:#8DDB8C">summary</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#768390">    /// Write the opening Xml tag with the given name</span></span>
+<span class="line"><span style="color:#768390">    /// &#x3C;/</span><span style="color:#8DDB8C">summary</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#768390">    /// &#x3C;</span><span style="color:#8DDB8C">param</span><span style="color:#6CB6FF"> name</span><span style="color:#768390">=</span><span style="color:#96D0FF">"doc"</span><span style="color:#768390">>The XML Document to write the tage to.&#x3C;/</span><span style="color:#8DDB8C">param</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#768390">    /// &#x3C;</span><span style="color:#8DDB8C">param</span><span style="color:#6CB6FF"> name</span><span style="color:#768390">=</span><span style="color:#96D0FF">"tagName"</span><span style="color:#768390">>The name of the tag&#x3C;/</span><span style="color:#8DDB8C">param</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#F47067">    void</span><span style="color:#DCBDFB"> WriteStart</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">XmlWriter</span><span style="color:#F69D50"> doc</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">string</span><span style="color:#F69D50"> tagName</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#768390">    /// &#x3C;</span><span style="color:#8DDB8C">summary</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#768390">    /// Write the appropriate end tag</span></span>
+<span class="line"><span style="color:#768390">    /// &#x3C;/</span><span style="color:#8DDB8C">summary</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#768390">    /// &#x3C;</span><span style="color:#8DDB8C">param</span><span style="color:#6CB6FF"> name</span><span style="color:#768390">=</span><span style="color:#96D0FF">"doc"</span><span style="color:#768390">>The XML Document to write the tage to.&#x3C;/</span><span style="color:#8DDB8C">param</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#F47067">    void</span><span style="color:#DCBDFB"> WriteEnd</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">XmlWriter</span><span style="color:#F69D50"> doc</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<h3>IValueWriter</h3>
+With the ability to write the structure, I then need to be able to write out the values of the various objects and their properties. Just like with the <code class="inline">ITagWriter</code> interface, I decided to create an <code class="inline">IValueWriter</code> for the various kinds of values that I would need to write. The types I came up with were <code class="inline">ObjectWriter</code>, <code class="inline">CollectionValueWriter</code>, <code class="inline">EnumValueWriter</code>, <code class="inline">SimpleValueWriter</code>, and <code class="inline">XmlElementValueWriter</code>.</p>
+<p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">/// &#x3C;</span><span style="color:#8DDB8C">summary</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#768390">/// Interface to implement to write different kinds of values.</span></span>
+<span class="line"><span style="color:#768390">/// &#x3C;/</span><span style="color:#8DDB8C">summary</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#F47067">internal</span><span style="color:#F47067"> interface</span><span style="color:#F69D50"> IValueWriter</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#768390">    /// &#x3C;</span><span style="color:#8DDB8C">summary</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#768390">    /// Write the Entry value to the XmlDocument</span></span>
+<span class="line"><span style="color:#768390">    /// &#x3C;/</span><span style="color:#8DDB8C">summary</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#768390">    /// &#x3C;</span><span style="color:#8DDB8C">param</span><span style="color:#6CB6FF"> name</span><span style="color:#768390">=</span><span style="color:#96D0FF">"doc"</span><span style="color:#768390">>The XML Document to write the tage to.&#x3C;/</span><span style="color:#8DDB8C">param</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#768390">    /// &#x3C;</span><span style="color:#8DDB8C">param</span><span style="color:#6CB6FF"> name</span><span style="color:#768390">=</span><span style="color:#96D0FF">"entry"</span><span style="color:#768390">>The meta-information and value to write.&#x3C;/</span><span style="color:#8DDB8C">param</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#F47067">    void</span><span style="color:#DCBDFB"> Write</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">XmlWriter</span><span style="color:#F69D50"> doc</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">CustomSerializationEntry</span><span style="color:#F69D50"> entry</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>You'll notice the <code class="inline">CustomSerializationEntry</code> class
+  is the parameter for the <code class="inline">IValueWriter.Write()</code>
+  method. This class contains all of the metadata and the
+    value about the various properties of an Object. This alows us an easy way
+    to ask questions about a given property. Is it a Collection? Is it an Enum?
+    Is there a sort order? Basically the idea is to encapsulate all of the
+    things that are interesting from a serialization point of view.</p>
+  <p>To help manage the interaction I also created a basic <code
+      class="inline">TypeLookup</code> class. The job of this class is to
+    determine what type of <code class="inline">ITagWriter</code>
+    and <code class="inline">IValueWriter</code> to use for a
+    given <code class="inline">CustomSerializationEntry</code>
+          instance. This allows us to centralize that decision making in a
+          single class. The centralized knowledge keeps the individual writer
+          implementations much simpler. They just need to ask for the correct
+          writer and then call the methods defined in the interface. They don't
+          need to care what type they are writing. All hail power of
+          encapsulation and abstraction!</p>
+<h3>Start Serializing</h3>
+I bootstrap the serialization by creating an ObjectWriter to handle the
+outermost object. From there, the ObjectWriter takes over, constructing
+CustomSerializationEntry objects for each of the serialized object's
+properties. The type of the property determines the type of IValueWriter that
+is used to write the property value.</p>
+<p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">/// &#x3C;</span><span style="color:#8DDB8C">summary</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#768390">/// Serialize an object using the given</span></span>
+<span class="line"><span style="color:#768390">/// &#x3C;</span><span style="color:#8DDB8C">paramref</span><span style="color:#6CB6FF"> name</span><span style="color:#768390">=</span><span style="color:#96D0FF">"xmlRoot"</span><span style="color:#768390">>xmlRoot&#x3C;/</span><span style="color:#8DDB8C">paramref</span><span style="color:#768390">> as the root element name.</span></span>
+<span class="line"><span style="color:#768390">/// &#x3C;/</span><span style="color:#8DDB8C">summary</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#768390">/// &#x3C;</span><span style="color:#8DDB8C">param</span><span style="color:#6CB6FF"> name</span><span style="color:#768390">=</span><span style="color:#96D0FF">"o"</span><span style="color:#768390">>&#x3C;/</span><span style="color:#8DDB8C">param</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#768390">/// &#x3C;</span><span style="color:#8DDB8C">param</span><span style="color:#6CB6FF"> name</span><span style="color:#768390">=</span><span style="color:#96D0FF">"xmlRoot"</span><span style="color:#768390">>&#x3C;/</span><span style="color:#8DDB8C">param</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#768390">/// &#x3C;</span><span style="color:#8DDB8C">returns</span><span style="color:#768390">>&#x3C;/</span><span style="color:#8DDB8C">returns</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> string</span><span style="color:#DCBDFB"> Serialize</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">object</span><span style="color:#F69D50"> o</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">string</span><span style="color:#F69D50"> xmlRoot</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#F69D50">    StringBuilder</span><span style="color:#F69D50"> sb</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> StringBuilder</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#F47067">    using</span><span style="color:#ADBAC7"> (</span><span style="color:#F69D50">XmlTextWriter</span><span style="color:#F69D50"> writer</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> XmlTextWriter</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">new</span><span style="color:#F69D50"> StringWriter</span><span style="color:#ADBAC7">(sb)))</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#ADBAC7">        writer.Formatting </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> Formatting.Indented;</span></span>
+<span class="line"><span style="color:#F69D50">        XmlWriter</span><span style="color:#F69D50"> xmlDoc</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> XmlWriter.</span><span style="color:#DCBDFB">Create</span><span style="color:#ADBAC7">(writer);</span></span>
+<span class="line"><span style="color:#DCBDFB">        WriteRootElement</span><span style="color:#ADBAC7">(xmlDoc, o, xmlRoot);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#ADBAC7"> sb.</span><span style="color:#DCBDFB">ToString</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#F47067">private</span><span style="color:#F47067"> static</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> WriteRootElement</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">XmlWriter</span><span style="color:#F69D50"> doc</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">object</span><span style="color:#F69D50"> o</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">string</span><span style="color:#F69D50"> rootElement</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#ADBAC7">    doc.</span><span style="color:#DCBDFB">WriteStartDocument</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#F69D50">    ObjectWriter</span><span style="color:#F69D50"> writer</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> ObjectWriter</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">new</span><span style="color:#F69D50"> TypeLookup</span><span style="color:#ADBAC7">());</span></span>
+<span class="line"><span style="color:#ADBAC7">    writer.</span><span style="color:#DCBDFB">Write</span><span style="color:#ADBAC7">(doc, o, rootElement);</span></span>
+<span class="line"><span style="color:#ADBAC7">    doc.</span><span style="color:#DCBDFB">WriteEndDocument</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>The ObjectWriter itself creates a CustomSerializationEntry for all the
+  properties that should be written. It then loops over the properties. Notice
+  how it uses the TypeLookup (lookup) to ask for the proper value writer for
+  each of the properties.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">// ...</span></span>
+<span class="line"><span style="color:#F47067">        public</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> Write</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">XmlWriter</span><span style="color:#F69D50"> doc</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">object</span><span style="color:#F69D50"> o</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">string</span><span style="color:#F69D50"> elementName</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">        {</span></span>
+<span class="line"><span style="color:#ADBAC7">            doc.</span><span style="color:#DCBDFB">WriteStartElement</span><span style="color:#ADBAC7">(elementName);</span></span>
+<span class="line"><span style="color:#F69D50">            IEnumerable</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">CustomSerializationEntry</span><span style="color:#ADBAC7">> </span><span style="color:#F69D50">entries</span><span style="color:#F47067"> =</span><span style="color:#DCBDFB"> GetMemberInfo</span><span style="color:#ADBAC7">(o);</span></span>
+<span class="line"><span style="color:#F47067">            foreach</span><span style="color:#ADBAC7"> (</span><span style="color:#F69D50">CustomSerializationEntry</span><span style="color:#F69D50"> currentEntry</span><span style="color:#F47067"> in</span><span style="color:#ADBAC7"> entries)</span></span>
+<span class="line"><span style="color:#ADBAC7">            {</span></span>
+<span class="line"><span style="color:#ADBAC7">                lookup.</span><span style="color:#DCBDFB">GetValueWriter</span><span style="color:#ADBAC7">(currentEntry).</span><span style="color:#DCBDFB">Write</span><span style="color:#ADBAC7">(doc, currentEntry);</span></span>
+<span class="line"><span style="color:#ADBAC7">            }</span></span>
+<span class="line"><span style="color:#ADBAC7">            doc.</span><span style="color:#DCBDFB">WriteEndElement</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"><span style="color:#768390">// ...</span></span></code></pre>
+</p>
+<h3>Conclusion</h3>
+OK, so I left out a lot of details! But If I gave you all of the answers it
+wouldn't be any fun now would it. I hope you can see how decomposing the
+problem of serialization turns it a series of relatively simple problems that
+you can answer. So, if I can do this in about 500 lines of code, how come
+Microsoft can't implement a decent XML Serializer for the .NET Compact
+Framework.</p>

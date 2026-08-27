@@ -1,0 +1,37 @@
+---
+title: "Grails Testing Acegi Security"
+pubDate: "2008-09-01 17:46:31 -0400"
+permalink: "/2008/09/01/grails-testing-acegi-security/"
+tags: ["mock-objects","grails","security","acegi","Unit Testing"]
+---
+<p>Almost every web application I create needs some form of user authentication and authorization. Grails provides a great plugin system that allows you to extend the base framework to provide these kinds of features. My current favorite security plugin for Grails is the <a href="http://www.grails.org/AcegiSecurity+Plugin">Acegi Security Plugin</a>. It's built using the Spring Security framework and the robust and widely used Acegi framework. I like the fact that it is built on top of existing, well-known frameworks which is the philosophy of Grails itself. It is also a flexible plugin that has a good default object model.</p>
+<p>One of the situations that inevitably arises is how to unit test code that depends on your security framework. Either you will want to test that basic authorization is working, or you might have code that makes decisions based upon who is logged in or what roles they might have. To run those test you have to setup your test cases so that the code that works when the system is running normally is tested.</p>
+<h3>Unit Testing Setup for Testing Acegi Security Code</h3>
+This situation arose for me the other day and so I thought I would share the solution that I came up with.</p>
+<p>
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">import</span><span style="color:#ADBAC7"> org.springframework.security.context.SecurityContextHolder</span><span style="color:#ADBAC7"> as</span><span style="color:#ADBAC7"> SCH</span></span>
+<span class="line"><span style="color:#F47067">import</span><span style="color:#ADBAC7"> org.springframework.security.providers.TestingAuthenticationToken</span></span>
+<span class="line"><span style="color:#F47067">import</span><span style="color:#ADBAC7"> org.springframework.security.GrantedAuthority</span></span>
+<span class="line"><span style="color:#F47067">import</span><span style="color:#ADBAC7"> org.springframework.security.Authentication</span></span>
+<span class="line"><span style="color:#F47067">import</span><span style="color:#ADBAC7"> org.springframework.security.GrantedAuthorityImpl</span></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> AuthenticationBaseTests</span><span style="color:#F47067"> extends</span><span style="color:#6CB6FF"> GroovyTestCase</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> setUp</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#F47067">      def</span><span style="color:#ADBAC7"> user </span><span style="color:#F47067">=</span><span style="color:#F47067"> User.</span><span style="color:#ADBAC7">get(</span><span style="color:#6CB6FF">1</span><span style="color:#ADBAC7">)    </span><span style="color:#768390">// or create a new one if one doesn't exist</span></span>
+<span class="line"><span style="color:#ADBAC7">      authenticate(user, </span><span style="color:#96D0FF">"abc123"</span><span style="color:#ADBAC7">, [</span><span style="color:#F47067">new</span><span style="color:#F47067"> GrantedAuthorityImpl</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">'ROLE_ADMIN'</span><span style="color:#ADBAC7">)])</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#F47067">  protected</span><span style="color:#F47067"> Authentication</span><span style="color:#DCBDFB"> authenticate</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">user</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">credentials</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">authorities</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">      def</span><span style="color:#ADBAC7"> principal </span><span style="color:#F47067">=</span><span style="color:#F47067"> new</span><span style="color:#F47067"> Expando</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">      principal</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">domainClass </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> user</span></span>
+<span class="line"><span style="color:#F47067">      Authentication</span><span style="color:#ADBAC7"> authentication </span><span style="color:#F47067">=</span><span style="color:#F47067"> new</span><span style="color:#F47067"> TestingAuthenticationToken</span><span style="color:#ADBAC7">(principal, </span><span style="color:#6CB6FF">null</span><span style="color:#ADBAC7">, authorities </span><span style="color:#F47067">as</span><span style="color:#F47067"> GrantedAuthority</span><span style="color:#ADBAC7">[])</span></span>
+<span class="line"><span style="color:#ADBAC7">      authentication</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">authenticated </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> true</span></span>
+<span class="line"><span style="color:#6CB6FF">      SCH</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">context</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">authentication </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> authentication</span></span>
+<span class="line"><span style="color:#F47067">      return</span><span style="color:#ADBAC7"> authentication</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<h4>setUp()</h4>
+The <em>setUp()</em> method will get executed prior to your tests being run. So if you want to do different things for each test you would want to move this code to a more appropriate place. In the setup method we are creating our Principle class, in this case, the User. Next we pass the user along with all of the roles we want the user to have for the given test case.</p>
+<h4>authenticate(user, credentials, authorities)</h4>
+The real setup work is done in the <em>authenticate()</em> method. This method does the real work of setting up the Authentication Token and setting it in the static context, which is a thread local variable I think, that is used by the framework to determine who is making the request and what rights they have.</p>
+<p>The fun thing about this message is the use of the Expando class. Expando allows you to create a class on the fly. This is a really interesting way to do a Mock object on-the-fly in Groovy. In this case we're creating a Mock authentication principle. We know, by looking at the Acegi Security code, that the security framework expects an object that will call <em>domainClass</em> to get the underlying implementation of the User (or Principle) implemented in the application. That will return us the <em>User</em> object that we are setting.</p>
+<p>This simple method can be added to a base class and then inherited from any tests that need user authentication to run successfully.</p>

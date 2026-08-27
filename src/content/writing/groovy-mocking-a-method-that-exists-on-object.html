@@ -1,0 +1,28 @@
+---
+title: "Groovy Mocking a Method That Exists on Object"
+pubDate: "2012-03-22 13:26:51 -0400"
+permalink: "/2012/03/22/groovy-mocking-a-method-that-exists-on-object/"
+tags: ["orm","groovy","mock-objects","jpa"]
+---
+<p>In Groovy, the find method exists on Object. The find method is also an instance method on EntityManager which is commonly used in JPA to get an instance based on a database id. I was trying to create a Mock of EntityManager like:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">def</span><span style="color:#F69D50"> emMock </span><span style="color:#F47067">=</span><span style="color:#F47067"> new</span><span style="color:#F47067"> MockFor</span><span style="color:#F69D50">(</span><span style="color:#F47067">EntityManager</span><span style="color:#F69D50">)</span></span>
+<span class="line"><span style="color:#ADBAC7">emMock</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">demand</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">find { </span><span style="color:#F47067">Class</span><span style="color:#F69D50"> clazz</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">Object</span><span style="color:#F69D50"> rquid</span><span style="color:#F47067"> -></span><span style="color:#F47067"> return</span><span style="color:#F47067"> new</span><span style="color:#F47067"> Request</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">rqUID</span><span style="color:#ADBAC7">: rquid) }</span></span>
+<span class="line"><span style="color:#F47067">def</span><span style="color:#F69D50"> em </span><span style="color:#F47067">=</span><span style="color:#F69D50"> emMock</span><span style="color:#F47067">.</span><span style="color:#F69D50">proxyDelegateInstance()</span></span></code></pre>
+</p>
+<p>This gave me an error though:
+<code>
+groovy.lang.MissingMethodException: No signature of method: com.onelinefix.services.RequestRepositoryImplTest$_2_get_closure1.doCall() is applicable for argument types: (groovy.mock.interceptor.Demand) values: [groovy.mock.interceptor.Demand@a27ebd9]
+Possible solutions: doCall(java.lang.Class, java.lang.Object), findAll(), findAll(), isCase(java.lang.Object), isCase(java.lang.Object)
+  at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:264) ~[groovy-all-1.8.6.jar:1.8.6]
+  at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:877) ~[groovy-all-1.8.6.jar:1.8.6]
+  at groovy.lang.Closure.call(Closure.java:412) ~[groovy-all-1.8.6.jar:1.8.6]
+  at groovy.lang.Closure.call(Closure.java:425) ~[groovy-all-1.8.6.jar:1.8.6]
+</code>
+It ends up that <em>find</em> is a DefaultGroovyMethod that's added to all Objects and this was causing the mock.demand to get confused because it thought I was trying to call the Object.find.</p>
+<p>Luckily there is a workaround and that's to use the ordinal argument for find.</p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">emMock</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">demand</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">find(</span><span style="color:#6CB6FF">1</span><span style="color:#ADBAC7">) { </span><span style="color:#F47067">Class</span><span style="color:#F69D50"> clazz</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">Object</span><span style="color:#F69D50"> rquid</span><span style="color:#F47067"> -></span><span style="color:#F47067"> return</span><span style="color:#F47067"> new</span><span style="color:#F47067"> Request</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">rqUID</span><span style="color:#ADBAC7">: rquid) }</span></span></code></pre>
+
+<p>That's enough of a change to invoke mock version instead of the DefaultGroovyMethod version.
+Now if I only knew why....</p>

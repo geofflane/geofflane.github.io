@@ -1,0 +1,76 @@
+---
+title: "Windows Subversion Maintenance Scripts"
+pubDate: "2008-11-19 20:46:44 -0500"
+permalink: "/2008/11/19/windows-subversion-maintenance-scripts/"
+tags: ["subversion","batch files","windows"]
+---
+<p>Previously I wrote about the <a href="/2006/09/27/subversion-maintenance-scripts/">Subversion Maintenance Scripts</a> that I use for doing things like backups and upgrades. They were bash shell scripts that automated dealing with multiple Subversion repositories. The secret was that those guys were being run using Cygwin on Windows. Recently we got a new, more powerful server to run our Virtuals on. I decided to rewrite the scripts using native Windows Batch files so that I wouldn't have to install Cygwin again. Hopefully someone else will find this useful too.</p>
+<h2>Windows Batch Script for Creating a Default Repository Structure</h2>
+I work for a <a href="http://www.spiderlogic.com">custom software development consulting firm</a> so we have a lot of different clients. We don't want to mix different clients' code so we create a repository per client. We often get multiple projects per client though (yeah, they like us) so we go ahead and create a project under the client. We also like to use the trunk, tags and branches directories by default.</p>
+<p>With all of these rules: Automate!</p>
+<p><strong><em>create_repo.bat</em</strong>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">@echo</span><span style="color:#ADBAC7"> off</span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">/p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">REM Check command line args to make sure a customer and project name were passed</span></span>
+<span class="line"><span style="color:#F47067">IF</span><span style="color:#ADBAC7"> (</span><span style="color:#F69D50">%1</span><span style="color:#ADBAC7">)</span><span style="color:#F47067">==</span><span style="color:#ADBAC7">() </span><span style="color:#F47067">GOTO</span><span style="color:#ADBAC7"> CMDLINE</span></span>
+<span class="line"><span style="color:#F47067">IF</span><span style="color:#ADBAC7"> (</span><span style="color:#F69D50">%2</span><span style="color:#ADBAC7">)</span><span style="color:#F47067">==</span><span style="color:#ADBAC7">() </span><span style="color:#F47067">GOTO</span><span style="color:#ADBAC7"> CMDLINE</span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">/p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">REM </span><span style="color:#F47067">If</span><span style="color:#ADBAC7"> svnadmin is </span><span style="color:#F47067">not</span><span style="color:#ADBAC7"> in your path, uncomment the following</span></span>
+<span class="line"><span style="color:#F47067">REM</span><span style="color:#768390"> PATH=%PATH%;"D:\Program Files\Subversion\bin"</span><span style="color:#FF938A;font-style:italic">&#x3C;</span><span style="color:#768390">/p</span><span style="color:#FF938A;font-style:italic">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">REM </span><span style="color:#F47067">Set</span><span style="color:#ADBAC7"> up variables with the directories</span></span>
+<span class="line"><span style="color:#F47067">SET</span><span style="color:#ADBAC7"> CUSTOMER</span><span style="color:#F47067">=</span><span style="color:#F69D50">%1</span></span>
+<span class="line"><span style="color:#F47067">SET</span><span style="color:#ADBAC7"> PROJECT</span><span style="color:#F47067">=</span><span style="color:#F69D50">%2</span></span>
+<span class="line"><span style="color:#F47067">SET</span><span style="color:#ADBAC7"> CUR_DIR</span><span style="color:#F47067">=</span><span style="color:#F69D50">%~dp0</span></span>
+<span class="line"><span style="color:#F47067">SET</span><span style="color:#ADBAC7"> CUR_DIR</span><span style="color:#F47067">=</span><span style="color:#ADBAC7">%CUR_DIR:</span><span style="color:#96D0FF">\</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">/</span><span style="color:#ADBAC7">%</span></span>
+<span class="line"><span style="color:#F47067">SET</span><span style="color:#ADBAC7"> SVN_DIR</span><span style="color:#F47067">=</span><span style="color:#ADBAC7">%CUR_DIR%/repos/%CUSTOMER%</span></span>
+<span class="line"><span style="color:#F47067">SET</span><span style="color:#ADBAC7"> PROJ_DIR</span><span style="color:#F47067">=</span><span style="color:#ADBAC7">file:///%SVN_DIR%/%PROJECT%</span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">/p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">echo Creating directory in %SVN_DIR%</span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">/p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">svnadmin create </span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">%SVN_DIR%</span><span style="color:#96D0FF">"</span></span>
+<span class="line"><span style="color:#ADBAC7">svn -m </span><span style="color:#96D0FF">"Create default structure."</span><span style="color:#F47067"> mkdir</span><span style="color:#ADBAC7"> %PROJ_DIR% %PROJ_DIR%/trunk %PROJ_DIR%/tags %PROJ_DIR%/branches</span></span>
+<span class="line"><span style="color:#F47067">GOTO</span><span style="color:#ADBAC7"> END</span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">/p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">:CMDLINE</span></span>
+<span class="line"><span style="color:#F47067">echo</span><span style="color:#ADBAC7"> Usage: </span><span style="color:#F69D50">%0</span><span style="color:#F47067"> ^&#x3C;</span><span style="color:#ADBAC7">customer</span><span style="color:#F47067">^></span><span style="color:#F47067"> ^</span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">project</span><span style="color:#F47067">^></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">:END</span></span>
+<span class="line"><span style="color:#F47067">echo</span><span style="color:#ADBAC7"> Done</span></span></code></pre>
+</p>
+<p>Some of the interesting pieces:
+<em>%~dp0</em> gives you the directory that the current script lives in.
+<em>%CUR_DIR:\=/%</em> replaces the backslash (\) with forward slashes (/) so that the SVN file:// URL will work correctly.</p>
+<h3>Windows Batch Script to Dump Your Subversion Repositories</h3>
+The next thing you might want to do is to dump all of your repositories so that you can back them up or upgrade SVN or move to a new server. With just one repository it's easy to do by hand. With 20+ repositories it's much nicer to run a script and then go do something else.</p>
+<p><strong><em>dump_all.bat</em</strong>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">@echo</span><span style="color:#ADBAC7"> off</span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">/p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">SET DUMP_DIR=dumps</span></span>
+<span class="line"><span style="color:#F47067">SET</span><span style="color:#ADBAC7"> REPOS_DIR</span><span style="color:#F47067">=</span><span style="color:#ADBAC7">repos</span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">/p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">IF </span><span style="color:#F47067">NOT</span><span style="color:#ADBAC7"> EXIST %DUMP_DIR% (</span></span>
+<span class="line"><span style="color:#F47067">echo</span><span style="color:#ADBAC7"> Creating directory %DUMP_DIR%</span></span>
+<span class="line"><span style="color:#F47067">md</span><span style="color:#ADBAC7"> %DUMP_DIR%</span></span>
+<span class="line"><span style="color:#ADBAC7">)</span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">/p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">echo Dumping...</span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">/p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">FOR /f </span><span style="color:#F47067">%%</span><span style="color:#ADBAC7">i IN ('dir /B /A:D %REPOS_DIR%\*') DO (</span></span>
+<span class="line"><span style="color:#F47067">    echo</span><span style="color:#ADBAC7"> Dumping %REPOS_DIR%\</span><span style="color:#F47067">%%</span><span style="color:#ADBAC7">i to %DUMP_DIR%\</span><span style="color:#F47067">%%</span><span style="color:#ADBAC7">i.dump</span></span>
+<span class="line"><span style="color:#ADBAC7">    svnadmin dump %REPOS_DIR%\</span><span style="color:#F47067">%%</span><span style="color:#ADBAC7">i </span><span style="color:#F47067">></span><span style="color:#ADBAC7"> %DUMP_DIR%\</span><span style="color:#F47067">%%</span><span style="color:#ADBAC7">i.dump</span></span>
+<span class="line"><span style="color:#ADBAC7">)</span></span></code></pre>
+</p>
+<p>Some of the interesting pieces:
+<em>FOR /f %%i IN ('dir /B /A:D %REPOS_DIR%\*') DO</em> is the part that finds each directory (in this case an SVN repository). Then for each repository you run the <em>svnadmin dump</em> command and send the dump file to a different directory.</p>
+<h3>Windows Batch Script to Load Your Subversion Repositories</h3>
+After you've dumped all of your repositories and you need to restore them, because you've upgraded or moved them to a new server we need to do the reverse of the dump script.</p>
+<p><strong><em>restore_all.bat</em</strong>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">@echo</span><span style="color:#ADBAC7"> off</span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">/p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">SET DUMP_DIR=dumps</span></span>
+<span class="line"><span style="color:#F47067">SET</span><span style="color:#ADBAC7"> REPOS_DIR</span><span style="color:#F47067">=</span><span style="color:#ADBAC7">repos</span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">/p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">echo Restoring....</span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">/p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">REM </span><span style="color:#F47067">%%</span><span style="color:#ADBAC7">~ni becomes the dump name without .dump</span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">/p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">FOR /f </span><span style="color:#F47067">%%</span><span style="color:#ADBAC7">i IN ('dir /B %DUMP_DIR%\*.dump') DO (</span></span>
+<span class="line"><span style="color:#F47067">    echo</span><span style="color:#ADBAC7"> Restoring %DUMP_DIR%\</span><span style="color:#F47067">%%</span><span style="color:#ADBAC7">i to %REPOS_DIR%\</span><span style="color:#F47067">%%</span><span style="color:#ADBAC7">~ni</span></span>
+<span class="line"><span style="color:#ADBAC7">    svnadmin create %REPOS_DIR%\</span><span style="color:#F47067">%%</span><span style="color:#ADBAC7">~ni</span></span>
+<span class="line"><span style="color:#ADBAC7">    svnadmin load %REPOS_DIR%\</span><span style="color:#F47067">%%</span><span style="color:#ADBAC7">~ni </span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7"> %DUMP_DIR%\</span><span style="color:#F47067">%%</span><span style="color:#ADBAC7">i</span></span>
+<span class="line"><span style="color:#ADBAC7">)</span></span></code></pre>
+</p>
+<p>Some of the interesting pieces:
+<em>FOR</em> in this case is the same as the dump, except it's looking for all the dump files.
+<em>%%i</em> holds the name of the dump file (e.g. repo.dump). <em>%%~ni</em> strips off the extension to give you just the name of the file (e.g. repo).</p>
+<p>Now you can manage your repositories with ease if you're stuck on a Windows machine.</p>

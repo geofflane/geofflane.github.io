@@ -1,0 +1,183 @@
+---
+title: "High Performance and Parallelism With the Feel of a Scripting Language"
+pubDate: "2013-10-21 18:24:11 -0400"
+permalink: "/2013/10/21/high-performance-and-parallelism-with-the-feel-of-a-scripting-language/"
+tags: ["code","go"]
+---
+<p>Sometimes you need a quick-and-dirty tool to get something done. You're not looking for a long-term solution, but rather just have a simple job to do. As a programmer when you have those thoughts you naturally migrate toward scripting languages. But sometimes that throw away tool also needs to do highly parallel operations with good performance characteristics. Until recently it seemed like you only got to choose one or the other though. And then came <a href="http://golang.org/">Go</a>.</p>
+<h2>A Use Case</h2></p>
+<p>We've been working on an application that provides APIs for other apps. Those APIs are required to be fast and to scale up to many concurrent users. We needed a way to push a lot of traffic to this API while ensuring that the API would access a wide swath of the data in the database. We didn't want to run into the case where the same request was being made over and over allowing the database to end up with an unrealistic scenario where it had all the data cached. There are a number of existing tools for this kind of performance testing, but seeing some of the tests run didn't give us much confidence that they were really running these requests in parallel like we needed. We also wanted to be able to easily run these tests from many different clients computers at once so that we could ensure that the client computers and internet connections were not the bottleneck.</p>
+<h2>How Does Go Fit That Use Case?</h2></p>
+<h3>Write-Once (Compile a Few Times) and Run Anywhere</h3></p>
+<p>One of the advantages of Go is that it is easy to cross-compile it to other architectures and operating systems. This property made it easy to write a little application that we could run at the same time on Mac OS and Linux. Just like a scripting language it was write-once and run anywhere. Of course we had to compile it for each of the different operating systems but that is incredibly easy with Go. Unlike most scripting languages, once a Go binary is compiled for an OS, nothing else needs to be installed to run it. There's no management of different versions or libraries. A Go binary is entirely self-contained so no extra Go runtime is needed to be installed for the application to be run and all of the depencies are statically linked in. Simply copy the binary to the appropriate machine and execute it. You can't get much simpler than that.</p>
+<pre>
+$ brew install go --cross-compile-common
+$ GOOS=linux go build myapp.go
+</pre></p>
+<h3>Libraries for All The Things</h3></p>
+<p>Go has a large number of <a href="http://golang.org/pkg/">good libraries</a> that come standard. These libraries include support for making HTTP clients and servers. There's support for accessing databases (although the drivers themselves are not included). It includes support for parsing command line arguments, encoding and decoding JSON, for doing cryptography, and for using regular expressions. Basically it includes a lot of libraries that you need for creating applications whether it's something you want to maintain forever or whether it's a throw away app.</p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">flag.</span><span style="color:#DCBDFB">BoolVar</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">&#x26;</span><span style="color:#ADBAC7">help, </span><span style="color:#96D0FF">"h"</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">false</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"help"</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">resp, err </span><span style="color:#F47067">:=</span><span style="color:#ADBAC7"> http.</span><span style="color:#DCBDFB">Get</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"http://example.com/"</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#F47067">var</span><span style="color:#ADBAC7"> exampleResp </span><span style="color:#F69D50">MyJsonResponse</span></span>
+<span class="line"><span style="color:#ADBAC7">decoder </span><span style="color:#F47067">:=</span><span style="color:#ADBAC7"> json.</span><span style="color:#DCBDFB">NewDecoder</span><span style="color:#ADBAC7">(resp.Body)</span></span>
+<span class="line"><span style="color:#ADBAC7">err </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> decoder.</span><span style="color:#DCBDFB">Decode</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">&#x26;</span><span style="color:#ADBAC7">exampleResp)</span></span></code></pre>
+
+<h3>Concurrent Design and Parallel Execution</h3></p>
+<p>Goroutines allow a program to execute a function concurrently with other running code. Channels allow for different goroutines to communicate by passing messages to each other. Those two things together allow for a simple means of structuring code with a concurrent design.</p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">ch </span><span style="color:#F47067">:=</span><span style="color:#DCBDFB"> make</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">chan</span><span style="color:#F47067"> int</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#F47067">go</span><span style="color:#F47067"> func</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#F47067">  for</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    val </span><span style="color:#F47067">:=</span><span style="color:#F47067"> &#x3C;-</span><span style="color:#ADBAC7">ch</span></span>
+<span class="line"><span style="color:#ADBAC7">    fmt.</span><span style="color:#DCBDFB">Printf</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Got an int: </span><span style="color:#F47067">%v</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">, val)</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}()</span></span>
+<span class="line"><span style="color:#ADBAC7">ch </span><span style="color:#F47067">&#x3C;-</span><span style="color:#6CB6FF"> 1</span></span>
+<span class="line"><span style="color:#ADBAC7">ch </span><span style="color:#F47067">&#x3C;-</span><span style="color:#6CB6FF"> 2</span></span></code></pre>
+
+<p>In addition to having easy mechanisms to implement a concurrent design, your program also needs to be able to do actual work in parallel. Go can run many different goroutines in parallel and gives you control over how many run at the same time with a simple function call.</p>
+<pre><code>runtime.GOMAXPROCS(25)</code></pre>
+
+<h2>Put The Pieces Together</h2></p>
+<p>Bringing together those libraries and a concurrent design allows us to easily create a program that meets our needs for testing these APIs.</p>
+<p>This is a simple application that does GET requests to a specific URL. The program allows you to specify the URL, the number of requests to make, and the number to run concurrently. It uses many of the libraries I mentioned above for handling HTTP, for parsing command line arguments, for calcuating the duration of requests, etc. It also uses goroutines to allow for multiple simultaneous requests to be made while using a channel to communicate the results back to the main program.</p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">package</span><span style="color:#F69D50"> main</span></span>
+<span class="line"><span style="color:#F47067">import</span><span style="color:#ADBAC7"> (</span></span>
+<span class="line"><span style="color:#96D0FF">  "</span><span style="color:#F69D50">flag</span><span style="color:#96D0FF">"</span></span>
+<span class="line"><span style="color:#96D0FF">  "</span><span style="color:#F69D50">fmt</span><span style="color:#96D0FF">"</span></span>
+<span class="line"><span style="color:#96D0FF">  "</span><span style="color:#F69D50">io/ioutil</span><span style="color:#96D0FF">"</span></span>
+<span class="line"><span style="color:#96D0FF">  "</span><span style="color:#F69D50">net/http</span><span style="color:#96D0FF">"</span></span>
+<span class="line"><span style="color:#96D0FF">  "</span><span style="color:#F69D50">runtime</span><span style="color:#96D0FF">"</span></span>
+<span class="line"><span style="color:#96D0FF">  "</span><span style="color:#F69D50">sync</span><span style="color:#96D0FF">"</span></span>
+<span class="line"><span style="color:#96D0FF">  "</span><span style="color:#F69D50">time</span><span style="color:#96D0FF">"</span></span>
+<span class="line"><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#F47067">var</span><span style="color:#ADBAC7"> help </span><span style="color:#F47067">bool</span></span>
+<span class="line"><span style="color:#F47067">var</span><span style="color:#ADBAC7"> count </span><span style="color:#F47067">int</span></span>
+<span class="line"><span style="color:#F47067">var</span><span style="color:#ADBAC7"> concurrent </span><span style="color:#F47067">int</span></span>
+<span class="line"><span style="color:#F47067">var</span><span style="color:#ADBAC7"> url </span><span style="color:#F47067">string</span></span>
+<span class="line"><span style="color:#F47067">var</span><span style="color:#ADBAC7"> client </span><span style="color:#F47067">*</span><span style="color:#F69D50">http</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Client</span></span>
+<span class="line"><span style="color:#F47067">func</span><span style="color:#DCBDFB"> init</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#ADBAC7">  client </span><span style="color:#F47067">=</span><span style="color:#F47067"> &#x26;</span><span style="color:#F69D50">http</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Client</span><span style="color:#ADBAC7">{}</span></span>
+<span class="line"><span style="color:#ADBAC7">  flag.</span><span style="color:#DCBDFB">BoolVar</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">&#x26;</span><span style="color:#ADBAC7">help, </span><span style="color:#96D0FF">"h"</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">false</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"help"</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">  flag.</span><span style="color:#DCBDFB">IntVar</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">&#x26;</span><span style="color:#ADBAC7">count, </span><span style="color:#96D0FF">"n"</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">1000</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"number of requests"</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">  flag.</span><span style="color:#DCBDFB">IntVar</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">&#x26;</span><span style="color:#ADBAC7">concurrent, </span><span style="color:#96D0FF">"c"</span><span style="color:#ADBAC7">, runtime.</span><span style="color:#DCBDFB">NumCPU</span><span style="color:#ADBAC7">() </span><span style="color:#F47067">+</span><span style="color:#6CB6FF"> 1</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"number of concurrent requests"</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">  flag.</span><span style="color:#DCBDFB">StringVar</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">&#x26;</span><span style="color:#ADBAC7">url, </span><span style="color:#96D0FF">"u"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"http://127.0.0.1:5000/"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"url"</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">  flag.</span><span style="color:#DCBDFB">Parse</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#F47067">func</span><span style="color:#DCBDFB"> main</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#F47067">  if</span><span style="color:#ADBAC7"> help {</span></span>
+<span class="line"><span style="color:#ADBAC7">    flag.</span><span style="color:#DCBDFB">Usage</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#F47067">    return</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">  fmt.</span><span style="color:#DCBDFB">Printf</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Concurrent: </span><span style="color:#F47067">%v\n</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">, concurrent)</span></span>
+<span class="line"><span style="color:#ADBAC7">  runtime.</span><span style="color:#DCBDFB">GOMAXPROCS</span><span style="color:#ADBAC7">(concurrent </span><span style="color:#F47067">+</span><span style="color:#6CB6FF"> 2</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">  runChan </span><span style="color:#F47067">:=</span><span style="color:#DCBDFB"> make</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">chan</span><span style="color:#F47067"> int</span><span style="color:#ADBAC7">, concurrent)</span></span>
+<span class="line"><span style="color:#ADBAC7">  resultChan </span><span style="color:#F47067">:=</span><span style="color:#DCBDFB"> make</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">chan</span><span style="color:#F69D50"> Result</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#F47067">  var</span><span style="color:#ADBAC7"> wg </span><span style="color:#F69D50">sync</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">WaitGroup</span></span>
+<span class="line"><span style="color:#ADBAC7">  success_cnt </span><span style="color:#F47067">:=</span><span style="color:#6CB6FF"> 0</span></span>
+<span class="line"><span style="color:#ADBAC7">  failure_cnt </span><span style="color:#F47067">:=</span><span style="color:#6CB6FF"> 0</span></span>
+<span class="line"><span style="color:#F47067">  var</span><span style="color:#ADBAC7"> durations []</span><span style="color:#F69D50">time</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Duration</span></span>
+<span class="line"><span style="color:#F47067">  var</span><span style="color:#ADBAC7"> min_dur </span><span style="color:#F69D50">time</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Duration</span></span>
+<span class="line"><span style="color:#F47067">  var</span><span style="color:#ADBAC7"> max_dur </span><span style="color:#F69D50">time</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Duration</span></span>
+<span class="line"><span style="color:#768390">  // Run the stuff</span></span>
+<span class="line"><span style="color:#ADBAC7">  dur </span><span style="color:#F47067">:=</span><span style="color:#DCBDFB"> duration</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">func</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#768390">    // setup to handle responses</span></span>
+<span class="line"><span style="color:#F47067">    go</span><span style="color:#F47067"> func</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#F47067">      for</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">        r </span><span style="color:#F47067">:=</span><span style="color:#F47067"> &#x3C;-</span><span style="color:#ADBAC7">resultChan</span></span>
+<span class="line"><span style="color:#ADBAC7">        durations </span><span style="color:#F47067">=</span><span style="color:#DCBDFB"> append</span><span style="color:#ADBAC7">(durations, r.Duration)</span></span>
+<span class="line"><span style="color:#ADBAC7">        min_dur </span><span style="color:#F47067">=</span><span style="color:#DCBDFB"> min</span><span style="color:#ADBAC7">(min_dur, r.Duration)</span></span>
+<span class="line"><span style="color:#ADBAC7">        max_dur </span><span style="color:#F47067">=</span><span style="color:#DCBDFB"> max</span><span style="color:#ADBAC7">(max_dur, r.Duration)</span></span>
+<span class="line"><span style="color:#768390">        // 200s and 300s are success in HTTP</span></span>
+<span class="line"><span style="color:#F47067">        if</span><span style="color:#ADBAC7"> r.StatusCode </span><span style="color:#F47067">&#x3C;</span><span style="color:#6CB6FF"> 400</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">          success_cnt </span><span style="color:#F47067">+=</span><span style="color:#6CB6FF"> 1</span></span>
+<span class="line"><span style="color:#ADBAC7">        } </span><span style="color:#F47067">else</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">          fmt.</span><span style="color:#DCBDFB">Printf</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Error: </span><span style="color:#F47067">%v</span><span style="color:#96D0FF">; </span><span style="color:#F47067">%v\n</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">, r.StatusCode, r.</span><span style="color:#DCBDFB">ErrOrBody</span><span style="color:#ADBAC7">())</span></span>
+<span class="line"><span style="color:#ADBAC7">          failure_cnt </span><span style="color:#F47067">+=</span><span style="color:#6CB6FF"> 1</span></span>
+<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"><span style="color:#ADBAC7">        wg.</span><span style="color:#DCBDFB">Done</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">      }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }()</span></span>
+<span class="line"><span style="color:#768390">    // setup to handle running requests</span></span>
+<span class="line"><span style="color:#ADBAC7">    wg.</span><span style="color:#DCBDFB">Add</span><span style="color:#ADBAC7">(count)</span></span>
+<span class="line"><span style="color:#F47067">    go</span><span style="color:#F47067"> func</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#F47067">      for</span><span style="color:#ADBAC7"> i</span><span style="color:#F47067">:=</span><span style="color:#6CB6FF">0</span><span style="color:#ADBAC7">; i </span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7"> count; i</span><span style="color:#F47067">++</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">        &#x3C;-</span><span style="color:#ADBAC7">runChan</span></span>
+<span class="line"><span style="color:#ADBAC7">        fmt.</span><span style="color:#DCBDFB">Printf</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"."</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#F47067">        go</span><span style="color:#F47067"> func</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#ADBAC7">          resultChan </span><span style="color:#F47067">&#x3C;-</span><span style="color:#DCBDFB"> Execute</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">          runChan </span><span style="color:#F47067">&#x3C;-</span><span style="color:#6CB6FF"> 1</span></span>
+<span class="line"><span style="color:#ADBAC7">        }()</span></span>
+<span class="line"><span style="color:#ADBAC7">      }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }()</span></span>
+<span class="line"><span style="color:#768390">    // tell N number of requests to run, but this limits the concurrency</span></span>
+<span class="line"><span style="color:#F47067">    for</span><span style="color:#ADBAC7"> i </span><span style="color:#F47067">:=</span><span style="color:#6CB6FF"> 0</span><span style="color:#ADBAC7">; i </span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7"> concurrent; i </span><span style="color:#F47067">++</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">      runChan </span><span style="color:#F47067">&#x3C;-</span><span style="color:#6CB6FF"> 1</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">    wg.</span><span style="color:#DCBDFB">Wait</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">  })</span></span>
+<span class="line"><span style="color:#ADBAC7">  fmt.</span><span style="color:#DCBDFB">Printf</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"</span><span style="color:#F47067">\n</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">  fmt.</span><span style="color:#DCBDFB">Printf</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Success: </span><span style="color:#F47067">%v\n</span><span style="color:#96D0FF">Failure: </span><span style="color:#F47067">%v\n</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">, success_cnt, failure_cnt)</span></span>
+<span class="line"><span style="color:#ADBAC7">  fmt.</span><span style="color:#DCBDFB">Printf</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Min: </span><span style="color:#F47067">%v\n</span><span style="color:#96D0FF">Max: </span><span style="color:#F47067">%v\n</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">, min_dur, max_dur)</span></span>
+<span class="line"><span style="color:#ADBAC7">  fmt.</span><span style="color:#DCBDFB">Printf</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Mean: </span><span style="color:#F47067">%v\n</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">, </span><span style="color:#DCBDFB">avg</span><span style="color:#ADBAC7">(durations))</span></span>
+<span class="line"><span style="color:#ADBAC7">  fmt.</span><span style="color:#DCBDFB">Printf</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Elapsed time: </span><span style="color:#F47067">%v\n</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">, dur.</span><span style="color:#DCBDFB">Seconds</span><span style="color:#ADBAC7">())</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#F47067">func</span><span style="color:#DCBDFB"> avg</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">durs</span><span style="color:#ADBAC7"> []</span><span style="color:#F69D50">time</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Duration</span><span style="color:#ADBAC7">) </span><span style="color:#F69D50">time</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Duration</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">  total </span><span style="color:#F47067">:=</span><span style="color:#F47067"> float64</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">0</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#F47067">  for</span><span style="color:#ADBAC7"> _, d </span><span style="color:#F47067">:=</span><span style="color:#F47067"> range</span><span style="color:#ADBAC7"> durs {</span></span>
+<span class="line"><span style="color:#ADBAC7">    total </span><span style="color:#F47067">+=</span><span style="color:#ADBAC7"> d.</span><span style="color:#DCBDFB">Seconds</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#F47067">  return</span><span style="color:#ADBAC7"> time.</span><span style="color:#DCBDFB">Duration</span><span style="color:#ADBAC7">((total </span><span style="color:#F47067">/</span><span style="color:#F47067"> float64</span><span style="color:#ADBAC7">(</span><span style="color:#DCBDFB">len</span><span style="color:#ADBAC7">(durs))) </span><span style="color:#F47067">*</span><span style="color:#F47067"> float64</span><span style="color:#ADBAC7">(time.Second))</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#F47067">func</span><span style="color:#DCBDFB"> min</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">a</span><span style="color:#F69D50"> time</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Duration</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">b</span><span style="color:#F69D50"> time</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Duration</span><span style="color:#ADBAC7">) </span><span style="color:#F69D50">time</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Duration</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">  if</span><span style="color:#ADBAC7"> a </span><span style="color:#F47067">!=</span><span style="color:#6CB6FF"> 0</span><span style="color:#F47067"> &#x26;&#x26;</span><span style="color:#ADBAC7"> a </span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7"> b {</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#ADBAC7"> a</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#F47067">  return</span><span style="color:#ADBAC7"> b</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#F47067">func</span><span style="color:#DCBDFB"> max</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">a</span><span style="color:#F69D50"> time</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Duration</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">b</span><span style="color:#F69D50"> time</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Duration</span><span style="color:#ADBAC7">) </span><span style="color:#F69D50">time</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Duration</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">  if</span><span style="color:#ADBAC7"> a </span><span style="color:#F47067">></span><span style="color:#ADBAC7"> b {</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#ADBAC7"> a</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#F47067">  return</span><span style="color:#ADBAC7"> b</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#F47067">func</span><span style="color:#DCBDFB"> Execute</span><span style="color:#ADBAC7">() </span><span style="color:#F69D50">Result</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">  var</span><span style="color:#ADBAC7"> resp </span><span style="color:#F47067">*</span><span style="color:#F69D50">http</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Response</span></span>
+<span class="line"><span style="color:#F47067">  var</span><span style="color:#ADBAC7"> err </span><span style="color:#F47067">error</span></span>
+<span class="line"><span style="color:#ADBAC7">  dur </span><span style="color:#F47067">:=</span><span style="color:#DCBDFB"> duration</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">func</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#ADBAC7">    resp, err </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> http.</span><span style="color:#DCBDFB">Get</span><span style="color:#ADBAC7">(url)</span></span>
+<span class="line"><span style="color:#ADBAC7">  })</span></span>
+<span class="line"><span style="color:#F47067">  if</span><span style="color:#ADBAC7"> err </span><span style="color:#F47067">!=</span><span style="color:#6CB6FF"> nil</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#F69D50"> Result</span><span style="color:#ADBAC7">{dur, </span><span style="color:#F47067">-</span><span style="color:#6CB6FF">1</span><span style="color:#ADBAC7">, err, </span><span style="color:#96D0FF">""</span><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#F47067">  defer</span><span style="color:#ADBAC7"> resp.Body.</span><span style="color:#DCBDFB">Close</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#F47067">  var</span><span style="color:#ADBAC7"> body </span><span style="color:#F47067">string</span></span>
+<span class="line"><span style="color:#F47067">  if</span><span style="color:#ADBAC7"> b, err </span><span style="color:#F47067">:=</span><span style="color:#ADBAC7"> ioutil.</span><span style="color:#DCBDFB">ReadAll</span><span style="color:#ADBAC7">(resp.Body); err </span><span style="color:#F47067">==</span><span style="color:#6CB6FF"> nil</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    body </span><span style="color:#F47067">=</span><span style="color:#F47067"> string</span><span style="color:#ADBAC7">(b)</span></span>
+<span class="line"><span style="color:#ADBAC7">  } </span><span style="color:#F47067">else</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    body </span><span style="color:#F47067">=</span><span style="color:#96D0FF"> ""</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#F47067">  return</span><span style="color:#F69D50"> Result</span><span style="color:#ADBAC7">{dur, resp.StatusCode, </span><span style="color:#6CB6FF">nil</span><span style="color:#ADBAC7">, body}</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#F47067">type</span><span style="color:#F69D50"> Result</span><span style="color:#F47067"> struct</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">  Duration </span><span style="color:#F69D50">time</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Duration</span></span>
+<span class="line"><span style="color:#ADBAC7">  StatusCode </span><span style="color:#F47067">int</span></span>
+<span class="line"><span style="color:#ADBAC7">  Err </span><span style="color:#F47067">error</span></span>
+<span class="line"><span style="color:#ADBAC7">  Body </span><span style="color:#F47067">string</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#F47067">func</span><span style="color:#ADBAC7"> (</span><span style="color:#F69D50">r </span><span style="color:#F47067">*</span><span style="color:#F69D50">Result</span><span style="color:#ADBAC7">) </span><span style="color:#DCBDFB">ErrOrBody</span><span style="color:#ADBAC7">() </span><span style="color:#F47067">string</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">  if</span><span style="color:#6CB6FF"> nil</span><span style="color:#F47067"> !=</span><span style="color:#ADBAC7"> r.Err {</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#ADBAC7"> r.Err.</span><span style="color:#DCBDFB">Error</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">  } </span><span style="color:#F47067">else</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#ADBAC7"> r.Body</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#F47067">func</span><span style="color:#DCBDFB"> duration</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">f</span><span style="color:#F47067"> func</span><span style="color:#ADBAC7">()) </span><span style="color:#F69D50">time</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Duration</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">  start </span><span style="color:#F47067">:=</span><span style="color:#ADBAC7"> time.</span><span style="color:#DCBDFB">Now</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#DCBDFB">  f</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#F47067">  return</span><span style="color:#ADBAC7"> time.</span><span style="color:#DCBDFB">Now</span><span style="color:#ADBAC7">().</span><span style="color:#DCBDFB">Sub</span><span style="color:#ADBAC7">(start)</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+
+<p>The app we wrote started out a lot like this; easy and straightforward. As we needed to add more tests we stated refactoring out types to allow me to separate the core of the load testing and calculation of times from the actual requests run. Go provides function type aliases, higher order functions and a lot of other abstractions which make those refactorings quite elegant. But that's for a different post...</p>

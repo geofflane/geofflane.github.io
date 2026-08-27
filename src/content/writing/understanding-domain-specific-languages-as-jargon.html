@@ -1,0 +1,93 @@
+---
+title: "Understanding Domain Specific Languages as Jargon"
+pubDate: "2007-03-05 11:16:27 -0500"
+permalink: "/2007/03/05/understanding-domain-specific-languages-as-jargon/"
+tags: ["software-development","dsl"]
+---
+<p>Domain Specific Languages (DSLs) are the idea of creating syntaxes that model a very specific problem domain. Domain Specific Languages are not a new concept. Some people call them 'little languages'. The Unix world has a bunch of little languages. Grep, awk, sed, lex, and yacc all exhibit features of these domain specific languages. They are little tools that do one thing well. In these cases they are often highly encoded and not in  natural language of any sort. Modern domain specific languages should aim to be humane and literate in the language of the user.</p>
+<p>Domain Specific Languages should be expressed in the language of the problem being solved. They are a higher level of abstraction than for loops and object instantiation. They are at the level of abstraction of the problem space. <a href="http://www.nealford.com/">Neal Ford</a> uses the example of "venti nonfat decaf whip latte". What am I talking about if I use those terms? If you guessed coffee, then you know the Jargon of one coffee chain out there. The person listening to the order understands that you are ordering a decaf coffee drink of a certain size, with non-fat milk and whipped cream. There is a lot of shared context in the Jargon of the coffee drinker and the coffee order taker. This shared context sets the stage for a rich conversation without a lot of unnecessary noise. This is true of all Jargon.</p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390"># CoffeeDSL.rb</span></span>
+<span class="line"><span style="color:#768390"># This is the input from the user, likely read from a file</span></span>
+<span class="line"><span style="color:#768390"># or input through a user interface of some sort</span></span>
+<span class="line"><span style="color:#6CB6FF">CoffeeInput</span><span style="color:#F47067"> =</span><span style="color:#96D0FF"> "venti nonfat decaf whip latte"</span></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Coffee</span></span>
+<span class="line"><span style="color:#F47067">    def</span><span style="color:#DCBDFB"> method_missing</span><span style="color:#ADBAC7">(symbol)</span></span>
+<span class="line"><span style="color:#F69D50">        name</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> symbol.</span><span style="color:#DCBDFB">to_s</span></span>
+<span class="line"><span style="color:#F47067">        if</span><span style="color:#96D0FF"> %w(venti grande)</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">include?</span><span style="color:#ADBAC7">(name)</span></span>
+<span class="line"><span style="color:#ADBAC7">            @size </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> name</span></span>
+<span class="line"><span style="color:#F47067">        elsif</span><span style="color:#96D0FF"> %w(whip nowhip)</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">include?</span><span style="color:#ADBAC7">(name)</span></span>
+<span class="line"><span style="color:#ADBAC7">            @whip </span><span style="color:#F47067">=</span><span style="color:#96D0FF"> 'whip'</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">eql?</span><span style="color:#ADBAC7">(name)</span></span>
+<span class="line"><span style="color:#F47067">        elsif</span><span style="color:#96D0FF"> %w(caf decaf halfcaf)</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">include?</span><span style="color:#ADBAC7">(name)</span></span>
+<span class="line"><span style="color:#ADBAC7">            @caf </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> name</span></span>
+<span class="line"><span style="color:#F47067">        elsif</span><span style="color:#96D0FF"> %w(regular latte cappachino)</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">include?</span><span style="color:#ADBAC7">(name)</span></span>
+<span class="line"><span style="color:#ADBAC7">            @type </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> name</span></span>
+<span class="line"><span style="color:#F47067">        elsif</span><span style="color:#96D0FF"> %w(milk nonfat)</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">include?</span><span style="color:#ADBAC7">(name)</span></span>
+<span class="line"><span style="color:#ADBAC7">            @milk </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> name</span></span>
+<span class="line"><span style="color:#F47067">        else</span></span>
+<span class="line"><span style="color:#F47067">            raise</span><span style="color:#6CB6FF"> ArgumentError</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"Unknown coffee informantion: </span><span style="color:#F47067">#{</span><span style="color:#96D0FF">name</span><span style="color:#F47067">}</span><span style="color:#96D0FF">."</span></span>
+<span class="line"><span style="color:#F47067">        end</span></span>
+<span class="line"><span style="color:#F47067">    end</span></span>
+<span class="line"><span style="color:#F47067">    def</span><span style="color:#DCBDFB"> order</span></span>
+<span class="line"><span style="color:#F69D50">        params</span><span style="color:#F47067"> =</span><span style="color:#96D0FF"> ''</span></span>
+<span class="line"><span style="color:#F69D50">        params</span><span style="color:#F47067"> +=</span><span style="color:#ADBAC7"> @milk </span><span style="color:#F47067">+</span><span style="color:#96D0FF"> ' '</span><span style="color:#F47067"> if</span><span style="color:#ADBAC7"> @milk</span></span>
+<span class="line"><span style="color:#F69D50">        params</span><span style="color:#F47067"> +=</span><span style="color:#ADBAC7"> @caf </span><span style="color:#F47067">+</span><span style="color:#96D0FF"> ' '</span><span style="color:#F47067"> if</span><span style="color:#ADBAC7"> @caf</span></span>
+<span class="line"><span style="color:#F69D50">        params</span><span style="color:#F47067"> +=</span><span style="color:#96D0FF">  'whip '</span><span style="color:#F47067"> if</span><span style="color:#ADBAC7"> @whip</span></span>
+<span class="line"><span style="color:#6CB6FF">        print</span><span style="color:#96D0FF"> "Ordering coffee: </span><span style="color:#F47067">#{</span><span style="color:#ADBAC7">@size</span><span style="color:#F47067">}</span><span style="color:#F47067"> #{</span><span style="color:#96D0FF">params</span><span style="color:#F47067">}#{</span><span style="color:#ADBAC7">@type</span><span style="color:#F47067">}</span><span style="color:#F47067">\n</span><span style="color:#96D0FF">"</span></span>
+<span class="line"><span style="color:#F47067">    end</span></span>
+<span class="line"><span style="color:#F47067">    def</span><span style="color:#DCBDFB"> load</span></span>
+<span class="line"><span style="color:#768390">        # turn one line into multi-line "method calls"</span></span>
+<span class="line"><span style="color:#F69D50">        cleaned</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> CoffeeInput</span><span style="color:#ADBAC7">.</span><span style="color:#6CB6FF">gsub</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">/</span><span style="color:#8DDB8C;font-weight:bold">\s</span><span style="color:#96D0FF">+/</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"</span><span style="color:#F47067">\n</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#6CB6FF">        self</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">instance_eval</span><span style="color:#ADBAC7">(cleaned)</span></span>
+<span class="line"><span style="color:#F47067">    end</span></span>
+<span class="line"><span style="color:#F47067">end</span></span>
+<span class="line"><span style="color:#768390"># this is your code which loads the DSL input and executes it</span></span>
+<span class="line"><span style="color:#F69D50">coffee</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> Coffee</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span></span>
+<span class="line"><span style="color:#ADBAC7">coffee.</span><span style="color:#6CB6FF">load</span><span style="color:#768390">       # load the user input</span></span>
+<span class="line"><span style="color:#ADBAC7">coffee.</span><span style="color:#DCBDFB">order</span><span style="color:#768390">      # submit the order</span></span></code></pre>
+
+<p><a href="http://en.wikipedia.org/wiki/Jargon">Jargon</a> is the terminology of a specific proffession or   group. Does your user community or problem space have a vocabulary? Can they express the things they want out of a system using that vocabulary or Jargon? If so, there is a very real possibility that you could utilize a DSL to solve some set of problems for those users.</p>
+<p>What about field validation?
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390"># ValidationDSL.rb</span></span>
+<span class="line"><span style="color:#768390"># Input from the user that would be read in</span></span>
+<span class="line"><span style="color:#6CB6FF">Input</span><span style="color:#96D0FF"> = &#x3C;&#x3C;EOF</span></span>
+<span class="line"><span style="color:#96D0FF">min_length  2</span></span>
+<span class="line"><span style="color:#96D0FF">max_length 5</span></span>
+<span class="line"><span style="color:#96D0FF">EOF</span></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Module</span></span>
+<span class="line"><span style="color:#F47067">    def</span><span style="color:#DCBDFB"> dsl_accessor</span><span style="color:#ADBAC7">(symbol)</span></span>
+<span class="line"><span style="color:#DCBDFB">        define_method</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"</span><span style="color:#F47067">#{</span><span style="color:#96D0FF">symbol</span><span style="color:#F47067">}</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">) </span><span style="color:#F47067">do</span><span style="color:#ADBAC7"> |v|</span></span>
+<span class="line"><span style="color:#ADBAC7">            instance_eval</span></span>
+<span class="line"><span style="color:#96D0FF">            %{</span></span>
+<span class="line"><span style="color:#96D0FF">                 @</span><span style="color:#F47067">#{</span><span style="color:#96D0FF">symbol</span><span style="color:#F47067">}</span><span style="color:#96D0FF"> = v</span></span>
+<span class="line"><span style="color:#96D0FF">            }</span></span>
+<span class="line"><span style="color:#F47067">        end</span></span>
+<span class="line"><span style="color:#F47067">    end</span></span>
+<span class="line"><span style="color:#F47067">end</span></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> ValidateDSL</span></span>
+<span class="line"><span style="color:#ADBAC7">    dsl_accessor </span><span style="color:#6CB6FF">:max_length</span></span>
+<span class="line"><span style="color:#ADBAC7">    dsl_accessor </span><span style="color:#6CB6FF">:min_length</span></span>
+<span class="line"><span style="color:#F47067">    def</span><span style="color:#DCBDFB"> validate</span><span style="color:#ADBAC7">(field)</span></span>
+<span class="line"><span style="color:#F47067">        if</span><span style="color:#ADBAC7"> @max_length </span><span style="color:#F47067">and</span><span style="color:#ADBAC7"> field.</span><span style="color:#DCBDFB">length</span><span style="color:#F47067"> ></span><span style="color:#ADBAC7"> @max_length</span></span>
+<span class="line"><span style="color:#F47067">            return</span><span style="color:#6CB6FF"> false</span></span>
+<span class="line"><span style="color:#F47067">        end</span></span>
+<span class="line"><span style="color:#F47067">        if</span><span style="color:#ADBAC7"> @min_length </span><span style="color:#F47067">and</span><span style="color:#ADBAC7"> field.</span><span style="color:#DCBDFB">length</span><span style="color:#F47067"> &#x3C;</span><span style="color:#ADBAC7"> @min_length</span></span>
+<span class="line"><span style="color:#F47067">            return</span><span style="color:#6CB6FF"> false</span></span>
+<span class="line"><span style="color:#F47067">        end</span></span>
+<span class="line"><span style="color:#F47067">        return</span><span style="color:#6CB6FF"> true</span></span>
+<span class="line"><span style="color:#F47067">    end</span></span>
+<span class="line"><span style="color:#F47067">    def</span><span style="color:#DCBDFB"> load</span></span>
+<span class="line"><span style="color:#6CB6FF">        self</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">instance_eval</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">Input</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#F47067">    end</span></span>
+<span class="line"><span style="color:#F47067">end</span></span>
+<span class="line"><span style="color:#F69D50">val</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> ValidateDSL</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span></span>
+<span class="line"><span style="color:#ADBAC7">val.</span><span style="color:#6CB6FF">load</span></span>
+<span class="line"><span style="color:#6CB6FF">print</span><span style="color:#ADBAC7"> val.</span><span style="color:#DCBDFB">validate</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">'foo'</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#6CB6FF">print</span><span style="color:#96D0FF"> "</span><span style="color:#F47067">\n</span><span style="color:#96D0FF">"</span></span>
+<span class="line"><span style="color:#6CB6FF">print</span><span style="color:#ADBAC7"> val.</span><span style="color:#DCBDFB">validate</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">''</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#6CB6FF">print</span><span style="color:#96D0FF"> "</span><span style="color:#F47067">\n</span><span style="color:#96D0FF">"</span></span>
+<span class="line"><span style="color:#6CB6FF">print</span><span style="color:#ADBAC7"> val.</span><span style="color:#DCBDFB">validate</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">'abbbbbbbbbbbbbbbbbbbbbb'</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#6CB6FF">print</span><span style="color:#96D0FF"> "</span><span style="color:#F47067">\n</span><span style="color:#96D0FF">"</span></span></code></pre>
+</p>
+<p>How does your user community talk about a problem? Can they easily express what they intend with simple Jargon that they already know? Is that more natural for a power user than some complicated UI with buttons and checkboxes? Then you might have a good place to use a DSL.</p>

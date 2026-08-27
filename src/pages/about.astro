@@ -1,0 +1,98 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="About" current="about" description="About Geoff Lane.">
+  <main>
+    <h1>About</h1>
+
+    <div class="prose">
+      <p class="lede">
+        I'm Geoff Lane. I've been a professional software developer since 1999, working across a
+        lot of different technologies and a lot of different places.
+      </p>
+      <p>
+        Startups in Silicon Valley during the tail end of the dot-com boom, then Chicago. A
+        consulting firm in Milwaukee. Custom software for clients out of Cincinnati. I've lived in
+        Ohio twice, plus Wisconsin, Illinois, Texas, Virginia and California. Now Windsor,
+        Ontario, with my wife, my son, and three cats.
+      </p>
+      <p>
+        I've never been especially loyal to one language or paradigm — object-oriented and
+        functional, static and dynamic, whatever the problem actually calls for. I like proven
+        tools and I keep an eye on new ones. I prefer Unixy systems. I use Vim because it's
+        awesome.
+      </p>
+      <p>
+        Away from a keyboard: I cook and play guitar.
+        I like heavy metal — At The Gates, Dark Tranquillity, In Flames, Lamb
+        of God, High on Fire — though Johnny Cash and Dylan get their turns
+        too.
+        I've been to twelve countries so far. Not sure if I'll make it to more or not.
+      </p>
+    </div>
+
+    <div class="elsewhere">
+      <span class="label">Elsewhere</span>
+      <div class="links">
+        <a href="mailto:geoff@zorched.net">geoff@zorched.net</a>
+        <a href="https://github.com/geofflane" rel="me">github.com/geofflane</a>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  main {
+    display: flex;
+    flex-direction: column;
+    gap: 44px;
+    max-width: 640px;
+    padding: clamp(48px, 7vw, 72px) 0;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(34px, 5vw, 44px);
+    line-height: 1.1;
+  }
+
+  .prose {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    font-size: 19px;
+    line-height: 1.72;
+  }
+
+  .prose p {
+    margin: 0;
+  }
+
+  .lede {
+    color: var(--soft);
+  }
+
+  .elsewhere {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-top: 36px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  .links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 16px;
+  }
+</style>

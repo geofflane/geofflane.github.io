@@ -1,0 +1,39 @@
+---
+title: "Getting the Revision Number of your Subversion Working Copy"
+pubDate: "2006-07-20 16:56:10 -0400"
+permalink: "/2006/07/20/getting-the-revision-number-of-your-subversion-working-copy/"
+tags: ["subversion"]
+---
+<p>I was asked today "How do I find out the revision number of my Subversion
+  directory?" and I didn't know the answer. The good news is there is an easy
+  answer:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">svnversion</span><span style="color:#96D0FF"> .</span></span></code></pre>
+</p>
+<p>From the
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">svnversion</span><span style="color:#96D0FF"> help</span></span></code></pre>
+ command:</p>
+<blockquote><p>
+The version number will be a single number if the working
+  copy is single revision, unmodified, not switched and with
+  an URL that matches the TRAIL_URL argument.  If the working
+  copy is unusual the version number will be more complex:
+</blockquote></p>
+<p>This command takes a little while to run, because it runs against the remote
+  repository as well. It gives more detailed results also such as whether or
+  not you have local modifications or if the repository has been changed since
+  your last update. These details can be interesting in certain cases. But
+  sometimes all you want to know is what revision you currently have checked
+  out...</p>
+<p>If all you want to do is check on the current revision of your local working copy you can use some Unix magic to do that.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">grep</span><span style="color:#96D0FF"> revision</span><span style="color:#96D0FF"> .svn/entries</span><span style="color:#F47067"> |</span><span style="color:#F69D50">  awk</span><span style="color:#6CB6FF"> -F</span><span style="color:#F47067">\"</span><span style="color:#96D0FF"> '{print $2}'</span></span></code></pre>
+</p>
+<p>Redirect this output to a file or use it as an argument to a build script and you can have the revision number put into your application.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">ant</span><span style="color:#6CB6FF"> -Drevision=grep</span><span style="color:#96D0FF"> revision</span><span style="color:#96D0FF"> .svn/entries</span><span style="color:#F47067"> |</span><span style="color:#F69D50"> awk</span><span style="color:#6CB6FF"> -F</span><span style="color:#F47067">\"</span><span style="color:#96D0FF"> '{print $2}'</span></span></code></pre>
+
+<small>(notice the backticks ` and this needs to be on one line)</small></p>
+<p>A little Unix scripting and voila!</p>
+<p><small>(Thanks to Ross Greinke for this little snippet)</small></p>
+<p>[ad name="image-banner"]</p>

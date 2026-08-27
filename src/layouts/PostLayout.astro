@@ -1,0 +1,96 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from './BaseLayout.astro';
+import PostNav from '../components/PostNav.astro';
+
+interface Props {
+  post: CollectionEntry<'writing'>;
+  older: CollectionEntry<'writing'> | null;
+  total: number;
+}
+
+const { post, older, total } = Astro.props;
+const { title, pubDate, tags, html } = post.data;
+
+const displayDate = pubDate.toLocaleDateString('en-CA', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
+---
+
+<BaseLayout title={title} current="writing" description={`${title} — written ${displayDate}.`}>
+  <main>
+    <article>
+      <aside class="archive-notice">
+        From the archive. Written {displayDate} and kept as published — links and versions have
+        aged.
+      </aside>
+
+      <div class="heading">
+        <div class="meta">
+          <time datetime={pubDate.toISOString()}>{displayDate}</time>
+          {tags.length > 0 && <span aria-hidden="true">&middot;</span>}
+          {tags.map((tag) => <span>{tag}</span>)}
+        </div>
+        <h1>{title}</h1>
+      </div>
+
+      <div class="post-body" set:html={html} />
+    </article>
+
+    <PostNav older={older} total={total} />
+  </main>
+</BaseLayout>
+
+<style>
+  main {
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+    padding: clamp(40px, 6vw, 64px) 0;
+  }
+
+  article {
+    max-width: var(--measure);
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .archive-notice {
+    padding: 13px 18px;
+    background: var(--panel);
+    border-left: 2px solid var(--muted);
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+
+  .heading {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .meta {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(30px, 4.5vw, 40px);
+    line-height: 1.16;
+    letter-spacing: -0.028em;
+  }
+</style>

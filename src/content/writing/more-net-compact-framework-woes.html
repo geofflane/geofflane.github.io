@@ -1,0 +1,91 @@
+---
+title: "More .NET Compact Framework Woes"
+pubDate: "2007-02-04 00:32:24 -0500"
+permalink: "/2007/02/04/more-net-compact-framework-woes/"
+tags: ["compact framework","csharp"]
+---
+<p>I posted previously on a <a href="/2006/12/21/bug-in-the-net-compactframework-xmlenum-with-whitespace/">Bug in the .NET Compact Framework with the XmlEnum Attribute</a> with whitespace in the name. Well I've run into some other interesting "features".</p>
+<p>The first thing to realize is that the things that work on the Full framework don't work on the Compact Framework.</p>
+<h2>What Works With Serialization</h2>
+First thing is the good news: Arrays work everywhere. They work on the Compact Framework and the Full Framework. The downside of course is that Arrays are very inconvenient. You have to manually resize them yourself for example.</p>
+<p>The second thing that works are regular <a href="http://msdn2.microsoft.com/en-us/library/system.collections.ilist.aspx">ILists</a>. When you map them a collection will be used. Of course one of the big improvements in .NET 2.0 was the introduction of Generics. Generics allow you to have strongly-typed collections without manually implementing them for each specific type.</p>
+<h2>More Generics Problems</h2>
+Xml Serialization works if you use IList. But there are <a href="http://www.srtsolutions.com/public/item/149270?model=user/myst/user-srt-corporate-comments&style=user/myst/srt-corporate&scheme=gray">problems with Generics interfaces</a>. I guess there are more than problems. Short story is that you can not use IList<T> for XML serialization, it plain just doesn't work.</p>
+<p>Here's where the difference between the Full Framework and the Compact Framework come into play. On the Full Framework, you can map to a concrete collection wether it's generic or not. So List<T> will work. Unfortunately this does not work in the Compact Framework. </p>
+<p>
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">[</span><span style="color:#F69D50">XmlElement</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">Name</span><span style="color:#F47067">=</span><span style="color:#96D0FF">"foo"</span><span style="color:#ADBAC7">)]</span></span>
+<span class="line"><span style="color:#F47067">public</span><span style="color:#ADBAC7"> List</span><span style="color:#F47067">&#x3C;</span><span style="color:#F47067">string</span><span style="color:#F47067">></span><span style="color:#ADBAC7"> Foos</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#ADBAC7">     get { </span><span style="color:#F47067">return</span><span style="color:#6CB6FF"> this</span><span style="color:#ADBAC7">.foos }</span></span>
+<span class="line"><span style="color:#ADBAC7">     set { </span><span style="color:#6CB6FF">this</span><span style="color:#ADBAC7">.foos </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> value; }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>You end up with an exception:</p>
+<pre>
+Two mappings for string[].</p>
+<p>Stack Trace:
+at System.Xml.Serialization.TypeContainer.AddType()
+at System.Xml.Serialization.TypeContainer.AddType()
+at System.Xml.Serialization.XmlSerializationReflector.AddIXmlSerializableType()
+at System.Xml.Serialization.XmlSerializationReflector.AddType()
+at System.Xml.Serialization.XmlSerializationReflector.FindType()
+at System.Xml.Serialization.XmlSerializationReflector.FindType()
+.....
+</pre></p>
+<h2>So What Do You Do About It</h2>
+You basically have 2 options:</p>
+<ol>
+<li>Use Arrays</li>
+<li>Create your own custom, strongly-typed collections classes</li>
+</ol></p>
+<h3>Arrays</h3>
+The advantage is that this is very simple and requires no extra code. The downside as I said above is that you have to write code to manually do array resizing.</p>
+<p>
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">public</span><span style="color:#F69D50"> T</span><span style="color:#ADBAC7">[] </span><span style="color:#DCBDFB">AppendItem</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">T</span><span style="color:#ADBAC7">>(</span><span style="color:#F69D50">T</span><span style="color:#ADBAC7">[] </span><span style="color:#F69D50">theArray</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">T</span><span style="color:#F69D50"> newItem</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F69D50">    T</span><span style="color:#ADBAC7">[] </span><span style="color:#F69D50">newArray</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> T</span><span style="color:#ADBAC7">[theArray.Length </span><span style="color:#F47067">+</span><span style="color:#6CB6FF"> 1</span><span style="color:#ADBAC7">];</span></span>
+<span class="line"><span style="color:#ADBAC7">    Array.</span><span style="color:#DCBDFB">Copy</span><span style="color:#ADBAC7">(theArray, newArray, theArray.Length);</span></span>
+<span class="line"><span style="color:#ADBAC7">    newArray[newArray.Length </span><span style="color:#F47067">-</span><span style="color:#6CB6FF"> 1</span><span style="color:#ADBAC7">] </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> newItem;</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#ADBAC7"> newArray;</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<h3>Custom, Strongly-Typed Collections</h3>
+If you don't want to use Arrays and deal with manually resizing them, you can build your own Collections classes for each of your types.</p>
+<p>Create your strongly-typed collection:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">[</span><span style="color:#F69D50">Serializable</span><span style="color:#ADBAC7">]</span></span>
+<span class="line"><span style="color:#ADBAC7">[</span><span style="color:#F69D50">EditorBrowsable</span><span style="color:#ADBAC7">(EditorBrowsableState.Advanced)]</span></span>
+<span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> EmployeeCollection</span><span style="color:#ADBAC7"> : </span><span style="color:#F69D50">ArrayList</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F69D50"> Employee</span><span style="color:#DCBDFB"> Add</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">Employee</span><span style="color:#F69D50"> obj</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#6CB6FF">        base</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">Add</span><span style="color:#ADBAC7">(obj);</span></span>
+<span class="line"><span style="color:#F47067">       return</span><span style="color:#ADBAC7"> obj;</span></span>
+<span class="line"><span style="color:#ADBAC7">    }&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>   </span><span style="color:#F47067">public</span><span style="color:#F69D50"> Employee</span><span style="color:#DCBDFB"> Add</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#F47067">       return</span><span style="color:#DCBDFB"> Add</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">new</span><span style="color:#F69D50"> Employee</span><span style="color:#ADBAC7">());</span></span>
+<span class="line"><span style="color:#ADBAC7">   }&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>   </span><span style="color:#F47067">public</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> Insert</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">int</span><span style="color:#F69D50"> index</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">Employee</span><span style="color:#F69D50"> obj</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#6CB6FF">       base</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">Insert</span><span style="color:#ADBAC7">(index, obj);</span></span>
+<span class="line"><span style="color:#ADBAC7">   }&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>   </span><span style="color:#F47067">public</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> Remove</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">Employee</span><span style="color:#F69D50"> obj</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#6CB6FF">       base</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">Remove</span><span style="color:#ADBAC7">(obj);</span></span>
+<span class="line"><span style="color:#ADBAC7">   }&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>   </span><span style="color:#F47067">new</span><span style="color:#F47067"> public</span><span style="color:#F69D50"> Employee</span><span style="color:#6CB6FF"> this</span><span style="color:#ADBAC7">[</span><span style="color:#F47067">int</span><span style="color:#F69D50"> index</span><span style="color:#ADBAC7">] {</span></span>
+<span class="line"><span style="color:#F47067">       get</span><span style="color:#ADBAC7"> { </span><span style="color:#F47067">return</span><span style="color:#ADBAC7"> (</span><span style="color:#F69D50">Employee</span><span style="color:#ADBAC7">) </span><span style="color:#6CB6FF">base</span><span style="color:#ADBAC7">[index]; }</span></span>
+<span class="line"><span style="color:#F47067">       set</span><span style="color:#ADBAC7"> { </span><span style="color:#6CB6FF">base</span><span style="color:#ADBAC7">[index] </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> value; }</span></span>
+<span class="line"><span style="color:#ADBAC7">   }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>Then use that collection in your class to map:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">[</span><span style="color:#F69D50">XmlRoot</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"company"</span><span style="color:#ADBAC7">)]</span></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Company</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    private</span><span style="color:#F69D50"> EmployeeCollection</span><span style="color:#F69D50"> employees</span><span style="color:#ADBAC7">;&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>    [</span><span style="color:#F69D50">XmlElement</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">Type</span><span style="color:#F47067">=typeof</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">Employee</span><span style="color:#ADBAC7">),</span><span style="color:#F69D50">ElementName</span><span style="color:#F47067">=</span><span style="color:#96D0FF">"employee"</span><span style="color:#ADBAC7">,</span><span style="color:#F69D50">IsNullable</span><span style="color:#F47067">=</span><span style="color:#6CB6FF">false</span><span style="color:#ADBAC7">)]</span></span>
+<span class="line"><span style="color:#ADBAC7">    [</span><span style="color:#F69D50">EditorBrowsable</span><span style="color:#ADBAC7">(EditorBrowsableState.Advanced)]</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F69D50"> EmployeeCollection</span><span style="color:#F69D50"> Employees</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">        get</span><span style="color:#ADBAC7"> { </span><span style="color:#F47067">return</span><span style="color:#6CB6FF"> this</span><span style="color:#ADBAC7">.employees; }</span></span>
+<span class="line"><span style="color:#F47067">        set</span><span style="color:#ADBAC7"> { </span><span style="color:#6CB6FF">this</span><span style="color:#ADBAC7">.employees </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> value; }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<h2>Pick Your Poison</h2>
+The problems with Generics collections in the .NET Compact Framework seem like yet another bug. So, pick your poison and choose a workaround. Whichever seems simpler to you. Hope that helps someone out.</p>

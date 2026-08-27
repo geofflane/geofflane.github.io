@@ -1,0 +1,132 @@
+---
+title: "Integrating ObjectBuilder with ASP.NET"
+pubDate: "2007-09-10 20:28:28 -0400"
+permalink: "/2007/09/10/integrating-objectbuilder-with-aspnet/"
+tags: ["ObjectBuilder","asp.net","dependency injection","csharp"]
+---
+<p><a href="http://www.codeplex.com/ObjectBuilder">ObjectBuilder</a> is a .NET framework made for building <a href="http://www.martinfowler.com/articles/injection.html">Inversion of Control or Dependency Injection</a> containers. Unlike Spring or Pico, ObjectBuilder is not a full DI framework, instead it's a framework for building DI solutions. Yes, that's incredibly weird to me too.</p>
+<h3>Why Use Object Builder?</h3>
+Why would you use ObjectBuilder instead of a fully baked DI solution? In the .NET world it seems like if it's not built by Microsoft then it's not on the table. People really are looking for the "garden path". So in part it's really a psychological thing. On the other hand the Microsoft Application Blocks and <a href="http://www.codeplex.com/entlib">Enterprise Library</a> are built using ObjectBuilder. So, if you are already using some of those solutions, then you already have a dependency on ObjectBuilder. It is natural to try to control the number of dependencies that a project relies upon. In this case, you have a simple solution that just requires a bit of custom code.</p>
+<p>In addition to the fact that it's basically a roll-your-own DI framework, the other downside of ObjectBuilder is that the documentation is non-existent. It's said 'Under construction...' sine July of 2006, so don't get your hopes up if you don't want to look at the API and read the source.</p>
+<h3>Wire Together Services</h3>
+If you are going to build a service you could do property based injection. What this means is that in your service layer all of the dependencies are passed into a service via property setters. This keeps the code clean and makes changing the implementation of a dependency very easy. If you have a hardcoded constructor for your dependency in a class then making this kind of change will be harder. It also makes Unit Testing very easy because you can mock out dependencies and isolate the layers of your code.</p>
+<p>
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> SomeService</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#F47067">    private</span><span style="color:#F69D50"> SomeDAO</span><span style="color:#F69D50"> someDao</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">    [</span><span style="color:#F69D50">Dependency</span><span style="color:#ADBAC7">]</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F69D50"> SomeDAO</span><span style="color:#F69D50"> SomeDAO</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#F47067">        get</span><span style="color:#ADBAC7"> { </span><span style="color:#F47067">return</span><span style="color:#ADBAC7"> someDao; }</span></span>
+<span class="line"><span style="color:#F47067">        set</span><span style="color:#ADBAC7"> { someDao </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> value; }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>    </span><span style="color:#F47067">public</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> Save</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">SomeObject</span><span style="color:#F69D50"> o</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#F47067">        if</span><span style="color:#ADBAC7"> (o.IsValid)</span></span>
+<span class="line"><span style="color:#ADBAC7">            SomeDAO.</span><span style="color:#DCBDFB">Save</span><span style="color:#ADBAC7">(o);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<h3>ASP.NET</h3>
+Most of the examples you can find on the web dealing with ObjectBuilder are about how to use ObjectBuilder as a ServiceBroker where you instantiate a service type object in a view.</p>
+<p>
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> partial</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> SomePage</span><span style="color:#ADBAC7"> : </span><span style="color:#F69D50">System</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Web</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">UI</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Page</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#F47067">    private</span><span style="color:#F69D50"> SomeService</span><span style="color:#F69D50"> someService</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">    protected</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> Page_Load</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">object</span><span style="color:#F69D50"> sender</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">EventArgs</span><span style="color:#F69D50"> e</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#F69D50">        Builder</span><span style="color:#F69D50"> builder</span><span style="color:#F47067"> =</span><span style="color:#DCBDFB"> NewBuilder</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#ADBAC7">        someService </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> builder.</span><span style="color:#DCBDFB">BuildUp</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">SomeService</span><span style="color:#ADBAC7">>(</span><span style="color:#6CB6FF">null</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">null</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">null</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>    </span><span style="color:#F47067">private</span><span style="color:#F69D50"> Builder</span><span style="color:#DCBDFB"> NewBuilder</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#768390">        // Create a Builder</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>While that's ok, I think it's a pretty limiting way to do things. Once you get to any sort of complex object construction, you are going to have to create another class to encapsulate all of the policies and strategies for building objects. The other issue is that using the Services in UI code is very different than compositing the services themselves. It also stands in stark contrast to the clean implementation of the Service layer.</p>
+<p>I want to make my pages look more like my Service layer.</p>
+<p>
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> partial</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> SomePage</span><span style="color:#ADBAC7"> : </span><span style="color:#F69D50">System</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Web</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">UI</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Page</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#F47067">    private</span><span style="color:#F69D50"> SomeService</span><span style="color:#F69D50"> someService</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">    protected</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> Page_Load</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">object</span><span style="color:#F69D50"> sender</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">EventArgs</span><span style="color:#F69D50"> e</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#ADBAC7">    }&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>    [</span><span style="color:#F69D50">Dependency</span><span style="color:#ADBAC7">]</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F69D50"> SomeService</span><span style="color:#DCBDFB"> SomeService</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#ADBAC7">        get { </span><span style="color:#F47067">return</span><span style="color:#ADBAC7"> someService; }</span></span>
+<span class="line"><span style="color:#ADBAC7">        set { someService </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> value; }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<h3>IHttpModules to the Rescue</h3>
+Page lifecycles are handled by the ASP.NET worker processes so there is no way to construct your own pages and do the Dependency Injection. I immediately went to the idea of a filter (which is how this is done in the Java world). The filter concept in ASP.NET is implemented as an IHttpModule.</p>
+<p>The module should do 2 main things:</p>
+<ul>
+<li>Construct and manage the DI container</li>
+<li>Inject Properties into the Page object that is going to handle the request</li>
+</ul></p>
+<p>Construct a series of ObjectBuilder classes to create your DI container.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">Locator</span><span style="color:#F69D50"> locator</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> Locator</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#F69D50">ILifetimeContainer</span><span style="color:#F69D50"> container</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> LifetimeContainer</span><span style="color:#ADBAC7">();</span><span style="color:#F47067">&#x3C;/</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#768390">// Setup the strategy for how objects can be created</span></span>
+<span class="line"><span style="color:#F69D50">BuilderStrategyChain</span><span style="color:#F69D50"> chain</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> BuilderStrategyChain</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#ADBAC7">chain.</span><span style="color:#DCBDFB">Add</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">new</span><span style="color:#F69D50"> CreationStrategy</span><span style="color:#ADBAC7">());</span></span>
+<span class="line"><span style="color:#ADBAC7">chain.</span><span style="color:#DCBDFB">Add</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">new</span><span style="color:#F69D50"> PropertyReflectionStrategy</span><span style="color:#ADBAC7">());</span></span>
+<span class="line"><span style="color:#ADBAC7">chain.</span><span style="color:#DCBDFB">Add</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">new</span><span style="color:#F69D50"> PropertySetterStrategy</span><span style="color:#ADBAC7">());</span></span>
+<span class="line"><span style="color:#ADBAC7">locator.</span><span style="color:#DCBDFB">Add</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">typeof</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">ILifetimeContainer</span><span style="color:#ADBAC7">), container);</span><span style="color:#F47067">&#x3C;/</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#768390">// Create a context to build an object</span></span>
+<span class="line"><span style="color:#F69D50">BuilderContext</span><span style="color:#F69D50"> builderContext</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> BuilderContext</span><span style="color:#ADBAC7">(chain, locator, </span><span style="color:#6CB6FF">null</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">builderContext.Policies.</span><span style="color:#DCBDFB">SetDefault</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">ICreationPolicy</span><span style="color:#ADBAC7">>(</span><span style="color:#F47067">new</span><span style="color:#F69D50"> DefaultCreationPolicy</span><span style="color:#ADBAC7">());</span></span></code></pre>
+</p>
+<p>You can access the current Page that will handle the request in an IHttpModule using:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">HttpApplication</span><span style="color:#F69D50"> app</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">app.Context.CurrentHandler; </span><span style="color:#768390">// The Page handler</span></span></code></pre>
+</p>
+<p>Now to tie it all together we create an IHttpModule that will filter each request and wire up our Pages with their dependencies. IHttpModules are configured to respond to callback events related to the <a href="http://msdn2.microsoft.com/en-us/library/system.web.httpapplication(VS.80).aspx">Life Cycle of a request</a>. In this case we need wire up our Pages after the PostMapRequestHandler because the Page is created prior to this. I set this up on the PreRequestHandlerExecute because everything is setup at this point and it is right before the Page methods are called.</p>
+<p>
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">///</span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">summary</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#768390">/// ObjectBuilderModule handles PropertyBased Injection for ASP.NET Forms.</span></span>
+<span class="line"><span style="color:#768390">/// &#x3C;/</span><span style="color:#8DDB8C">summary</span><span style="color:#768390">></span></span>
+<span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> ObjectBuilderModule</span><span style="color:#ADBAC7"> : </span><span style="color:#F69D50">IHttpModule</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#F47067">    private</span><span style="color:#F69D50"> HttpApplication</span><span style="color:#F69D50"> app</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">    private</span><span style="color:#F47067"> readonly</span><span style="color:#F69D50"> Locator</span><span style="color:#F69D50"> locator</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> Locator</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#F47067">    private</span><span style="color:#F47067"> readonly</span><span style="color:#F69D50"> ILifetimeContainer</span><span style="color:#F69D50"> container</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> LifetimeContainer</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#F47067">    private</span><span style="color:#F47067"> readonly</span><span style="color:#F69D50"> BuilderStrategyChain</span><span style="color:#F69D50"> chain</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> BuilderStrategyChain</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#F47067">    private</span><span style="color:#F47067"> readonly</span><span style="color:#F69D50"> BuilderContext</span><span style="color:#F69D50"> builderContext</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#DCBDFB"> ObjectBuilderModule</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#ADBAC7">        chain.</span><span style="color:#DCBDFB">Add</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">new</span><span style="color:#F69D50"> CreationStrategy</span><span style="color:#ADBAC7">());</span></span>
+<span class="line"><span style="color:#ADBAC7">        chain.</span><span style="color:#DCBDFB">Add</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">new</span><span style="color:#F69D50"> PropertyReflectionStrategy</span><span style="color:#ADBAC7">());</span></span>
+<span class="line"><span style="color:#ADBAC7">        chain.</span><span style="color:#DCBDFB">Add</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">new</span><span style="color:#F69D50"> PropertySetterStrategy</span><span style="color:#ADBAC7">());</span></span>
+<span class="line"><span style="color:#ADBAC7">        locator.</span><span style="color:#DCBDFB">Add</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">typeof</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">ILifetimeContainer</span><span style="color:#ADBAC7">), container);</span></span>
+<span class="line"><span style="color:#ADBAC7">        builderContext </span><span style="color:#F47067">=</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> BuilderContext</span><span style="color:#ADBAC7">(chain, locator, </span><span style="color:#6CB6FF">null</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">        builderContext.Policies.</span><span style="color:#DCBDFB">SetDefault</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">ICreationPolicy</span><span style="color:#ADBAC7">>(</span><span style="color:#F47067">new</span><span style="color:#F69D50"> DefaultCreationPolicy</span><span style="color:#ADBAC7">());</span></span>
+<span class="line"><span style="color:#ADBAC7">    }&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>    </span><span style="color:#F47067">public</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> Init</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">HttpApplication</span><span style="color:#F69D50"> context</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#ADBAC7">        app </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> context;</span></span>
+<span class="line"><span style="color:#768390">        // PreRequestHandler so that everything is setup including the Session, etc</span></span>
+<span class="line"><span style="color:#ADBAC7">        app.PreRequestHandlerExecute </span><span style="color:#F47067">+=</span><span style="color:#ADBAC7"> InjectProperties;</span></span>
+<span class="line"><span style="color:#ADBAC7">    }&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>    </span><span style="color:#F47067">void</span><span style="color:#DCBDFB"> InjectProperties</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">object</span><span style="color:#F69D50"> sender</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">EventArgs</span><span style="color:#F69D50"> e</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#F69D50">        IHttpHandler</span><span style="color:#F69D50"> h</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> app.Context.CurrentHandler;</span></span>
+<span class="line"><span style="color:#F47067">        if</span><span style="color:#ADBAC7"> (h </span><span style="color:#F47067">is</span><span style="color:#F69D50"> DefaultHttpHandler</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#F47067">            return</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">        chain.Head.</span><span style="color:#DCBDFB">BuildUp</span><span style="color:#ADBAC7">(builderContext, h.</span><span style="color:#DCBDFB">GetType</span><span style="color:#ADBAC7">(), h, </span><span style="color:#6CB6FF">null</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>    </span><span style="color:#F47067">public</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> Dispose</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#ADBAC7">        app.PostMapRequestHandler </span><span style="color:#F47067">-=</span><span style="color:#ADBAC7"> InjectProperties;</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<h3>Conclusion</h3>
+Hopefully this shows you that you can create a powerful, transparent solution for doing Dependency Injection with ASP.NET. This isn't necessarily a complete solution. We could implement many other things like Singleton management for various service classes for example. Now all you have to do is extend it for your application's own needs.</p>

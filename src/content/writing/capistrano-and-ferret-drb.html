@@ -1,0 +1,42 @@
+---
+title: "Capistrano and Ferret DRB"
+pubDate: "2008-06-19 10:27:07 -0400"
+permalink: "/2008/06/19/capistrano-and-ferret-drb/"
+tags: ["Automation","capistrano","ferret"]
+---
+<p>This is a bit of a followup to my previous post on <a href="/2008/06/17/capistrano-deploy-with-git-and-passenger/">Capistrano with Git and Passenger</a>. I decided to use Ferret via the <a href="http://projects.jkraemer.net/acts_as_ferret/">acts_as_ferret</a> (<abbr title="Acts As Ferret">AAF</abbr>) plugin. <a href="http://ferret.davebalmain.com/">Ferret</a> is a full-text search inspired by <a href="http://lucene.apache.org/">Apache's Lucene</a> but written in Ruby.</p>
+<p>Basically Ferret and Lucene keep a full-text index outside of the database that allows it to quickly perform full-text searches and find the identifers of rows in your database. Then you can go get those objects out of the database. It's pretty slick.</p>
+<p>Ferret uses <a href="http://www.ruby-doc.org/stdlib/libdoc/drb/rdoc/index.html">DRb</a> as a means of supporting multiple-concurrent clients and for scaling across multiple machines. You really don't need to know much about DRb to use <abbr title="Acts As Ferret">AAF</abbr>, but you do need to run the ferret DRb server in your production environment. Which gets us to...</p>
+<h3>Automating The Starting and Stopping of ferret_server</h3></p>
+<p>A few lines of code in your Capistrano <strong>deploy.rb</strong> and you are off and running.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">before </span><span style="color:#96D0FF">"deploy:start"</span><span style="color:#F47067"> do</span></span>
+<span class="line"><span style="color:#ADBAC7">  run </span><span style="color:#96D0FF">"</span><span style="color:#F47067">#{</span><span style="color:#96D0FF">current_path</span><span style="color:#F47067">}</span><span style="color:#96D0FF">/script/ferret_server -e production start"</span></span>
+<span class="line"><span style="color:#F47067">end</span><span style="color:#F47067"> &#x3C;/</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">after </span><span style="color:#96D0FF">"deploy:stop"</span><span style="color:#F47067"> do</span></span>
+<span class="line"><span style="color:#ADBAC7">  run </span><span style="color:#96D0FF">"</span><span style="color:#F47067">#{</span><span style="color:#96D0FF">current_path</span><span style="color:#F47067">}</span><span style="color:#96D0FF">/script/ferret_server -e production stop"</span></span>
+<span class="line"><span style="color:#F47067">end&#x3C;/</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">after </span><span style="color:#96D0FF">'deploy:restart'</span><span style="color:#F47067"> do</span></span>
+<span class="line"><span style="color:#ADBAC7">  run </span><span style="color:#96D0FF">"cd </span><span style="color:#F47067">#{</span><span style="color:#96D0FF">current_path</span><span style="color:#F47067">}</span><span style="color:#96D0FF"> &#x26;&#x26; ./script/ferret_server -e production stop"</span></span>
+<span class="line"><span style="color:#ADBAC7">  run </span><span style="color:#96D0FF">"cd </span><span style="color:#F47067">#{</span><span style="color:#96D0FF">current_path</span><span style="color:#F47067">}</span><span style="color:#96D0FF"> &#x26;&#x26; ./script/ferret_server -e production start"</span></span>
+<span class="line"><span style="color:#F47067">end</span></span></code></pre>
+</p>
+<p>Except it doesn't work. I ended up with some errors like:
+<samp>could not execute command</samp>
+<samp>no such file to load -- /usr/bin/../config/environment</samp></p>
+<p>It also ends up that it's not Capistrano's fault.</p>
+<h3>Acts As Ferret server_manager.rb</h3></p>
+<p>In the file <strong>vendor/plugins/acts_as_ferret/lib/server_manager.rb</strong> there is a line that sets up where to look for its environment information. For some reason this is the default:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">  # require(File.join(File.dirname(__FILE__), '../../../../config/environment'))</span></span>
+<span class="line"><span style="color:#F47067">  require</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">File</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">join</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">File</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">dirname</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">ENV</span><span style="color:#ADBAC7">[</span><span style="color:#96D0FF">'_'</span><span style="color:#ADBAC7">]), </span><span style="color:#96D0FF">'../config/environment'</span><span style="color:#ADBAC7">))</span></span></code></pre>
+</p>
+<p>If you notice, there is a line commented out. It just so happens that uncommenting that line and commenting out the other fixed the issue for me. It ends up that ENV['_'] points to the base path of the executable and thats <strong>/usr/bin/env</strong>. And that doesn't work. I'm not sure why that's the default behavior.</p>
+<p>Anyway, it's easily fixed:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">  require</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">File</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">join</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">File</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">dirname</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">__FILE__</span><span style="color:#ADBAC7">), </span><span style="color:#96D0FF">'../../../../config/environment'</span><span style="color:#ADBAC7">))</span></span>
+<span class="line"><span style="color:#768390">  # require(File.join(File.dirname(ENV['_']), '../config/environment'))</span></span></code></pre>
+</p>
+<p>With that fix in place, the Capistrano deployment will restart the Ferret DRb server when you deploy your application.</p>
+<p><strong><em>Update</em></strong>
+  According to John in the comments below you can fix the AAF problem without changing the code as well. Just add <code class="inline">default_run_options[:shell] = false</code> to your Capistrano script and that will take care of it.</p>

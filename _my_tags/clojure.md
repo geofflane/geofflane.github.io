@@ -1,4 +1,0 @@
----
-slug: clojure
-name: Clojure
----

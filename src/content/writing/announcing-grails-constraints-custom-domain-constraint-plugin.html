@@ -1,0 +1,42 @@
+---
+title: "Announcing Grails Constraints Custom Domain Constraint Plugin"
+pubDate: "2009-10-26 20:15:05 -0400"
+permalink: "/2009/10/26/announcing-grails-constraints-custom-domain-constraint-plugin/"
+tags: ["grails","plugins","validation"]
+---
+<p>I've released my first public Grails Plugin today.</p>
+<p>The Grails Constraint plugin gives you the ability to create custom Constraints that you can apply to your Domain classes to validate them. These are applied and act just like the built in Domain class constraints.</p>
+<h3>Why would you want this?</h3>
+Grails provides two generic, catch-all Constraints in the core application:</p>
+<ul>
+<li>validator - a generic closure mechanism for validation</li>
+<li>matches - a regular expression mechanism</li>
+</ul></p>
+<p>While those work, I find myself often wanting to use the same Constraints on multiple Domain classes (think Social Security Number, Phone Number, Zipcode, etc.) and I don't like to repeat those regular expressions or validations all over the place.</p>
+<h3>What does this plugin do?</h3>
+With the Grails Constraints plugin, you can write a custom Constraint class, drop it in <em>/grails-app/utils/</em> and it will automatically be available to all of your domain classes.</p>
+<h3>Example</h3></p>
+<p>I create a new constrain by hand in <em>/grails-app/utils/ComparisonConstraint.groovy</em>. (You can also use the provided create-constraint script like <em>grails create-constraint com.foo.MyConstraint</em>)
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> ComparisonConstraint</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#F69D50"> name </span><span style="color:#F47067">=</span><span style="color:#96D0FF"> "compareTo"</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#F69D50"> expectsParams </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> true</span></span>
+<span class="line"><span style="color:#F47067">    def</span><span style="color:#F69D50"> validate </span><span style="color:#F47067">=</span><span style="color:#F69D50"> { val, target </span><span style="color:#F47067">-></span></span>
+<span class="line"><span style="color:#F47067">        def</span><span style="color:#F69D50"> compareVal </span><span style="color:#F47067">=</span><span style="color:#F69D50"> target</span><span style="color:#F47067">.</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">$params</span><span style="color:#96D0FF">"</span></span>
+<span class="line"><span style="color:#F47067">        if</span><span style="color:#F69D50"> (</span><span style="color:#6CB6FF">null</span><span style="color:#F47067"> ==</span><span style="color:#F69D50"> val </span><span style="color:#F47067">||</span><span style="color:#6CB6FF"> null</span><span style="color:#F47067"> ==</span><span style="color:#F69D50"> compareVal)</span></span>
+<span class="line"><span style="color:#F47067">            return</span><span style="color:#6CB6FF"> false</span></span>
+<span class="line"><span style="color:#F47067">        return</span><span style="color:#F69D50"> val</span><span style="color:#F47067">.</span><span style="color:#F69D50">compareTo(compareVal) </span><span style="color:#F47067">==</span><span style="color:#6CB6FF"> 0</span></span>
+<span class="line"><span style="color:#F69D50">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>Then you can apply your constraint to your Domain class:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Login</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    String</span><span style="color:#F69D50"> password</span></span>
+<span class="line"><span style="color:#F47067">    String</span><span style="color:#F69D50"> confirm</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#F69D50"> constraints </span><span style="color:#F47067">=</span><span style="color:#F69D50"> {</span></span>
+<span class="line"><span style="color:#F69D50">        password(</span><span style="color:#6CB6FF">compareTo</span><span style="color:#F69D50">: </span><span style="color:#96D0FF">'confirm'</span><span style="color:#F69D50">)</span></span>
+<span class="line"><span style="color:#F69D50">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>See <a href="http://github.com/geofflane/grails-constraints">Grails Custom Constraints Plugin</a> for the full documentation on what all of the above means and  the source code.</p>

@@ -1,0 +1,98 @@
+---
+title: "Erlang Examples: Talk with Sockets"
+pubDate: "2008-05-29 19:52:58 -0400"
+permalink: "/2008/05/29/erlang-examples-talk-with-sockets/"
+tags: ["erlang exercises"]
+---
+<p>This is part of a series on the <a href="http://www.erlang.org/course/exercises.html">Erlang Exercises</a> which is a great set of programming problems that challenge you to implement solutions to some common Erlang problems. I'm going to share some of my solutions to these problems.</p>
+<h2>Erlang using UNIX sockets</h2>
+Do you want to talk with a friend on another machine? Shouldn't it be nice to have a shell connected to your friend and transfer messages in between?
+This can be implemented using the client/server concept with a process on each side listening to a socket for messages.</p>
+<p>
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">-</span><span style="color:#F47067">module</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">talk</span><span style="color:#ADBAC7">).</span></span>
+<span class="line"><span style="color:#ADBAC7">-</span><span style="color:#F47067">compile</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">export_all</span><span style="color:#ADBAC7">).</span></span>
+<span class="line"><span style="color:#DCBDFB">start</span><span style="color:#ADBAC7">(LocalPort, RemotePort) </span><span style="color:#F47067">-></span></span>
+<span class="line"><span style="color:#ADBAC7">    ServerPid </span><span style="color:#F47067">=</span><span style="color:#DCBDFB"> spawn</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">?</span><span style="color:#DCBDFB">MODULE</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">start_server</span><span style="color:#ADBAC7">, [LocalPort]),</span></span>
+<span class="line"><span style="color:#DCBDFB">    cli</span><span style="color:#ADBAC7">(RemotePort, ServerPid).</span></span>
+<span class="line"><span style="color:#DCBDFB">cli</span><span style="color:#ADBAC7">(RemotePort, ServerPid) </span><span style="color:#F47067">-></span></span>
+<span class="line"><span style="color:#ADBAC7">    Data </span><span style="color:#F47067">=</span><span style="color:#DCBDFB"> clean</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">io</span><span style="color:#ADBAC7">:</span><span style="color:#DCBDFB">get_line</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">'Message: '</span><span style="color:#ADBAC7">)),</span></span>
+<span class="line"><span style="color:#F47067">    case</span><span style="color:#DCBDFB"> should_stop</span><span style="color:#ADBAC7">(Data) </span><span style="color:#F47067">of</span></span>
+<span class="line"><span style="color:#6CB6FF">        true</span><span style="color:#ADBAC7"> -></span></span>
+<span class="line"><span style="color:#ADBAC7">            ServerPid </span><span style="color:#F47067">!</span><span style="color:#6CB6FF"> done</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#6CB6FF">        false</span><span style="color:#ADBAC7"> -></span></span>
+<span class="line"><span style="color:#DCBDFB">            spawn</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">?</span><span style="color:#DCBDFB">MODULE</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">send</span><span style="color:#ADBAC7">, [RemotePort, Data]),</span></span>
+<span class="line"><span style="color:#DCBDFB">            cli</span><span style="color:#ADBAC7">(RemotePort, ServerPid)</span></span>
+<span class="line"><span style="color:#F47067">    end</span><span style="color:#ADBAC7">.</span></span>
+<span class="line"><span style="color:#DCBDFB">clean</span><span style="color:#ADBAC7">(Data) </span><span style="color:#F47067">-></span></span>
+<span class="line"><span style="color:#F69D50">    string</span><span style="color:#ADBAC7">:</span><span style="color:#DCBDFB">strip</span><span style="color:#ADBAC7">(Data, </span><span style="color:#6CB6FF">both</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">$\n</span><span style="color:#ADBAC7">).</span></span>
+<span class="line"><span style="color:#DCBDFB">should_stop</span><span style="color:#ADBAC7">(Str) </span><span style="color:#F47067">-></span></span>
+<span class="line"><span style="color:#6CB6FF">    0</span><span style="color:#F47067"> =:=</span><span style="color:#F69D50"> string</span><span style="color:#ADBAC7">:</span><span style="color:#DCBDFB">len</span><span style="color:#ADBAC7">(Str).</span></span>
+<span class="line"><span style="color:#DCBDFB">start_server</span><span style="color:#ADBAC7">(Port) </span><span style="color:#F47067">-></span></span>
+<span class="line"><span style="color:#F47067">    case</span><span style="color:#F69D50"> gen_tcp</span><span style="color:#ADBAC7">:</span><span style="color:#DCBDFB">listen</span><span style="color:#ADBAC7">(Port, [</span><span style="color:#6CB6FF">binary</span><span style="color:#ADBAC7">, {</span><span style="color:#6CB6FF">packet</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">4</span><span style="color:#ADBAC7">},</span></span>
+<span class="line"><span style="color:#ADBAC7">                               {</span><span style="color:#6CB6FF">reuseaddr</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">true</span><span style="color:#ADBAC7">},</span></span>
+<span class="line"><span style="color:#ADBAC7">                               {</span><span style="color:#6CB6FF">active</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">true</span><span style="color:#ADBAC7">}]) </span><span style="color:#F47067">of</span></span>
+<span class="line"><span style="color:#ADBAC7">        {</span><span style="color:#6CB6FF">ok</span><span style="color:#ADBAC7">, Listen} -></span></span>
+<span class="line"><span style="color:#DCBDFB">            server</span><span style="color:#ADBAC7">(Listen);</span></span>
+<span class="line"><span style="color:#ADBAC7">        {</span><span style="color:#6CB6FF">error</span><span style="color:#ADBAC7">, Reason} -></span></span>
+<span class="line"><span style="color:#ADBAC7">            {</span><span style="color:#6CB6FF">error</span><span style="color:#ADBAC7">, Reason}</span></span>
+<span class="line"><span style="color:#F47067">    end</span><span style="color:#ADBAC7">.</span></span>
+<span class="line"><span style="color:#DCBDFB">server</span><span style="color:#ADBAC7">(Listen) </span><span style="color:#F47067">-></span></span>
+<span class="line"><span style="color:#F47067">    case</span><span style="color:#F69D50"> gen_tcp</span><span style="color:#ADBAC7">:</span><span style="color:#DCBDFB">accept</span><span style="color:#ADBAC7">(Listen) </span><span style="color:#F47067">of</span></span>
+<span class="line"><span style="color:#ADBAC7">        {</span><span style="color:#6CB6FF">ok</span><span style="color:#ADBAC7">, Socket} -></span></span>
+<span class="line"><span style="color:#DCBDFB">            server_loop</span><span style="color:#ADBAC7">(Socket),</span></span>
+<span class="line"><span style="color:#DCBDFB">            server</span><span style="color:#ADBAC7">(Listen);</span></span>
+<span class="line"><span style="color:#6CB6FF">        _</span><span style="color:#ADBAC7"> -></span></span>
+<span class="line"><span style="color:#6CB6FF">            ok</span></span>
+<span class="line"><span style="color:#F47067">    end</span><span style="color:#ADBAC7">.</span></span>
+<span class="line"><span style="color:#DCBDFB">server_loop</span><span style="color:#ADBAC7">(Socket) </span><span style="color:#F47067">-></span></span>
+<span class="line"><span style="color:#F47067">    receive</span></span>
+<span class="line"><span style="color:#6CB6FF">        done</span><span style="color:#ADBAC7"> -></span></span>
+<span class="line"><span style="color:#F69D50">            gen_tcp</span><span style="color:#ADBAC7">:</span><span style="color:#DCBDFB">close</span><span style="color:#ADBAC7">(Socket),</span></span>
+<span class="line"><span style="color:#F69D50">            io</span><span style="color:#ADBAC7">:</span><span style="color:#DCBDFB">format</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Server socket closed</span><span style="color:#F47067">~n</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">        {</span><span style="color:#6CB6FF">tcp</span><span style="color:#ADBAC7">, Socket, Bin} -></span></span>
+<span class="line"><span style="color:#ADBAC7">            Str </span><span style="color:#F47067">=</span><span style="color:#DCBDFB"> clean</span><span style="color:#ADBAC7">(</span><span style="color:#DCBDFB">binary_to_term</span><span style="color:#ADBAC7">(Bin)),</span></span>
+<span class="line"><span style="color:#F69D50">            io</span><span style="color:#ADBAC7">:</span><span style="color:#DCBDFB">format</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"</span><span style="color:#F47067">~p~n</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">, [Str]),</span></span>
+<span class="line"><span style="color:#F47067">            case</span><span style="color:#DCBDFB"> should_stop</span><span style="color:#ADBAC7">(Str) </span><span style="color:#F47067">of</span></span>
+<span class="line"><span style="color:#6CB6FF">                true</span><span style="color:#ADBAC7"> -></span></span>
+<span class="line"><span style="color:#6CB6FF">                    void</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#6CB6FF">                false</span><span style="color:#ADBAC7"> -></span></span>
+<span class="line"><span style="color:#DCBDFB">                    server_loop</span><span style="color:#ADBAC7">(Socket)</span></span>
+<span class="line"><span style="color:#F47067">            end</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">        {</span><span style="color:#6CB6FF">tcp_closed</span><span style="color:#ADBAC7">, _Socket} -></span></span>
+<span class="line"><span style="color:#6CB6FF">            ok</span></span>
+<span class="line"><span style="color:#F47067">    end</span><span style="color:#ADBAC7">.</span></span>
+<span class="line"><span style="color:#DCBDFB">send</span><span style="color:#ADBAC7">(Port, Data) </span><span style="color:#F47067">-></span></span>
+<span class="line"><span style="color:#F47067">    case</span><span style="color:#F69D50"> gen_tcp</span><span style="color:#ADBAC7">:</span><span style="color:#DCBDFB">connect</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"localhost"</span><span style="color:#ADBAC7">, Port, [</span><span style="color:#6CB6FF">binary</span><span style="color:#ADBAC7">, {</span><span style="color:#6CB6FF">packet</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">4</span><span style="color:#ADBAC7">}]) </span><span style="color:#F47067">of</span></span>
+<span class="line"><span style="color:#ADBAC7">        {</span><span style="color:#6CB6FF">ok</span><span style="color:#ADBAC7">, Socket} -></span></span>
+<span class="line"><span style="color:#F69D50">            gen_tcp</span><span style="color:#ADBAC7">:</span><span style="color:#DCBDFB">send</span><span style="color:#ADBAC7">(Socket, </span><span style="color:#DCBDFB">term_to_binary</span><span style="color:#ADBAC7">(Data)),</span></span>
+<span class="line"><span style="color:#F69D50">            gen_tcp</span><span style="color:#ADBAC7">:</span><span style="color:#DCBDFB">close</span><span style="color:#ADBAC7">(Socket);</span></span>
+<span class="line"><span style="color:#ADBAC7">        {</span><span style="color:#6CB6FF">error</span><span style="color:#ADBAC7">, Reason} -></span></span>
+<span class="line"><span style="color:#ADBAC7">            {</span><span style="color:#6CB6FF">error</span><span style="color:#ADBAC7">, Reason}</span></span>
+<span class="line"><span style="color:#F47067">    end</span><span style="color:#ADBAC7">.</span></span></code></pre>
+</p>
+<h3>Explanation</h3>
+<strong>start(LocalPort, RemotePort) -></strong>
+The entry point to the talk program. This spawns a new start_server process that will handle opening a socket and listening for messages from a remote client. It then runs the command line interface and waits for data from the user to send to the remote port.</p>
+<p><strong>cli(RemotePort, ServerPid) -></strong>
+This is the loop that will get the data from the user and send it to the remote port.</p>
+<p><strong>clean(Data)</strong>
+This is a simple function that removes the newlines from the end of the data sent to the client.</p>
+<p><strong>should_stop(Str)</strong>
+This is a simple function that determines whether the client and server should shut down. The rule is that if it's an empty string then the processes should stop.</p>
+<p><strong>start_server(Port) -></strong>
+This function gets run in a process and opens a Listening socket. It then hands off to <strong>server(Listen) -></strong> to handle dealing with new incoming socket connections.</p>
+<p><strong>server(Listen) -></strong>
+The server gets a new Socket when an incoming connection connects to the Listening port. It then goes into a receive state and waits for an incoming connection to send it data. The receive state is handled in the <strong>server_loop</strong>.</p>
+<p><strong>send(Port, Data) -></strong>
+This is the client side of the application. It connects to a remote port and sends the data to that port.</p>
+<p><strong>case ... of</strong>
+In a number of these functions you see a common idiom:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">case</span><span style="color:#DCBDFB"> fun</span><span style="color:#ADBAC7">() </span><span style="color:#F47067">of</span></span>
+<span class="line"><span style="color:#ADBAC7">    SomeMatch -></span></span>
+<span class="line"><span style="color:#ADBAC7">        Do </span><span style="color:#6CB6FF">something</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">    AnotherMatch -></span></span>
+<span class="line"><span style="color:#ADBAC7">        Do </span><span style="color:#6CB6FF">something</span><span style="color:#F47067"> else</span></span>
+<span class="line"><span style="color:#F47067">end</span></span></code></pre>
+</p>
+<p>With socket connections and many others it is common to return a tuple like <strong>{ok, Val}</strong> when the function call is successful and will return <strong>{error, Reason}</strong> or a similar tuple when there is an error in the function. The case statement is just an easy way to handle these differences.</p>

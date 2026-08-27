@@ -1,89 +1,127 @@
-![](_assets/images/documentation/chalk-intro@2x.png)
+# zorched.net
 
-Chalk is a high quality, completely customizable, performant and 100% free blog template for Jekyll.
+The personal site of Geoff Lane, built with [Astro](https://astro.build) and served as
+static files from GitHub Pages at <https://www.zorched.net>.
 
-## Overview
+The site is four things: a home page, an about page, an archive index, and 135 archived
+posts written between 2005 and 2014. It has no client-side JavaScript.
 
-Features:
-  - Dark and Light theme.
-  - Filter on tags.
-  - customizable pagination.
-  - Beautified link sharing in Facebook and other social media.
-  - Automatic time to read post indicator.
-  - Automatic RSS feed.
-  - About page.
-  - 404 page.
-  - SEO optimized.
-  - PageSpeed optimized.
-  - Cross browser support (supports all modern browsers).
-  - Media embed for videos.
-  - Enlarge images on click.
-  - Support for local fonts
+## Requirements
 
-Integrations
-  - [Google Analytics](https://analytics.google.com/analytics/web/)
-  - [Google Fonts](https://fonts.google.com/)
-  - [Disqus](https://disqus.com/)
-  - [Ionicons](http://ionicons.com/)
-  - Social media links
+Node is pinned in `.tool-versions`, which both [mise](https://mise.jdx.dev) and the CI
+workflow read. There is no other toolchain — no Ruby, no bundler.
 
-Used tools
-  - [Autoprefixer](https://github.com/postcss/autoprefixer)
-  - [Circle CI](https://circleci.com/)
-  - [Html-proofer](https://github.com/gjtorikian/html-proofer)
-  - [Jekyll](https://jekyllrb.com/)
-  - [Jekyll assets](https://github.com/jekyll/jekyll-assets)
-  - [Jekyll Sitemap](https://github.com/jekyll/jekyll-sitemap)
-  - [HTML5 Boilerplate](https://html5boilerplate.com/) (Influenced by)
-  - [Kickster](https://kickster.nielsenramon.com/)
-  - [Retina.js](https://imulus.github.io/retinajs/)
-  - [STACSS](https://stacss.nielsenramon.com/)
-  - [Yarn](https://yarnpkg.com)
+```sh
+mise install     # installs the pinned Node
+npm ci           # installs dependencies from package-lock.json
+```
 
-## Usage
+## Working on it
 
-### Installation
+```sh
+npm run dev      # dev server at http://localhost:4321 with live reload
+npm run build    # static build into dist/
+npm run preview  # serve dist/ locally, to check the real build
+npm run check    # type-check .astro and .ts files
+```
 
-If you haven't installed the following tools then go ahead and do so (make sure you have [Homebrew](https://brew.sh/) installed):
+`npm run build` is what CI runs. If it passes locally it will pass there.
 
-    brew install ruby
-    brew install npm
+Astro is a local dependency, not a global command, so a bare `astro check` will not
+resolve. Use the `npm run` scripts above, or `npx astro <command>` to reach the CLI
+directly — `npx astro preview stop`, for example.
 
-On windows, install Ruby and Node with the installers found here:
+## Layout
 
-  - [Ruby](https://rubyinstaller.org/)
-  - [Node.js](https://nodejs.org/en/download/)
+```
+public/                    Copied to the site root verbatim
+  CNAME                    The custom domain — do not delete
+  favicon.ico robots.txt keybase.txt
+src/
+  content/writing/         The 135 archived posts, one HTML file each
+  content.config.ts        Loads and validates those posts
+  layouts/
+    BaseLayout.astro       Page shell: <head>, masthead, footer
+    PostLayout.astro       Archived-post page
+  components/
+    Masthead.astro SiteFooter.astro PostNav.astro
+  pages/                   One file per route (see below)
+  styles/global.css        Design tokens, base elements, archived-post styles
+scripts/migrate-posts.mjs  One-shot Jekyll importer, already run — kept for reference
+design/                    Design mockups (.dc.html), not part of the build
+```
 
-Next setup your environment:
+### Routes
 
-    bin/setup
+| File | URL |
+| --- | --- |
+| `pages/index.astro` | `/` |
+| `pages/about.astro` | `/about/` |
+| `pages/writing/index.astro` | `/writing/` |
+| `pages/[year]/[month]/[day]/[slug].astro` | `/2014/05/18/some-post/` |
+| `pages/feed.xml.js` | `/feed.xml` |
+| `pages/404.astro` | `/404.html` |
 
-### Development
+## Editing content
 
-Run Jekyll:
+**The home and about pages are ordinary markup.** Their copy lives directly in
+`src/pages/index.astro` and `src/pages/about.astro`. Edit the text between the tags;
+the styles are in the `<style>` block at the bottom of each file.
 
-    bundle exec jekyll serve
+**Site-wide text** — the footer line about the archive, the nav labels — lives in
+`src/components/SiteFooter.astro` and `src/components/Masthead.astro`.
 
-## Deploy to GitHub Pages
+**Colours, fonts and spacing** are CSS custom properties at the top of
+`src/styles/global.css`. Changing `--accent` there changes every link on the site.
 
-Before you deploy, commit your changes to any working branch except the `gh-pages` one then run the following command:
+### The archive
 
-    bin/deploy
+Each post is one file in `src/content/writing/`, named after its slug, with JSON-valued
+front matter:
 
-**Important note**: Chalk does not support the standard way of Jekyll hosting on GitHub Pages. You need to deploy your working branch (can be any branch, for xxx.github.io users: use another branch than master) with the `bin/deploy` script. This is because Chalk uses Jekyll plugins that aren't supported by GitHub pages. The `bin/deploy` script will automatically build the entire project, then push it to the `gh-pages` branch of your repo. The script creates that branch for you so no need to create it yourself.
+```
+---
+title: "Using A Core.Async Routine As A State Machine"
+pubDate: "2014-05-18 09:00:56 -0400"
+permalink: "/2014/05/18/using-a-core-async-routine-as-a-state-machine/"
+tags: ["code","clojure"]
+---
+<p>Clojure has a library called Core.Async …</p>
+```
 
-You can find more info on how to use the `gh-pages` branch and a custom domain [here](https://help.github.com/articles/quick-start-setting-up-a-custom-domain/).
+`permalink` is the URL the post has had since it was published, and it is what builds the
+route. **Changing it breaks an inbound link that may be twenty years old.** Rename the
+file freely; leave `permalink` alone.
 
-[View this](https://github.com/nielsenramon/kickster#automated-deployment-with-circle-ci) for more info about automated deployment with Circle CI.
+Post bodies are HTML rather than Markdown on purpose. Several posts contain raw `<pre>`
+blocks whose indentation Markdown would mangle, and the point of the archive is that the
+posts read as they were written. Code samples were highlighted once at import time with
+[Shiki](https://shiki.style) and are stored as styled markup, so they need no build-time
+processing and no highlighting library ships to the browser.
 
-## License
+To add a post, drop a new file in that directory with the same front matter. It will
+appear on `/writing/` and in the feed automatically, sorted by `pubDate`.
 
-MIT License
+## Deploying
 
-## Contributing
+Pushing to `main` triggers `.github/workflows/deploy.yml`, which builds the site and
+publishes `dist/` straight to Pages. There is no `gh-pages` branch and no build output in
+git.
 
-1. Fork it (https://github.com/[my-github-username]/chalk/fork)
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+Pages is already set to build from GitHub Actions rather than from a branch, so no
+repository settings need changing. `public/CNAME` is what keeps the custom domain
+attached — it ships in the build artifact, so deleting it would drop the site back to
+`geofflane.github.io`.
+
+## Known gaps in the archive
+
+- **Eight images 404.** Posts from 2006, 2008 and 2014 reference
+  `/wp-content/uploads/…`, which died with the WordPress install years before this
+  rebuild. They were already broken. If copies turn up, drop them in `public/` at the same
+  paths and they will resolve.
+- **38 Amazon affiliate images** are also dead links, from a program long since shut down.
+- **`/tag/clojure/`, `/tag/code/` and `/tag/java/` now 404.** Jekyll generated those three
+  pages; nothing links to them any more. Tags still appear on each post, as plain text.
+- **The résumé page is gone.** It listed a 2016 role as current. The original is still in
+  git history:
+  `git show dd3e3d7:about-geoff-lane/geoff-lanes-resume/index.html`

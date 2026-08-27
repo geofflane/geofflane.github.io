@@ -1,0 +1,89 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout>
+  <main>
+    <div class="intro">
+      <h1>Geoff Lane</h1>
+      <div class="prose">
+        <p class="lede">
+          I've been writing software since 1999 — startups in Silicon Valley and Chicago, a
+          consulting firm in Milwaukee and Cincinnati. Then I started building sports analytics systems.
+          These days I'm in Windsor, Ontario.
+        </p>
+        <p>
+          Now I mostly try and hang out with my family, cook a good dinner, and play some guitar.
+        </p>
+      </div>
+    </div>
+
+    <div class="elsewhere">
+      <span class="label">Elsewhere</span>
+      <div class="links">
+        <a href="mailto:geoff@zorched.net">geoff@zorched.net</a>
+        <a href="https://github.com/geofflane" rel="me">github.com/geofflane</a>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  main {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(56px, 9vw, 92px);
+    padding: clamp(56px, 9vw, 92px) 0;
+  }
+
+  .intro {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    max-width: var(--measure);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(42px, 7vw, 66px);
+    line-height: 1;
+    letter-spacing: -0.035em;
+  }
+
+  .prose {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    font-size: 20px;
+    line-height: 1.7;
+  }
+
+  .prose p {
+    margin: 0;
+  }
+
+  .lede {
+    color: var(--soft);
+  }
+
+  .elsewhere {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  .links {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    font-size: 15px;
+  }
+</style>

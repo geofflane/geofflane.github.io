@@ -1,0 +1,62 @@
+---
+title: "Coffee DSL in Groovy"
+pubDate: "2007-03-08 20:51:46 -0500"
+permalink: "/2007/03/08/coffee-dsl-in-groovy/"
+tags: ["groovy","dsl"]
+---
+<p>I thought I'd follow up with my previous post with the  <a href="/2007/03/05/understanding-domain-specific-languages-as-jargon/">Coffee Domain Specific Language</a> in the Groovy Language.</p>
+<p>This is really one of my first forays into Groovy, so it's pretty rough. It's really just a direct translation of the Ruby code and not what I would expect to be 'idiomatic Groovy'. I'll try and update this once I learn some more Groovy.</p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">//</span><span style="color:#6CB6FF"> CoffeeDSL</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">groovy</span></span>
+<span class="line"><span style="color:#F47067">//</span><span style="color:#6CB6FF"> This</span><span style="color:#ADBAC7"> is the input from the user, likely read from a file</span></span>
+<span class="line"><span style="color:#96D0FF">//</span><span style="color:#F47067"> or</span><span style="color:#ADBAC7"> input through a user interface of some sort</span></span>
+<span class="line"><span style="color:#6CB6FF">CoffeeInput</span><span style="color:#F47067"> =</span><span style="color:#96D0FF"> "venti nonfat decaf whip latte"</span></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Coffee</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> size</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> whip</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> caf</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> type</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> milk</span></span>
+<span class="line"><span style="color:#F47067">  public</span><span style="color:#DCBDFB"> invokeMethod</span><span style="color:#ADBAC7">(name)</span></span>
+<span class="line"><span style="color:#ADBAC7">  {</span></span>
+<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> ([</span><span style="color:#96D0FF">'venti'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'grande'</span><span style="color:#ADBAC7">].</span><span style="color:#DCBDFB">contains</span><span style="color:#ADBAC7">(name))</span></span>
+<span class="line"><span style="color:#F69D50">      size</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> name</span></span>
+<span class="line"><span style="color:#FF938A;font-style:italic">    else if</span><span style="color:#ADBAC7"> ([</span><span style="color:#96D0FF">'whip'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'nowhip'</span><span style="color:#ADBAC7">].</span><span style="color:#DCBDFB">contains</span><span style="color:#ADBAC7">(name))</span></span>
+<span class="line"><span style="color:#F69D50">      whip</span><span style="color:#F47067"> =</span><span style="color:#96D0FF"> 'whip'</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">equals</span><span style="color:#ADBAC7">(name)</span></span>
+<span class="line"><span style="color:#FF938A;font-style:italic">    else if</span><span style="color:#ADBAC7"> ([</span><span style="color:#96D0FF">'caf'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'decaf'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'halfcaf'</span><span style="color:#ADBAC7">].</span><span style="color:#DCBDFB">contains</span><span style="color:#ADBAC7">(name))</span></span>
+<span class="line"><span style="color:#F69D50">      caf</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> name</span></span>
+<span class="line"><span style="color:#FF938A;font-style:italic">    else if</span><span style="color:#ADBAC7"> ([</span><span style="color:#96D0FF">'regular'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'latte'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'cappachino'</span><span style="color:#ADBAC7">].</span><span style="color:#DCBDFB">contains</span><span style="color:#ADBAC7">(name))</span></span>
+<span class="line"><span style="color:#F69D50">      type</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> name</span></span>
+<span class="line"><span style="color:#FF938A;font-style:italic">    else if</span><span style="color:#ADBAC7"> ([</span><span style="color:#96D0FF">'milk'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'nonfat'</span><span style="color:#ADBAC7">].</span><span style="color:#DCBDFB">contains</span><span style="color:#ADBAC7">(name))</span></span>
+<span class="line"><span style="color:#F69D50">      milk</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> name</span></span>
+<span class="line"><span style="color:#F47067">    else</span></span>
+<span class="line"><span style="color:#F47067">    throw</span><span style="color:#F47067"> new</span><span style="color:#6CB6FF"> Exception</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Unknown coffee informantion: ${name}."</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#F47067">  public</span><span style="color:#DCBDFB"> order</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#F47067">    def</span><span style="color:#DCBDFB"> params</span><span style="color:#F47067"> =</span><span style="color:#96D0FF"> ''</span></span>
+<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> (milk)</span></span>
+<span class="line"><span style="color:#F69D50">      params</span><span style="color:#F47067"> +=</span><span style="color:#ADBAC7"> milk </span><span style="color:#F47067">+</span><span style="color:#96D0FF"> ' '</span></span>
+<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> (caf)</span></span>
+<span class="line"><span style="color:#F69D50">      params</span><span style="color:#F47067"> +=</span><span style="color:#ADBAC7"> caf </span><span style="color:#F47067">+</span><span style="color:#96D0FF"> ' '</span></span>
+<span class="line"><span style="color:#F47067">    if</span><span style="color:#ADBAC7"> (whip)</span></span>
+<span class="line"><span style="color:#F69D50">      params</span><span style="color:#F47067"> +=</span><span style="color:#96D0FF">  'whip '</span></span>
+<span class="line"><span style="color:#DCBDFB">    println</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Ordering coffee: ${size} ${params}${type}</span><span style="color:#F47067">\n</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#F47067">  public</span><span style="color:#6CB6FF"> load</span><span style="color:#ADBAC7">(input) {</span></span>
+<span class="line"><span style="color:#F47067">    //</span><span style="color:#ADBAC7"> turn one line into multi</span><span style="color:#F47067">-</span><span style="color:#ADBAC7">line </span><span style="color:#96D0FF">"method calls"</span></span>
+<span class="line"><span style="color:#F47067">    def</span><span style="color:#DCBDFB"> cleaned</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> input.</span><span style="color:#DCBDFB">split</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">/</span><span style="color:#8DDB8C;font-weight:bold">\s</span><span style="color:#96D0FF">+/</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#DCBDFB">    instance_eval</span><span style="color:#ADBAC7">(cleaned)</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#F47067">  public</span><span style="color:#DCBDFB"> instance_eval</span><span style="color:#ADBAC7">(methods) {</span></span>
+<span class="line"><span style="color:#F47067">    for</span><span style="color:#ADBAC7"> (method </span><span style="color:#F47067">in</span><span style="color:#ADBAC7"> methods) {</span></span>
+<span class="line"><span style="color:#ADBAC7">      this.</span><span style="color:#DCBDFB">invokeMethod</span><span style="color:#ADBAC7">(method)</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#F47067">//</span><span style="color:#ADBAC7"> this is your code which loads the </span><span style="color:#6CB6FF">DSL</span><span style="color:#ADBAC7"> input </span><span style="color:#F47067">and</span><span style="color:#ADBAC7"> executes it</span></span>
+<span class="line"><span style="color:#F69D50">coffee</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#6CB6FF"> Coffee</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">coffee.</span><span style="color:#6CB6FF">load</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">CoffeeInput</span><span style="color:#ADBAC7">)    </span><span style="color:#F47067">//</span><span style="color:#6CB6FF"> load</span><span style="color:#ADBAC7"> the user input</span></span>
+<span class="line"><span style="color:#ADBAC7">coffee.</span><span style="color:#DCBDFB">order</span><span style="color:#ADBAC7">()                 </span><span style="color:#F47067">//</span><span style="color:#ADBAC7"> submit the order</span></span></code></pre>
+
+This isn't even metaprogramming. You could do this in any language, Java, C#, whatever. Everyone talks about metaprogramming in Groovy, but I have not yet found a lot of information on it. Does anyone have any pointers?</p>
