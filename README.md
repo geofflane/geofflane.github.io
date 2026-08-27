@@ -104,13 +104,14 @@ appear on `/writing/` and in the feed automatically, sorted by `pubDate`.
 
 ## Deploying
 
-Pushing to `master` triggers `.github/workflows/deploy.yml`, which builds the site and
+Pushing to `main` triggers `.github/workflows/deploy.yml`, which builds the site and
 publishes `dist/` straight to Pages. There is no `gh-pages` branch and no build output in
 git.
 
-**One-time setup, in the repository settings:** under *Settings → Pages → Build and
-deployment*, set **Source** to **GitHub Actions**. Until that is changed, Pages is still
-trying to build the old Jekyll site from the branch and will keep failing.
+Pages is already set to build from GitHub Actions rather than from a branch, so no
+repository settings need changing. `public/CNAME` is what keeps the custom domain
+attached — it ships in the build artifact, so deleting it would drop the site back to
+`geofflane.github.io`.
 
 ## Known gaps in the archive
 
