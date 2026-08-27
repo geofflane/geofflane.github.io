@@ -1,0 +1,47 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1200,
+      "h": 5450,
+      "title": "/rhythm/ \u2014 marketing page"
+    },
+    {
+      "file": "Privacy.dc.html",
+      "x": 1320,
+      "y": 0,
+      "w": 1200,
+      "h": 2160,
+      "title": "/rhythm/privacy/"
+    },
+    {
+      "file": "Mobile.dc.html",
+      "x": 2640,
+      "y": 0,
+      "w": 390,
+      "h": 8300,
+      "title": "/rhythm/ at phone width"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "brief",
+      "x": 0,
+      "y": -250,
+      "w": 620,
+      "text": "The site shell is unchanged \u2014 same masthead, footer, ground and IBM Plex. Only the accent changes inside /rhythm: the app's own teal (#2FA98B) instead of the site amber.\n\nType follows Rhythm's docs/wordmark-and-type.md \u00a73, the scale that document defines for exactly this case: display 56/500/-3.5%, heading 22/500/-2%, body 17/400/1.6, mono labels 11 uppercase +0.16em.\n\nEvery claim is drawn from docs/store-listing.md \u00a72, which is asserted by StoreListingTests. Nothing here makes a claim its \u00a76 refuses.\n\nThe App Store button is inert \u2014 outlined and grey, not a link \u2014 with a filled teal Coming soon chip beside it. One constant at the top of the page turns it into a real button.\n\nEvery capture is of the app itself: iPhone and iPad, portrait and landscape, light and dark.\n\nThe bar sheet and the song are your two device screenshots. The bar one is store-listing.md \u00a77's missing row 3 \u2014 it cannot be rendered by the harness. The song's iOS status bar was cropped so it matches the other captures, none of which have one."
+    },
+    {
+      "id": "privacy-note",
+      "x": 1320,
+      "y": -250,
+      "w": 560,
+      "text": "Written against docs/privacy-audit.md \u00a72, \u00a73 and \u00a75 rather than from a template, so every sentence is one the audit already evidences.\n\nNo iCloud sync claim \u2014 FR-1004 does not exist in v1, and store-listing.md \u00a76 refuses it. What IS true is the system device backup, and it says so.\n\nThis address replaces PrivacyPolicy.privacyPolicyAddress in AboutScreen.swift, which is still on the .invalid placeholder."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

@@ -1,0 +1,202 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Every claim on this page is one that `docs/privacy-audit.md` in the Rhythm repository
+// already evidences — §2 for the App Store questionnaire, §3 for the permissions and
+// declarations, §5 for the storage inventory. If the app changes, that file changes
+// first and this page follows it. Do not add a claim this page cannot point at.
+//
+// Two things this page deliberately does NOT say, because they are not true of v1:
+//   · iCloud sync. FR-1004 is post-v1 and CloudKit is not linked. `docs/store-listing.md`
+//     §6 refuses the claim outright. What IS true is the system's own device backup,
+//     which the "What leaves your device" section states instead.
+//   · Anything about how collected data is handled. Nothing is collected, and describing
+//     handling would imply a channel that does not exist.
+const lastUpdated = '27 August 2026';
+---
+
+<BaseLayout
+  title="Rhythm — Privacy policy"
+  section="rhythm"
+  description="Rhythm collects no data. It has no account, no analytics, and no network code at all."
+>
+  <main>
+    <header>
+      <a class="back" href="/rhythm/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="11 18 5 12 11 6"></polyline>
+        </svg>
+        <span>Rhythm</span>
+      </a>
+      <h1>Privacy policy</h1>
+      <span class="date">Last updated {lastUpdated}</span>
+    </header>
+
+    <p class="lede">Rhythm collects no data.</p>
+
+    <p>
+      There is no account, no analytics, no tracking, and no code in it from anyone else. There is
+      no network code in it at all — the app links no networking framework — so it makes no
+      requests, sends nothing anywhere, and works with the network off. Its App Store privacy label
+      reads <em>Data Not Collected</em>. That is not a promise about how data is handled. There is
+      no channel for it to travel down.
+    </p>
+
+    <section>
+      <h2>What Rhythm stores, and where</h2>
+      <p>
+        Everything you make in Rhythm stays on your device, in the app's own storage: your presets
+        and folders, your songs, setlists and practice routines, your practice history, your
+        settings, and any sound you import. Nobody else can see it, and that includes me. Deleting
+        the app removes all of it.
+      </p>
+    </section>
+
+    <section>
+      <h2>What leaves your device</h2>
+      <p>
+        Only what you send yourself. <em>Settings &rsaquo; Data &rsaquo; Back up</em> writes one
+        file holding your library, and where it goes next is your decision, made in the iOS share
+        sheet. Rhythm has no other way out.
+      </p>
+      <p>
+        If you back up your iPhone or iPad, iOS includes Rhythm's storage in that backup, along
+        with every other app's. That backup is made by the system, under your own Apple Account,
+        and Rhythm neither performs it nor reads it.
+      </p>
+    </section>
+
+    <section>
+      <h2>Permissions</h2>
+      <p>
+        Rhythm asks for none, at launch or afterwards. It uses no camera, no microphone, no
+        location, no contacts, no photo library and no notifications, and it declares no permission
+        strings — which is why no prompt appears when you open it.
+      </p>
+    </section>
+
+    <section>
+      <h2>Diagnostics</h2>
+      <p>
+        While the click is running, Rhythm writes a few timing markers into your device's own
+        system log, which is where iOS keeps that kind of thing. They can be read on the device, by
+        whoever is holding it, and they are readable nowhere else. Nothing is uploaded, aggregated
+        or sent to me.
+      </p>
+    </section>
+
+    <section>
+      <h2>The link inside the app</h2>
+      <p>
+        The App Store requires Rhythm to carry a link to this page, and it does, on the About
+        screen. Tapping it hands the address to your browser; Rhythm does not fetch the page,
+        embeds no web view, and has no way to learn whether you opened it.
+      </p>
+    </section>
+
+    <section>
+      <h2>Children</h2>
+      <p>Rhythm is rated 4+. It collects nothing from anyone, of any age.</p>
+    </section>
+
+    <section>
+      <h2>Changes</h2>
+      <p>
+        If this policy changes, the new version will be at this address, with the date it changed.
+        There is no mailing list to announce it on, because there is no list.
+      </p>
+    </section>
+
+    <section>
+      <h2>Contact</h2>
+      <p>Write to <a href="mailto:geoff@zorched.net">geoff@zorched.net</a>.</p>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  /* Same scale as /rhythm/ — docs/wordmark-and-type.md §3. */
+  main {
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+    max-width: 640px;
+    padding: clamp(48px, 7vw, 72px) 0 clamp(40px, 6vw, 64px);
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  header {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-bottom: 8px;
+  }
+
+  .back {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    align-self: flex-start;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .back svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+    flex-shrink: 0;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(34px, 5vw, 44px);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+
+  .date {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.35;
+  }
+
+  section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .lede {
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--bright);
+  }
+
+  /* The app spells its own screens this way; italics would read as emphasis rather
+     than as a name, so these are set in the brighter text colour instead. */
+  em {
+    font-style: normal;
+    color: var(--soft);
+  }
+</style>

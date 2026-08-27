@@ -22,6 +22,17 @@
   --pad-x: clamp(24px, 6vw, 88px);
 }
 
+/* The /rhythm section wears the app's own accent rather than the site's amber.
+   docs/design/BRAND.md §3 in the Rhythm repo is where these two values come from;
+   docs/wordmark-and-type.md §3 there is the type scale the section's pages use.
+   Custom properties inherit, so setting them on .page reaches the masthead and
+   footer too — the section is accented, not just its prose. */
+.page[data-section='rhythm'] {
+  --accent: #2fa98b;
+  --accent-hover: #62c6a9;
+  --rhythm-ground: #0b1f1d;
+}
+
 *,
 *::before,
 *::after {

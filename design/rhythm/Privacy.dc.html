@@ -1,0 +1,105 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap">
+  <style>
+    body { margin: 0; background: #0f1215; }
+    a { color: #2fa98b; text-decoration: none; }
+    a:hover { color: #62c6a9; }
+    p { text-wrap: pretty; }
+  </style>
+</helmet>
+
+<div style="background: #0f1215; color: #a9a59d; font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif; font-size: 17px; font-weight: 400; line-height: 1.6; padding: 64px 88px 72px; display: flex; flex-direction: column; gap: 72px; min-height: 100%; box-sizing: border-box;">
+
+  <!-- masthead -->
+  <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 24px;">
+    <a href="#" style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: #6e6a63;">zorched.net</a>
+    <div style="display: flex; gap: 30px; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.08em;">
+      <a href="#">About</a>
+      <a href="#">Writing</a>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 44px; max-width: 640px;">
+
+    <!-- title block -->
+    <div style="display: flex; flex-direction: column; gap: 18px;">
+      <a href="#" style="display: flex; align-items: center; gap: 10px; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; flex-shrink: 0;" aria-hidden="true">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="11 18 5 12 11 6"></polyline>
+        </svg>
+        <span>Rhythm</span>
+      </a>
+      <h1 style="margin: 0; font-size: 44px; font-weight: 500; letter-spacing: -0.03em; line-height: 1.05; color: #f0ede7;">Privacy policy</h1>
+      <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #4a4741;">Last updated 27 August 2026</span>
+    </div>
+
+    <p style="margin: 0; font-size: 22px; line-height: 1.5; color: #f0ede7;">Rhythm collects no data.</p>
+
+    <p style="margin: 0;">There is no account, no analytics, no tracking, and no code in it from anyone else. There is no network code in it at all — the app links no networking framework, so it makes no requests, sends nothing anywhere, and works with the network off. Its App Store privacy label reads <em style="color: #cbc7bf; font-style: normal;">Data Not Collected</em>, and that is not a promise about how the data is handled. There is no channel for it to travel down.</p>
+
+    <div style="display: flex; flex-direction: column; gap: 36px;">
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <h2 style="margin: 0; font-size: 22px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.35; color: #f0ede7;">What Rhythm stores, and where</h2>
+        <p style="margin: 0;">Everything you make in Rhythm stays on your device, in the app's own storage: your presets and folders, your songs, setlists and practice routines, your practice history, your settings, and any sound you import. Nobody else can see it, and that includes me. Deleting the app removes all of it.</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <h2 style="margin: 0; font-size: 22px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.35; color: #f0ede7;">What leaves your device</h2>
+        <p style="margin: 0;">Only what you send yourself. <em style="color: #cbc7bf; font-style: normal;">Settings &rsaquo; Data &rsaquo; Back up</em> writes one file holding your library, and where it goes next is your decision, made in the iOS share sheet. Rhythm has no other way out.</p>
+        <p style="margin: 0;">If you back up your iPhone or iPad, iOS includes Rhythm's storage in that backup, along with every other app's. That backup is made by the system, under your own Apple Account, and Rhythm neither performs it nor reads it.</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <h2 style="margin: 0; font-size: 22px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.35; color: #f0ede7;">Permissions</h2>
+        <p style="margin: 0;">Rhythm asks for none, at launch or afterwards. It uses no camera, no microphone, no location, no contacts, no photo library and no notifications, and it declares no permission strings — which is why no prompt appears when you open it.</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <h2 style="margin: 0; font-size: 22px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.35; color: #f0ede7;">Diagnostics</h2>
+        <p style="margin: 0;">While the click is running, Rhythm writes a few timing markers into your device's own system log, which is where iOS keeps that kind of thing. They can be read on the device, by whoever is holding it, and they are readable nowhere else. Nothing is uploaded, aggregated or sent to me.</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <h2 style="margin: 0; font-size: 22px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.35; color: #f0ede7;">The link inside the app</h2>
+        <p style="margin: 0;">The App Store requires Rhythm to carry a link to this page, and it does, on the About screen. Tapping it hands the address to your browser; Rhythm does not fetch the page, embeds no web view, and has no way to learn whether you opened it.</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <h2 style="margin: 0; font-size: 22px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.35; color: #f0ede7;">Children</h2>
+        <p style="margin: 0;">Rhythm is rated 4+. It collects nothing from anyone, of any age.</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <h2 style="margin: 0; font-size: 22px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.35; color: #f0ede7;">Changes</h2>
+        <p style="margin: 0;">If this policy changes, the new version will be at this address, with the date it changed. There is no mailing list to announce it on, because there is no list.</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <h2 style="margin: 0; font-size: 22px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.35; color: #f0ede7;">Contact</h2>
+        <p style="margin: 0;">Write to <a href="#">geoff@zorched.net</a>.</p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- site footer -->
+  <div style="margin-top: auto; padding-top: 40px; border-top: 1px solid #22262a; display: flex; justify-content: space-between; align-items: baseline; gap: 32px; font-size: 15px; color: #6e6a63;">
+    <span style="max-width: 520px;">I wrote here regularly between 2005 and 2014. Those posts are <a href="#">still up</a>, at the addresses they've always had.</span>
+    <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; color: #4a4741; white-space: nowrap;">Windsor, Ontario &middot; 2026</span>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

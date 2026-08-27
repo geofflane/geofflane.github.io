@@ -7,12 +7,16 @@ interface Props {
   title?: string;
   description?: string;
   current?: 'about' | 'writing';
+  /** Names a sub-section that restyles the page shell. See `.page[data-section]`
+      in global.css — /rhythm swaps the accent for the app's own. */
+  section?: 'rhythm';
 }
 
 const {
   title,
   description = 'Geoff Lane — software developer since 1999, in Windsor, Ontario.',
   current,
+  section,
 } = Astro.props;
 
 const pageTitle = title ? `${title} — Geoff Lane` : 'Geoff Lane';
@@ -41,7 +45,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     />
   </head>
   <body>
-    <div class="page">
+    <div class="page" data-section={section}>
       <Masthead current={current} />
       <slot />
       <SiteFooter />

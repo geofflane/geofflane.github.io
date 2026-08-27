@@ -1,0 +1,640 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import restingDark from '../../assets/rhythm/resting-dark.png';
+import stageDark from '../../assets/rhythm/stage-dark.png';
+import ipadRestingLight from '../../assets/rhythm/ipad-resting-light.png';
+import phoneBarLandscape from '../../assets/rhythm/phone-bar-landscape.png';
+import phoneSong from '../../assets/rhythm/phone-song.png';
+import phoneLandscapeLight from '../../assets/rhythm/phone-landscape-light.png';
+
+// 🔴 Placeholder. Rhythm has not been submitted, so there is no App Store page yet.
+// When there is one, put the address here and the button stops announcing itself as
+// unfinished. Nothing else on this page changes.
+const appStoreURL: string | null = null;
+
+// The store's own copy, from `docs/store-listing.md` §2 in the Rhythm repository.
+// That file is asserted by `StoreListingTests`, and its §6 lists the claims v1
+// cannot support — check it before adding a sentence here.
+const features = [
+  {
+    label: 'Two rhythms at once',
+    body: 'A polyrhythm spreads each layer across the same bar. A polymeter counts a bar of its own length until the two come round together. Divide the beat by anything from two to eight, swing the eighths as far as you want them to lean, and tap any click in the bar to change its weight.',
+  },
+  {
+    label: 'Practice',
+    body: 'Silence: the click stops for the bars you choose and keeps counting, so you find out whether you are still with it when it comes back. Dropped clicks are left out at random, and everything you do hear is exactly in time. Off the beat moves the click to a subdivision, so you place the beat yourself.',
+  },
+  {
+    label: 'Tempo ramp',
+    body: 'Speed up or slow down over bars, repetitions or seconds, on three curves, with an optional drop back after each rise. A session timer starts with the click, and a log records what you practised and at what tempo — on this device, and nowhere else.',
+  },
+  {
+    label: 'Sound',
+    body: 'Five click sounds. Each kind of click — accent, normal, soft, and the clicks between the beats — has its own sound, pitch and level. Import your own short WAV, AIFF or M4A, and remove it again. Rhythm plays through the silent switch and mixes with a backing track.',
+  },
+];
+---
+
+<BaseLayout
+  title="Rhythm"
+  section="rhythm"
+  description="Rhythm is a metronome and a practice tool for iPhone and iPad. It works offline, and it collects nothing."
+>
+  <main>
+    <section class="hero">
+      <div class="pitch">
+        <div class="lockup">
+          <div class="mark-and-word">
+            {/* The app icon, from docs/design/assets/rhythm-icon-light.svg in the Rhythm
+                repository. Geometry per BRAND.md §2 as amended at Step 28b — do not nudge
+                the circles; the spacing was set by looking at it at 29px. The rounded
+                corner is drawn here because iOS masks the shipped icon and a web page
+                does not. Lockup ratios are wordmark-and-type.md §2: mark height is
+                1.6 × cap height and the gap is 0.6 × the mark, off a 56px display size. */}
+            <svg class="mark" viewBox="0 0 1024 1024" aria-hidden="true">
+              <rect width="1024" height="1024" rx="229" fill="#0F3A33"></rect>
+              <circle cx="247.5" cy="512" r="145" fill="#F2EFE8"></circle>
+              <circle cx="510" cy="512" r="62.5" fill="#ADADA8"></circle>
+              <circle cx="685" cy="512" r="62.5" fill="#ADADA8"></circle>
+              <circle cx="860" cy="512" r="62.5" fill="#ADADA8"></circle>
+            </svg>
+            <h1>Rhythm</h1>
+          </div>
+          <span class="descriptor">Metronome &amp; practice tool</span>
+        </div>
+
+        <p class="lede">
+          A metronome that handles compound and additive metres correctly, and remembers the
+          songs, sets and routines you practise. Everything works offline. Nothing is collected.
+        </p>
+
+        {/* Until there is an App Store page, this is deliberately not a link: a dead
+            "Download" button is worse than an honest disabled one. Setting `appStoreURL`
+            above turns it into a real button and drops the "Coming soon" chip. */}
+        <div class="cta">
+          {
+            appStoreURL ? (
+              <a class="button" href={appStoreURL}>Download on the App Store</a>
+            ) : (
+              <>
+                <span class="button pending" aria-disabled="true">Download on the App Store</span>
+                <span class="chip">Coming soon</span>
+              </>
+            )
+          }
+        </div>
+
+        <span class="spec">iPhone and iPad &middot; iOS 18 or later &middot; English</span>
+      </div>
+
+      <Image
+        class="shot"
+        src={restingDark}
+        alt="The Rhythm metronome at rest: a row of four beat marks above 4/4 and 120 BPM."
+        width={600}
+        loading="eager"
+      />
+    </section>
+
+    {/* The bar is the screen the app is actually about, so it gets a section rather than a
+        cell in the grid. This capture is docs/store-listing.md §7's missing row 3 — the
+        sheet cannot be rendered honestly by the screenshot harness and had to be taken on
+        a device, which is what this is. */}
+    <section class="bar">
+      <div class="prose narrow">
+        <h2>The bar</h2>
+        <p>
+          20 to 500 BPM, and time signatures from 1 to 32 over 1, 2, 4, 8, 16 or 32. Compound
+          metres are counted the way you count them: 6/8 is two dotted-quarter pulses, not six
+          eighths. Additive metres are written the way you say them, 3+2+2, and the click marks
+          each group, not only the bar line.
+        </p>
+        <p>
+          Divide the beat by anything from two to eight, swing the eighths as far as you want them
+          to lean, and tap any click in the bar to change its weight.
+        </p>
+      </div>
+      <figure class="landscape">
+        <Image
+          class="shot"
+          src={phoneBarLandscape}
+          alt="The bar sheet: the time signature, the weight of every click in the bar, how each beat splits, and the swing."
+          width={1400}
+        />
+        <figcaption>The bar &middot; every click in it, and what it splits into</figcaption>
+      </figure>
+    </section>
+
+    <section class="features">
+      {
+        features.map((feature) => (
+          <div class="feature">
+            <span class="label">{feature.label}</span>
+            <p>{feature.body}</p>
+          </div>
+        ))
+      }
+    </section>
+
+    <section class="songs">
+      <div class="prose">
+        <h2>Songs, sets and routines</h2>
+        <p>
+          A song is an ordered list of sections, each with its own bar, tempo and repeats, and a
+          tempo that can move across a section. A setlist plays songs and presets in the order you
+          arrange them. A routine plays your presets one after another, for as long as you set,
+          with rests between them.
+        </p>
+        <p>
+          Save any setup as a preset — the tempo, the bar, the weights, the sounds and any
+          exercise, exactly as they are. There is no limit, and they file into folders.
+        </p>
+      </div>
+      <Image
+        class="shot"
+        src={phoneSong}
+        alt="A song open: In the Hall of the Mountain King, with its sections listed at their own tempo, metre and length."
+        width={620}
+      />
+    </section>
+
+    {/* NFR-502 and FR-1305. Every capture here is of the app itself: light and dark are
+        the system appearance rather than a setting, and the iPad and landscape layouts
+        are drawn for those sizes rather than stretched from the phone. */}
+    <section class="devices">
+      <div class="prose narrow">
+        <h2>Every screen you have</h2>
+        <p>
+          iPhone and iPad, portrait and landscape, each with a layout of its own rather than the
+          phone's stretched. Rhythm follows the system appearance, light or dark, and holds its
+          composition at the accessibility text sizes without truncating anything.
+        </p>
+      </div>
+
+      <div class="portraits">
+        <figure class="ipad">
+          <Image
+            class="shot"
+            src={ipadRestingLight}
+            alt="Rhythm on iPad in light appearance: the beat row drawn as rings, with the metre and tempo side by side."
+            width={720}
+          />
+          <figcaption>iPad &middot; light &middot; ringed marks</figcaption>
+        </figure>
+        <figure class="wide">
+          <Image
+            class="shot"
+            src={phoneLandscapeLight}
+            alt="Rhythm on iPhone in landscape: the beat row across the top, the metre and tempo side by side beneath it."
+            width={1200}
+          />
+          <figcaption>iPhone &middot; landscape &middot; at a large text size</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="stage">
+      <Image
+        class="shot"
+        src={stageDark}
+        alt="Stage mode: the song and section, the tempo and metre, and the beat drawn large."
+        width={560}
+      />
+      <div class="prose">
+        <h2>On stage</h2>
+        <p>
+          Stage mode is a full screen for performing: the beat drawn large enough to read from a
+          monitor position, with the song and section you are on, and your notes. It is tap-locked,
+          it holds the screen awake, it can raise the brightness, and it can stop at the end of the
+          piece.
+        </p>
+        <p>
+          A hardware keyboard or a Bluetooth foot pedal can start, stop and move the tempo, and
+          every key is remappable. There is an output offset for Bluetooth, which iOS does not
+          correct on its own.
+        </p>
+      </div>
+    </section>
+
+    {/* FR-1307. Stated at exactly its true size, with both of its limits — see
+        docs/store-listing.md §5. It is the haptic click and not a visual mode. */}
+    <section class="prose narrow">
+      <h2>If you cannot hear the click</h2>
+      <p>
+        On iPhone the beat can be a tap you can feel, alongside the sound or instead of it, which
+        makes Rhythm usable by Deaf and hard-of-hearing musicians. It needs an iPhone 8 or later.
+        iOS switches haptics off whenever Rhythm is not the app in front, so a felt session is a
+        screen-on session, and Rhythm holds the screen awake while it delivers the beat.
+      </p>
+      <p>
+        Every control is labelled for VoiceOver, and the layout works at the accessibility text
+        sizes without truncating anything.
+      </p>
+    </section>
+
+    {/* NFR-407's four denials, in the app's own words — this is `about.commitment` and
+        `about.commitment.footer` from the String Catalog. NFR-407a: the word "free" is
+        deliberately absent. Every claim here survives a future one-time price. */}
+    <section class="commitment">
+      <span class="label">What Rhythm does not do</span>
+      <p class="denials">
+        There is no subscription and no recurring charge. There is no advertising. There is no
+        account, and nothing here asks who you are. Rhythm collects no data: no analytics, no
+        tracking, and no code from anyone else.
+      </p>
+      <p>
+        There is no network code in Rhythm at all, which is why it works with the network off and
+        asks for no permission when you open it. Your library, your practice log and the sounds you
+        import stay on this device.
+      </p>
+      <a class="label link" href="/rhythm/privacy/">Privacy policy &rarr;</a>
+    </section>
+
+    <section class="support">
+      <span class="label quiet">Support</span>
+      <p>
+        Help lives inside the app: there is a quick start on the first screen, and nothing here
+        needs a web page to learn. If something is wrong — or a metre is counted in a way you do not
+        recognise — write to me, and say which device you are on and which version you have. The
+        version is at the bottom of Settings, under About.
+      </p>
+      <a href="mailto:geoff@zorched.net">geoff@zorched.net</a>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  /* The type scale is docs/wordmark-and-type.md §3 in the Rhythm repository, which is
+     the scale that document defines for a site: display 56/500/-3.5%, heading 22/500/-2%,
+     body 17/400/1.6 at a measure of 68 characters, mono labels 11 uppercase +0.16em.
+     It is deliberately not the site's own 18/300 body — this section follows the app's
+     hand-off so the page and the store listing cannot drift apart. */
+  main {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(64px, 8vw, 96px);
+    padding: clamp(56px, 8vw, 92px) 0 clamp(40px, 6vw, 64px);
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  p {
+    margin: 0;
+    max-width: 34em; /* ≈ 68 characters */
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.35;
+  }
+
+  .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .label.quiet {
+    color: var(--faint);
+  }
+
+  /* --- hero ------------------------------------------------------------ */
+
+  .hero {
+    display: flex;
+    gap: clamp(40px, 6vw, 80px);
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .pitch {
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+    flex: 1 1 420px;
+    max-width: 620px;
+  }
+
+  .lockup {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .mark-and-word {
+    display: flex;
+    align-items: center;
+    gap: 37px; /* 0.6 × the mark */
+  }
+
+  .mark {
+    display: block;
+    flex-shrink: 0;
+    width: 63px; /* 1.6 × the cap height of 56px Plex Sans, ≈39px */
+    height: 63px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 56px;
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1;
+  }
+
+  .descriptor {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-left: 100px; /* the mark plus its gap: aligned to the word's leading edge */
+  }
+
+  .lede {
+    font-size: 22px;
+    line-height: 1.55;
+    color: var(--soft);
+    max-width: 28em;
+  }
+
+  .cta {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  .button {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--rhythm-ground);
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    padding: 15px 30px;
+    border-radius: 999px;
+  }
+
+  .button:hover {
+    background: var(--accent-hover);
+    color: var(--rhythm-ground);
+  }
+
+  /* The inert state. Flat, outlined and in the secondary text colour, so it cannot be
+     mistaken for something that will respond to a tap. */
+  .button.pending {
+    background: none;
+    color: var(--muted);
+    border: 1px solid var(--rule);
+    padding: 14px 29px;
+    cursor: default;
+  }
+
+  .chip {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: var(--rhythm-ground);
+    padding: 9px 16px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .spec {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  /* The captures are of the app itself, from docs/screenshots-step67. They carry no
+     status bar, because the harness that writes them renders into a window with no
+     safe area — see docs/store-listing.md §7. Framed with a hairline rather than a
+     drawn device, which would be a lie about a bezel. */
+  .shot {
+    width: 300px;
+    height: auto;
+    flex-shrink: 0;
+    border: 1px solid var(--rule);
+    border-radius: 28px;
+    display: block;
+  }
+
+  /* --- features -------------------------------------------------------- */
+
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    column-gap: 72px;
+    row-gap: 52px;
+  }
+
+  .feature {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* --- devices ---------------------------------------------------------- */
+
+  .devices {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .portraits {
+    display: flex;
+    gap: clamp(24px, 4vw, 48px);
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  figure {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  figcaption {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  /* Each capture is a different aspect, so each gets its own width rather than a shared
+     one: matching the phone's width would shrink the iPad's type past reading. */
+  .portraits .ipad .shot {
+    width: 320px;
+  }
+
+  .portraits .wide {
+    flex: 1 1 400px;
+  }
+
+  .portraits .wide .shot {
+    width: 100%;
+    border-radius: 18px;
+  }
+
+  /* --- the bar ---------------------------------------------------------- */
+
+  .bar {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  /* The bar sheet is a landscape capture, so it takes the full measure rather than
+     sitting in a column beside its copy. */
+  .landscape .shot {
+    width: 100%;
+    border-radius: 20px;
+  }
+
+  .landscape {
+    align-self: stretch;
+  }
+
+  /* --- songs ------------------------------------------------------------ */
+
+  .songs {
+    display: flex;
+    gap: clamp(40px, 6vw, 80px);
+    align-items: center;
+    flex-wrap: wrap;
+    flex-direction: row-reverse;
+  }
+
+  .songs .shot {
+    width: 300px;
+  }
+
+  /* --- stage ----------------------------------------------------------- */
+
+  .stage {
+    display: flex;
+    gap: clamp(40px, 6vw, 80px);
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .stage .shot {
+    width: 280px;
+  }
+
+  .prose {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1 1 380px;
+  }
+
+  .narrow {
+    max-width: 660px;
+  }
+
+  /* --- the four denials ------------------------------------------------ */
+
+  .commitment {
+    background: var(--panel);
+    border: 1px solid var(--hairline);
+    border-radius: 4px;
+    padding: clamp(36px, 5vw, 56px) clamp(28px, 5vw, 64px);
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    align-items: flex-start;
+  }
+
+  .denials {
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--bright);
+    max-width: 36em;
+  }
+
+  .link {
+    color: var(--accent);
+  }
+
+  .link:hover {
+    color: var(--accent-hover);
+  }
+
+  /* --- support --------------------------------------------------------- */
+
+  .support {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+    max-width: 660px;
+  }
+
+  @media (max-width: 720px) {
+    .mark-and-word {
+      gap: 26px;
+    }
+
+    .mark {
+      width: 45px;
+      height: 45px;
+    }
+
+    h1 {
+      font-size: 40px;
+    }
+
+    .descriptor {
+      padding-left: 71px;
+    }
+
+    .lede {
+      font-size: 20px;
+    }
+
+    .denials {
+      font-size: 20px;
+    }
+
+    .button {
+      flex: 1 1 100%;
+      text-align: center;
+    }
+
+    .shot,
+    .stage .shot {
+      width: 100%;
+      border-radius: 24px;
+    }
+
+    .portraits {
+      flex-direction: column;
+    }
+
+    .portraits .ipad .shot {
+      width: 100%;
+    }
+
+    .songs .shot {
+      width: 100%;
+    }
+  }
+</style>

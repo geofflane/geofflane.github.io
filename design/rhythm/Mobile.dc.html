@@ -1,0 +1,157 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap">
+  <style>
+    body { margin: 0; background: #0f1215; }
+    a { color: #2fa98b; text-decoration: none; }
+    a:hover { color: #62c6a9; }
+    p { text-wrap: pretty; }
+  </style>
+</helmet>
+
+<div style="background: #0f1215; color: #a9a59d; font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif; font-size: 17px; font-weight: 400; line-height: 1.6; padding: 40px 24px 48px; display: flex; flex-direction: column; gap: 64px; min-height: 100%; box-sizing: border-box;">
+
+  <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px;">
+    <a href="#" style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: #6e6a63;">zorched.net</a>
+    <div style="display: flex; gap: 22px; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.08em;">
+      <a href="#">About</a>
+      <a href="#">Writing</a>
+    </div>
+  </div>
+
+  <!-- hero -->
+  <div style="display: flex; flex-direction: column; gap: 32px;">
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 26px;">
+        <svg width="45" height="45" viewBox="0 0 1024 1024" style="display: block; flex-shrink: 0;" aria-hidden="true">
+          <rect width="1024" height="1024" rx="229" fill="#0F3A33"></rect>
+          <circle cx="247.5" cy="512" r="145" fill="#F2EFE8"></circle>
+          <circle cx="510" cy="512" r="62.5" fill="#ADADA8"></circle>
+          <circle cx="685" cy="512" r="62.5" fill="#ADADA8"></circle>
+          <circle cx="860" cy="512" r="62.5" fill="#ADADA8"></circle>
+        </svg>
+        <h1 style="margin: 0; font-size: 40px; font-weight: 500; letter-spacing: -0.035em; line-height: 1; color: #f0ede7;">Rhythm</h1>
+      </div>
+      <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #6e6a63; padding-left: 71px;">Metronome &amp; practice tool</span>
+    </div>
+
+    <p style="margin: 0; font-size: 20px; line-height: 1.55; color: #cbc7bf;">A metronome that handles compound and additive metres correctly, and remembers the songs, sets and routines you practise. Everything works offline. Nothing is collected.</p>
+
+    <div style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start;">
+      <span style="display: block; background: none; color: #6e6a63; border: 1px solid #22262a; font-size: 17px; font-weight: 500; letter-spacing: -0.01em; padding: 15px 27px; border-radius: 999px; text-align: center; align-self: stretch;">Download on the App Store</span>
+      <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; background: #2fa98b; color: #0b1f1d; padding: 9px 16px; border-radius: 999px;">Coming soon</span>
+    </div>
+
+    <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #4a4741;">iPhone and iPad &middot; iOS 18 or later &middot; English</span>
+
+    <img src="resting-dark.png" alt="The Rhythm metronome at rest: four beat marks, 4/4, 120 BPM." style="width: 100%; height: auto; border: 1px solid #22262a; border-radius: 24px; display: block;">
+
+  </div>
+
+  <!-- the bar -->
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <h2 style="margin: 0; font-size: 22px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.35; color: #f0ede7;">The bar</h2>
+    <p style="margin: 0;">20 to 500 BPM, and time signatures from 1 to 32 over 1, 2, 4, 8, 16 or 32. Compound metres are counted the way you count them: 6/8 is two dotted-quarter pulses, not six eighths. Additive metres are written the way you say them, 3+2+2, and the click marks each group, not only the bar line.</p>
+    <p style="margin: 0;">Divide the beat by anything from two to eight, swing the eighths as far as you want them to lean, and tap any click in the bar to change its weight.</p>
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <img src="phone-bar-landscape.png" alt="The bar sheet: the time signature, the weight of every click in the bar, how each beat splits, and the swing." style="width: 100%; height: auto; border: 1px solid #22262a; display: block; border-radius: 14px;">
+      <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #4a4741;">The bar &middot; every click in it</span>
+    </div>
+  </div>
+
+  <!-- features -->
+  <div style="display: flex; flex-direction: column; gap: 44px;">
+
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #2fa98b;">Two rhythms at once</span>
+      <p style="margin: 0;">A polyrhythm spreads each layer across the same bar. A polymeter counts a bar of its own length until the two come round together. Divide the beat by anything from two to eight, swing the eighths as far as you want them to lean, and tap any click in the bar to change its weight.</p>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #2fa98b;">Practice</span>
+      <p style="margin: 0;">Silence: the click stops for the bars you choose and keeps counting, so you find out whether you are still with it when it comes back. Dropped clicks are left out at random, and everything you do hear is exactly in time. Off the beat moves the click to a subdivision, so you place the beat yourself.</p>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #2fa98b;">Tempo ramp</span>
+      <p style="margin: 0;">Speed up or slow down over bars, repetitions or seconds, on three curves, with an optional drop back after each rise. A session timer starts with the click, and a log records what you practised and at what tempo — on this device, and nowhere else.</p>
+    </div>
+
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #2fa98b;">Sound</span>
+      <p style="margin: 0;">Five click sounds. Each kind of click — accent, normal, soft, and the clicks between the beats — has its own sound, pitch and level. Import your own short WAV, AIFF or M4A, and remove it again. Rhythm plays through the silent switch and mixes with a backing track.</p>
+    </div>
+
+  </div>
+
+  <!-- songs, sets and routines -->
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <h2 style="margin: 0; font-size: 22px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.35; color: #f0ede7;">Songs, sets and routines</h2>
+    <img src="phone-song.png" alt="A song open: In the Hall of the Mountain King, with its sections listed at their own tempo, metre and length." style="width: 100%; height: auto; border: 1px solid #22262a; display: block; border-radius: 24px;">
+    <p style="margin: 0;">A song is an ordered list of sections, each with its own bar, tempo and repeats, and a tempo that can move across a section. A setlist plays songs and presets in the order you arrange them. A routine plays your presets one after another, for as long as you set, with rests between them.</p>
+    <p style="margin: 0;">Save any setup as a preset — the tempo, the bar, the weights, the sounds and any exercise, exactly as they are. There is no limit, and they file into folders.</p>
+  </div>
+
+  <!-- every screen you have -->
+  <div style="display: flex; flex-direction: column; gap: 32px;">
+    <h2 style="margin: 0; font-size: 22px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.35; color: #f0ede7;">Every screen you have</h2>
+    <p style="margin: 0;">iPhone and iPad, portrait and landscape, each with a layout of its own rather than the phone's stretched. Rhythm follows the system appearance, light or dark, and holds its composition at the accessibility text sizes without truncating anything.</p>
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <img src="ipad-resting-light.png" alt="Rhythm on iPad in light appearance: the beat row drawn as rings, with the metre and tempo side by side." style="width: 100%; height: auto; border: 1px solid #22262a; border-radius: 24px; display: block;">
+      <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #4a4741;">iPad &middot; light &middot; ringed marks</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <img src="phone-landscape-light.png" alt="Rhythm on iPhone in landscape: the beat row across the top, the metre and tempo side by side beneath it." style="width: 100%; height: auto; border: 1px solid #22262a; border-radius: 16px; display: block;">
+      <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #4a4741;">iPhone &middot; landscape &middot; at a large text size</span>
+    </div>
+  </div>
+
+  <!-- stage mode -->
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <h2 style="margin: 0; font-size: 22px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.35; color: #f0ede7;">On stage</h2>
+    <img src="stage-dark.png" alt="Stage mode: the song and section, the tempo and metre, and the beat drawn large." style="width: 100%; height: auto; border: 1px solid #22262a; border-radius: 24px; display: block;">
+    <p style="margin: 0;">Stage mode is a full screen for performing: the beat drawn large enough to read from a monitor position, with the song and section you are on, and your notes. It is tap-locked, it holds the screen awake, it can raise the brightness, and it can stop at the end of the piece.</p>
+    <p style="margin: 0;">A hardware keyboard or a Bluetooth foot pedal can start, stop and move the tempo, and every key is remappable. There is an output offset for Bluetooth, which iOS does not correct on its own.</p>
+  </div>
+
+  <!-- haptics -->
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <h2 style="margin: 0; font-size: 22px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.35; color: #f0ede7;">If you cannot hear the click</h2>
+    <p style="margin: 0;">On iPhone the beat can be a tap you can feel, alongside the sound or instead of it, which makes Rhythm usable by Deaf and hard-of-hearing musicians. It needs an iPhone 8 or later. iOS switches haptics off whenever Rhythm is not the app in front, so a felt session is a screen-on session, and Rhythm holds the screen awake while it delivers the beat.</p>
+    <p style="margin: 0;">Every control is labelled for VoiceOver, and the layout works at the accessibility text sizes without truncating anything.</p>
+  </div>
+
+  <!-- the four denials -->
+  <div style="background: #15191d; border: 1px solid #1c2024; border-radius: 4px; padding: 36px 28px; display: flex; flex-direction: column; gap: 24px;">
+    <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #2fa98b;">What Rhythm does not do</span>
+    <p style="margin: 0; font-size: 20px; line-height: 1.5; color: #f0ede7;">There is no subscription and no recurring charge. There is no advertising. There is no account, and nothing here asks who you are. Rhythm collects no data: no analytics, no tracking, and no code from anyone else.</p>
+    <p style="margin: 0;">There is no network code in Rhythm at all, which is why it works with the network off and asks for no permission when you open it. Your library, your practice log and the sounds you import stay on this device.</p>
+    <a href="#" style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;">Privacy policy &rarr;</a>
+  </div>
+
+  <!-- support -->
+  <div style="display: flex; flex-direction: column; gap: 16px;">
+    <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #4a4741;">Support</span>
+    <p style="margin: 0;">Help lives inside the app: there is a quick start on the first screen, and nothing here needs a web page to learn. If something is wrong — or a metre is counted in a way you do not recognise — write to me, and say which device you are on and which version you have. The version is at the bottom of Settings, under About.</p>
+    <a href="#" style="font-size: 17px;">geoff@zorched.net</a>
+  </div>
+
+  <div style="margin-top: auto; padding-top: 32px; border-top: 1px solid #22262a; display: flex; flex-direction: column; gap: 16px; font-size: 15px; color: #6e6a63;">
+    <span>I wrote here regularly between 2005 and 2014. Those posts are <a href="#">still up</a>, at the addresses they've always had.</span>
+    <span style="font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; color: #4a4741;">Windsor, Ontario &middot; 2026</span>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
