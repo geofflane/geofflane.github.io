@@ -53,11 +53,11 @@ As I said above, IIS exclusively uses file extensions to map files to code to ex
 <p>Of course if that was all there was too it, this would be a much less interesting article. The trick to making this all work is to properly configure IIS. We want to handle all requests to our application using the .NET code that we have written. We don't want IIS to return 404s (Not Found) for files that don't exist since we want to implement a dynamic, virtual directory and not just deal with files on the file system.</p>
 <p>To do this, you have to remove all of the existing handlers under the Application Configuration. Then you want to map all extensions (.*) and in our case all Verbs (GET, POST, PROPFIND, MKCOL - which allows us to hopefully respond to WebDAV verbs as well) to the aspnet_isapi.dll.
 
-<img src="/wp-content/uploads/2006/01/iis_config1.png" alt="Overview of ISS configuration."/>
+<img src="/images/archive/2006/iis_config1.png" alt="Overview of ISS configuration."/>
 
 Here's the editing screen that you will see:
 
-<img src="/wp-content/uploads/2006/01/iis_config2.png" alt="Details of ISS configuration."/></p>
+<img src="/images/archive/2006/iis_config2.png" alt="Details of ISS configuration."/></p>
 <p>This was Step 1 of the proof of concept to see if we can make the WebDAV system work. Hopefully a future posting will be about the success of the implementation.</p>
 <p>This is a very non-obvious thing to do in IIS/ASP.NET, but for some applications it is a necessary thing. Of course if you have more control over the tools and language you use to implement it, then maybe you could choose something that was better suited for this application. Maybe someone else will find this useful? What do you think?</p>
 <p>Thanks to <a href="http://brennan.offwhite.net/blog/">Brennan</a> and <a href="http://www.devspot.com">Oliver</a> who work at SpiderLogic for their help with this. </p>

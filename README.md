@@ -113,13 +113,34 @@ repository settings need changing. `public/CNAME` is what keeps the custom domai
 attached — it ships in the build artifact, so deleting it would drop the site back to
 `geofflane.github.io`.
 
+## Archive assets
+
+The posts originally pointed at `/wp-content/uploads/…` on the old WordPress install,
+which went away years before this rebuild — those files were never in this repository and
+had been 404ing for a long time. Fourteen of them were recovered from the Internet
+Archive and now live under `public/`:
+
+```
+public/images/archive/<year>/   the eight embedded images and their full-size versions
+public/files/                   a slide deck and two C# sample projects
+```
+
+They sit in `public/` rather than `src/assets/` for a structural reason: archived post
+bodies are injected with `set:html`, and Astro's image pipeline only sees ESM imports it
+can resolve at build time. It cannot look inside an HTML string, so an `src/assets/`
+reference would simply 404. `public/` is the right home for anything referenced from raw
+HTML or needing a fixed URL. New images used from `.astro` pages should go in
+`src/assets/` and be imported, so they get optimised and hashed.
+
 ## Known gaps in the archive
 
-- **Eight images 404.** Posts from 2006, 2008 and 2014 reference
-  `/wp-content/uploads/…`, which died with the WordPress install years before this
-  rebuild. They were already broken. If copies turn up, drop them in `public/` at the same
-  paths and they will resolve.
-- **38 Amazon affiliate images** are also dead links, from a program long since shut down.
+- **`publish_from_ical.png` was never archived.** Only the 300px version survived, so the
+  "full size" link on that post points at the same image it displays.
+- **38 Amazon affiliate images** are dead links, from a program long since shut down.
+- **Four WordPress URLs still 404**: `/category/code/automation/`,
+  `/category/code/unit-testing/`, `/tag/mock-objects/` and `/nant-sqlschematask/`. These
+  were taxonomy and page URLs, not files, and did not survive the move to Jekyll in 2017
+  either.
 - **`/tag/clojure/`, `/tag/code/` and `/tag/java/` now 404.** Jekyll generated those three
   pages; nothing links to them any more. Tags still appear on each post, as plain text.
 - **The résumé page is gone.** It listed a 2016 role as current. The original is still in
