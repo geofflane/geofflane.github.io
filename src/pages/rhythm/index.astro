@@ -19,7 +19,7 @@ const appStoreURL: string | null = null;
 const features = [
   {
     label: 'Two rhythms at once',
-    body: 'A polyrhythm spreads each layer across the same bar. A polymeter counts a bar of its own length until the two come round together. Divide the beat by anything from two to eight, swing the eighths as far as you want them to lean, and tap any click in the bar to change its weight.',
+    body: 'A polyrhythm spreads each layer across the same bar. A polymeter counts a bar of its own length until the two come round together, which is the point at which you can hear how long "together" actually is.',
   },
   {
     label: 'Practice',
@@ -29,6 +29,17 @@ const features = [
     label: 'Tempo ramp',
     body: 'Speed up or slow down over bars, repetitions or seconds, on three curves, with an optional drop back after each rise. A session timer starts with the click, and a log records what you practised and at what tempo — on this device, and nowhere else.',
   },
+  // The silent-switch and mix-with-a-backing-track claims below are `FR-909` and `FR-908`,
+  // and they are the two on this page worth knowing the history of. Both were silently
+  // broken on every device from Step 6 until de73509 (2026-08-26): `setCategory` was handed
+  // `.allowBluetoothA2DP` alongside `.playback`, which iOS refuses with -50, so the app ran
+  // on the inherited `.soloAmbient` category and obeyed the ring switch — the exact failure
+  // `FR-909` exists to prevent. That commit records that the simulator accepts the illegal
+  // call, so no test off a device could have caught it, and none did.
+  // ✅ Confirmed by ear on hardware, 2026-08-27, by the product owner: the click is audible
+  // with the ring switch set to silent. The claim below rests on that, not on the suite.
+  // If the audio session configuration is ever touched again, it has to be re-checked the
+  // same way — this page is the Support URL Apple reads.
   {
     label: 'Sound',
     body: 'Five click sounds. Each kind of click — accent, normal, soft, and the clicks between the beats — has its own sound, pitch and level. Import your own short WAV, AIFF or M4A, and remove it again. Rhythm plays through the silent switch and mixes with a backing track.',
@@ -167,8 +178,7 @@ const features = [
         <h2>Every screen you have</h2>
         <p>
           iPhone and iPad, portrait and landscape, each with a layout of its own rather than the
-          phone's stretched. Rhythm follows the system appearance, light or dark, and holds its
-          composition at the accessibility text sizes without truncating anything.
+          phone's stretched. Rhythm follows the system appearance, light or dark.
         </p>
       </div>
 
@@ -228,8 +238,8 @@ const features = [
         screen-on session, and Rhythm holds the screen awake while it delivers the beat.
       </p>
       <p>
-        Every control is labelled for VoiceOver, and the layout works at the accessibility text
-        sizes without truncating anything.
+        Every control is labelled for VoiceOver, and at the accessibility text sizes the layout
+        reflows rather than truncating — the transport stays where it is.
       </p>
     </section>
 
@@ -259,7 +269,7 @@ const features = [
         recognise — write to me, and say which device you are on and which version you have. The
         version is at the bottom of Settings, under About.
       </p>
-      <a href="mailto:geoff@zorched.net">geoff@zorched.net</a>
+      <!--email_off--><a href="mailto:geoff@zorched.net">geoff@zorched.net</a><!--email_on-->
     </section>
   </main>
 </BaseLayout>
