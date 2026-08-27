@@ -1,0 +1,101 @@
+---
+title: "Encryption, Codecs and Unit Tests in Grails"
+pubDate: "2008-02-03 10:25:35 -0500"
+permalink: "/2008/02/03/encryption-codecs-and-unit-tests-in-grails/"
+tags: ["grails","encryption","codecs"]
+---
+<p>Certain data stored as plain text in a database is just asking for trouble these days. We hear too often about misplaced and stolen computers that contain databases full of Social Security numbers and other information that can lead to identity theft. We can help avoid these situations by encrypting those fields in a database so that if someone happens to get the data that they will have a difficult time getting the sensitive data.</p>
+<h3>Codecs</h3>
+Grails provides a very good mechanism for this encryption in its <a href="http://grails.org/doc/1.0.x/ref/Plug-ins/codecs.html">Codec support</a>. Codecs allow you to create encoders and decoders that become very easy to use in your application. Grails comes with a few useful ones built in to do things like Base64, URL, HTML, and Javascript Encoding.</p>
+<p>Anywhere you have a string you can call the encodeAs<em>CodecName</em> or decode<em>CodecName</em> to perform the encoding or decoding:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">assert</span><span style="color:#96D0FF"> "apples &#x26;amp; oranges "</span><span style="color:#F47067"> ==</span><span style="color:#96D0FF"> "apples &#x26; oranges"</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">encodeAsHTML()</span></span>
+<span class="line"><span style="color:#F47067">assert</span><span style="color:#96D0FF"> "apples &#x26; oranges "</span><span style="color:#F47067"> ==</span><span style="color:#96D0FF"> "apples &#x26;amp; oranges"</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">decodeHTML()</span></span></code></pre>
+</p>
+<p>This is a nice, generally useful utility that can be used for any kind of string conversion really. There's nothing from stopping you from creating your <em>encodeAsInteger</em> or <em>decodeShortDate</em> if that's something you need a lot of in your application.</p>
+<p>The basic format of a Codec is simple. You can create your new Codec in the <em>grails-app/utils</em> directory and it will be found automatically by Grails based on the naming convention.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> MyCodec</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#F69D50"> encode </span><span style="color:#F47067">=</span><span style="color:#F69D50"> { str </span><span style="color:#F47067">-></span></span>
+<span class="line"><span style="color:#768390">        // Implement encoding here</span></span>
+<span class="line"><span style="color:#F69D50">    }</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#F69D50"> decode </span><span style="color:#F47067">=</span><span style="color:#F69D50"> { str </span><span style="color:#F47067">-></span></span>
+<span class="line"><span style="color:#768390">        // Implement decoding here</span></span>
+<span class="line"><span style="color:#F69D50">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<h3>Encryption Codec</h3>
+In my case I wanted to create something to do encryption. Luckily this is not so hard with the javax.crypto classes. The crypto API is not the most straight forward to use in the world, but with a little bit of reading you can figure out how to encrypt and decrypt data without a lot of hassle. Basically what you see is a fairly simple encryption routine wrapped in the Grails Codec standard.</p>
+<p>As you saw from previous example, the Codec standard is really simple, so all of the complexity here is really just the encryption code.</p>
+<p>
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">import</span><span style="color:#ADBAC7"> javax.crypto.spec.SecretKeySpec</span></span>
+<span class="line"><span style="color:#F47067">import</span><span style="color:#ADBAC7"> javax.crypto.Cipher</span></span>
+<span class="line"><span style="color:#F47067">import</span><span style="color:#ADBAC7"> javax.crypto.spec.IvParameterSpec</span></span>
+<span class="line"><span style="color:#F47067">import</span><span style="color:#ADBAC7"> sun.misc.BASE64Encoder</span></span>
+<span class="line"><span style="color:#F47067">import</span><span style="color:#ADBAC7"> sun.misc.BASE64Decoder</span></span>
+<span class="line"><span style="color:#F47067">import</span><span style="color:#ADBAC7"> org.codehaus.groovy.grails.commons.ConfigurationHolder</span></span>
+<span class="line"><span style="color:#768390">/**</span></span>
+<span class="line"><span style="color:#768390">* Used for encrypting things to store in the database</span></span>
+<span class="line"><span style="color:#768390">*/</span></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> SecureCodec</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#F47067"> BASE64Decoder</span><span style="color:#F69D50"> decoder </span><span style="color:#F47067">=</span><span style="color:#F47067"> new</span><span style="color:#F47067"> BASE64Decoder</span><span style="color:#F69D50">()</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#F47067"> BASE64Encoder</span><span style="color:#F69D50"> encoder </span><span style="color:#F47067">=</span><span style="color:#F47067"> new</span><span style="color:#F47067"> BASE64Encoder</span><span style="color:#F69D50">()</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#F69D50"> encode </span><span style="color:#F47067">=</span><span style="color:#F69D50"> { str </span><span style="color:#F47067">-></span></span>
+<span class="line"><span style="color:#F47067">        Cipher</span><span style="color:#F69D50"> cipher </span><span style="color:#F47067">=</span><span style="color:#F69D50"> setupCipher(</span><span style="color:#F47067">Cipher.</span><span style="color:#6CB6FF">ENCRYPT_MODE</span><span style="color:#F69D50">, getPassword())</span></span>
+<span class="line"><span style="color:#F47067">        return</span><span style="color:#F69D50"> encoder</span><span style="color:#F47067">.</span><span style="color:#F69D50">encode(cipher</span><span style="color:#F47067">.</span><span style="color:#F69D50">doFinal(str</span><span style="color:#F47067">.</span><span style="color:#F69D50">getBytes()));</span></span>
+<span class="line"><span style="color:#F69D50">    }</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#F69D50"> decode </span><span style="color:#F47067">=</span><span style="color:#F69D50"> { str </span><span style="color:#F47067">-></span></span>
+<span class="line"><span style="color:#F47067">        Cipher</span><span style="color:#F69D50"> cipher </span><span style="color:#F47067">=</span><span style="color:#F69D50"> setupCipher(</span><span style="color:#F47067">Cipher.</span><span style="color:#6CB6FF">DECRYPT_MODE</span><span style="color:#F69D50">, getPassword())</span></span>
+<span class="line"><span style="color:#F47067">        return</span><span style="color:#F47067"> new</span><span style="color:#F47067"> String</span><span style="color:#F69D50">(cipher</span><span style="color:#F47067">.</span><span style="color:#F69D50">doFinal(decoder</span><span style="color:#F47067">.</span><span style="color:#F69D50">decodeBuffer(str)));</span></span>
+<span class="line"><span style="color:#F69D50">    }</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#DCBDFB"> getPassword</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#F47067">        return</span><span style="color:#F47067"> ConfigurationHolder.</span><span style="color:#ADBAC7">config</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">encryption</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">password</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#F47067">    private</span><span style="color:#F47067"> static</span><span style="color:#DCBDFB"> setupCipher</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">mode</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">password</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">        Cipher</span><span style="color:#ADBAC7"> cipher </span><span style="color:#F47067">=</span><span style="color:#F47067"> Cipher.</span><span style="color:#ADBAC7">getInstance(</span><span style="color:#96D0FF">"AES/CBC/PKCS5Padding"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#768390">        // setup key</span></span>
+<span class="line"><span style="color:#F47067">        byte</span><span style="color:#ADBAC7">[] keyBytes </span><span style="color:#F47067">=</span><span style="color:#F47067"> new</span><span style="color:#F47067"> byte</span><span style="color:#ADBAC7">[</span><span style="color:#6CB6FF">16</span><span style="color:#ADBAC7">];</span></span>
+<span class="line"><span style="color:#F47067">        byte</span><span style="color:#ADBAC7">[] b </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> password</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">getBytes(</span><span style="color:#96D0FF">"UTF-8"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#F47067">        int</span><span style="color:#ADBAC7"> len </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> b</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">length;</span></span>
+<span class="line"><span style="color:#F47067">        if</span><span style="color:#ADBAC7"> (len </span><span style="color:#F47067">></span><span style="color:#ADBAC7"> keyBytes</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">length)</span></span>
+<span class="line"><span style="color:#ADBAC7">            len </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> keyBytes</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">length;</span></span>
+<span class="line"><span style="color:#F47067">        System.</span><span style="color:#ADBAC7">arraycopy(b, </span><span style="color:#6CB6FF">0</span><span style="color:#ADBAC7">, keyBytes, </span><span style="color:#6CB6FF">0</span><span style="color:#ADBAC7">, len);</span></span>
+<span class="line"><span style="color:#F47067">        SecretKeySpec</span><span style="color:#ADBAC7"> keySpec </span><span style="color:#F47067">=</span><span style="color:#F47067"> new</span><span style="color:#F47067"> SecretKeySpec</span><span style="color:#ADBAC7">(keyBytes, </span><span style="color:#96D0FF">"AES"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#F47067">        IvParameterSpec</span><span style="color:#ADBAC7"> ivSpec </span><span style="color:#F47067">=</span><span style="color:#F47067"> new</span><span style="color:#F47067"> IvParameterSpec</span><span style="color:#ADBAC7">(keyBytes);</span></span>
+<span class="line"><span style="color:#ADBAC7">        cipher</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">init(mode, keySpec, ivSpec);</span></span>
+<span class="line"><span style="color:#F47067">        return</span><span style="color:#ADBAC7"> cipher</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>Another handy thing to notice is the <em>ConfigurationHolder.config</em>. This is the way to access application properties defined in Config.groovy. In a Domain class or a Controller you can get those values using <em>grailsApplication.config</em> but the grailsApplication variable is not available in Codecs or other classes. I use the Config.groovy to define an application specific secret to use for the encryption.</p>
+<h3>Testing Your Codec</h3>
+Now to confirm that the code works we can write a Unit Tests. Encryption and Codecs are the perfect example of checking an Inverse Relationships to confirm the functionality of the Codec. Basically just encode it and decode it and compare the original value to the decoded value. If they match, it worked! </p>
+<h4>As a Unit Test</h4>
+Outside the context of your running Grails application your Codec is just another Groovy class. Testing it in a Unit Test is easy though. You can just instantiate an instance of it and call the closures like they are methods.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> SecureCodecTests</span><span style="color:#F47067"> extends</span><span style="color:#6CB6FF"> GroovyTestCase</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    void</span><span style="color:#DCBDFB"> test_roundtrip_decodes_to_the_same_thing</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#F47067">        SecureCodec</span><span style="color:#ADBAC7"> codec </span><span style="color:#F47067">=</span><span style="color:#F47067"> new</span><span style="color:#F47067"> SecureCodec</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#F47067">        def</span><span style="color:#ADBAC7"> original </span><span style="color:#F47067">=</span><span style="color:#96D0FF"> "secret"</span></span>
+<span class="line"><span style="color:#F47067">        def</span><span style="color:#ADBAC7"> encoded </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> codec</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">encode(original)</span></span>
+<span class="line"><span style="color:#F47067">        def</span><span style="color:#ADBAC7"> decoded </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> codec</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">decode(encoded)</span></span>
+<span class="line"><span style="color:#F47067">        assert</span><span style="color:#ADBAC7"> original </span><span style="color:#F47067">!=</span><span style="color:#ADBAC7"> encoded</span></span>
+<span class="line"><span style="color:#F47067">        assert</span><span style="color:#ADBAC7"> encoded </span><span style="color:#F47067">!=</span><span style="color:#ADBAC7"> decoded</span></span>
+<span class="line"><span style="color:#F47067">        assert</span><span style="color:#ADBAC7"> original </span><span style="color:#F47067">==</span><span style="color:#ADBAC7"> decoded</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<h4>As an Integration Test</h4>
+If you want to be able to test it as it will be used in your Grails application though, you will need to run it as an integration test. The integration tests are loaded, instrumented and run just like they would be by the real Grails application. To do that, you just have to create the test under the <em>tests/integration</em> directory of your Grails application.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> SecureCodecTests</span><span style="color:#F47067"> extends</span><span style="color:#6CB6FF"> GroovyTestCase</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    void</span><span style="color:#DCBDFB"> test_roundtrip_decodes_to_the_same_thing</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#F47067">        def</span><span style="color:#ADBAC7"> original </span><span style="color:#F47067">=</span><span style="color:#96D0FF"> "secret"</span></span>
+<span class="line"><span style="color:#F47067">        def</span><span style="color:#ADBAC7"> encoded </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> original</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">encodeAsSecure()</span></span>
+<span class="line"><span style="color:#F47067">        def</span><span style="color:#ADBAC7"> decoded </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> encoded</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">decodeSecure()</span></span>
+<span class="line"><span style="color:#F47067">        assert</span><span style="color:#ADBAC7"> original </span><span style="color:#F47067">!=</span><span style="color:#ADBAC7"> encoded</span></span>
+<span class="line"><span style="color:#F47067">        assert</span><span style="color:#ADBAC7"> encoded </span><span style="color:#F47067">!=</span><span style="color:#ADBAC7"> decoded</span></span>
+<span class="line"><span style="color:#F47067">        assert</span><span style="color:#ADBAC7"> original </span><span style="color:#F47067">==</span><span style="color:#ADBAC7"> decoded</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>

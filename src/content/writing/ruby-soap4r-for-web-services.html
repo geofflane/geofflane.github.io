@@ -1,0 +1,76 @@
+---
+title: "Ruby SOAP4R For Web Services"
+pubDate: "2006-02-09 21:08:04 -0500"
+permalink: "/2006/02/09/ruby-soap4r-for-web-services/"
+tags: []
+---
+<p>Web Services are about sharing. SOAP Web Services are about interoperability. If you don't need to share information or services and if you don't need to interoperate with other systems or other programming languages, then why incur the overhead of doing Service Oriented Architecture (SOA)? If you don't need to share services or data, save yourself a bunch of trouble and save yourself the performance penalty and build a monolithic application. There will always be systems that need to be built to share their services with other systems though.</p>
+<p>I've (along with a <a href="http://brennan.offwhite.net/blog/">colleague</a>) been working on an example of Contract First Web Service design for a presentation. In doing so, I wanted to provide some examples in different languages (remember interoperable) to show users different ways of interacting with the service. I chose to build the service in Java using <a href="http://ws.apache.org/axis/">Apache Axis</a>. We're building a client in in ASP.NET to use the service. When it comes down to it though Java and .NET are very similar though, so I thought I would choose another language that was very different from those too.</p>
+<p>Ruby is pretty different, so I chose that.</p>
+<h3>Using SOAP4R</h3>
+Ruby comes with a package called <a href="http://dev.ctor.org/soap4r">SOAP4R</a> that handles all of the complexity of dealing with Web Services.</p>
+<p>SOAP4R offers a couple of different ways to create a web service client. I chose to use the WSDLDriverFactory which parses a WSDL file and dynamically generates service classes at runtime. </p>
+<p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">service</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> SOAP</span><span style="color:#ADBAC7">::</span><span style="color:#6CB6FF">WSDLDriverFactory</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">WSDL_URL</span><span style="color:#ADBAC7">).</span><span style="color:#DCBDFB">create_rpc_driver</span></span>
+<span class="line"><span style="color:#ADBAC7">service.</span><span style="color:#DCBDFB">generate_explicit_type</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> true</span></span>
+<span class="line"><span style="color:#ADBAC7">service.</span><span style="color:#DCBDFB">wiredump_dev</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> STDOUT</span><span style="color:#F47067"> if</span><span style="color:#ADBAC7"> $DEBUG</span></span></code></pre>
+</p>
+<p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">result</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> service.</span><span style="color:#6CB6FF">SearchContacts</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">:search</span><span style="color:#ADBAC7"> => </span><span style="color:#96D0FF">'some_name'</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#F47067">if</span><span style="color:#ADBAC7"> result.</span><span style="color:#DCBDFB">contacts</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">length</span><span style="color:#F47067"> ></span><span style="color:#6CB6FF"> 0</span></span>
+<span class="line"><span style="color:#ADBAC7">    result.</span><span style="color:#DCBDFB">contacts</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">each</span><span style="color:#ADBAC7"> { |c| </span><span style="color:#DCBDFB">print_contact</span><span style="color:#ADBAC7">(c) }</span></span>
+<span class="line"><span style="color:#F47067">else</span></span>
+<span class="line"><span style="color:#6CB6FF">    puts</span><span style="color:#96D0FF"> "No contacts found..."</span></span>
+<span class="line"><span style="color:#F47067">end</span></span></code></pre>
+</p>
+<p>Ruby is a highly dynamic language which is one of its huge strengths. SOAP4R utilizes this by generating service bindings at runtime. This is a really cool feature but it can also make it difficult to figure out exactly what's going on. To get around this I ended up doing a lot of inspection of the runtime classes that were generated. This kind of inspection can be a bit tedious.</p>
+<p>Luckily the SOAP4R package also includes some handy utilities for generating code from XSD and WSDL files. </p>
+<ul>
+<li>xsd2ruby - A tool that will read an XML Schema Definition (XSD) and create classes from the defined entities.</li>
+<li>wsdl2ruby - This tool extends the xsd2ruby tool to include creating wrapper classes for the service calls.</li>
+</ul></p>
+<p>Using these tools gives you a file/files that contain the definitions for the business entities and services so that you have something to reference as you write code. The following isn't so different, but it uses generated code from the xsd2ruby tool.</p>
+<p>The generated code will look something like:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390"># {urn:spiderlogic-com:contacts:service:v1}SearchContactsRequest</span></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> SearchContactsRequest</span></span>
+<span class="line"><span style="color:#ADBAC7">  @@schema_type </span><span style="color:#F47067">=</span><span style="color:#96D0FF"> "SearchContactsRequest"</span></span>
+<span class="line"><span style="color:#ADBAC7">  @@schema_ns </span><span style="color:#F47067">=</span><span style="color:#96D0FF"> "urn:spiderlogic-com:contacts:service:v1"</span></span>
+<span class="line"><span style="color:#ADBAC7">  @@schema_qualified </span><span style="color:#F47067">=</span><span style="color:#96D0FF"> "true"</span></span>
+<span class="line"><span style="color:#ADBAC7">  @@schema_element </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> [[</span><span style="color:#96D0FF">"query"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"SOAP::SOAPString"</span><span style="color:#ADBAC7">]]</span></span></code></pre>
+</p>
+<p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">  attr_accessor</span><span style="color:#6CB6FF"> :query</span></span></code></pre>
+</p>
+<p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> initialize</span><span style="color:#ADBAC7">(query </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> nil</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    @query </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> query</span></span>
+<span class="line"><span style="color:#F47067">  end</span></span>
+<span class="line"><span style="color:#F47067">end</span></span></code></pre>
+</p>
+<p>As you can see, it adds in extra information that SOAP will need to map it to the proper schema elements.</p>
+<p>Using this generated code, you get code like:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">require</span><span style="color:#96D0FF"> 'service'</span></span></code></pre>
+</p>
+<p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">service</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> SOAP</span><span style="color:#ADBAC7">::</span><span style="color:#6CB6FF">WSDLDriverFactory</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">WSDL_URL</span><span style="color:#ADBAC7">).</span><span style="color:#DCBDFB">create_rpc_driver</span></span>
+<span class="line"><span style="color:#ADBAC7">service.</span><span style="color:#DCBDFB">generate_explicit_type</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> true</span></span>
+<span class="line"><span style="color:#ADBAC7">service.</span><span style="color:#DCBDFB">wiredump_dev</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> STDOUT</span><span style="color:#F47067"> if</span><span style="color:#ADBAC7"> $DEBUG</span></span></code></pre>
+</p>
+<p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">result</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> service.</span><span style="color:#6CB6FF">SearchContacts</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">SearchContactsRequest</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">'some_name'</span><span style="color:#ADBAC7">))</span></span>
+<span class="line"><span style="color:#F47067">if</span><span style="color:#ADBAC7"> result.</span><span style="color:#DCBDFB">contacts</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">length</span><span style="color:#F47067"> ></span><span style="color:#6CB6FF"> 0</span></span>
+<span class="line"><span style="color:#ADBAC7">    result.</span><span style="color:#DCBDFB">contacts</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">each</span><span style="color:#ADBAC7"> { |c| </span><span style="color:#DCBDFB">print_contact</span><span style="color:#ADBAC7">(c) }</span></span>
+<span class="line"><span style="color:#F47067">else</span></span>
+<span class="line"><span style="color:#6CB6FF">    puts</span><span style="color:#96D0FF"> "No contacts found..."</span></span>
+<span class="line"><span style="color:#F47067">end</span></span></code></pre>
+</p>
+<h3>One Problem I found</h3>
+SOAP4R was originally built to support RPC Literal encoded Web Services. Support for Document Literal services is more recent. To get the service to work, I had to update to the latest trunk version from their Subversion server. Before the update I was not able to send Arrays of objects to my service. Document Literal services are preferred for Contract First design because it offers full schema validation of the soap message. Document Literal support is still a little bit rough around the edges, but I got it to work successfully.</p>

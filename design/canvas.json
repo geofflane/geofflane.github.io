@@ -1,0 +1,12 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html",    "x": 0,    "y": 0, "w": 1200, "h": 900,  "title": "Home" },
+    { "file": "About.dc.html",   "x": 1280, "y": 0, "w": 1200, "h": 1010, "title": "About" },
+    { "file": "Archive.dc.html", "x": 2560, "y": 0, "w": 1200, "h": 1120, "title": "Writing (archive index)" },
+    { "file": "Post.dc.html",    "x": 3840, "y": 0, "w": 1200, "h": 1500, "title": "Post" }
+  ],
+  "annotations": [
+    { "id": "whats-changed", "x": 0, "y": -210, "w": 620, "text": "Direction A's palette and type, without the terminal chrome, the language chips, or the archive chart.\n\nRésumé is gone from the nav. \"Archive\" is now just \"Writing\" — one quiet line on the home page rather than a feature.\n\nBio copy is drafted from your old about page so the lengths are realistic. It's yours to replace." }
+  ],
+  "launch": { "view": "canvas" }
+}

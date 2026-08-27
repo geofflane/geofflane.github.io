@@ -1,0 +1,48 @@
+---
+title: "Grails Validations Based on Related Objects"
+pubDate: "2008-08-19 19:17:11 -0400"
+permalink: "/2008/08/19/grails-validations-based-on-related-objects/"
+tags: ["grails","validation"]
+---
+<p>Grails has a rich set of tools for performing validations of your domain objects. There are quite a few <a href="http://www.grails.org/Validation+Reference">built in validations</a> that you can use. These mainly resolve around validating single properties within a single domain object. It also supports things like validating the sizes of dependent collections.</p>
+<p>Sometimes you need to know about the properties of one instance to validate another dependent instance. The property of that dependent instance might be used to determine the valid values of or might provide a limit for a property.</p>
+<p>This is more easily explained with an example.</p>
+<h3>Problem Statement</h3>
+I'll use voting for members of the Board of a public company as an example.</p>
+<p>A ShareHolder owns N number of shares of stock in a company. When the ShareHolder votes on a Board member of the company, the ShareHolder can assign 1 to N shares to that Candidate. The top 5 Candidates that receive the most Shares (not individual votes) win the election.</p>
+<p>We might create a series of Domain classes like this:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> ShareHolder</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#F69D50"> hasMany </span><span style="color:#F47067">=</span><span style="color:#F69D50"> [</span><span style="color:#6CB6FF">votes</span><span style="color:#F69D50">:</span><span style="color:#F47067">Vote</span><span style="color:#F69D50">]</span><span style="color:#F47067">&#x3C;/</span><span style="color:#F69D50">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#F47067">    String</span><span style="color:#F69D50"> name</span></span>
+<span class="line"><span style="color:#F47067">    Double</span><span style="color:#F69D50"> shares</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span><span style="color:#F47067">&#x3C;/</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">>class</span><span style="color:#F69D50"> Candidate</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#F69D50"> hasMany </span><span style="color:#F47067">=</span><span style="color:#F69D50"> [</span><span style="color:#6CB6FF">votes</span><span style="color:#F69D50">:</span><span style="color:#F47067">Vote</span><span style="color:#F69D50">]</span><span style="color:#F47067">&#x3C;/</span><span style="color:#F69D50">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#F47067">    String</span><span style="color:#F69D50"> name</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span><span style="color:#F47067">&#x3C;/</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">>class</span><span style="color:#F69D50"> Vote</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#F69D50"> belongsTo </span><span style="color:#F47067">=</span><span style="color:#F69D50"> [</span><span style="color:#6CB6FF">shareHolder</span><span style="color:#F69D50">: </span><span style="color:#F47067">ShareHolder</span><span style="color:#F69D50">, </span><span style="color:#6CB6FF">candidate</span><span style="color:#F69D50">: </span><span style="color:#F47067">Candidate</span><span style="color:#F69D50">]</span><span style="color:#F47067">&#x3C;/</span><span style="color:#F69D50">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#F47067">    Double</span><span style="color:#F69D50"> voteShares</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>A ShareHolder can vote multiple times, so it has many Votes. A Candidate can be voted for many times, so it has many Votes. A given Vote can be assigned 1 or more shares. But the shares for a given vote must be less than or equal to the number of shares that the voter (the ShareHolder) owns.</p>
+<h3>Validation</h3>
+The natural place to perform this validation is on the Vote domain object itself. The problem is that the limit is really the shares value from the ShareHolder domain object. To solve this we can not use a built in validation. Instead we need to create our own.</p>
+<p>To do this we can utilize the <a href="http://www.grails.org/Validation+Reference#validator">validator</a> validation. This is no different than any other custom validation that we might need to create. Since we must have the ShareHolder and the Candidate set for this to be a valid object, we can assume that they are available. Because of this we should be able to access their properties to validate our Vote domain object.</p>
+<p>Add a custom validator constraint:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Vote</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#F69D50"> belongsTo </span><span style="color:#F47067">=</span><span style="color:#F69D50"> [</span><span style="color:#6CB6FF">shareHolder</span><span style="color:#F69D50">: </span><span style="color:#F47067">ShareHolder</span><span style="color:#F69D50">, </span><span style="color:#6CB6FF">candidate</span><span style="color:#F69D50">: </span><span style="color:#F47067">Candidate</span><span style="color:#F69D50">]</span><span style="color:#F47067">&#x3C;/</span><span style="color:#F69D50">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#F47067">    Double</span><span style="color:#ADBAC7"> voteShares</span><span style="color:#F47067">&#x3C;/</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#F47067">    static</span><span style="color:#F69D50"> constraints </span><span style="color:#F47067">=</span><span style="color:#F69D50"> {</span></span>
+<span class="line"><span style="color:#F69D50">        voteShares(</span><span style="color:#6CB6FF">min</span><span style="color:#F69D50">: </span><span style="color:#6CB6FF">0D</span><span style="color:#F69D50">,</span></span>
+<span class="line"><span style="color:#6CB6FF">                validator</span><span style="color:#F69D50">: {</span></span>
+<span class="line"><span style="color:#F69D50">                    val, obj </span><span style="color:#F47067">-></span></span>
+<span class="line"><span style="color:#F69D50">                    val </span><span style="color:#F47067">&#x3C;=</span><span style="color:#F69D50"> obj</span><span style="color:#F47067">.</span><span style="color:#F69D50">shareHolder</span><span style="color:#F47067">?.</span><span style="color:#F69D50">shares</span></span>
+<span class="line"><span style="color:#F69D50">                })</span></span>
+<span class="line"><span style="color:#F69D50">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>As you can see, the <em>obj</em> that gets passed in is the instance that is being validated. The <em>val</em> is the value of the property being validated, in this case the <em>voteShares</em> property. All that has to be done is to compare the value of the <em>obj.shareHolder?.shares</em> too the <em>voteShares</em> property. The <em>obj.shareHolder?.</em> should protect us against a null reference in case the shareHolder isn't set. Then the validation will just fail on not having the ShareHolder.</p>
+<p>Nothing really tricky here, just something interesting I ran into recently.</p>

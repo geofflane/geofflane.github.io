@@ -1,0 +1,96 @@
+---
+title: "Coffee DSL Redone With Meta-Programming"
+pubDate: "2008-01-07 15:25:05 -0500"
+permalink: "/2008/01/07/coffee-dsl-redone-with-meta-programming/"
+tags: ["dsl","meta-programming"]
+---
+<p>In a <a href="/2007/03/05/understanding-domain-specific-languages-as-jargon/">previous post I wrote about DSLs as Jargon</a>. I implemented a simple Coffee DSL that would allow code to parse an order written by a human and turn it into a domain model. I used a fairly basic method_missing structure to capture the values.</p>
+<p>There's a much better way to do it in Ruby with meta-programming. Meta-programming allows you to write code to write code. You program your programming. In this case we can create the syntax of Coffee using a meta-programming technique.</p>
+<p><em>dsl_attr :size, %w(venti grande tall)</em></p>
+<p>This is us programming the class to say: "If someone calls a method venti, grande, or tall on our object they mean that they are telling us the size of the coffee, so store that value as the size". So now we can write our Coffee class like this:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390"># CoffeeDSL.rb</span></span>
+<span class="line"><span style="color:#768390"># This is the input from the user, likely read from a file</span></span>
+<span class="line"><span style="color:#768390"># or input through a user interface of some sort</span></span>
+<span class="line"><span style="color:#6CB6FF">CoffeeInput</span><span style="color:#F47067"> =</span><span style="color:#96D0FF"> "venti nonfat whip latte"</span></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Coffee</span></span>
+<span class="line"><span style="color:#ADBAC7">    dsl_attr </span><span style="color:#6CB6FF">:size</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">%w(venti grande tall)</span></span>
+<span class="line"><span style="color:#ADBAC7">    dsl_attr </span><span style="color:#6CB6FF">:whipped</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">%w(whip nowhip)</span></span>
+<span class="line"><span style="color:#ADBAC7">    dsl_attr </span><span style="color:#6CB6FF">:caffinated</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">%w(caf decaf halfcaf)</span></span>
+<span class="line"><span style="color:#ADBAC7">    dsl_attr </span><span style="color:#6CB6FF">:type</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">%w(regular latte cappachino)</span></span>
+<span class="line"><span style="color:#ADBAC7">    dsl_attr </span><span style="color:#6CB6FF">:milks</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">%w(milk nonfat soy)</span></span>
+<span class="line"><span style="color:#F47067">    def</span><span style="color:#DCBDFB"> order</span></span>
+<span class="line"><span style="color:#F69D50">        params</span><span style="color:#F47067"> =</span><span style="color:#96D0FF"> ''</span></span>
+<span class="line"><span style="color:#F69D50">        params</span><span style="color:#F47067"> +=</span><span style="color:#ADBAC7"> milks </span><span style="color:#F47067">+</span><span style="color:#96D0FF"> ' '</span><span style="color:#F47067"> if</span><span style="color:#ADBAC7"> milks?</span></span>
+<span class="line"><span style="color:#F69D50">        params</span><span style="color:#F47067"> +=</span><span style="color:#ADBAC7"> caffinated </span><span style="color:#F47067">+</span><span style="color:#96D0FF"> ' '</span><span style="color:#F47067"> if</span><span style="color:#ADBAC7"> caffinated?</span></span>
+<span class="line"><span style="color:#F69D50">        params</span><span style="color:#F47067"> +=</span><span style="color:#ADBAC7"> whipped </span><span style="color:#F47067">+</span><span style="color:#96D0FF"> ' '</span><span style="color:#F47067"> if</span><span style="color:#ADBAC7"> whipped?</span></span>
+<span class="line"><span style="color:#6CB6FF">        print</span><span style="color:#96D0FF"> "Ordering coffee: </span><span style="color:#F47067">#{</span><span style="color:#96D0FF">size</span><span style="color:#F47067">}</span><span style="color:#F47067"> #{</span><span style="color:#96D0FF">params</span><span style="color:#F47067">}#{</span><span style="color:#96D0FF">type</span><span style="color:#F47067">}</span><span style="color:#F47067">\n</span><span style="color:#96D0FF">"</span></span>
+<span class="line"><span style="color:#F47067">    end</span></span>
+<span class="line"><span style="color:#F47067">    def</span><span style="color:#DCBDFB"> load</span></span>
+<span class="line"><span style="color:#768390">        # turn one line into multi-line "method calls"</span></span>
+<span class="line"><span style="color:#F69D50">        cleaned</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> CoffeeInput</span><span style="color:#ADBAC7">.</span><span style="color:#6CB6FF">gsub</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">/</span><span style="color:#8DDB8C;font-weight:bold">\s</span><span style="color:#96D0FF">+/</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"</span><span style="color:#F47067">\n</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#6CB6FF">        self</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">instance_eval</span><span style="color:#ADBAC7">(cleaned)</span></span>
+<span class="line"><span style="color:#F47067">    end</span></span>
+<span class="line"><span style="color:#F47067">end</span></span></code></pre>
+</p>
+<p>We are essentially configuring the class in code. We could add extra values as well, such as a default value, required validation, any number of things. We then just need to implement the <em>dsl_attr</em> using meta-programming. That can be done in the Module in Ruby which makes that available to all classes in the system.</p>
+<p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Module</span></span>
+<span class="line"><span style="color:#F47067">    def</span><span style="color:#DCBDFB"> dsl_attr</span><span style="color:#ADBAC7">(param_name, values)</span></span>
+<span class="line"><span style="color:#F47067">        attr</span><span style="color:#ADBAC7"> param_name</span></span>
+<span class="line"><span style="color:#ADBAC7">        class_eval </span><span style="color:#96D0FF">"def </span><span style="color:#F47067">#{</span><span style="color:#96D0FF">param_name</span><span style="color:#F47067">}</span><span style="color:#96D0FF">?; @</span><span style="color:#F47067">#{</span><span style="color:#96D0FF">param_name</span><span style="color:#F47067">}</span><span style="color:#96D0FF">; end"</span></span>
+<span class="line"><span style="color:#ADBAC7">        values.</span><span style="color:#DCBDFB">each</span><span style="color:#F47067"> do</span><span style="color:#ADBAC7"> |val|</span></span>
+<span class="line"><span style="color:#DCBDFB">            define_method</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"</span><span style="color:#F47067">#{</span><span style="color:#96D0FF">val</span><span style="color:#F47067">}</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">) </span><span style="color:#F47067">do</span></span>
+<span class="line"><span style="color:#ADBAC7">                instance_eval </span><span style="color:#96D0FF">%{</span></span>
+<span class="line"><span style="color:#96D0FF">                    @</span><span style="color:#F47067">#{</span><span style="color:#96D0FF">param_name</span><span style="color:#F47067">}</span><span style="color:#96D0FF"> = '</span><span style="color:#F47067">#{</span><span style="color:#96D0FF">val</span><span style="color:#F47067">}</span><span style="color:#96D0FF">'</span></span>
+<span class="line"><span style="color:#96D0FF">                }</span></span>
+<span class="line"><span style="color:#F47067">            end</span></span>
+<span class="line"><span style="color:#F47067">      end</span></span>
+<span class="line"><span style="color:#F47067">    end</span></span>
+<span class="line"><span style="color:#F47067">end</span></span></code></pre>
+</p>
+<p>Now when you run the code it captures all of the values that are parsed from the input and puts them into your object as meaningful values.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">c</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> Coffee</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span></span>
+<span class="line"><span style="color:#ADBAC7">c.</span><span style="color:#6CB6FF">load</span></span>
+<span class="line"><span style="color:#ADBAC7">c.</span><span style="color:#DCBDFB">order</span></span></code></pre>
+</p>
+<p>I did the same <a href="/2007/03/08/coffee-dsl-in-groovy/">DSL in Groovy</a> and thought I could attempt to do it more justice using meta-programming as well. In <a href="http://groovy.codehaus.org">Groovy</a>, meta-programming is done with the ExpandoMetaClass - no, I didn't make that up. Each Class has a metaClass property that gets you access to that types' ExpandoMetaClass instance. You can then add properties and methods and whatnot to it. This has the effect of making the properties or methods callable on an instance of that type.</p>
+<p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#6CB6FF">ExpandoMetaClass</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">enableGlobally</span><span style="color:#ADBAC7">()   </span><span style="color:#F47067">//</span><span style="color:#ADBAC7"> have to </span><span style="color:#F47067">do</span><span style="color:#ADBAC7"> this to get inheritance of dslAttr</span></span>
+<span class="line"><span style="color:#6CB6FF">Object</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">metaClass</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">dslAttr</span><span style="color:#F47067"> &#x3C;&#x3C;</span><span style="color:#ADBAC7"> {</span><span style="color:#6CB6FF">String</span><span style="color:#ADBAC7"> param_name, values </span><span style="color:#6CB6FF">-></span></span>
+<span class="line"><span style="color:#F47067">    def</span><span style="color:#DCBDFB"> clazz</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> delegate</span></span>
+<span class="line"><span style="color:#ADBAC7">    clazz.</span><span style="color:#DCBDFB">metaClass</span><span style="color:#ADBAC7">.</span><span style="color:#96D0FF">"${param_name}"</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> null</span></span>
+<span class="line"><span style="color:#ADBAC7">    values.</span><span style="color:#DCBDFB">each</span><span style="color:#ADBAC7">() { val </span><span style="color:#6CB6FF">-></span></span>
+<span class="line"><span style="color:#ADBAC7">        clazz.</span><span style="color:#DCBDFB">metaClass</span><span style="color:#ADBAC7">.</span><span style="color:#96D0FF">"${val}"</span><span style="color:#F47067"> &#x3C;&#x3C;</span><span style="color:#ADBAC7"> {</span><span style="color:#6CB6FF">-></span><span style="color:#ADBAC7"> clazz.</span><span style="color:#96D0FF">"${param_name}"</span><span style="color:#F47067"> =</span><span style="color:#96D0FF"> "${val}"</span><span style="color:#ADBAC7"> }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Coffee</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    def</span><span style="color:#DCBDFB"> Coffee</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#DCBDFB">        dslAttr</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"size"</span><span style="color:#ADBAC7">, [</span><span style="color:#96D0FF">'venti'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'tall'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'grande'</span><span style="color:#ADBAC7">])</span></span>
+<span class="line"><span style="color:#DCBDFB">        dslAttr</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"whipped"</span><span style="color:#ADBAC7">, [</span><span style="color:#96D0FF">'whip'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'nowhip'</span><span style="color:#ADBAC7">])</span></span>
+<span class="line"><span style="color:#DCBDFB">        dslAttr</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"caffinated"</span><span style="color:#ADBAC7">, [</span><span style="color:#96D0FF">'caf'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'decaf'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'halfcaf'</span><span style="color:#ADBAC7">])</span></span>
+<span class="line"><span style="color:#DCBDFB">        dslAttr</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"type"</span><span style="color:#ADBAC7">, [</span><span style="color:#96D0FF">'regular'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'latte'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'cappachino'</span><span style="color:#ADBAC7">])</span></span>
+<span class="line"><span style="color:#DCBDFB">        dslAttr</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"milks"</span><span style="color:#ADBAC7">, [</span><span style="color:#96D0FF">'milk'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'nonfat'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'soy'</span><span style="color:#ADBAC7">])</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#F47067">    def</span><span style="color:#DCBDFB"> order</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#F47067">        def</span><span style="color:#DCBDFB"> params</span><span style="color:#F47067"> =</span><span style="color:#96D0FF"> ''</span></span>
+<span class="line"><span style="color:#F47067">        if</span><span style="color:#ADBAC7"> (null </span><span style="color:#F47067">!=</span><span style="color:#DCBDFB"> getMilks</span><span style="color:#ADBAC7">()) params </span><span style="color:#F47067">+=</span><span style="color:#96D0FF"> "${getMilks()} "</span></span>
+<span class="line"><span style="color:#F47067">        if</span><span style="color:#ADBAC7"> (null </span><span style="color:#F47067">!=</span><span style="color:#DCBDFB"> getCaffinated</span><span style="color:#ADBAC7">()) params </span><span style="color:#F47067">+=</span><span style="color:#96D0FF"> "${getCaffinated()} "</span></span>
+<span class="line"><span style="color:#F47067">        if</span><span style="color:#ADBAC7"> (null </span><span style="color:#F47067">!=</span><span style="color:#DCBDFB"> getWhipped</span><span style="color:#ADBAC7">()) params </span><span style="color:#F47067">+=</span><span style="color:#96D0FF"> "${getWhipped()} "</span></span>
+<span class="line"><span style="color:#ADBAC7">        println </span><span style="color:#96D0FF">"Ordering coffee: ${getSize()} ${params}${getType()}</span><span style="color:#F47067">\n</span><span style="color:#96D0FF">"</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#F47067">    def</span><span style="color:#DCBDFB"> load</span><span style="color:#ADBAC7">(String input) {</span></span>
+<span class="line"><span style="color:#F47067">        //</span><span style="color:#ADBAC7"> turn one line into multi</span><span style="color:#F47067">-</span><span style="color:#ADBAC7">line </span><span style="color:#96D0FF">"method calls"</span></span>
+<span class="line"><span style="color:#F47067">        def</span><span style="color:#DCBDFB"> cleaned</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> input.</span><span style="color:#DCBDFB">split</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">/</span><span style="color:#8DDB8C;font-weight:bold">\s</span><span style="color:#96D0FF">+/</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">        cleaned.</span><span style="color:#DCBDFB">each</span><span style="color:#ADBAC7">() { meth </span><span style="color:#6CB6FF">-></span><span style="color:#ADBAC7"> this.</span><span style="color:#F47067">&#x26;</span><span style="color:#96D0FF">"${meth}"</span><span style="color:#ADBAC7">() }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#F47067">def</span><span style="color:#DCBDFB"> c</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> new </span><span style="color:#6CB6FF">Coffee</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">c.</span><span style="color:#6CB6FF">load</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"venti nonfat whip latte"</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">c.</span><span style="color:#DCBDFB">order</span><span style="color:#ADBAC7">()</span></span></code></pre>
+</p>
+<p>I'm not sure if there is a better way to do this or not. Ideally I would like to have the dslAttr add something to the Coffee metaClass instead of just adding stuff to the instances, but this seems to do the trick for now.</p>
+<p>The Ruby and Groovy implementations become fairly similar at this point. It's a great way to reduce the amount of boilerplate code you would need to normally write to implement this kind of thing in less dynamic languages.</p>

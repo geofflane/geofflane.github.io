@@ -1,0 +1,61 @@
+---
+import '../styles/global.css';
+import Masthead from '../components/Masthead.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  current?: 'about' | 'writing';
+}
+
+const {
+  title,
+  description = 'Geoff Lane — software developer since 1999, in Windsor, Ontario.',
+  current,
+} = Astro.props;
+
+const pageTitle = title ? `${title} — Geoff Lane` : 'Geoff Lane';
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="alternate" type="application/rss+xml" title="Geoff Lane" href="/feed.xml" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap"
+    />
+  </head>
+  <body>
+    <div class="page">
+      <Masthead current={current} />
+      <slot />
+      <SiteFooter />
+    </div>
+  </body>
+</html>
+
+<style>
+  .page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: clamp(40px, 6vw, 64px) var(--pad-x) 72px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+</style>

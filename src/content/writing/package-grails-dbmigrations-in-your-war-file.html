@@ -1,0 +1,19 @@
+---
+title: "Package Grails DBMigrations in your WAR File"
+pubDate: "2008-06-10 11:35:13 -0400"
+permalink: "/2008/06/10/package-grails-dbmigrations-in-your-war-file/"
+tags: ["grails","Automation"]
+---
+<p>The <a href="http://code.google.com/p/dbmigrate/wiki/Grails">Grails DBMigrate Plugin</a> is a handy way to give you control over the generation of your database if you don't want Grails to auto-munge your schema. It works fine in development, but when you create a WAR for deployment on another machine the Migrations are not packaged in the WAR so the database can't be created or updated.</p>
+<h3>Packaging DBMigrate Scripts for Deployment</h3>
+Here's the quick solution to package your DBMigrations in your WAR file.</p>
+<p>Just add this to your <strong>Config.groovy</strong> file and when you generate the WAR the migrations will be included and found by the Plugin.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">grails</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">war</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">resources </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> {</span><span style="color:#F69D50">stagingDir</span><span style="color:#F47067"> -></span></span>
+<span class="line"><span style="color:#ADBAC7">    copy(</span><span style="color:#6CB6FF">todir</span><span style="color:#ADBAC7">: </span><span style="color:#96D0FF">"</span><span style="color:#F47067">${</span><span style="color:#96D0FF">stagingDir</span><span style="color:#F47067">}</span><span style="color:#96D0FF">/WEB-INF/classes/grails-app/migrations"</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">        fileset(</span><span style="color:#6CB6FF">dir</span><span style="color:#ADBAC7">:</span><span style="color:#96D0FF">"grails-app/migrations"</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<h3>Aside</h3>
+The only problem with DBMigrate is that it doesn't handle creating or updating Stored Procedures and Functions which means if you want to use those - for Reporting purposes lets say - you're out of luck currently. </p>

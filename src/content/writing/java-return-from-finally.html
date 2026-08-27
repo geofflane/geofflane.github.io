@@ -1,0 +1,30 @@
+---
+title: "Java Return from Finally"
+pubDate: "2011-03-18 07:36:24 -0400"
+permalink: "/2011/03/18/java-return-from-finally/"
+tags: ["Java","bugs","exceptions"]
+---
+<p>try...catch...finally is the common idiom in Java for exception handling and cleanup. The thing that people may not know is that returning from within a finally block has the unintended consequence of stoping an exception from propagating up the call stack. It "overrides" the throwing of an exception so that the caller will never get to handle it.</p>
+<p>
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> Main</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> static</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> main</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">String</span><span style="color:#ADBAC7">[] </span><span style="color:#F69D50">args</span><span style="color:#ADBAC7">) </span><span style="color:#F47067">throws</span><span style="color:#ADBAC7"> Throwable {</span></span>
+<span class="line"><span style="color:#ADBAC7">        System.out.</span><span style="color:#DCBDFB">println</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Starting"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#DCBDFB">        method</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#ADBAC7">        System.out.</span><span style="color:#DCBDFB">println</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"No way to know that an exception was thrown"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }&#x3C;/</span><span style="color:#F47067">p</span><span style="color:#ADBAC7">></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F47067">p</span><span style="color:#ADBAC7">>    </span><span style="color:#F47067">public</span><span style="color:#F47067"> static</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> method</span><span style="color:#ADBAC7">() </span><span style="color:#F47067">throws</span><span style="color:#ADBAC7"> Throwable {</span></span>
+<span class="line"><span style="color:#F47067">        try</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">            System.out.</span><span style="color:#DCBDFB">println</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"In method about to throw an exception."</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#F47067">            throw</span><span style="color:#F47067"> new</span><span style="color:#DCBDFB"> RuntimeException</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#ADBAC7">        } </span><span style="color:#F47067">catch</span><span style="color:#ADBAC7"> (Throwable </span><span style="color:#F69D50">ex</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">            System.out.</span><span style="color:#DCBDFB">println</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Caught exception, maybe log it, and then rethrow it."</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#F47067">            throw</span><span style="color:#ADBAC7"> ex;</span></span>
+<span class="line"><span style="color:#ADBAC7">        } </span><span style="color:#F47067">finally</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">            System.out.</span><span style="color:#DCBDFB">println</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"return in finally prevents an exception from being passed up the call stack."</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#F47067">            return</span><span style="color:#ADBAC7">; </span><span style="color:#768390">// remove the return to see the real behavior</span></span>
+<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>I recently came across code like this. This is Real Bad. Returning from within finally prevents the propagation of regular exceptions, which is bad enough, but worse, prevents the propagation of runtime exceptions which are generally programmer errors. This one small mistake can hide programmer errors so that you'll never see them and never know why things aren't working as expected. One of the interesting things is that the Java compiler understands this as well. If you return from within a finally block where an exception would otherwise be thrown, the compiler does not force you to declare that exception in the method's throws declaration.</p>
+<p>Long story short. Don't return from with finally. Ever.</p>

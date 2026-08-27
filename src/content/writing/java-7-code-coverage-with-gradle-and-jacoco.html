@@ -1,0 +1,61 @@
+---
+title: "Java 7 Code Coverage with Gradle and Jacoco"
+pubDate: "2012-09-13 13:18:03 -0400"
+permalink: "/2012/09/13/java-7-code-coverage-with-gradle-and-jacoco/"
+tags: ["code","java","automation","groovy"]
+---
+<h3>Thanks</h3>
+Steven Dicks' post on <a href="http://stevendick.github.com/blog/2012/01/22/jacoco-and-gradle/">Jacoco and Gradle</a> is a great start to integrating Jacoco and Gradle, this is a small iteration on top of that work.</p>
+<h3>Java 7 Code Coverage</h3>
+The state of Code Coverage took a serious turn for the worst when Java 7 came out. The byte-code changes in Java 7 effectively made Emma and Cobertura defunct. They will not work with Java 7 constructs. Fortunately there is a new player in town called <a href="http://www.eclemma.org/jacoco/">JaCoCo</a> (for Java Code Coverage). JaCoCo is the successor to Emma which is being built on the knowledge gained over the years by the Eclipse and Emma teams on how best to do code coverage. And works with Java 7 out-of-the-box.</p>
+<p>The advantage of using established tools is that they generally are well supported across your toolchain. JaCoCo is fairly new and so support in <a href="http://gradle.org">Gradle</a> isn't so smooth. Fortunately Steven's post got me started down the right path. The one thing that I wanted to improve right away was to use transitive dependency declarations as opposed to having local jar files in my source repository. JaCoCo is now available in the Maven repos so we can do that. <em>One thing to note is that the default files build in the Maven repo are Eclipse plugins, so we need to reference the "runtime" classifier in our dependency</em></p>
+<h3>The Gradle Script</h3>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">configurations {</span></span>
+<span class="line"><span style="color:#ADBAC7">    codeCoverage</span></span>
+<span class="line"><span style="color:#ADBAC7">    codeCoverageAnt</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#ADBAC7">dependencies {</span></span>
+<span class="line"><span style="color:#ADBAC7">    codeCoverage </span><span style="color:#96D0FF">'org.jacoco:org.jacoco.agent:0.5.10.201208310627:runtime@jar'</span></span>
+<span class="line"><span style="color:#ADBAC7">    codeCoverageAnt </span><span style="color:#96D0FF">'org.jacoco:org.jacoco.ant:0.5.10.201208310627'</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#ADBAC7">test {</span></span>
+<span class="line"><span style="color:#ADBAC7">    systemProperties </span><span style="color:#F47067">=</span><span style="color:#F47067"> System.</span><span style="color:#ADBAC7">properties</span></span>
+<span class="line"><span style="color:#ADBAC7">    jvmArgs </span><span style="color:#96D0FF">"-javaagent:</span><span style="color:#F47067">${</span><span style="color:#96D0FF">configurations.codeCoverage.asPath</span><span style="color:#F47067">}</span><span style="color:#96D0FF">=destfile=</span><span style="color:#F47067">${</span><span style="color:#96D0FF">project.buildDir.path</span><span style="color:#F47067">}</span><span style="color:#96D0FF">/coverage-results/jacoco.exec,sessionid=HSServ,append=false"</span><span style="color:#ADBAC7">,</span></span>
+<span class="line"><span style="color:#96D0FF">            '-Djacoco=true'</span><span style="color:#ADBAC7">,</span></span>
+<span class="line"><span style="color:#96D0FF">            '-Xms128m'</span><span style="color:#ADBAC7">,</span></span>
+<span class="line"><span style="color:#96D0FF">            '-Xmx512m'</span><span style="color:#ADBAC7">,</span></span>
+<span class="line"><span style="color:#96D0FF">            '-XX:MaxPermSize=128m'</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#ADBAC7">task generateCoverageReport </span><span style="color:#F47067">&#x3C;&#x3C;</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    ant {</span></span>
+<span class="line"><span style="color:#ADBAC7">        taskdef(</span><span style="color:#6CB6FF">name</span><span style="color:#ADBAC7">:</span><span style="color:#96D0FF">'jacocoreport'</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">classname</span><span style="color:#ADBAC7">: </span><span style="color:#96D0FF">'org.jacoco.ant.ReportTask'</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">classpath</span><span style="color:#ADBAC7">: configurations</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">codeCoverageAnt</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">asPath)</span></span>
+<span class="line"><span style="color:#ADBAC7">          mkdir </span><span style="color:#6CB6FF">dir</span><span style="color:#ADBAC7">: </span><span style="color:#96D0FF">"build/reports/coverage"</span></span>
+<span class="line"><span style="color:#ADBAC7">          jacocoreport {</span></span>
+<span class="line"><span style="color:#ADBAC7">            executiondata {</span></span>
+<span class="line"><span style="color:#ADBAC7">                fileset(</span><span style="color:#6CB6FF">dir</span><span style="color:#ADBAC7">: </span><span style="color:#96D0FF">"build/coverage-results"</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">                    include </span><span style="color:#6CB6FF">name</span><span style="color:#ADBAC7">: </span><span style="color:#96D0FF">'jacoco.exec'</span></span>
+<span class="line"><span style="color:#ADBAC7">                }</span></span>
+<span class="line"><span style="color:#ADBAC7">            }</span></span>
+<span class="line"><span style="color:#ADBAC7">            structure(</span><span style="color:#6CB6FF">name</span><span style="color:#ADBAC7">: project</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">name) {</span></span>
+<span class="line"><span style="color:#ADBAC7">                classfiles {</span></span>
+<span class="line"><span style="color:#ADBAC7">                    fileset(</span><span style="color:#6CB6FF">dir</span><span style="color:#ADBAC7">: </span><span style="color:#96D0FF">"build/classes/main"</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">                        exclude </span><span style="color:#6CB6FF">name</span><span style="color:#ADBAC7">: </span><span style="color:#96D0FF">'org/ifxforum/**/*'</span></span>
+<span class="line"><span style="color:#ADBAC7">                        exclude </span><span style="color:#6CB6FF">name</span><span style="color:#ADBAC7">: </span><span style="color:#96D0FF">'org/gca/euronet/generated**/*'</span></span>
+<span class="line"><span style="color:#ADBAC7">                    }</span></span>
+<span class="line"><span style="color:#ADBAC7">                }</span></span>
+<span class="line"><span style="color:#ADBAC7">                sourcefiles(</span><span style="color:#6CB6FF">encoding</span><span style="color:#ADBAC7">: </span><span style="color:#96D0FF">'CP1252'</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">                    fileset </span><span style="color:#6CB6FF">dir</span><span style="color:#ADBAC7">: </span><span style="color:#96D0FF">"src/main/java"</span></span>
+<span class="line"><span style="color:#ADBAC7">                }</span></span>
+<span class="line"><span style="color:#ADBAC7">            }</span></span>
+<span class="line"><span style="color:#ADBAC7">              xml  </span><span style="color:#6CB6FF">destfile</span><span style="color:#ADBAC7">: </span><span style="color:#96D0FF">"build/reports/coverage/jacoco.xml"</span></span>
+<span class="line"><span style="color:#ADBAC7">            html </span><span style="color:#6CB6FF">destdir</span><span style="color:#ADBAC7">:  </span><span style="color:#96D0FF">"build/reports/coverage"</span></span>
+<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<h3>A Few Details</h3>
+The magic is in the <em>jvmArgs</em> of the test block. JaCoCo is run as a Java Agent which uses the runtime instrumentation feature added in Java 6 to be able to inspect the running code. Extra arguments can be added to JaCoCo there including things like <em>excludes</em> to exclude specific classes from coverage. The available parameters are the same as the <a href="http://www.eclemma.org/jacoco/trunk/doc/prepare-agent-mojo.html">maven JaCoCo parameters</a>.</p>
+<p>The <em>generateCoverageReport</em> task converts the jacoco.exec binary into html files for human consumption. If you're just integrating with a CI tool, like Jenkins, then you probably don't need this, but it's handy for local use and to dig into the details of what's covered.</p>
+<h3>Loose Ends</h3>
+One problem that I ran into was referencing project paths like the project.buildDir from within an Ant task. Hopefully someone will come along and let me know how that's done.</p>

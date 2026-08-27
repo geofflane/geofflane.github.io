@@ -1,0 +1,99 @@
+---
+title: "Register and Unregister COM DLL from .NET Code"
+pubDate: "2009-01-01 16:39:36 -0500"
+permalink: "/2009/01/01/register-and-unregister-com-dll-from-net-code/"
+tags: ["com","csharp"]
+---
+<h2>Background</h2>
+The command <a href="http://en.wikipedia.org/wiki/Regsvr32">regsvr32</a> is used to register a native, unmanaged code DLL so that it is available via COM. With a registered DLL you can use COM Interop to call that code from .NET Managed code.</p>
+<p>Regsvr32 is unmanaged code and as such makes use of some existing functions that are defined in the <em>kernel32.dll</em>. Fortunately .NET makes available a pretty easy to use <a href="http://en.wikipedia.org/wiki/Foreign_function_interface">foreign function interface (FFI)</a> in the form of <a href="http://en.wikipedia.org/wiki/P/Invoke">P/Invoke</a>. </p>
+<p>In general to call an unmanaged function you just need to use the <em>DllImport</em> annotation on an extern function to tell the CLR how to access the function.</p>
+<p>e.g.:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">[</span><span style="color:#F69D50">DllImport</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"shell32.dll"</span><span style="color:#ADBAC7">)]</span></span>
+<span class="line"><span style="color:#F47067">static</span><span style="color:#F47067"> extern</span><span style="color:#F47067"> int</span><span style="color:#DCBDFB"> DllGetVersion</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">ref</span><span style="color:#F69D50"> DLLVERSIONINFO</span><span style="color:#F69D50"> pdvi</span><span style="color:#ADBAC7">);</span></span></code></pre>
+</p>
+<h2>Registering an Unmanaged DLL with C# Code</h2></p>
+<p>regsvr32 actually calls functions defined within the DLL itself in what is known as a self-registering DLL. So assuming your DLL is self-registering then you should be able to use this approach as well. The only thing we need to do is figure out what functions to call.</p>
+<p>It ends up there are 2 basic functions: <em>LoadLibrary</em> and <em>GetProcAddress</em>.</p>
+<h3>LoadLibrary</h3>
+<a href="http://msdn.microsoft.com/en-us/library/ms684175.aspx">LoadLibrary</a> returns a handle the module (a pointer to a structure).</p>
+<p>After you are done with you library you can clean up by calling <em>FreeLibrary</em> passing it the handle that was returned from <em>LoadLibrary</em>.</p>
+<h3>GetProcAddress</h3>
+<a href="http://msdn.microsoft.com/en-us/library/ms683212(VS.85).aspx">GetProcAddress</a> finds a function defined in a module and returns a pointer to that function. A function pointer allows you to call a method in a dynamic way. It is functionally equivalent to a <a href="http://msdn.microsoft.com/en-us/library/ms173171(VS.80).aspx">delegate</a> in managed code.</p>
+<p>In C e.g.:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">(</span><span style="color:#F47067">*</span><span style="color:#ADBAC7">some_func)();</span></span></code></pre>
+</p>
+<h3>Put it All Together</h3>
+Now we have a basic algorithm to register a DLL:</p>
+<ol>
+<li>LoadLibrary to get a handle to the library</li>
+<li>GetProcAddress to get a function pointer to the proper function to register the DLL</li>
+<li>Call the function returned from GetProcAddress</li>
+<li>Cleanup</li>
+</ol></p>
+<p>Mix that in with some error checking code and I got the following:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> Registrar</span><span style="color:#ADBAC7"> : </span><span style="color:#F69D50">IDisposable</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#F47067">    private</span><span style="color:#F69D50"> IntPtr</span><span style="color:#F69D50"> hLib</span><span style="color:#ADBAC7">;&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>    [</span><span style="color:#F69D50">DllImport</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"kernel32.dll"</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">CharSet</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> CharSet.Ansi, </span><span style="color:#F69D50">ExactSpelling</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> true</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">SetLastError</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> true</span><span style="color:#ADBAC7">)]</span></span>
+<span class="line"><span style="color:#F47067">    internal</span><span style="color:#F47067"> static</span><span style="color:#F47067"> extern</span><span style="color:#F69D50"> IntPtr</span><span style="color:#DCBDFB"> GetProcAddress</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">IntPtr</span><span style="color:#F69D50"> hModule</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">string</span><span style="color:#F69D50"> procName</span><span style="color:#ADBAC7">);&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>    [</span><span style="color:#F69D50">DllImport</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"kernel32.dll"</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">SetLastError</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> true</span><span style="color:#ADBAC7">)]</span></span>
+<span class="line"><span style="color:#F47067">    internal</span><span style="color:#F47067"> static</span><span style="color:#F47067"> extern</span><span style="color:#F69D50"> IntPtr</span><span style="color:#DCBDFB"> LoadLibrary</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">string</span><span style="color:#F69D50"> lpFileName</span><span style="color:#ADBAC7">);&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>    [</span><span style="color:#F69D50">DllImport</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"kernel32.dll"</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">SetLastError</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> true</span><span style="color:#ADBAC7">)]</span></span>
+<span class="line"><span style="color:#F47067">    internal</span><span style="color:#F47067"> static</span><span style="color:#F47067"> extern</span><span style="color:#F47067"> bool</span><span style="color:#DCBDFB"> FreeLibrary</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">IntPtr</span><span style="color:#F69D50"> hModule</span><span style="color:#ADBAC7">);&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>    </span><span style="color:#F47067">internal</span><span style="color:#F47067"> delegate</span><span style="color:#F47067"> int</span><span style="color:#F69D50"> PointerToMethodInvoker</span><span style="color:#ADBAC7">();&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>    </span><span style="color:#F47067">public</span><span style="color:#DCBDFB"> Registrar</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">string</span><span style="color:#F69D50"> filePath</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#ADBAC7">        hLib </span><span style="color:#F47067">=</span><span style="color:#DCBDFB"> LoadLibrary</span><span style="color:#ADBAC7">(filePath);</span></span>
+<span class="line"><span style="color:#F47067">        if</span><span style="color:#ADBAC7"> (IntPtr.Zero </span><span style="color:#F47067">==</span><span style="color:#ADBAC7"> hLib)</span></span>
+<span class="line"><span style="color:#ADBAC7">        {</span></span>
+<span class="line"><span style="color:#F47067">            int</span><span style="color:#F69D50"> errno</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> Marshal.</span><span style="color:#DCBDFB">GetLastWin32Error</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#F47067">            throw</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> Win32Exception</span><span style="color:#ADBAC7">(errno, </span><span style="color:#96D0FF">"Failed to load library."</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>    </span><span style="color:#F47067">public</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> RegisterComDLL</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#DCBDFB">        CallPointerMethod</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"DllRegisterServer"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>    </span><span style="color:#F47067">public</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> UnRegisterComDLL</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#DCBDFB">        CallPointerMethod</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"DllUnregisterServer"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>    </span><span style="color:#F47067">private</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> CallPointerMethod</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">string</span><span style="color:#F69D50"> methodName</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#F69D50">        IntPtr</span><span style="color:#F69D50"> dllEntryPoint</span><span style="color:#F47067"> =</span><span style="color:#DCBDFB"> GetProcAddress</span><span style="color:#ADBAC7">(hLib, methodName);</span></span>
+<span class="line"><span style="color:#F47067">        if</span><span style="color:#ADBAC7"> (IntPtr.Zero </span><span style="color:#F47067">==</span><span style="color:#ADBAC7"> dllEntryPoint)</span></span>
+<span class="line"><span style="color:#ADBAC7">        {</span></span>
+<span class="line"><span style="color:#F47067">            throw</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> Win32Exception</span><span style="color:#ADBAC7">(Marshal.</span><span style="color:#DCBDFB">GetLastWin32Error</span><span style="color:#ADBAC7">());</span></span>
+<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"><span style="color:#F69D50">        PointerToMethodInvoker</span><span style="color:#F69D50"> drs</span><span style="color:#F47067"> =</span></span>
+<span class="line"><span style="color:#ADBAC7">               (</span><span style="color:#F69D50">PointerToMethodInvoker</span><span style="color:#ADBAC7">) Marshal.</span><span style="color:#DCBDFB">GetDelegateForFunctionPointer</span><span style="color:#ADBAC7">(dllEntryPoint,</span></span>
+<span class="line"><span style="color:#F47067">                           typeof</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">PointerToMethodInvoker</span><span style="color:#ADBAC7">));</span></span>
+<span class="line"><span style="color:#DCBDFB">        drs</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#ADBAC7">    }&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>    </span><span style="color:#F47067">public</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> Dispose</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#F47067">      if</span><span style="color:#ADBAC7"> (IntPtr.Zero </span><span style="color:#F47067">!=</span><span style="color:#ADBAC7"> hLib)</span></span>
+<span class="line"><span style="color:#ADBAC7">      {</span></span>
+<span class="line"><span style="color:#DCBDFB">          UnRegisterComDLL</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#DCBDFB">          FreeLibrary</span><span style="color:#ADBAC7">(hLib);</span></span>
+<span class="line"><span style="color:#ADBAC7">          hLib </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> IntPtr.Zero;</span></span>
+<span class="line"><span style="color:#ADBAC7">      }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p><strong><em>Note:</em></strong>
+The requirement I was dealing with was a build script so I wanted to register the unmanaged DLL, use it, and then unregister it so the computer would be in its previous state. If you want to leave the DLL registered, such as for an install program, you would need to modify the above example.</p>
+<p>To call this code you just need to pass it a path to the dll that needs to be registered.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">using</span><span style="color:#ADBAC7"> (</span><span style="color:#F69D50">Registrar</span><span style="color:#F69D50"> registrar</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> Registrar</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"path</span><span style="color:#F47067">\\</span><span style="color:#96D0FF">to</span><span style="color:#F47067">\\</span><span style="color:#96D0FF">com.dll"</span><span style="color:#ADBAC7">))</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#ADBAC7">    registrar.</span><span style="color:#DCBDFB">RegisterComDLL</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#6CB6FF"> base</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">Execute</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p><strong><em>Resources:</em></strong>
+Check out <a href="http://pinvoke.net">pinvoke.net</a> for a lot of good documentation and example of how to call native methods from managed code.</p>

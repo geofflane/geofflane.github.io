@@ -1,0 +1,171 @@
+---
+title: "Mocking .NET Objects with NUnit"
+pubDate: "2007-03-10 20:33:27 -0500"
+permalink: "/2007/03/10/mocking-net-objects-with-nunit/"
+tags: ["software-development","nunit","mock-objects","csharp"]
+---
+<p>NUnit is my Unit Testing tool of choice for .NET development. Microsoft provides a unit testing framework but it only works with some higher-end versions of Visual Studio. They're so similar that it's almost ridiculous that Microsoft created their own version.
+(See one of my previous posts for more information on <a href="/2006/11/28/msbuild-with-nunit/">Automating NUnit with MSBuild</a>.) In the Java world it's fairly common to do Mocking to help make unit testing easier. I've written about <a href="/2006/09/24/jmock-for-mocking-unit-tests/">using JMock for Unit Tesing</a> in Java. In this post, I'd like to talk about a relatively new feature of NUnit which now supports Mocks out of the box.</p>
+<h3>What Are Mock Objects</h3></p>
+<p>Mock Objects are a technique that allow you to isolate classes from their dependencies for testing purposes. This isolation allows for fine-grained testing of single methods in a single class, possibly even before the dependent classes are fully implemented. This isolation allows your tests to run quickly and it makes testing small pieces of functionality much easier. When you've tested individual pieces of code in isolation you can have much higher confidence in larger-grained tests. This isolation becomes even more interesting when you are dealing with dependencies such as a data layer or a web service layer. External calls like that can be very time consuming or could fail if the remote system is down for maintenance.</p>
+<p>One of the great things about using Mock Objects is that they force you to think about the dependencies that your classes and methods have. It forces you to think about the coupling between your classes. If you have high coupling then your code is often harder to test. If you have a loosely coupled design then testing and using Mock Objects is very much easier. Thinking about those design notions early can help you more easily manage change over time.</p>
+<p>Maxims:</p>
+<ul>
+<li>Good design is better than bad design</li>
+<li>Loosely coupled objects are usually a better design than tightly coupled objects</li>
+<li>Testing improves code quality and developer efficiency over time</li>
+<li>Testing is easier with a loosely coupled designs</li>
+</ul></p>
+<h3>A Sample Project</h3></p>
+<p>We're going to start with some simple code. We create a Domain object called Person and an interface for a Data Access object called IPersonRepository. Pretty simple at this point.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> Person</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> string</span><span style="color:#F69D50"> Id</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> string</span><span style="color:#F69D50"> FirstName</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> string</span><span style="color:#F69D50"> LastName</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#DCBDFB"> Person</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">string</span><span style="color:#F69D50"> newId</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">string</span><span style="color:#F69D50"> fn</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">string</span><span style="color:#F69D50"> ln</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#ADBAC7">        Id </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> newId;</span></span>
+<span class="line"><span style="color:#ADBAC7">        FirstName </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> fn;</span></span>
+<span class="line"><span style="color:#ADBAC7">        LastName </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> ln;</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> interface</span><span style="color:#F69D50"> IPersonRepository</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#F69D50">    List</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">Person</span><span style="color:#ADBAC7">> </span><span style="color:#DCBDFB">GetPeople</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#F69D50">    Person</span><span style="color:#DCBDFB"> GetPersonById</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">string</span><span style="color:#F69D50"> id</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>Next we create a PersonService object. This would represent all of the business logic in our application. It would interact with the Data Access tier and return information to the UI layer for display.</p>
+<p>We wire together our objects using Constructor based <a href="http://en.wikipedia.org/wiki/Dependency_injection">Dependency Injection</a>. All of the dependent Objects are sent in through the constructor. This allows for the loose coupling since the PersonService doesn't know about the Implementing class, but only the interface. Since it's done in the constructor we can also never have an invalid PersonService as would be the case if there was a setter for the IPersonRepository implementation.</p>
+<p>This is again a fairly straightforward implementation, but I hope enough to display the issue at hand.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> PersonService</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#F47067">    private</span><span style="color:#F69D50"> IPersonRepository</span><span style="color:#F69D50"> personRepos</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#DCBDFB"> PersonService</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">IPersonRepository</span><span style="color:#F69D50"> repos</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#ADBAC7">        personRepos </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> repos;</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F69D50"> List</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">Person</span><span style="color:#ADBAC7">> </span><span style="color:#DCBDFB">GetAllPeople</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#F47067">        return</span><span style="color:#ADBAC7"> personRepos.</span><span style="color:#DCBDFB">GetPeople</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F69D50"> List</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">Person</span><span style="color:#ADBAC7">> </span><span style="color:#DCBDFB">GetAllPeopleSorted</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#F69D50">        List</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">Person</span><span style="color:#ADBAC7">> </span><span style="color:#F69D50">people</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> personRepos.</span><span style="color:#DCBDFB">GetPeople</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#ADBAC7">        people.</span><span style="color:#DCBDFB">Sort</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">delegate</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">Person</span><span style="color:#F69D50"> lhp</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">Person</span><span style="color:#F69D50"> rhp</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">            return</span><span style="color:#ADBAC7"> lhp.LastName.</span><span style="color:#DCBDFB">CompareTo</span><span style="color:#ADBAC7">(rhp.LastName);</span></span>
+<span class="line"><span style="color:#ADBAC7">        });</span></span>
+<span class="line"><span style="color:#F47067">        return</span><span style="color:#ADBAC7"> people;</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F69D50"> Person</span><span style="color:#DCBDFB"> GetPerson</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">string</span><span style="color:#F69D50"> id</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#F47067">        try</span></span>
+<span class="line"><span style="color:#ADBAC7">        {</span></span>
+<span class="line"><span style="color:#F47067">            return</span><span style="color:#ADBAC7"> personRepos.</span><span style="color:#DCBDFB">GetPersonById</span><span style="color:#ADBAC7">(id);</span></span>
+<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"><span style="color:#F47067">        catch</span><span style="color:#ADBAC7"> (</span><span style="color:#F69D50">ArgumentException</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">        {</span></span>
+<span class="line"><span style="color:#F47067">            return</span><span style="color:#6CB6FF"> null</span><span style="color:#ADBAC7">; </span><span style="color:#768390">// no person with that id was found</span></span>
+<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<h3>Using Mocks with NUnit</h3></p>
+<p>Now we can start testing our PersonService. Notice that we haven't even implemented the IPersonRepository yet. That way we can make sure that everything in our PersonService class works as expected without having to think about other layers of the application.</p>
+<p>
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">using</span><span style="color:#F69D50"> System</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">using</span><span style="color:#F69D50"> System</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Collections</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Generic</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">using</span><span style="color:#F69D50"> NUnit</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Framework</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">using</span><span style="color:#F69D50"> NUnit</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Mocks</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">[</span><span style="color:#F69D50">TestFixture</span><span style="color:#ADBAC7">]</span></span>
+<span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> PersonServiceTest</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#768390">    // The dynamic mock proxy that we will use to implement IPersonRepository</span></span>
+<span class="line"><span style="color:#F47067">    private</span><span style="color:#F69D50"> DynamicMock</span><span style="color:#F69D50"> personRepositoryMock</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#768390">    // Set up some testing data</span></span>
+<span class="line"><span style="color:#F47067">    private</span><span style="color:#F69D50"> Person</span><span style="color:#F69D50"> onePerson</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> Person</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"1"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"Wendy"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"Whiner"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#F47067">    private</span><span style="color:#F69D50"> Person</span><span style="color:#F69D50"> secondPerson</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> Person</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"2"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"Aaron"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"Adams"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#F47067">    private</span><span style="color:#F69D50"> List</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">Person</span><span style="color:#ADBAC7">> </span><span style="color:#F69D50">peopleList</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">    [</span><span style="color:#F69D50">SetUp</span><span style="color:#ADBAC7">]</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> TestInit</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#ADBAC7">        peopleList </span><span style="color:#F47067">=</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> List</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">Person</span><span style="color:#ADBAC7">>();</span></span>
+<span class="line"><span style="color:#ADBAC7">        peopleList.</span><span style="color:#DCBDFB">Add</span><span style="color:#ADBAC7">(onePerson);</span></span>
+<span class="line"><span style="color:#ADBAC7">        peopleList.</span><span style="color:#DCBDFB">Add</span><span style="color:#ADBAC7">(secondPerson);</span></span>
+<span class="line"><span style="color:#768390">        // Construct a Mock Object of the IPersonRepository Interface</span></span>
+<span class="line"><span style="color:#ADBAC7">        personRepositoryMock </span><span style="color:#F47067">=</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> DynamicMock</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">typeof</span><span style="color:#ADBAC7"> (</span><span style="color:#F69D50">IPersonRepository</span><span style="color:#ADBAC7">));</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">    [</span><span style="color:#F69D50">Test</span><span style="color:#ADBAC7">]</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> TestGetAllPeople</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#768390">        // Tell that mock object when the "GetPeople" method is</span></span>
+<span class="line"><span style="color:#768390">        // called to return a predefined list of people</span></span>
+<span class="line"><span style="color:#ADBAC7">        personRepositoryMock.</span><span style="color:#DCBDFB">ExpectAndReturn</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"GetPeople"</span><span style="color:#ADBAC7">, peopleList);</span></span>
+<span class="line"><span style="color:#768390">        // Construct a Person service with the Mock IPersonRepository</span></span>
+<span class="line"><span style="color:#F69D50">        PersonService</span><span style="color:#F69D50"> service</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> PersonService</span><span style="color:#ADBAC7">(</span></span>
+<span class="line"><span style="color:#ADBAC7">             (</span><span style="color:#F69D50">IPersonRepository</span><span style="color:#ADBAC7">) personRepositoryMock.MockInstance);</span></span>
+<span class="line"><span style="color:#768390">        // Call methods and assert tests</span></span>
+<span class="line"><span style="color:#ADBAC7">        Assert.</span><span style="color:#DCBDFB">AreEqual</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">2</span><span style="color:#ADBAC7">, service.</span><span style="color:#DCBDFB">GetAllPeople</span><span style="color:#ADBAC7">().Count);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">    [</span><span style="color:#F69D50">Test</span><span style="color:#ADBAC7">]</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> TestGetAllPeopleSorted</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#768390">        // Tell that mock object when the "GetPeople" method is called to</span></span>
+<span class="line"><span style="color:#768390">        // return a predefined list of people</span></span>
+<span class="line"><span style="color:#ADBAC7">        personRepositoryMock.</span><span style="color:#DCBDFB">ExpectAndReturn</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"GetPeople"</span><span style="color:#ADBAC7">, peopleList);</span></span>
+<span class="line"><span style="color:#F69D50">        PersonService</span><span style="color:#F69D50"> service</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> PersonService</span><span style="color:#ADBAC7">(</span></span>
+<span class="line"><span style="color:#ADBAC7">                (</span><span style="color:#F69D50">IPersonRepository</span><span style="color:#ADBAC7">) personRepositoryMock.MockInstance);</span></span>
+<span class="line"><span style="color:#768390">        // This method really has "business logic" in it - the sorting of people</span></span>
+<span class="line"><span style="color:#F69D50">        List</span><span style="color:#ADBAC7">&#x3C;</span><span style="color:#F69D50">Person</span><span style="color:#ADBAC7">> </span><span style="color:#F69D50">people</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> service.</span><span style="color:#DCBDFB">GetAllPeopleSorted</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#ADBAC7">        Assert.</span><span style="color:#DCBDFB">IsNotNull</span><span style="color:#ADBAC7">(people);</span></span>
+<span class="line"><span style="color:#ADBAC7">        Assert.</span><span style="color:#DCBDFB">AreEqual</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">2</span><span style="color:#ADBAC7">, people.Count);</span></span>
+<span class="line"><span style="color:#768390">        // Make sure the first person returned is the correct one</span></span>
+<span class="line"><span style="color:#F69D50">        Person</span><span style="color:#F69D50"> p</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> people[</span><span style="color:#6CB6FF">0</span><span style="color:#ADBAC7">];</span></span>
+<span class="line"><span style="color:#ADBAC7">        Assert.</span><span style="color:#DCBDFB">AreEqual</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Adams"</span><span style="color:#ADBAC7">, p.LastName);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">    [</span><span style="color:#F69D50">Test</span><span style="color:#ADBAC7">]</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> TestGetSinglePersonWithValidId</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#768390">        // Tell that mock object when the "GetPerson" method is called to</span></span>
+<span class="line"><span style="color:#768390">        // return a predefined Person</span></span>
+<span class="line"><span style="color:#ADBAC7">        personRepositoryMock.</span><span style="color:#DCBDFB">ExpectAndReturn</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"GetPersonById"</span><span style="color:#ADBAC7">, onePerson, </span><span style="color:#96D0FF">"1"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#F69D50">        PersonService</span><span style="color:#F69D50"> service</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> PersonService</span><span style="color:#ADBAC7">(</span></span>
+<span class="line"><span style="color:#ADBAC7">            (</span><span style="color:#F69D50">IPersonRepository</span><span style="color:#ADBAC7">) personRepositoryMock.MockInstance);</span></span>
+<span class="line"><span style="color:#F69D50">        Person</span><span style="color:#F69D50"> p</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> service.</span><span style="color:#DCBDFB">GetPerson</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"1"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">        Assert.</span><span style="color:#DCBDFB">IsNotNull</span><span style="color:#ADBAC7">(p);</span></span>
+<span class="line"><span style="color:#ADBAC7">        Assert.</span><span style="color:#DCBDFB">AreEqual</span><span style="color:#ADBAC7">(p.Id, </span><span style="color:#96D0FF">"1"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">    [</span><span style="color:#F69D50">Test</span><span style="color:#ADBAC7">]</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> TestGetSinglePersonWithInalidId</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#768390">        // Tell that mock object when the "GetPersonById" is called with a null</span></span>
+<span class="line"><span style="color:#768390">        // value to throw an ArgumentException</span></span>
+<span class="line"><span style="color:#ADBAC7">        personRepositoryMock.</span><span style="color:#DCBDFB">ExpectAndThrow</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"GetPersonById"</span><span style="color:#ADBAC7">,</span></span>
+<span class="line"><span style="color:#F47067">             new</span><span style="color:#F69D50"> ArgumentException</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Invalid person id."</span><span style="color:#ADBAC7">), </span><span style="color:#6CB6FF">null</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#F69D50">        PersonService</span><span style="color:#F69D50"> service</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> PersonService</span><span style="color:#ADBAC7">(</span></span>
+<span class="line"><span style="color:#ADBAC7">                 (</span><span style="color:#F69D50">IPersonRepository</span><span style="color:#ADBAC7">) personRepositoryMock.MockInstance);</span></span>
+<span class="line"><span style="color:#768390">        // The only way to get null is if the underlying IPersonRepository</span></span>
+<span class="line"><span style="color:#768390">        // threw an ArgumentException</span></span>
+<span class="line"><span style="color:#ADBAC7">        Assert.</span><span style="color:#DCBDFB">IsNull</span><span style="color:#ADBAC7">(service.</span><span style="color:#DCBDFB">GetPerson</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">null</span><span style="color:#ADBAC7">));</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>The PersonService doesn't have a lot of logic in it, but I hope this illustrates how you easily can test various conditions using Mock objects. It also illustrates the idea of testing early by allowing you to test some code before all of the dependent objects are implemented.</p>
+<p>While the Mocks built into NUnit might not be the most powerful or complete Mocking library out there, it should be sufficient for most uses. I'm sure they will continue to improve them over time as well, so I look forward to them becoming more powerful (and having better documentation) in the future.</p>
+<p>Download Code Example:
+<a href='/wp-content/uploads/2007/03/nmock-example.zip' title='NMock C# Example Project'>NMock C# Example Project</a></p>
+<p>For more on NUnit you might like to check out:</p>
+<ul>
+<li>
+<a href="http://www.amazon.com/gp/product/0974514020?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0974514020">Pragmatic Unit Testing in C# with Nunit (Pragmatic Programmers)</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=0974514020" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
+</li></p>
+<li>
+<a href="http://www.amazon.com/gp/product/0596007396?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0596007396">NUnit Pocket Reference (Pocket Reference (O'Reilly))</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=0596007396" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
+</li>
+</ul></p>
+<p>[ad name="image-banner"]</p>

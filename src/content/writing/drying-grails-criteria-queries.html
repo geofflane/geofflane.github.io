@@ -1,0 +1,121 @@
+---
+title: "DRYing Grails Criteria Queries"
+pubDate: "2009-09-02 10:47:59 -0400"
+permalink: "/2009/09/02/drying-grails-criteria-queries/"
+tags: ["groovy","meta-programming","grails","DRY"]
+---
+<p>When you're writing code, Don't Repeat Yourself. Now say that 5 times. <em>*rimshot*</em> </p>
+<p>One of the things that I find myself repeating a lot of in many business apps is queries. It's common to have a rule or filter that applies to many different cases. I came across such a situation recently and wanted to figure out a way to share that filter across many different queries. This is what I came up with for keeping those Criteria DRY.</p>
+<p>To start with, I'll use an example of an Article. This could be a blog post or a newspaper article. One of the rules of the system is that Articles need to be published before they are visible by end users. Because of this seemingly simple rule, every time we query for Articles, we will need to check the published flag. If you get a lot of queries, that ends up being a lot of repetition.</p>
+<p>Here's our example domain class:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">package</span><span style="color:#ADBAC7"> net.zorched.domain</span></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Article</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    String</span><span style="color:#F69D50"> name</span></span>
+<span class="line"><span style="color:#F47067">    String</span><span style="color:#F69D50"> slug</span></span>
+<span class="line"><span style="color:#F47067">    String</span><span style="color:#F69D50"> category</span></span>
+<span class="line"><span style="color:#F47067">    boolean</span><span style="color:#F69D50"> published</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#F69D50"> constraints </span><span style="color:#F47067">=</span><span style="color:#F69D50"> {</span></span>
+<span class="line"><span style="color:#F69D50">        name(</span><span style="color:#6CB6FF">blank</span><span style="color:#F69D50">: </span><span style="color:#6CB6FF">false</span><span style="color:#F69D50">)</span></span>
+<span class="line"><span style="color:#F69D50">        slug(</span><span style="color:#6CB6FF">nullable</span><span style="color:#F69D50">: </span><span style="color:#6CB6FF">true</span><span style="color:#F69D50">)</span></span>
+<span class="line"><span style="color:#F69D50">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>Now we need to add a query that will retrieve our domain instance by its <a href="http://en.wikipedia.org/wiki/Slug_(production)">slug</a> (a slug is a publishing term for a short name given to an article, in the web world it has become a term often used for a search engine optimization technique that uses the title instead of an artificial ID). To perform that query we might write something like this on the Article class:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">    static</span><span style="color:#DCBDFB"> getBySlug</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">String</span><span style="color:#F69D50"> slug</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">        withCriteria(</span><span style="color:#6CB6FF">uniqueResult</span><span style="color:#ADBAC7">:</span><span style="color:#6CB6FF">true</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">            and {</span></span>
+<span class="line"><span style="color:#ADBAC7">                eq(</span><span style="color:#96D0FF">'approved'</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">true</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">                eq(</span><span style="color:#96D0FF">' slug'</span><span style="color:#ADBAC7">,  slug)</span></span>
+<span class="line"><span style="color:#ADBAC7">            }</span></span>
+<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span></code></pre>
+</p>
+<p>We want to query based on the slug, but we also want to only allow a published Article to be shown. This would allow us to unpublish an article if necessary. Without the approved filter, if the link had gotten out, people could still view the article.</p>
+<p>Next we decide we want to list all of the Articles in a particular category so we write something like this, again filtering by the approved flag.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">    static</span><span style="color:#DCBDFB"> findAllByCategory</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">String</span><span style="color:#F69D50"> category</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">        withCriteria() {</span></span>
+<span class="line"><span style="color:#ADBAC7">            and {</span></span>
+<span class="line"><span style="color:#ADBAC7">                eq(</span><span style="color:#96D0FF">'approved'</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">true</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">                eq(</span><span style="color:#96D0FF">'category'</span><span style="color:#ADBAC7">,  category)</span></span>
+<span class="line"><span style="color:#ADBAC7">            }</span></span>
+<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span></code></pre>
+</p>
+<p>Two simple examples like this might not be that big of a deal. But you can easily see how this would grow if you added more custom queries or if you had some more complicated filtering logic.  Another common case would be if you had the same filter across many different domain objects. (What if the Article had attachments and comments all of which needed their own approval?) What you need is a way to share that logic among multiple withCriteria calls.</p>
+<p>The trick to this is understanding how <em>withCriteria</em> and <em>createCriteria</em> work in GORM. They are both implemented using a custom class called <em>HibernateCriteriaBuilder</em>. That class invokes the closures that you pass to it on itself. Sounds confusing. Basically the elements in the closure of your criteria queries get executed as if the were called on an instance of HibernateCriteriaBuilder.</p>
+<p>e.g.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">withCriteria {</span></span>
+<span class="line"><span style="color:#ADBAC7">     eq(</span><span style="color:#96D0FF">'a'</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">1</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">     like(</span><span style="color:#96D0FF">'b'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'%foo%'</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>would be the equivalent of calling something like:</p>
+<p>
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">def</span><span style="color:#F69D50"> builder </span><span style="color:#F47067">=</span><span style="color:#F47067"> new</span><span style="color:#F47067"> HibernateCriteriaBuilder</span><span style="color:#F69D50">(</span><span style="color:#F47067">...</span><span style="color:#F69D50">)</span></span>
+<span class="line"><span style="color:#ADBAC7">builder</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">eq(</span><span style="color:#96D0FF">'a'</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">1</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">builder</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">like(</span><span style="color:#96D0FF">'b'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'%foo%'</span><span style="color:#ADBAC7">)</span></span></code></pre>
+</p>
+<p>That little bit of knowledge allow you to reach into your meta programming bag of tricks and add new calls to the HibernateCriteriaBuilder. Every Class in groovy has a <em>metaClass</em> that is used to extend types of that Class. In this case we'll add a Closure that will combine our criteria with other criteria like so:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">HibernateCriteriaBuilder.</span><span style="color:#ADBAC7">metaClass</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">published </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> { </span><span style="color:#F47067">Closure</span><span style="color:#F69D50"> c</span><span style="color:#F47067"> -></span></span>
+<span class="line"><span style="color:#ADBAC7">    and {</span></span>
+<span class="line"><span style="color:#ADBAC7">        eq(</span><span style="color:#96D0FF">'published'</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">true</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">        c()</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>This <em>ands</em> together our eq call with all of the other parts of the passed in closure.
+Now we can put the whole thing together into a domain class with a reusable filter.</p>
+<p>
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">package</span><span style="color:#ADBAC7"> net.zorched.domain</span></span>
+<span class="line"><span style="color:#F47067">import</span><span style="color:#ADBAC7"> grails.orm.HibernateCriteriaBuilder</span></span>
+<span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Article</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#768390">        // monkey patch HibernateCriteriaBuilder to have a reusable 'published' filter</span></span>
+<span class="line"><span style="color:#F47067">        HibernateCriteriaBuilder.</span><span style="color:#ADBAC7">metaClass</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">published </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> { </span><span style="color:#F47067">Closure</span><span style="color:#F69D50"> c</span><span style="color:#F47067"> -></span></span>
+<span class="line"><span style="color:#ADBAC7">            and {</span></span>
+<span class="line"><span style="color:#ADBAC7">                eq(</span><span style="color:#96D0FF">'published'</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">true</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">                c()</span></span>
+<span class="line"><span style="color:#ADBAC7">            }</span></span>
+<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#F47067">    String</span><span style="color:#F69D50"> name</span></span>
+<span class="line"><span style="color:#F47067">    String</span><span style="color:#F69D50"> slug</span></span>
+<span class="line"><span style="color:#F47067">    String</span><span style="color:#F69D50"> category</span></span>
+<span class="line"><span style="color:#F47067">    boolean</span><span style="color:#F69D50"> published</span></span>
+<span class="line"><span style="color:#F47067">    Date</span><span style="color:#F69D50"> datePublished</span></span>
+<span class="line"><span style="color:#F47067">    def</span><span style="color:#DCBDFB"> publish</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#ADBAC7">        published </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> true</span></span>
+<span class="line"><span style="color:#ADBAC7">        datePublished </span><span style="color:#F47067">=</span><span style="color:#F47067"> new</span><span style="color:#F47067"> Date</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#F47067"> def</span><span style="color:#DCBDFB"> createSlug</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">n</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">        return</span><span style="color:#ADBAC7"> n</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">replaceAll(</span><span style="color:#96D0FF">'[^A-Za-z0-9</span><span style="color:#F47067">\\</span><span style="color:#96D0FF">s]'</span><span style="color:#ADBAC7">,</span><span style="color:#96D0FF">''</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">                 .replaceAll(</span><span style="color:#96D0FF">'</span><span style="color:#F47067">\\</span><span style="color:#96D0FF">s'</span><span style="color:#ADBAC7">,</span><span style="color:#96D0FF">'-'</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">                 .toLowerCase()</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#DCBDFB"> findAllApprovedByCategory</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">String</span><span style="color:#F69D50"> category</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">        withCriteria {</span></span>
+<span class="line"><span style="color:#ADBAC7">            published {</span></span>
+<span class="line"><span style="color:#ADBAC7">                eq(</span><span style="color:#96D0FF">'category'</span><span style="color:#ADBAC7">, category)</span></span>
+<span class="line"><span style="color:#ADBAC7">            }</span></span>
+<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#DCBDFB"> getBySlug</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">String</span><span style="color:#F69D50"> slug</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">        withCriteria(</span><span style="color:#6CB6FF">uniqueResult</span><span style="color:#ADBAC7">:</span><span style="color:#6CB6FF">true</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">            published {</span></span>
+<span class="line"><span style="color:#ADBAC7">                eq(</span><span style="color:#96D0FF">' slug'</span><span style="color:#ADBAC7">,  slug)</span></span>
+<span class="line"><span style="color:#ADBAC7">            }</span></span>
+<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#F47067">    static</span><span style="color:#F69D50"> constraints </span><span style="color:#F47067">=</span><span style="color:#F69D50"> {</span></span>
+<span class="line"><span style="color:#F69D50">        name(</span><span style="color:#6CB6FF">blank</span><span style="color:#F69D50">: </span><span style="color:#6CB6FF">false</span><span style="color:#F69D50">)</span></span>
+<span class="line"><span style="color:#F69D50">        datePublished(</span><span style="color:#6CB6FF">nullable</span><span style="color:#F69D50">: </span><span style="color:#6CB6FF">true</span><span style="color:#F69D50">)</span></span>
+<span class="line"><span style="color:#F69D50">        slug(</span><span style="color:#6CB6FF">nullable</span><span style="color:#F69D50">: </span><span style="color:#6CB6FF">true</span><span style="color:#F69D50">)</span></span>
+<span class="line"><span style="color:#F69D50">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>And there you have it. Do you have any other techniques that can be used to DRY criteria?</p>

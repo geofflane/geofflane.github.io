@@ -1,0 +1,85 @@
+---
+title: "Implementing Mixins with C# Extension Methods"
+pubDate: "2008-01-03 16:11:12 -0500"
+permalink: "/2008/01/03/implementing-mixins-with-c-extension-methods/"
+tags: ["mixin","oop","extension methods","csharp"]
+---
+<p><a href="http://en.wikipedia.org/">Wikipedia</a> defines a <a href="http://en.wikipedia.org/wiki/Mixin">mixin</a> as "a class that provides a certain functionality to be inherited by a subclass, but is not meant to stand alone. Inheriting from a mixin is not a form of specialization but is rather a means to collect functionality. A subclass may even choose to inherit most or all of its functionality by inheriting from one or more mixins through multiple inheritance. A mixin can also be viewed as an interface with implemented methods."</p>
+<p>Inheritance defines an "is a" relationship between classes. A car "is a" vehicle &mdash; a car is a specialization of a vehicle. A mixin, on the otherhand, is a means of sharing functionality among a series of related classes that do not inherit from the same base class. A mixin allows you to reuse code without implying a relationship among the classes. It also allows you to get around the Single Inheritance model a bit to do this.</p>
+<p>An <a href="http://en.wikipedia.org/wiki/Extension_method">extension method</a> is a new feature of C# 3.0. It is essentially a way of providing methods on existing classes that you may or may not have access to. This is similar in many ways to "open classes" that allow you to add methods to existing classes in languages such as Ruby. The interesting things is that you can add domain specific methods to framework classes like String or Int.</p>
+<p>e.g.:
+3.Days().FromNow()</p>
+<p>
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> static</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> TimeMixin</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> static</span><span style="color:#F69D50"> TimeSpan</span><span style="color:#DCBDFB"> Days</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">this</span><span style="color:#F47067"> int</span><span style="color:#F69D50"> days</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#F47067">        return</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> TimeSpan</span><span style="color:#ADBAC7">(days, </span><span style="color:#6CB6FF">0</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">0</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">0</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>    </span><span style="color:#F47067">public</span><span style="color:#F47067"> static</span><span style="color:#F69D50"> DateTime</span><span style="color:#DCBDFB"> FromNow</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">this</span><span style="color:#F69D50"> TimeSpan</span><span style="color:#F69D50"> timeSpan</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#F47067">        return</span><span style="color:#ADBAC7"> DateTime.Now.</span><span style="color:#DCBDFB">Add</span><span style="color:#ADBAC7">(timeSpan);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>This is a great way to keep code looking and feeling like Object Oriented code and avoiding a whole bunch of Utility classes with static methods. Avoiding these Utility methods keeps the power of OO for dealing with complexity through polymorphism and avoids the often more complex structures that come out of procedural code.</p>
+<p>So, how do you use Extension Methods as Mixins?</p>
+<h3>Define an Interface (or use an existing one)</h3>
+This could be anything from a <a href="http://en.wikipedia.org/wiki/Marker_interface">marker interface</a> to a full interface that defines a contract. In this simple example, I'll make use of an existing interface.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> interface</span><span style="color:#F69D50"> IComparable</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    int</span><span style="color:#DCBDFB"> CompareTo</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">object</span><span style="color:#F69D50"> other</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<h3>Create Extension Methods for the Interface</h3>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">namespace</span><span style="color:#F69D50"> Mixins</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> static</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> ComparableExtension</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">        public</span><span style="color:#F47067"> static</span><span style="color:#F47067"> bool</span><span style="color:#DCBDFB"> GreaterThan</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">this</span><span style="color:#F69D50"> IComparable</span><span style="color:#F69D50"> leftHand</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">object</span><span style="color:#F69D50"> other</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">            return</span><span style="color:#ADBAC7"> leftHand.</span><span style="color:#DCBDFB">CompareTo</span><span style="color:#ADBAC7">(other) </span><span style="color:#F47067">></span><span style="color:#6CB6FF"> 0</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">        }&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>        </span><span style="color:#F47067">public</span><span style="color:#F47067"> static</span><span style="color:#F47067"> bool</span><span style="color:#DCBDFB"> LessThan</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">this</span><span style="color:#F69D50"> IComparable</span><span style="color:#F69D50"> leftHand</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">object</span><span style="color:#F69D50"> other</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">            return</span><span style="color:#ADBAC7"> leftHand.</span><span style="color:#DCBDFB">CompareTo</span><span style="color:#ADBAC7">(other) </span><span style="color:#F47067">&#x3C;</span><span style="color:#6CB6FF"> 0</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>Notice the 'this' in the method declaration before the first parameter. The 'this' denotes an extension method. It defines the types of objects that will have this method available to be called on them. </p>
+<h3>Implement the interface in a Concrete class</h3>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">namespace</span><span style="color:#F69D50"> Domain</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> Money</span><span style="color:#ADBAC7"> : </span><span style="color:#F69D50">IComparable</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">        private</span><span style="color:#F47067"> double</span><span style="color:#F69D50"> amount</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">        private</span><span style="color:#F47067"> string</span><span style="color:#F69D50"> currency</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">        private</span><span style="color:#F69D50"> CurrencyConverter</span><span style="color:#F69D50"> converter</span><span style="color:#ADBAC7">;&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>        </span><span style="color:#F47067">public</span><span style="color:#DCBDFB"> Money</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">CurrencyConverter</span><span style="color:#F69D50"> converter</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">double</span><span style="color:#F69D50"> amount</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">string</span><span style="color:#F69D50"> currency</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#6CB6FF">            this</span><span style="color:#ADBAC7">.amount </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> amount;</span></span>
+<span class="line"><span style="color:#6CB6FF">            this</span><span style="color:#ADBAC7">.currency </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> currency;</span></span>
+<span class="line"><span style="color:#6CB6FF">            this</span><span style="color:#ADBAC7">.converter </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> converter;</span></span>
+<span class="line"><span style="color:#ADBAC7">        }&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>        </span><span style="color:#F47067">public</span><span style="color:#F47067"> int</span><span style="color:#DCBDFB"> CompareTo</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">object</span><span style="color:#F69D50"> other</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">            double</span><span style="color:#F69D50"> otherAmount</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> converter.</span><span style="color:#DCBDFB">ConvertAmount</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">this</span><span style="color:#ADBAC7">.currency, (</span><span style="color:#F69D50">Money</span><span style="color:#ADBAC7">) other);</span></span>
+<span class="line"><span style="color:#F47067">            return</span><span style="color:#6CB6FF"> this</span><span style="color:#ADBAC7">.amount.</span><span style="color:#DCBDFB">CompareTo</span><span style="color:#ADBAC7">(otherAmount);</span></span>
+<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<h3>Use the Code</h3>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">namespace</span><span style="color:#F69D50"> Domain</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">    using</span><span style="color:#F69D50"> Mixin</span><span style="color:#ADBAC7">;&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>    </span><span style="color:#F47067">public</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> Account</span><span style="color:#ADBAC7"> : </span><span style="color:#F69D50">IComparable</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#F47067">        private</span><span style="color:#F69D50"> Money</span><span style="color:#F69D50"> currentBalance</span><span style="color:#ADBAC7">;&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>        </span><span style="color:#F47067">public</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> Withdrawl</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">Money</span><span style="color:#F69D50"> amount</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">            if</span><span style="color:#ADBAC7"> (currentBalance.</span><span style="color:#DCBDFB">LessThan</span><span style="color:#ADBAC7">(amount)) {</span></span>
+<span class="line"><span style="color:#F47067">                 throw</span><span style="color:#F47067"> new</span><span style="color:#F69D50"> BalanceExceededException</span><span style="color:#ADBAC7">(currentBalance);</span></span>
+<span class="line"><span style="color:#ADBAC7">            }</span></span>
+<span class="line"><span style="color:#768390">            // ... implement the rest of the method</span></span>
+<span class="line"><span style="color:#ADBAC7">        }&#x3C;/p></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;p>        </span><span style="color:#F47067">public</span><span style="color:#F47067"> int</span><span style="color:#DCBDFB"> CompareTo</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">object</span><span style="color:#F69D50"> other</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">            return</span><span style="color:#ADBAC7"> currentBalance.</span><span style="color:#DCBDFB">CompareTo</span><span style="color:#ADBAC7">(((</span><span style="color:#F69D50">Account</span><span style="color:#ADBAC7">) other).currentBalance);</span></span>
+<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>Now the LessThan and GreaterThan methods implementations are reusable on both the Money and the Account classes. They are of course available on any class that implements IComparable.</p>
+<p>So now you can avoid some limitations of Single Inheritance and increase the amount of code reuse that is available to you with the concept of a Mixin. This is probably officially a 'sharp knife' so be careful with this kind of programming. It can be non-intuitive to people and can probably be greatly overused but it is a very valuable tool in many cases.</p>

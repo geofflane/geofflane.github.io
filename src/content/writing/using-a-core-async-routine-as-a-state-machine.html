@@ -1,0 +1,93 @@
+---
+title: "Using A Core.Async Routine As A State Machine"
+pubDate: "2014-05-18 09:00:56 -0400"
+permalink: "/2014/05/18/using-a-core-async-routine-as-a-state-machine/"
+tags: ["code","clojure"]
+---
+<p>Clojure has a library called Core.Async that it allows you to model your system as a set of independent processes that pass messages to each other through channels. Each process is responsible for running itself, managing its own state, etc. But how do you manage state in a language where everything is immutable? Well there are many ways to do that using Atoms, Refs, and Agents. But those constructs are mostly about sharing mutable state between processes, and in many cases end up being more complex than you would need to implement state machine that entirely encapsulated its own state transitions. Fortunately there's another way.</p>
+<p>The go block is the basis of each of the independent processes. These blocks define a unit of asynchronous work. The go block is generally implemented in a loop/recur fashion where a message is received from a channel, processed, and then the recur is called to loop back and wait for another message to be received. This looping gives the go block an opportunity to transform itself into a new state after each message is processed.</p>
+<h2>A Simple Example</h2></p>
+<p>A simple state machine might only have a couple of states and transform from one to the next.</p>
+<p><img src="/wp-content/uploads/2014/04/simple.png" alt="simple state machine" width="407" height="140" class="aligncenter size-full wp-image-629" /></p>
+<p>Below you can see a go block that implements those three states: starting, playing, and done. It does so by starting in the ":starting" state and then transforming to ":playing" state when it recurs in the loop. The ":playing" state is run over and over until "some-condition" is met that makes it go to ":done".</p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">(</span><span style="color:#DCBDFB">go-loop</span></span>
+<span class="line"><span style="color:#ADBAC7">   [state </span><span style="color:#6CB6FF">:starting</span><span style="color:#ADBAC7">]</span></span>
+<span class="line"><span style="color:#ADBAC7">   (</span><span style="color:#F47067">let</span><span style="color:#ADBAC7"> [[new-state]</span></span>
+<span class="line"><span style="color:#ADBAC7">        (</span><span style="color:#F47067">case</span><span style="color:#ADBAC7"> state</span></span>
+<span class="line"><span style="color:#6CB6FF">              :starting</span><span style="color:#ADBAC7"> (</span><span style="color:#F47067">let</span><span style="color:#ADBAC7"> [init-value (</span><span style="color:#DCBDFB">&#x3C;!</span><span style="color:#ADBAC7"> ch)]</span></span>
+<span class="line"><span style="color:#ADBAC7">                         (</span><span style="color:#DCBDFB">some-work</span><span style="color:#ADBAC7"> init-value)</span></span>
+<span class="line"><span style="color:#6CB6FF">                         :playing</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#6CB6FF">              :playing</span><span style="color:#ADBAC7"> (</span><span style="color:#F47067">let</span><span style="color:#ADBAC7"> [round (</span><span style="color:#DCBDFB">&#x3C;!</span><span style="color:#ADBAC7"> ch)]</span></span>
+<span class="line"><span style="color:#ADBAC7">                         (</span><span style="color:#F47067">if</span><span style="color:#ADBAC7"> some-condition</span></span>
+<span class="line"><span style="color:#6CB6FF">                           :done</span></span>
+<span class="line"><span style="color:#ADBAC7">                           (</span><span style="color:#F47067">do</span></span>
+<span class="line"><span style="color:#ADBAC7">                             (</span><span style="color:#DCBDFB">some-other-work</span><span style="color:#ADBAC7"> round)</span></span>
+<span class="line"><span style="color:#ADBAC7">                             state)))</span></span>
+<span class="line"><span style="color:#6CB6FF">              :done</span><span style="color:#ADBAC7"> (</span><span style="color:#F47067">do</span></span>
+<span class="line"><span style="color:#ADBAC7">                      (</span><span style="color:#DCBDFB">maybe-do-some-cleanup</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">                      (</span><span style="color:#DCBDFB">close!</span><span style="color:#ADBAC7"> ch)</span></span>
+<span class="line"><span style="color:#6CB6FF">                      :done</span><span style="color:#ADBAC7">))]</span></span>
+<span class="line"><span style="color:#ADBAC7">       (</span><span style="color:#F47067">if-not</span><span style="color:#ADBAC7"> (</span><span style="color:#DCBDFB">=</span><span style="color:#6CB6FF"> :done</span><span style="color:#ADBAC7"> new-state)</span></span>
+<span class="line"><span style="color:#ADBAC7">          (</span><span style="color:#F47067">recur</span><span style="color:#ADBAC7"> new-state))))</span></span></code></pre>
+
+<h2>Using Data to Determine State Transitions</h2></p>
+<p>A slightly more complex state machine might have multiple states to step through to process a series of messages. Think of an ATM as an example (a really simple ATM that is).</p>
+<p><img src="/wp-content/uploads/2014/04/atm.png" alt="atm state machine" width="1001" height="268" class="aligncenter size-full wp-image-628" /></p>
+<p>The ATM has multiple user interactions and must communicate with other services to actually authorize the transaction. When the ATM is done with a given user, it goes back into a waiting state until someone swipes their card again.</p>
+<p>Instead of passing an explicit state through the loop, our implementation passes data around. This accumulator pattern allows for the state machine to collect data at each step and then to pass that data on to later states. The data itself is used to determine what state the state machine is in. If there's card information, but then the process expects a pin, if there's a pin it expects an amount, etc. Once it's accumulated the data it can process the transaction. It then transitions back to the waiting state by setting the transaction data back to empty so that the next iteration puts it back in the waiting state. Each of those states is a fairly simple process, but you can easily layer on more rules to implement more complex state transitions.</p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">(</span><span style="color:#F47067">def</span><span style="color:#6CB6FF"> host</span><span style="color:#ADBAC7"> (</span><span style="color:#DCBDFB">chan</span><span style="color:#ADBAC7">))</span></span>
+<span class="line"><span style="color:#ADBAC7">(</span><span style="color:#F47067">def</span><span style="color:#6CB6FF"> from-host</span><span style="color:#ADBAC7"> (</span><span style="color:#DCBDFB">chan</span><span style="color:#ADBAC7">))</span></span>
+<span class="line"><span style="color:#ADBAC7">(</span><span style="color:#F47067">def</span><span style="color:#6CB6FF"> atm</span><span style="color:#ADBAC7"> (</span><span style="color:#DCBDFB">chan</span><span style="color:#ADBAC7">))</span></span>
+<span class="line"><span style="color:#ADBAC7">(</span><span style="color:#F47067">defn</span><span style="color:#6CB6FF"> run</span></span>
+<span class="line"><span style="color:#ADBAC7">  []</span></span>
+<span class="line"><span style="color:#768390">  ;; The State machine for the ATM</span></span>
+<span class="line"><span style="color:#ADBAC7">  (</span><span style="color:#DCBDFB">go-loop</span></span>
+<span class="line"><span style="color:#ADBAC7">    [data {}]</span></span>
+<span class="line"><span style="color:#ADBAC7">    (</span><span style="color:#F47067">let</span><span style="color:#ADBAC7"> [new-txn-data</span></span>
+<span class="line"><span style="color:#ADBAC7">      (</span><span style="color:#F47067">cond</span></span>
+<span class="line"><span style="color:#ADBAC7">        (</span><span style="color:#6CB6FF">:error</span><span style="color:#ADBAC7"> data)</span></span>
+<span class="line"><span style="color:#ADBAC7">          (</span><span style="color:#F47067">do</span></span>
+<span class="line"><span style="color:#ADBAC7">            (</span><span style="color:#DCBDFB">println</span><span style="color:#96D0FF"> "Got an error. No monies for you."</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">            {})</span></span>
+<span class="line"><span style="color:#ADBAC7">        (</span><span style="color:#6CB6FF">:dispense</span><span style="color:#ADBAC7"> data)</span></span>
+<span class="line"><span style="color:#ADBAC7">          (</span><span style="color:#F47067">do</span></span>
+<span class="line"><span style="color:#ADBAC7">            (</span><span style="color:#DCBDFB">println</span><span style="color:#96D0FF"> "You've withdrawn: "</span><span style="color:#ADBAC7"> (</span><span style="color:#6CB6FF">:amount</span><span style="color:#ADBAC7"> data))</span></span>
+<span class="line"><span style="color:#ADBAC7">            {})</span></span>
+<span class="line"><span style="color:#ADBAC7">        (</span><span style="color:#6CB6FF">:host-response</span><span style="color:#ADBAC7"> data)</span></span>
+<span class="line"><span style="color:#ADBAC7">          (</span><span style="color:#F47067">let</span><span style="color:#ADBAC7"> [resp (</span><span style="color:#DCBDFB">&#x3C;!</span><span style="color:#ADBAC7"> from-host)</span></span>
+<span class="line"><span style="color:#ADBAC7">                data (</span><span style="color:#DCBDFB">dissoc</span><span style="color:#ADBAC7"> data </span><span style="color:#6CB6FF">:host-response</span><span style="color:#ADBAC7">)]</span></span>
+<span class="line"><span style="color:#ADBAC7">            (</span><span style="color:#F47067">case</span><span style="color:#ADBAC7"> resp</span></span>
+<span class="line"><span style="color:#6CB6FF">              :success</span><span style="color:#ADBAC7"> (</span><span style="color:#DCBDFB">assoc</span><span style="color:#ADBAC7"> data </span><span style="color:#6CB6FF">:dispense</span><span style="color:#6CB6FF"> true</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">              (</span><span style="color:#DCBDFB">assoc</span><span style="color:#ADBAC7"> data </span><span style="color:#6CB6FF">:error</span><span style="color:#6CB6FF"> true</span><span style="color:#ADBAC7">)))</span></span>
+<span class="line"><span style="color:#ADBAC7">        (</span><span style="color:#6CB6FF">:pin</span><span style="color:#ADBAC7"> data)</span></span>
+<span class="line"><span style="color:#ADBAC7">          (</span><span style="color:#F47067">let</span><span style="color:#ADBAC7"> [amount (</span><span style="color:#DCBDFB">&#x3C;!</span><span style="color:#ADBAC7"> atm)</span></span>
+<span class="line"><span style="color:#ADBAC7">                txn (</span><span style="color:#DCBDFB">assoc</span><span style="color:#ADBAC7"> data </span><span style="color:#6CB6FF">:amount</span><span style="color:#ADBAC7"> amount)]</span></span>
+<span class="line"><span style="color:#ADBAC7">            (</span><span style="color:#DCBDFB">>!</span><span style="color:#ADBAC7"> host txn)</span></span>
+<span class="line"><span style="color:#ADBAC7">            (</span><span style="color:#DCBDFB">assoc</span><span style="color:#ADBAC7"> txn </span><span style="color:#6CB6FF">:host-response</span><span style="color:#6CB6FF"> true</span><span style="color:#ADBAC7">))</span></span>
+<span class="line"><span style="color:#ADBAC7">        (</span><span style="color:#6CB6FF">:card</span><span style="color:#ADBAC7"> data)</span></span>
+<span class="line"><span style="color:#ADBAC7">          (</span><span style="color:#F47067">let</span><span style="color:#ADBAC7"> [pin (</span><span style="color:#DCBDFB">&#x3C;!</span><span style="color:#ADBAC7"> atm)]</span></span>
+<span class="line"><span style="color:#ADBAC7">            (</span><span style="color:#DCBDFB">assoc</span><span style="color:#ADBAC7"> data </span><span style="color:#6CB6FF">:pin</span><span style="color:#ADBAC7"> pin))</span></span>
+<span class="line"><span style="color:#ADBAC7">        (</span><span style="color:#DCBDFB">empty?</span><span style="color:#ADBAC7"> data)</span></span>
+<span class="line"><span style="color:#ADBAC7">          (</span><span style="color:#F47067">let</span><span style="color:#ADBAC7"> [card-info (</span><span style="color:#DCBDFB">&#x3C;!</span><span style="color:#ADBAC7"> atm)]</span></span>
+<span class="line"><span style="color:#ADBAC7">            (</span><span style="color:#DCBDFB">assoc</span><span style="color:#ADBAC7"> data </span><span style="color:#6CB6FF">:card</span><span style="color:#ADBAC7"> card-info)))]</span></span>
+<span class="line"><span style="color:#ADBAC7">      (</span><span style="color:#F47067">recur</span><span style="color:#ADBAC7"> new-txn-data)))</span></span>
+<span class="line"><span style="color:#768390">  ;; Simulator for the Host that the ATM talks to</span></span>
+<span class="line"><span style="color:#ADBAC7">  (</span><span style="color:#DCBDFB">go-loop</span></span>
+<span class="line"><span style="color:#ADBAC7">    []</span></span>
+<span class="line"><span style="color:#ADBAC7">    (</span><span style="color:#F47067">let</span><span style="color:#ADBAC7"> [txn (</span><span style="color:#DCBDFB">&#x3C;!</span><span style="color:#ADBAC7"> host)]</span></span>
+<span class="line"><span style="color:#ADBAC7">      (</span><span style="color:#F47067">if</span><span style="color:#ADBAC7"> (</span><span style="color:#DCBDFB">=</span><span style="color:#6CB6FF"> 1111</span><span style="color:#ADBAC7"> (</span><span style="color:#6CB6FF">:pin</span><span style="color:#ADBAC7"> txn))</span></span>
+<span class="line"><span style="color:#ADBAC7">        (</span><span style="color:#DCBDFB">>!</span><span style="color:#ADBAC7"> from-host </span><span style="color:#6CB6FF">:success</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">        (</span><span style="color:#DCBDFB">>!</span><span style="color:#ADBAC7"> from-host </span><span style="color:#6CB6FF">:error</span><span style="color:#ADBAC7">))</span></span>
+<span class="line"><span style="color:#ADBAC7">      (</span><span style="color:#F47067">recur</span><span style="color:#ADBAC7">)))</span></span>
+<span class="line"><span style="color:#768390">  ;; Simulated hardware events from the ATM machine</span></span>
+<span class="line"><span style="color:#ADBAC7">  (</span><span style="color:#DCBDFB">>!!</span><span style="color:#ADBAC7"> atm </span><span style="color:#6CB6FF">411111111111</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">  (</span><span style="color:#DCBDFB">>!!</span><span style="color:#ADBAC7"> atm </span><span style="color:#6CB6FF">1111</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">  (</span><span style="color:#DCBDFB">>!!</span><span style="color:#ADBAC7"> atm </span><span style="color:#6CB6FF">200</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">  (</span><span style="color:#DCBDFB">>!!</span><span style="color:#ADBAC7"> atm </span><span style="color:#6CB6FF">411111111111</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">  (</span><span style="color:#DCBDFB">>!!</span><span style="color:#ADBAC7"> atm </span><span style="color:#6CB6FF">112</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">  (</span><span style="color:#DCBDFB">>!!</span><span style="color:#ADBAC7"> atm </span><span style="color:#6CB6FF">200</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">)</span></span></code></pre>
+
+<p>Sets of independent processes managing their own state, doing their own work, communicating by sending messages to other independent processes. Welcome to the world of simple asynchronous programs!</p>

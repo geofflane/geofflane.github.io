@@ -1,0 +1,33 @@
+---
+title: "jMock For Mocking Unit Tests"
+pubDate: "2006-09-24 12:42:58 -0400"
+permalink: "/2006/09/24/jmock-for-mocking-unit-tests/"
+tags: ["mock-objects"]
+---
+<p>Ok, so I might not exactly be on the cutting edge with this post, but I just started playing with <a href="http://www.jmock.org">jMock</a>, a framework for creating <a href="http://en.wikipedia.org/wiki/Mock_object">Mock objects</a>.</p>
+<p>Mock objects are used to isolate various layers of an application by providing a fake implementation that will mimic the behavior of the real implementation but offers a deterministic behavior. It's very useful for isolating database layers as well because DB access can slow down unit tests dramatically. And if unit tests take to long then they won't get run. Like <a href="http://www.martinfowler.com/articles/injection.html">Inversion of Control (IoC)</a>, Mock Objects, can be done by hand without the use of a framework, but frameworks can make the job a lot easier.</p>
+<p>jMock alows you to setup the methods that you want to call and define the return values for a given set of parameters. You basically script the expected calls with the return values you want. This lets you isolate classes so that you can test just a single method or class at a time thus simplifying the tests.</p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> MockTester</span><span style="color:#F47067"> extends</span><span style="color:#6CB6FF"> MockObjectTestCase</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">    Mock</span><span style="color:#ADBAC7"> mockOrderService;</span></span>
+<span class="line"><span style="color:#ADBAC7">    OrderService</span><span style="color:#ADBAC7"> orderService;</span></span>
+<span class="line"><span style="color:#F47067">      public</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> setUp</span><span style="color:#ADBAC7">() </span><span style="color:#F47067">throws</span><span style="color:#ADBAC7"> Exception {</span></span>
+<span class="line"><span style="color:#ADBAC7">        mockOrderService </span><span style="color:#F47067">=</span><span style="color:#F47067"> new</span><span style="color:#DCBDFB"> Mock</span><span style="color:#ADBAC7">(OrderService.class);</span></span>
+<span class="line"><span style="color:#ADBAC7">        orderService </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> (OrderService) mockOrderService.</span><span style="color:#DCBDFB">proxy</span><span style="color:#ADBAC7">();</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#F47067">      public</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> testSomeServiceMethod</span><span style="color:#ADBAC7">() </span><span style="color:#F47067">throws</span><span style="color:#ADBAC7"> Exception {</span></span>
+<span class="line"><span style="color:#ADBAC7">        String</span><span style="color:#ADBAC7"> orderId</span><span style="color:#F47067"> =</span><span style="color:#96D0FF"> "orderId"</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#768390">          // The "doesOrderExist" method will be called once with the orderId parameter</span></span>
+<span class="line"><span style="color:#768390">        // and will return a true boolean value</span></span>
+<span class="line"><span style="color:#768390">        // If the method isn't called, then the mock will complain</span></span>
+<span class="line"><span style="color:#ADBAC7">        mockOrderService.</span><span style="color:#DCBDFB">expects</span><span style="color:#ADBAC7">(</span><span style="color:#DCBDFB">once</span><span style="color:#ADBAC7">())</span></span>
+<span class="line"><span style="color:#ADBAC7">            .</span><span style="color:#DCBDFB">method</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"doesOrderExist"</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">            .</span><span style="color:#DCBDFB">with</span><span style="color:#ADBAC7">(</span><span style="color:#DCBDFB">eq</span><span style="color:#ADBAC7">(orderId))</span></span>
+<span class="line"><span style="color:#ADBAC7">            .</span><span style="color:#DCBDFB">will</span><span style="color:#ADBAC7">(</span><span style="color:#DCBDFB">returnValue</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">true</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">         FullfillmentService</span><span style="color:#ADBAC7"> fullfillment</span><span style="color:#F47067"> =</span><span style="color:#F47067"> new</span><span style="color:#DCBDFB"> FullfillmentServiceImpl</span><span style="color:#ADBAC7">(orderService);</span></span>
+<span class="line"><span style="color:#DCBDFB">       assertTrue</span><span style="color:#ADBAC7">(fullfillment.</span><span style="color:#DCBDFB">confirmOrder</span><span style="color:#ADBAC7">(orderId));</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+
+<p>One thing to realize is that by default jMock will only create proxies for interfaces. If you want to mock concrete classes, you'll need the <a href="http://www.jmock.org/download.html">jmock-cglib extension</a> and the asm library so that it can create proxies of the concrete classes.</p>
+<p>I find this sort of scripting of Mock objects very compelling. It allows you to focus on testing the behavior of a very isolated piece of code. It even allows you to test code without having written all of the dependent objects. I encourage you to check it out for yourself.</p>

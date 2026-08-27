@@ -1,0 +1,100 @@
+---
+title: "Groovy Programming Language"
+pubDate: "2007-03-03 11:02:08 -0500"
+permalink: "/2007/03/03/groovy-programming-language/"
+tags: []
+---
+<p>Welcome to the disco era...wait, wrong Groovy. <a href="http://groovy.codehaus.org/">Groovy the programming language</a> is dynamic programming language that runs on the Java Virtual Machine. At a first glance it looks a lot like Ruby, but it's built from the ground up to leverage the JVM. This offers a lot of power as a transitional language. It allows you to leverage an existing investment in Java code while transitioning to a powerful, dynamic language.</p>
+<h3>Java and Groovy - Happy Together</h3>
+One of the most interesting things about Groovy is that almost all standard Java code is valid Groovy code.</p>
+<p>The quintessential example:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> Hello</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#F47067">  public</span><span style="color:#F47067"> static</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> main</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">String</span><span style="color:#ADBAC7">[] </span><span style="color:#F69D50">args</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">  {</span></span>
+<span class="line"><span style="color:#F47067">    System.</span><span style="color:#ADBAC7">out</span><span style="color:#F47067">.</span><span style="color:#6CB6FF">println</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Hello"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">  }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>Is that Java code or Groovy code? In fact it's both. So what's the big deal?</p>
+<p>Well, in Groovy you can write the same thing like:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#6CB6FF">println</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Hello"</span><span style="color:#ADBAC7">)</span></span></code></pre>
+</p>
+<p>To steal <a href="http://www.agiledeveloper.com/">Venkat Subramaniam's</a> joke: If you get paid by lines of code, this is a terrible thing.</p>
+<h3>Easier Construction</h3>
+One of the other cool things with Groovy is that you can set named properties in the constructor. Conceptually setting a bunch of properties after you construct a class is often the same thing as setting those properties in a constructor. This makes code quite a bit cleaner looking. It also means the class writer does not need to predict all the combinations of the properties you might want use to initialize an object.</p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">car </span><span style="color:#F47067">=</span><span style="color:#F47067"> new</span><span style="color:#F47067"> Car</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">make</span><span style="color:#ADBAC7">: </span><span style="color:#96D0FF">"VW"</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">model</span><span style="color:#ADBAC7">: </span><span style="color:#96D0FF">"GTI"</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">year</span><span style="color:#ADBAC7">: </span><span style="color:#6CB6FF">2001</span><span style="color:#ADBAC7">)</span></span></code></pre>
+
+<h3>Easier Collections</h3>
+Of course they also add some interesting things to handle collections as well.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">lst </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> [</span><span style="color:#6CB6FF">1</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">2</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">4</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">6</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">8</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">12</span><span style="color:#ADBAC7">] </span><span style="color:#768390">// create java.util.ArrayList</span></span>
+<span class="line"><span style="color:#6CB6FF">println</span><span style="color:#ADBAC7"> lst[</span><span style="color:#6CB6FF">-1</span><span style="color:#ADBAC7">]               </span><span style="color:#768390">// 12</span></span>
+<span class="line"><span style="color:#6CB6FF">println</span><span style="color:#ADBAC7"> lst[</span><span style="color:#6CB6FF">1</span><span style="color:#F47067">..</span><span style="color:#6CB6FF">3</span><span style="color:#ADBAC7">]            </span><span style="color:#768390">// [2, 4, 6]</span></span>
+<span class="line"><span style="color:#6CB6FF">println</span><span style="color:#ADBAC7"> list[</span><span style="color:#6CB6FF">-1</span><span style="color:#F47067">..</span><span style="color:#6CB6FF">-2</span><span style="color:#ADBAC7">]         </span><span style="color:#768390">// [12, 8]</span></span></code></pre>
+</p>
+<h3>Easier Code Reuse</h3>
+One of the biggest things that Groovy offers, which is the baby of the new scripting languages (and the baby of a bunch of old languages), is closures. Closures are blocks of code that can be passed around and executed sharing the context of where they are called from and where they are executed.</p>
+<p>This code separates the concept of iterating from what you want to do with the elements that are iterated over. This makes for great reusability.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">public</span><span style="color:#DCBDFB"> iterate</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">count</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">closure</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#F47067">    for</span><span style="color:#ADBAC7"> (i </span><span style="color:#F47067">in</span><span style="color:#6CB6FF"> 0</span><span style="color:#F47067">..</span><span style="color:#ADBAC7">count)</span></span>
+<span class="line"><span style="color:#ADBAC7">        closure(i)</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#ADBAC7">iterate(</span><span style="color:#6CB6FF">5</span><span style="color:#ADBAC7">) { </span><span style="color:#6CB6FF">println</span><span style="color:#ADBAC7"> it }</span></span>
+<span class="line"><span style="color:#ADBAC7">val </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> 0</span></span>
+<span class="line"><span style="color:#ADBAC7">iterate(</span><span style="color:#6CB6FF">5</span><span style="color:#ADBAC7">) { val </span><span style="color:#F47067">+=</span><span style="color:#ADBAC7"> it }</span></span></code></pre>
+
+<p>Of course this kind of thing is built into the existing collections as well.</p>
+
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">myNums </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> [</span><span style="color:#6CB6FF">1</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">3</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">5</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">7</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">9</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">13</span><span style="color:#ADBAC7">]</span></span>
+<span class="line"><span style="color:#ADBAC7">myNums</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">each { </span><span style="color:#F69D50">curNum</span><span style="color:#F47067"> -></span><span style="color:#6CB6FF"> println</span><span style="color:#ADBAC7"> curNum }</span></span></code></pre>
+
+<h3>Dynamic Messaging</h3>
+Unlike languages like Java or C#, Groovy gives you the ability to respond to method calls in a dynamic way. You do not have to have all of the methods defined up front, but can rather respond to them at runtime.</p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">baseball </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> [</span><span style="color:#96D0FF">'Milwaukee'</span><span style="color:#ADBAC7"> : </span><span style="color:#96D0FF">'Brewers'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'Chicago'</span><span style="color:#ADBAC7"> : </span><span style="color:#96D0FF">'White Sox'</span><span style="color:#ADBAC7">]</span></span>
+<span class="line"><span style="color:#6CB6FF">println</span><span style="color:#F47067"> baseball.Milwaukee</span><span style="color:#768390">        // Brewers</span></span>
+<span class="line"><span style="color:#6CB6FF">println</span><span style="color:#ADBAC7"> baseball</span><span style="color:#F47067">.</span><span style="color:#96D0FF">'Chicago'</span><span style="color:#768390">          // White Sox</span></span></code></pre>
+
+<p>In the case of the HashMap it interprets the new "method call" as your way of asking for the value from the Hash. Of course there are many other ways that you can use this as well. You can dynamically respond to methods on any class.</p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Thing</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#F47067">    def</span><span style="color:#DCBDFB"> invokeMethod</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">String</span><span style="color:#F69D50"> name</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">args</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#6CB6FF">        println</span><span style="color:#96D0FF"> "I'm #{name}ing!"</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+
+<p>Of course this is a silly example, but it's utilized to great effect in the XML Builder.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">baseball </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> [</span><span style="color:#96D0FF">'Milwaukee'</span><span style="color:#ADBAC7"> : </span><span style="color:#96D0FF">'Brewers'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'Chicago'</span><span style="color:#ADBAC7"> : </span><span style="color:#96D0FF">'White Sox'</span><span style="color:#ADBAC7">]</span></span>
+<span class="line"><span style="color:#ADBAC7">bldr </span><span style="color:#F47067">=</span><span style="color:#F47067"> new</span><span style="color:#F47067"> groovy.xml.MarkupBuilder</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">xml </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> bldr</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">teams {</span></span>
+<span class="line"><span style="color:#ADBAC7">    baseball</span><span style="color:#F47067">.</span><span style="color:#ADBAC7">each { </span><span style="color:#F69D50">key</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">value</span><span style="color:#F47067"> -></span></span>
+<span class="line"><span style="color:#ADBAC7">        team(</span><span style="color:#6CB6FF">city</span><span style="color:#ADBAC7"> : key) {</span></span>
+<span class="line"><span style="color:#ADBAC7">            name (value)</span></span>
+<span class="line"><span style="color:#ADBAC7">        }</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>Gives you:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">&#x3C;</span><span style="color:#8DDB8C">teams</span><span style="color:#ADBAC7">></span></span>
+<span class="line"><span style="color:#ADBAC7">  &#x3C;</span><span style="color:#8DDB8C">team</span><span style="color:#6CB6FF"> city</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">'Milwaukee'</span><span style="color:#ADBAC7">></span></span>
+<span class="line"><span style="color:#ADBAC7">    &#x3C;</span><span style="color:#8DDB8C">name</span><span style="color:#ADBAC7">>Brewers&#x3C;/</span><span style="color:#8DDB8C">name</span><span style="color:#ADBAC7">></span></span>
+<span class="line"><span style="color:#ADBAC7">  &#x3C;/</span><span style="color:#8DDB8C">team</span><span style="color:#ADBAC7">></span></span>
+<span class="line"><span style="color:#ADBAC7">  &#x3C;</span><span style="color:#8DDB8C">team</span><span style="color:#6CB6FF"> city</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">'Chicago'</span><span style="color:#ADBAC7">></span></span>
+<span class="line"><span style="color:#ADBAC7">    &#x3C;</span><span style="color:#8DDB8C">name</span><span style="color:#ADBAC7">>White Sox&#x3C;/</span><span style="color:#8DDB8C">name</span><span style="color:#ADBAC7">></span></span>
+<span class="line"><span style="color:#ADBAC7">  &#x3C;/</span><span style="color:#8DDB8C">team</span><span style="color:#ADBAC7">></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;/</span><span style="color:#8DDB8C">teams</span><span style="color:#ADBAC7">></span></span></code></pre>
+</p>
+<p>Isn't that a nice way to write XML?</p>
+<h3>Conclusion</h3>
+I hope that gives you a taste of Groovy. It could be a very interesting language for some problems especially if you are already a Java shop looking for some more dynamic language features. That way you don't have to abandon everything you've done in the past. Instead you can start a slow migration or a bit of exploration utilizing the older code.</p>

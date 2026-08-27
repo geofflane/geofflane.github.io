@@ -1,16 +1,22 @@
 {
-  "name": "chalk",
+  "name": "zorched",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
   "scripts": {
-    "setup": "bin/setup",
-    "local": "bundle exec jekyll serve --drafts",
-    "publish": "bin/deploy"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check"
   },
   "dependencies": {
-    "jquery": "^3.2.1",
-    "npm": "^6.0.1",
-    "retinajs": "^2.1.1",
-    "svgxuse": "^1.2.4",
-    "webfontloader": "^1.6.28",
-    "zooming": "^2.0.0"
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.3",
+    "astro": "^7.2.9",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "typescript": "^6.0.3"
   }
 }

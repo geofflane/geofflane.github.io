@@ -1,0 +1,34 @@
+---
+title: "Check Multiple Mercurial Repositories for Incoming Changes"
+pubDate: "2011-08-26 09:16:44 -0400"
+permalink: "/2011/08/26/check-multiple-mercurial-repositories-for-incoming-changes/"
+tags: ["version-control","Automation","hg","bash"]
+---
+<p>Currently I have a whole bunch of <a href="http://mercurial.selenic.com/">Mercurial</a> repositories in a directory. All of these are cloned from a central repository that the team pushes their changes to. I like to generally keep my local repositories up-to-date so that I can review changes. Manually running <em>hg incoming -R some_directory</em> on 20 different projects is a lot of work. So I automated it with a simple shell script.</p>
+<p>This script will run incoming (or outgoing) on all of the local repositories and print the results to the console. Then I can manually sync the ones that have changed if I want.</p>
+<p>I called this file <em>hgcheckall.sh</em> and run it like: <em>./hgcheckall.sh incoming</em>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#768390">#!/bin/bash&#x3C;/p></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7"># Find all the directories that are mercurial repos</span></span>
+<span class="line"><span style="color:#ADBAC7">dirs</span><span style="color:#F47067">=</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">`</span><span style="color:#F69D50">find</span><span style="color:#96D0FF"> . </span><span style="color:#6CB6FF">-name</span><span style="color:#96D0FF"> ".hg"`</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#768390"># Remove the /.hg from the path and that's the base repo dir</span></span>
+<span class="line"><span style="color:#ADBAC7">merc_dirs</span><span style="color:#F47067">=</span><span style="color:#ADBAC7">( </span><span style="color:#96D0FF">"${</span><span style="color:#ADBAC7">dirs</span><span style="color:#96D0FF">[</span><span style="color:#F47067">@</span><span style="color:#96D0FF">]</span><span style="color:#F47067">//\/</span><span style="color:#96D0FF">.</span><span style="color:#ADBAC7">hg</span><span style="color:#F47067">/</span><span style="color:#96D0FF">}"</span><span style="color:#ADBAC7"> )</span><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">/p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">>case</span><span style="color:#F69D50"> $1</span><span style="color:#F47067"> in</span></span>
+<span class="line"><span style="color:#96D0FF">    incoming</span><span style="color:#F47067">)</span></span>
+<span class="line"><span style="color:#F47067">    for</span><span style="color:#ADBAC7"> indir </span><span style="color:#F47067">in</span><span style="color:#ADBAC7"> ${merc_dirs[</span><span style="color:#F47067">@</span><span style="color:#ADBAC7">]}; </span><span style="color:#F47067">do</span></span>
+<span class="line"><span style="color:#6CB6FF">        echo</span><span style="color:#96D0FF"> "Checking: ${</span><span style="color:#ADBAC7">indir</span><span style="color:#96D0FF">}"</span></span>
+<span class="line"><span style="color:#F69D50">        hg</span><span style="color:#6CB6FF"> -R</span><span style="color:#96D0FF"> "</span><span style="color:#ADBAC7">$indir</span><span style="color:#96D0FF">"</span><span style="color:#96D0FF"> incoming</span></span>
+<span class="line"><span style="color:#F47067">    done</span></span>
+<span class="line"><span style="color:#ADBAC7">    ;;</span></span>
+<span class="line"><span style="color:#96D0FF">    outgoing</span><span style="color:#F47067">)</span></span>
+<span class="line"><span style="color:#F47067">    for</span><span style="color:#ADBAC7"> outdir </span><span style="color:#F47067">in</span><span style="color:#ADBAC7"> ${merc_dirs[</span><span style="color:#F47067">@</span><span style="color:#ADBAC7">]}; </span><span style="color:#F47067">do</span></span>
+<span class="line"><span style="color:#6CB6FF">        echo</span><span style="color:#96D0FF"> "Checking: ${</span><span style="color:#ADBAC7">outdir</span><span style="color:#96D0FF">}"</span></span>
+<span class="line"><span style="color:#F69D50">        hg</span><span style="color:#6CB6FF"> -R</span><span style="color:#96D0FF"> "</span><span style="color:#ADBAC7">$outdir</span><span style="color:#96D0FF">"</span><span style="color:#96D0FF"> outgoing</span></span>
+<span class="line"><span style="color:#F47067">    done</span></span>
+<span class="line"><span style="color:#ADBAC7">    ;;</span></span>
+<span class="line"><span style="color:#F47067">    *)</span></span>
+<span class="line"><span style="color:#6CB6FF">    echo</span><span style="color:#96D0FF"> "Usage: hgcheckall.sh [incoming|outgoing]"</span></span>
+<span class="line"><span style="color:#ADBAC7">    ;;</span></span>
+<span class="line"><span style="color:#F47067">esac</span></span></code></pre>
+</p>
+<p>I guess the next major improvement would be to capture the output and then automatically sync the ones that have changed, but I haven't gotten around to that yet.</p>

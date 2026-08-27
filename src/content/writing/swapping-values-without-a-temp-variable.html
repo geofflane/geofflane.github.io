@@ -1,0 +1,66 @@
+---
+title: "Swapping Values Without a Temp Variable"
+pubDate: "2008-11-12 22:20:36 -0500"
+permalink: "/2008/11/12/swapping-values-without-a-temp-variable/"
+tags: []
+---
+<p>It's been a long time since I've done any C programming (the only C I ever really did was in school 10+ years ago) and I've never done it outside of school. I figure since I look at and study languages that are pretty esoteric, it's only fair to throw in a language that is really widely used. It should make my Objective-C better (which probably isn't saying much). It also gives me a chance to go "a little closer to the metal" I guess. Hey look, a Bus Error!</p>
+<p>Anyway, one of the things that I love/hate about C are the little tricks that people often use. Sometimes they're really fun but often they take a bit of thinking to understand if you're not familiar with them. One of those that I ran across again was swapping values without a temp variable.</p>
+<h3>How Normal People Swap Values</h3>
+The simplest way of swapping two values is ususally accomplished using a temp variable to hold one of the values for a moment.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">int</span><span style="color:#ADBAC7"> a </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> 2</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">int</span><span style="color:#ADBAC7"> b </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> 5</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">int</span><span style="color:#ADBAC7"> temp </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> 0</span><span style="color:#ADBAC7">;</span><span style="color:#F47067">&#x3C;/</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">temp </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> a;</span></span>
+<span class="line"><span style="color:#ADBAC7">a </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> b;</span></span>
+<span class="line"><span style="color:#ADBAC7">b </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> temp;</span></span></code></pre>
+</p>
+<h3>And Another Way</h3>
+But you can accomplish the same thing using an <a href="http://en.wikipedia.org/wiki/Exclusive_or">Exclusive Or (XOR)</a> operation.</p>
+<p>To review bitwise operations:</p>
+<pre>
+& AND
+  0101 (5)
+  1100 (12)
+  ----
+& 0100 (4)</p>
+<p>| OR
+  0101 (5)
+  1100 (12)
+  ----
+| 1101 (13)</p>
+<p>^ XOR
+  0101 (5)
+  1100 (12)
+  ----
+| 1001 (9)
+</pre></p>
+<p>The <em>^=</em> just combines the XOR with an Assignment.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">int</span><span style="color:#ADBAC7"> a </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> 2</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">int</span><span style="color:#ADBAC7"> b </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> 5</span><span style="color:#ADBAC7">;</span><span style="color:#F47067">&#x3C;/</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">a </span><span style="color:#F47067">^=</span><span style="color:#ADBAC7"> b;</span></span>
+<span class="line"><span style="color:#ADBAC7">b </span><span style="color:#F47067">^=</span><span style="color:#ADBAC7"> a;</span></span>
+<span class="line"><span style="color:#ADBAC7">a </span><span style="color:#F47067">^=</span><span style="color:#ADBAC7"> b;</span></span></code></pre>
+
+Now isn't that totally intuitive? Yeah, not to me either. Technically once you know this piece of trivia, you don't really need to think about it. You'll just recognize the pattern and understand what's going on. But understanding why it works is probably a good thing.</p>
+<p>So, I just came up with an example that shows what's happening:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">int</span><span style="color:#ADBAC7"> a </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> 2</span><span style="color:#ADBAC7">;</span><span style="color:#768390">  // 0010</span></span>
+<span class="line"><span style="color:#F47067">int</span><span style="color:#ADBAC7"> b </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> 5</span><span style="color:#ADBAC7">;</span><span style="color:#768390">  // 0101&#x3C;/p></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">a </span><span style="color:#F47067">^=</span><span style="color:#ADBAC7"> b;</span><span style="color:#768390">     // 0111 = 0010 ^ 0101</span></span>
+<span class="line"><span style="color:#ADBAC7">b </span><span style="color:#F47067">^=</span><span style="color:#ADBAC7"> a;</span><span style="color:#768390">     // 0010 = 0101 ^ 0111</span></span>
+<span class="line"><span style="color:#ADBAC7">a </span><span style="color:#F47067">^=</span><span style="color:#ADBAC7"> b;</span><span style="color:#768390">     // 0101 = 0111 ^ 0010</span></span></code></pre>
+</p>
+<p>What are some of the principles in why this works?:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">a </span><span style="color:#F47067">^</span><span style="color:#ADBAC7"> b </span><span style="color:#F47067">==</span><span style="color:#ADBAC7"> b </span><span style="color:#F47067">^</span><span style="color:#ADBAC7"> a</span></span></code></pre>
+</p>
+<p>XOR is a reversible binary operation.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">a </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> a </span><span style="color:#F47067">^</span><span style="color:#ADBAC7"> b</span><span style="color:#768390">  // now a is some other value</span></span>
+<span class="line"><span style="color:#ADBAC7">b </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> a </span><span style="color:#F47067">^</span><span style="color:#ADBAC7"> b</span><span style="color:#768390">  // now b is the original value of a</span></span>
+<span class="line"><span style="color:#ADBAC7">a </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> a </span><span style="color:#F47067">^</span><span style="color:#ADBAC7"> b</span><span style="color:#768390">  // now a is the original value of b</span></span></code></pre>
+</p>
+<p>This isn't a proof of any sort, but hopefully it will help you understand why it actually works. If you want even more of an explanation, and a proof, check out the article on Wikipedia: <a href="http://en.wikipedia.org/wiki/XOR_swap_algorithm">XOR Swap Algorithm</a></p>

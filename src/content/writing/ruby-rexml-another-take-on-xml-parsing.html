@@ -1,0 +1,44 @@
+---
+title: "Ruby REXML - Another Take on XML Parsing"
+pubDate: "2006-01-25 20:30:51 -0500"
+permalink: "/2006/01/25/ruby-rexml-another-take-on-xml-parsing/"
+tags: []
+---
+<p>If you are a programmer and have not been living under a rock, you've heard of <a href="http://www.ruby-lang.org">Ruby</a>. There's been a lot of hype built up around the language recently. Its even more hyped progeny <a href="http://www.rubyonrails.com">Ruby on Rails</a> highlight the strengths of this dynamic language. A seemingly large number of thought leaders in the software development space have also taken to the language as a primary tool in their toolkit.</p>
+<p>Curious about the hype, and looking for something interesting to learn, I've recently started playing around with the Ruby programming language and Rails. I hope to write some more in detail about it at some point, but thought I would share some thoughts on one of the available Ruby XML parsers.</p>
+<p><a href="http://www.germane-software.com/software/rexml/">REXML</a> is a pure Ruby implementation of an XML parser. It was inspired by an Open Source Java XML parser called Electric XML. Basically the whole point of REXML is to make an XML parser that feels like a Ruby library. It is a reaction to the SAX and the DOM parsers that exist. SAX and DOM parsers are generally available in all kinds of languages, but they are really tightly coupled to the demands of XML. </p>
+<p>As a bit of background: SAX is an event-based model that parses a document in a single pass triggering event callbacks when specific elements are reached. The programmer is then responsible for deciphering the context and calling the appropriate functions. DOM on the other hand is a heirarchical, in-memory representation of an XML document. It allows for ad-hoc traversal of the XML structure. DOM also allows for the use of things like XPath for querying elements (attributes too) of an XML structure.</p>
+<p>REXML on the other hand aims to feel like Ruby.</p>
+<p>Creating a document:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">doc</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> REXML</span><span style="color:#ADBAC7">::</span><span style="color:#6CB6FF">Document</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span><span style="color:#ADBAC7">(atom_feed)</span></span>
+<span class="line"><span style="color:#F69D50">root</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> doc.</span><span style="color:#DCBDFB">root</span><span style="color:#ADBAC7">()</span></span></code></pre>
+</p>
+<p>Getting a single text node:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">linkNode</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> root.</span><span style="color:#DCBDFB">elements</span><span style="color:#ADBAC7">[</span><span style="color:#96D0FF">'link'</span><span style="color:#ADBAC7">]</span></span>
+<span class="line"><span style="color:#F69D50">linkValue</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> linkNode.</span><span style="color:#DCBDFB">text</span><span style="color:#F47067"> if</span><span style="color:#ADBAC7"> linkNode</span></span></code></pre>
+</p>
+<p>REXML also uses the standard Enumerable features found by other collections classes so that it feels very natural to use. In Ruby it is common to use "blocks" to handle each of the items in a method. Rather than having to itterate over a collection of items, you let the collection do the itterating for you.</p>
+<p>For each of the elements called "author" call the add_author method:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">root.</span><span style="color:#DCBDFB">elements</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">each</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">'author'</span><span style="color:#ADBAC7">) { |a| </span><span style="color:#DCBDFB">add_author</span><span style="color:#ADBAC7">(a) }</span></span></code></pre>
+</p>
+<p>You can also use XPath:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#6CB6FF">XPath</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">each</span><span style="color:#ADBAC7">(doc, </span><span style="color:#96D0FF">"//entry"</span><span style="color:#ADBAC7">) { |e| </span><span style="color:#DCBDFB">add_entry</span><span style="color:#ADBAC7">(e) }</span></span></code></pre>
+</p>
+<p>Of course you can create and/or modify documents as well in a Ruby-esque way.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">entry</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> Element</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"entry"</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#F69D50">id</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> Element</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"id"</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">id.</span><span style="color:#DCBDFB">add_element</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">Text</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"_some_unique_id"</span><span style="color:#ADBAC7">))</span></span>
+<span class="line"><span style="color:#ADBAC7">entry.</span><span style="color:#DCBDFB">add_element</span><span style="color:#ADBAC7">(id)</span></span>
+<span class="line"><span style="color:#ADBAC7">[</span><span style="color:#96D0FF">'Geoff'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'Bob'</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">'Sam'</span><span style="color:#ADBAC7">].</span><span style="color:#DCBDFB">each</span><span style="color:#F47067"> do</span><span style="color:#ADBAC7"> |author|</span></span>
+<span class="line"><span style="color:#F69D50">    a</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> Element</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"author"</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#F69D50">    name</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> Element</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"name"</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    name.</span><span style="color:#DCBDFB">add_element</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">Text</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span><span style="color:#ADBAC7">(author))</span></span>
+<span class="line"><span style="color:#ADBAC7">    entry.</span><span style="color:#DCBDFB">elements</span><span style="color:#F47067"> &#x3C;&#x3C;</span><span style="color:#ADBAC7"> a</span></span>
+<span class="line"><span style="color:#F47067">end</span></span></code></pre>
+</p>
+<p>It's nice to see a slightly different take on XML manipulation.</p>

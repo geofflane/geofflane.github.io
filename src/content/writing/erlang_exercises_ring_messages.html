@@ -1,0 +1,45 @@
+---
+title: "Erlang Exercises: Ring Messages"
+pubDate: "2008-05-28 07:30:40 -0400"
+permalink: "/2008/05/28/erlang_exercises_ring_messages/"
+tags: ["erlang exercises"]
+---
+<p><a href="http://www.erlang.org/course/exercises.html">Erlang Exercises</a> has a great little series of programming problems that challenge you to implement solutions to some common Erlang problems. It's a great way to learn the language. I'm going to share some of my solutions to these problems. Maybe for some discussion, maybe for some feedback from some people more experienced with Erlang, maybe just to give some new people a flavor of the language.</p>
+<h2>Interaction between processes, Concurrency</h2>
+2) Write a function which starts N processes in a ring, and sends a message M times around all the processes in the ring. After the messages have been sent the processes should terminate gracefully.</p>
+<p>
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">-</span><span style="color:#F47067">module</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">ring</span><span style="color:#ADBAC7">).</span></span>
+<span class="line"><span style="color:#ADBAC7">-</span><span style="color:#F47067">export</span><span style="color:#ADBAC7">([</span><span style="color:#DCBDFB">start</span><span style="color:#ADBAC7">/</span><span style="color:#6CB6FF">2</span><span style="color:#ADBAC7">, </span><span style="color:#DCBDFB">loop</span><span style="color:#ADBAC7">/</span><span style="color:#6CB6FF">2</span><span style="color:#ADBAC7">]).</span></span>
+<span class="line"><span style="color:#DCBDFB">start</span><span style="color:#ADBAC7">(N, M) </span><span style="color:#F47067">-></span></span>
+<span class="line"><span style="color:#ADBAC7">    Seq </span><span style="color:#F47067">=</span><span style="color:#F69D50"> lists</span><span style="color:#ADBAC7">:</span><span style="color:#DCBDFB">seq</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">1</span><span style="color:#ADBAC7">, N),</span></span>
+<span class="line"><span style="color:#ADBAC7">    Messages </span><span style="color:#F47067">=</span><span style="color:#F69D50"> lists</span><span style="color:#ADBAC7">:</span><span style="color:#DCBDFB">reverse</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">lists</span><span style="color:#ADBAC7">:</span><span style="color:#DCBDFB">seq</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">0</span><span style="color:#ADBAC7">, M</span><span style="color:#F47067">-</span><span style="color:#6CB6FF">1</span><span style="color:#ADBAC7">)),</span></span>
+<span class="line"><span style="color:#ADBAC7">    LastP </span><span style="color:#F47067">=</span><span style="color:#F69D50"> lists</span><span style="color:#ADBAC7">:</span><span style="color:#DCBDFB">foldl</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">fun</span><span style="color:#ADBAC7">(S, Pid) -></span></span>
+<span class="line"><span style="color:#DCBDFB">                                             spawn</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">?</span><span style="color:#DCBDFB">MODULE</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">loop</span><span style="color:#ADBAC7">, [N</span><span style="color:#F47067">-</span><span style="color:#ADBAC7">S, Pid])</span></span>
+<span class="line"><span style="color:#F47067">                             end</span><span style="color:#ADBAC7">, </span><span style="color:#DCBDFB">self</span><span style="color:#ADBAC7">(), Seq),</span></span>
+<span class="line"><span style="color:#DCBDFB">    spawn</span><span style="color:#ADBAC7">(</span><span style="color:#DCBDFB">fun</span><span style="color:#ADBAC7">() </span><span style="color:#F47067">-></span><span style="color:#ADBAC7"> [ LastP </span><span style="color:#F47067">!</span><span style="color:#ADBAC7"> R || R </span><span style="color:#F47067">&#x3C;-</span><span style="color:#ADBAC7"> Messages ] </span><span style="color:#F47067">end</span><span style="color:#ADBAC7">).</span></span>
+<span class="line"><span style="color:#DCBDFB">loop</span><span style="color:#ADBAC7">(N, NextPid) </span><span style="color:#F47067">-></span></span>
+<span class="line"><span style="color:#F47067">    receive</span></span>
+<span class="line"><span style="color:#ADBAC7">        R </span><span style="color:#F47067">when</span><span style="color:#ADBAC7"> R </span><span style="color:#F47067">></span><span style="color:#6CB6FF"> 0</span><span style="color:#ADBAC7"> -></span></span>
+<span class="line"><span style="color:#ADBAC7">            NextPid </span><span style="color:#F47067">!</span><span style="color:#ADBAC7"> R,</span></span>
+<span class="line"><span style="color:#F69D50">            io</span><span style="color:#ADBAC7">:</span><span style="color:#DCBDFB">format</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">": Process: </span><span style="color:#F47067">~8w</span><span style="color:#96D0FF">, Sequence#: </span><span style="color:#F47067">~w</span><span style="color:#96D0FF">, Message#: </span><span style="color:#F47067">~w</span><span style="color:#96D0FF"> ..</span><span style="color:#F47067">~n</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">,</span></span>
+<span class="line"><span style="color:#ADBAC7">                          [</span><span style="color:#DCBDFB">self</span><span style="color:#ADBAC7">(), N, R]),</span></span>
+<span class="line"><span style="color:#DCBDFB">            loop</span><span style="color:#ADBAC7">(N, NextPid);</span></span>
+<span class="line"><span style="color:#ADBAC7">        R </span><span style="color:#F47067">when</span><span style="color:#ADBAC7"> R </span><span style="color:#F47067">=:=</span><span style="color:#6CB6FF"> 0</span><span style="color:#ADBAC7"> -></span></span>
+<span class="line"><span style="color:#ADBAC7">            NextPid </span><span style="color:#F47067">!</span><span style="color:#ADBAC7"> R,</span></span>
+<span class="line"><span style="color:#F69D50">            io</span><span style="color:#ADBAC7">:</span><span style="color:#DCBDFB">format</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"* Process: </span><span style="color:#F47067">~8w</span><span style="color:#96D0FF">, Sequence#: </span><span style="color:#F47067">~w</span><span style="color:#96D0FF">, Message#: terminate!</span><span style="color:#F47067">~n</span><span style="color:#96D0FF">"</span><span style="color:#ADBAC7">,</span></span>
+<span class="line"><span style="color:#ADBAC7">                            [</span><span style="color:#DCBDFB">self</span><span style="color:#ADBAC7">(), N])</span></span>
+<span class="line"><span style="color:#F47067">    end</span><span style="color:#ADBAC7">.</span></span></code></pre>
+</p>
+<h3>Explanation</h3>
+<strong>Seq = lists:seq(1, N)</strong> and <strong>Messages = lists:reverse(lists:seq(0, M-1)),</strong>
+These create lists of integers from 1 - N and then from M-1 - 0 (because of the reverse). These lists are used for creating processes and the messages that will be passed to those processes respectively.</p>
+<p><strong>LastP = lists:foldl(...</strong>
+This is an accumulator function. The self() value passed to the function is passed in as Pid on the first iteration, but subsequent iterations get the value computed in the method with the <strong>spawn</strong> function. The final <strong>spawn</strong> Pid is returned from the accumulator and is stored in LastP. The spawn function is setting up new processes which are running the <strong>loop</strong> function with the given values.</p>
+<p><strong>spawn(fun() -> [ LastP ! R || R <- Messages ] end).</strong>
+This is a <a href="http://en.wikipedia.org/wiki/List_comprehension">list comprehension</a> in Erlang. It basically takes each value from the <strong>Messages</strong> list and sends that as a message to the LastP pid which is the beginning of the Ring.</p>
+<p><strong>loop(N, NextPid) -></strong>
+This is the function that is being run as the processes of each of the elements of the ring.</p>
+<p><strong>R when R > 0 -> </strong>
+When this process receives a message where the message is an integer greater than zero then write some info to the console and forward the message to the NextPid and use <a href="http://en.wikipedia.org/wiki/Tail_recursion">tail recursion</a> to start waiting for another message.</p>
+<p><strong>R when R =:= 0 -></strong>
+When this process receives a message where the message is an integer that equals zero then write some info to the console and forward the message to the NextPid, but allow this process to complete naturally.</p>

@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap">
+  <style>
+    body { margin: 0; background: #0f1215; }
+    a { color: #e0a458; text-decoration: none; }
+    a:hover { color: #f3c98b; }
+    p { text-wrap: pretty; }
+  </style>
+</helmet>
+<div style="background: #0f1215; color: #a9a59d; font-family: 'IBM Plex Sans', system-ui, sans-serif; padding: 64px 88px 72px; display: flex; flex-direction: column; gap: 56px;">
+
+  <div style="display: flex; justify-content: space-between; align-items: baseline;">
+    <a href="#" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: #6e6a63;">zorched.net</a>
+    <div style="display: flex; gap: 30px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.08em;">
+      <a href="#" style="color: #6e6a63;">About</a>
+      <a href="#" style="color: #f0ede7;">Writing</a>
+    </div>
+  </div>
+
+  <div style="max-width: 660px; display: flex; flex-direction: column; gap: 30px;">
+
+    <div style="padding: 13px 18px; background: #15191d; border-left: 2px solid #6e6a63;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 1.6; color: #6e6a63;">From the archive. Written in May 2014 and kept as published — links and versions have aged.</span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 18px;">
+      <div style="display: flex; gap: 14px; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: #4a4741;">
+        <span>18 MAY 2014</span><span>·</span><span>CLOJURE</span>
+      </div>
+      <h1 style="margin: 0; font-size: 40px; font-weight: 500; line-height: 1.16; letter-spacing: -0.028em; color: #f0ede7;">Using a core.async Routine as a State Machine</h1>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 20px; font-size: 18px; font-weight: 300; line-height: 1.75;">
+      <p style="margin: 0;">Clojure has a library called core.async that lets you model your system as a set of independent processes that pass messages to each other through channels. Each process is responsible for running itself, managing its own state, and so on. But how do you manage state in a language where everything is immutable?</p>
+      <p style="margin: 0;">There are many ways to do that using <a href="#">Atoms, Refs, and Agents</a>. But those constructs are mostly about sharing mutable state between processes, and in many cases end up being more complex than you'd need to implement a state machine that entirely encapsulates its own state transitions. Fortunately there's another way.</p>
+    </div>
+
+    <h2 style="margin: 10px 0 0; font-size: 24px; font-weight: 500; letter-spacing: -0.015em; color: #f0ede7;">A Simple Example</h2>
+
+    <p style="margin: 0; font-size: 18px; font-weight: 300; line-height: 1.75;">The go block is the basis of each independent process, defining a unit of asynchronous work. It's generally implemented in a loop/recur fashion: a message is received from a channel, processed, and then recur loops back to wait for another. That looping gives the block an opportunity to transform itself into a new state after each message.</p>
+
+    <div style="background: #15191d; border-left: 2px solid #e0a458; padding: 20px 24px; overflow-x: auto;">
+      <pre style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.75; color: #cbc7bf;"><span style="color: #55524c;">;; three states: starting, playing, done</span>
+(<span style="color: #d99a5c;">go-loop</span>
+   [state <span style="color: #8fae7e;">:starting</span>]
+   (<span style="color: #d99a5c;">let</span> [[new-state]
+        (<span style="color: #d99a5c;">case</span> state
+              <span style="color: #8fae7e;">:starting</span> (<span style="color: #d99a5c;">let</span> [init-value (&lt;! ch)]
+                         (some-work init-value)
+                         <span style="color: #8fae7e;">:playing</span>)
+              <span style="color: #8fae7e;">:playing</span> (<span style="color: #d99a5c;">let</span> [round (&lt;! ch)]
+                         (<span style="color: #d99a5c;">if</span> some-condition
+                           <span style="color: #8fae7e;">:done</span>
+                           (<span style="color: #d99a5c;">do</span>
+                             (some-other-work round)
+                             state)))
+              <span style="color: #8fae7e;">:done</span> (<span style="color: #d99a5c;">do</span>
+                      (maybe-do-some-cleanup)
+                      (close! ch)
+                      <span style="color: #8fae7e;">:done</span>))]
+       (<span style="color: #d99a5c;">if-not</span> (= <span style="color: #8fae7e;">:done</span> new-state)
+          (recur new-state))))</pre>
+    </div>
+
+    <p style="margin: 0; font-size: 18px; font-weight: 300; line-height: 1.75;">It starts in the <code style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; background: #1b1f23; padding: 2px 6px; color: #cbc7bf;">:starting</code> state and transforms to <code style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; background: #1b1f23; padding: 2px 6px; color: #cbc7bf;">:playing</code> when it recurs. The playing state runs over and over until some condition sends it to <code style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; background: #1b1f23; padding: 2px 6px; color: #cbc7bf;">:done</code>.</p>
+
+  </div>
+
+  <div style="display: flex; justify-content: space-between; gap: 40px; padding-top: 32px; border-top: 1px solid #22262a; max-width: 660px;">
+    <a href="#" style="display: flex; flex-direction: column; gap: 7px; max-width: 280px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #4a4741;">← Previous</span>
+      <span style="font-size: 15px; font-weight: 300; color: #cbc7bf; line-height: 1.4;">High Performance and Parallelism with the Feel of a Scripting Language</span>
+    </a>
+    <a href="#" style="display: flex; flex-direction: column; gap: 7px; text-align: right; max-width: 280px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #4a4741;">All writing →</span>
+      <span style="font-size: 15px; font-weight: 300; color: #cbc7bf; line-height: 1.4;">135 posts, 2005–2014</span>
+    </a>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

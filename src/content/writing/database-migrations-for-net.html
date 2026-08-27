@@ -1,0 +1,105 @@
+---
+title: "Database Migrations for .NET"
+pubDate: "2008-04-20 15:31:58 -0400"
+permalink: "/2008/04/20/database-migrations-for-net/"
+tags: ["database","Automation","csharp"]
+---
+<p>One of the more difficult things to manage in software projects is often changing a database schema over time. On the projects that I work on, we don't usually have DBAs who manage the schema so it is left up to the developers to figure out. The other thing you have to manage is applying changes to the database in such a way that you don't disrupt the work of other developers on your team. We need the change to go in at the same time as the code so that Continuous Integration can work.</p>
+<h3>Migrations</h3>
+While I don't know if they were invented there, migrations seem to have been popularized by Ruby on Rails. Rails is a database centric framework that implies the properties of your domain from the schema of your database. For that reason it makes sense that they came up with a very good way of These are some example migrations to give you an idea of the basics of creating a schema.</p>
+<p><strong>001_AddAddressTable.cs</strong>:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">using</span><span style="color:#F69D50"> Migrator</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Framework</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">using</span><span style="color:#F69D50"> System</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Data</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">[</span><span style="color:#F69D50">Migration</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">1</span><span style="color:#ADBAC7">)]</span></span>
+<span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> AddAddressTable</span><span style="color:#ADBAC7"> : </span><span style="color:#F69D50">Migration</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#F47067">    override</span><span style="color:#F47067"> public</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> Up</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#ADBAC7">         Database.</span><span style="color:#DCBDFB">AddTable</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Address"</span><span style="color:#ADBAC7">,</span></span>
+<span class="line"><span style="color:#F47067">             new</span><span style="color:#F69D50"> Column</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"id"</span><span style="color:#ADBAC7">, DbType.Int32, ColumnProperty.PrimaryKey),</span></span>
+<span class="line"><span style="color:#F47067">             new</span><span style="color:#F69D50"> Column</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"street"</span><span style="color:#ADBAC7">, DbType.String, </span><span style="color:#6CB6FF">50</span><span style="color:#ADBAC7">),</span></span>
+<span class="line"><span style="color:#F47067">             new</span><span style="color:#F69D50"> Column</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"city"</span><span style="color:#ADBAC7">, DbType.String, </span><span style="color:#6CB6FF">50</span><span style="color:#ADBAC7">),</span></span>
+<span class="line"><span style="color:#F47067">             new</span><span style="color:#F69D50"> Column</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"state"</span><span style="color:#ADBAC7">, DbType.StringFixedLength, </span><span style="color:#6CB6FF">2</span><span style="color:#ADBAC7">),</span></span>
+<span class="line"><span style="color:#F47067">             new</span><span style="color:#F69D50"> Column</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"postal_code"</span><span style="color:#ADBAC7">, DbType.String, </span><span style="color:#6CB6FF">10</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">    override public </span><span style="color:#F47067">void</span><span style="color:#DCBDFB"> Down</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#ADBAC7">        Database.</span><span style="color:#DCBDFB">RemoveTable</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Address"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p><strong>02_AddAddressColumns.cs</strong>:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">using</span><span style="color:#F69D50"> Migrator</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Framework</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">using</span><span style="color:#F69D50"> System</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Data</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">[</span><span style="color:#F69D50">Migration</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">2</span><span style="color:#ADBAC7">)]</span></span>
+<span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> AddAddressColumns</span><span style="color:#ADBAC7"> : </span><span style="color:#F69D50">Migration</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> override</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> Up</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#ADBAC7">        Database.</span><span style="color:#DCBDFB">AddColumn</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Address"</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">new</span><span style="color:#F69D50"> Column</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"street2"</span><span style="color:#ADBAC7">, DbType.String, </span><span style="color:#6CB6FF">50</span><span style="color:#ADBAC7">));</span></span>
+<span class="line"><span style="color:#ADBAC7">        Database.</span><span style="color:#DCBDFB">AddColumn</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Address"</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">new</span><span style="color:#F69D50"> Column</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"street3"</span><span style="color:#ADBAC7">, DbType.String, </span><span style="color:#6CB6FF">50</span><span style="color:#ADBAC7">));</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> override</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> Down</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#ADBAC7">        Database.</span><span style="color:#DCBDFB">RemoveColumn</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Address"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"street2"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">        Database.</span><span style="color:#DCBDFB">RemoveColumn</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Address"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"street3"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p><strong>003_AddPersonTable.cs</strong>:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">using</span><span style="color:#F69D50"> Migrator</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Framework</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">using</span><span style="color:#F69D50"> System</span><span style="color:#ADBAC7">.</span><span style="color:#F69D50">Data</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#ADBAC7">[</span><span style="color:#F69D50">Migration</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">3</span><span style="color:#ADBAC7">)]</span></span>
+<span class="line"><span style="color:#F47067">public</span><span style="color:#F47067"> class</span><span style="color:#F69D50"> AddPersonTable</span><span style="color:#ADBAC7"> : </span><span style="color:#F69D50">Migration</span></span>
+<span class="line"><span style="color:#ADBAC7">{</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> override</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> Up</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#ADBAC7">        Database.</span><span style="color:#DCBDFB">AddTable</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Person"</span><span style="color:#ADBAC7">,</span></span>
+<span class="line"><span style="color:#F47067">            new</span><span style="color:#F69D50"> Column</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"id"</span><span style="color:#ADBAC7">, DbType.Int32, ColumnProperty.PrimaryKey),</span></span>
+<span class="line"><span style="color:#F47067">            new</span><span style="color:#F69D50"> Column</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"first_name"</span><span style="color:#ADBAC7">, DbType.String, </span><span style="color:#6CB6FF">50</span><span style="color:#ADBAC7">),</span></span>
+<span class="line"><span style="color:#F47067">            new</span><span style="color:#F69D50"> Column</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"last_name"</span><span style="color:#ADBAC7">, DbType.String, </span><span style="color:#6CB6FF">50</span><span style="color:#ADBAC7">),</span></span>
+<span class="line"><span style="color:#F47067">            new</span><span style="color:#F69D50"> Column</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"address_id"</span><span style="color:#ADBAC7">, DbType.Int32, ColumnProperty.Unsigned)</span></span>
+<span class="line"><span style="color:#ADBAC7">        );</span></span>
+<span class="line"><span style="color:#ADBAC7">        Database.</span><span style="color:#DCBDFB">AddForeignKey</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"FK_PERSON_ADDRESS"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"Person"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"address_id"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"Address"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"id"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#F47067">    public</span><span style="color:#F47067"> override</span><span style="color:#F47067"> void</span><span style="color:#DCBDFB"> Down</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">    {</span></span>
+<span class="line"><span style="color:#ADBAC7">        Database.</span><span style="color:#DCBDFB">RemoveTable</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"Person"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<h3>Run Your Migrations</h3>
+The best way to run your migrations will be to integrate it into your build automation tool of choice. If you are not using one, now is the time.</p>
+<p>MigratorDotNet supports MSBuild and NAnt.</p>
+<p><strong>MSBuild</strong>:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">&#x3C;</span><span style="color:#8DDB8C">Target</span><span style="color:#6CB6FF"> name</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"Migrate"</span><span style="color:#6CB6FF"> DependsOnTargets</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"Build"</span><span style="color:#ADBAC7">></span></span>
+<span class="line"><span style="color:#ADBAC7">    &#x3C;</span><span style="color:#8DDB8C">CreateProperty</span><span style="color:#6CB6FF"> Value</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"-1"</span><span style="color:#6CB6FF">  Condition</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"'$(SchemaVersion)'==''"</span><span style="color:#ADBAC7">></span></span>
+<span class="line"><span style="color:#ADBAC7">        &#x3C;</span><span style="color:#8DDB8C">Output</span><span style="color:#6CB6FF"> TaskParameter</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"Value"</span><span style="color:#6CB6FF"> PropertyName</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"SchemaVersion"</span><span style="color:#ADBAC7">/></span></span>
+<span class="line"><span style="color:#ADBAC7">    &#x3C;/</span><span style="color:#8DDB8C">CreateProperty</span><span style="color:#ADBAC7">></span></span>
+<span class="line"><span style="color:#ADBAC7">    &#x3C;</span><span style="color:#8DDB8C">Migrate</span><span style="color:#6CB6FF"> Provider</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"SqlServer"</span></span>
+<span class="line"><span style="color:#6CB6FF">            Connectionstring</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"Database=MyDB;Data Source=localhost;User Id=;Password=;"</span></span>
+<span class="line"><span style="color:#6CB6FF">            Migrations</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"bin/MyProject.dll"</span></span>
+<span class="line"><span style="color:#6CB6FF">            To</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"$(SchemaVersion)"</span><span style="color:#ADBAC7">/></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;/</span><span style="color:#8DDB8C">Target</span><span style="color:#ADBAC7">></span></span></code></pre>
+</p>
+<p><strong>NAnt</strong>:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">&#x3C;</span><span style="color:#8DDB8C">target</span><span style="color:#6CB6FF"> name</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"migrate"</span><span style="color:#6CB6FF"> description</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"Migrate the database"</span><span style="color:#6CB6FF"> depends</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"build"</span><span style="color:#ADBAC7">>&#x3C;/</span><span style="color:#8DDB8C">p</span><span style="color:#ADBAC7">></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;</span><span style="color:#8DDB8C">property</span><span style="color:#6CB6FF"> name</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"version"</span><span style="color:#6CB6FF"> value</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"-1"</span><span style="color:#6CB6FF"> overwrite</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"false"</span><span style="color:#ADBAC7"> /></span></span>
+<span class="line"><span style="color:#ADBAC7">  &#x3C;</span><span style="color:#8DDB8C">migrate</span></span>
+<span class="line"><span style="color:#6CB6FF">    provider</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"MySql|PostgreSQL|SqlServer"</span></span>
+<span class="line"><span style="color:#6CB6FF">    connectionstring</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"Database=MyDB;Data Source=localhost;User Id=;Password=;"</span></span>
+<span class="line"><span style="color:#6CB6FF">    migrations</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"bin/MyProject.dll"</span></span>
+<span class="line"><span style="color:#6CB6FF">    to</span><span style="color:#ADBAC7">=</span><span style="color:#96D0FF">"${version}"</span><span style="color:#ADBAC7"> /></span></span>
+<span class="line"><span style="color:#ADBAC7">&#x3C;/</span><span style="color:#8DDB8C">target</span><span style="color:#ADBAC7">></span></span></code></pre>
+</p>
+<h3>So You Want to Migrate?</h3>
+Some more documentation and example are available <a href="http://code.google.com/p/migratordotnet/w/list>on the wiki</a>.</p>
+<p>The code can be downloaded at <a href="http://code.google.com/p/migratordotnet">MigratorDotNet</a>.  Some of the changes represented are still in an experimental branch that is in the process of being merged.</p>
+<p><em>
+MigratorDotNet is a continuation of code started by <a href="http://macournoyer.wordpress.com/">Marc-Andr&Atilde;&copy; Cournoyer</a> and Nick Hemsley.
+</em></p>

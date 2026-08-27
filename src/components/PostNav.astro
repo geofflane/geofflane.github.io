@@ -1,0 +1,64 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  older: CollectionEntry<'writing'> | null;
+  total: number;
+}
+const { older, total } = Astro.props;
+---
+
+<nav>
+  {
+    older ? (
+      <a href={older.data.permalink} class="prev">
+        <span class="label">&larr; Previous</span>
+        <span class="title">{older.data.title}</span>
+      </a>
+    ) : (
+      <span />
+    )
+  }
+  <a href="/writing/" class="index">
+    <span class="label">All writing &rarr;</span>
+    <span class="title">{total} posts, 2005–2014</span>
+  </a>
+</nav>
+
+<style>
+  nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    flex-wrap: wrap;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+    max-width: var(--measure);
+  }
+
+  a {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    max-width: 280px;
+  }
+
+  .index {
+    text-align: right;
+    margin-left: auto;
+  }
+
+  .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  .title {
+    font-size: 15px;
+    line-height: 1.4;
+    color: var(--soft);
+  }
+</style>

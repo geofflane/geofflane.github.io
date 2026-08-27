@@ -1,0 +1,87 @@
+---
+title: "MongoDB: MapReduce Functions for Grouping"
+pubDate: "2010-10-04 19:34:16 -0400"
+permalink: "/2010/10/04/mongodb-mapreduce-functions-for-grouping/"
+tags: ["sql","functional programming","mongodb","mapreduce"]
+---
+<p>SQL GROUP BY allows you to perform aggregate functions on data sets; To count all of the stores in each state, to average a series of related numbers, etc. MongoDB has <a href="http://www.mongodb.org/display/DOCS/Aggregation">some aggregate functions</a> but they are fairly limited in scope. The MongoDB group function also suffers from the fact that it does not work on <a href="http://en.wikipedia.org/wiki/Shard_(database_architecture)">sharded</a> configurations. So how do you perform grouped queries using MongoDB? By using MapReduce functions of course (you read the title right?)</p>
+<h3>Understanding MapReduce</h3>
+Understanding MapReduce requires, or at least is made much easier by, understanding functional programming concepts. <em>map</em> and <em>reduce (fold, inject)</em> are functions that come from Lisp and have been inherited by a lot of languages (Scheme, Smalltalk, Ruby, Python).</p>
+<dl>
+<dt>map</dt>
+<dd>A higher-order function which transforms a list by applying a function to each of its elements. Its return value is the transformed list. In MongoDB terms, the map is a function that is run for each Document in a collection and can return a value for that row to be included in the transformed list.</dd></p>
+<dt>reduce</dt>
+<dd>A higher-order function that iterates an arbitrary function over a data structure and builds up a return value. The reduce function takes the values returned by map and allows you to run a function to manipulate those values in some way.</dd>
+</dl></p>
+<h3>Some Examples</h3>
+Let's start with some sample data:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">db.factories.</span><span style="color:#DCBDFB">insert</span><span style="color:#ADBAC7">( { name: </span><span style="color:#96D0FF">"Miller"</span><span style="color:#ADBAC7">, metro: { city: </span><span style="color:#96D0FF">"Milwaukee"</span><span style="color:#ADBAC7">, state: </span><span style="color:#96D0FF">"WI"</span><span style="color:#ADBAC7"> } } );</span></span>
+<span class="line"><span style="color:#ADBAC7">db.factories.</span><span style="color:#DCBDFB">insert</span><span style="color:#ADBAC7">( { name: </span><span style="color:#96D0FF">"Lakefront"</span><span style="color:#ADBAC7">, metro: { city: </span><span style="color:#96D0FF">"Milwaukee"</span><span style="color:#ADBAC7">, state: </span><span style="color:#96D0FF">"WI"</span><span style="color:#ADBAC7"> } } );</span></span>
+<span class="line"><span style="color:#ADBAC7">db.factories.</span><span style="color:#DCBDFB">insert</span><span style="color:#ADBAC7">( { name: </span><span style="color:#96D0FF">"Point"</span><span style="color:#ADBAC7">, metro: { city: </span><span style="color:#96D0FF">"Steven's Point"</span><span style="color:#ADBAC7">, state: </span><span style="color:#96D0FF">"WI"</span><span style="color:#ADBAC7"> } } );</span></span>
+<span class="line"><span style="color:#ADBAC7">db.factories.</span><span style="color:#DCBDFB">insert</span><span style="color:#ADBAC7">( { name: </span><span style="color:#96D0FF">"Pabst"</span><span style="color:#ADBAC7">, metro: { city: </span><span style="color:#96D0FF">"Milwaukee"</span><span style="color:#ADBAC7">, state: </span><span style="color:#96D0FF">"WI"</span><span style="color:#ADBAC7"> } } );</span></span>
+<span class="line"><span style="color:#ADBAC7">db.factories.</span><span style="color:#DCBDFB">insert</span><span style="color:#ADBAC7">( { name: </span><span style="color:#96D0FF">"Blatz"</span><span style="color:#ADBAC7">, metro: { city: </span><span style="color:#96D0FF">"Milwaukee"</span><span style="color:#ADBAC7">, state: </span><span style="color:#96D0FF">"WI"</span><span style="color:#ADBAC7"> } } );</span></span>
+<span class="line"><span style="color:#ADBAC7">db.factories.</span><span style="color:#DCBDFB">insert</span><span style="color:#ADBAC7">( { name: </span><span style="color:#96D0FF">"Coors"</span><span style="color:#ADBAC7">, metro: { city: </span><span style="color:#96D0FF">"Golden Springs"</span><span style="color:#ADBAC7">, state: </span><span style="color:#96D0FF">"CO"</span><span style="color:#ADBAC7"> } } );</span></span>
+<span class="line"><span style="color:#ADBAC7">db.factories.</span><span style="color:#DCBDFB">find</span><span style="color:#ADBAC7">()</span></span></code></pre>
+</p>
+<p>Lets say I want to count the number of factories in each of the cities (ignore the fact that I could have the same city in more than one state, I don't in my data). For a count, I write a function that "emits" the group by key and a value that you can count. It can be any value, but for simplicity I'll make it 1. <em>emit()</em> is a MongoDB server-side function that you use to identify a value in a row that should be added to the transformed list. If <em>emit()</em> is not called then the values for that row will be excluded from the results.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#DCBDFB">mapCity</span><span style="color:#F47067"> =</span><span style="color:#F47067"> function</span><span style="color:#ADBAC7"> () {</span></span>
+<span class="line"><span style="color:#DCBDFB">    emit</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">this</span><span style="color:#ADBAC7">.metro.city, </span><span style="color:#6CB6FF">1</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>The next piece is the <em>reduce()</em> function. The reduce function will be passed a key and an array of values that were collected by the <em>map()</em> function. I know my map function returns a 1 for each row keyed by city. So the reduce function will be called with a key "Golden Springs" and a single-element array containing a 1. For "Milwaukee" it will be passed an 4-element array of 1s.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#DCBDFB">reduceCount</span><span style="color:#F47067"> =</span><span style="color:#F47067"> function</span><span style="color:#ADBAC7"> (</span><span style="color:#F69D50">k</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">vals</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">    var</span><span style="color:#ADBAC7"> sum </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> 0</span><span style="color:#ADBAC7">;</span></span>
+<span class="line"><span style="color:#F47067">    for</span><span style="color:#ADBAC7"> (</span><span style="color:#F47067">var</span><span style="color:#ADBAC7"> i </span><span style="color:#F47067">in</span><span style="color:#ADBAC7"> vals) {</span></span>
+<span class="line"><span style="color:#ADBAC7">        sum </span><span style="color:#F47067">+=</span><span style="color:#ADBAC7"> vals[i];</span></span>
+<span class="line"><span style="color:#ADBAC7">    }</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#ADBAC7"> sum;</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
+</p>
+<p>With those 2 functions I can call the mapReduce function to perform my Query.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">res </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> db.factories.</span><span style="color:#DCBDFB">mapReduce</span><span style="color:#ADBAC7">(mapCity, reduceCount)</span></span>
+<span class="line"><span style="color:#ADBAC7">db[res.result].</span><span style="color:#DCBDFB">find</span><span style="color:#ADBAC7">()</span></span></code></pre>
+</p>
+<p>This results in:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">{ </span><span style="color:#96D0FF">"_id"</span><span style="color:#ADBAC7"> : </span><span style="color:#96D0FF">"Golden Springs"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"value"</span><span style="color:#ADBAC7"> : </span><span style="color:#6CB6FF">1</span><span style="color:#ADBAC7"> }</span></span>
+<span class="line"><span style="color:#ADBAC7">{ </span><span style="color:#96D0FF">"_id"</span><span style="color:#ADBAC7"> : </span><span style="color:#96D0FF">"Milwaukee"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"value"</span><span style="color:#ADBAC7"> : </span><span style="color:#6CB6FF">4</span><span style="color:#ADBAC7"> }</span></span>
+<span class="line"><span style="color:#ADBAC7">{ </span><span style="color:#96D0FF">"_id"</span><span style="color:#ADBAC7"> : </span><span style="color:#96D0FF">"Steven's Point"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"value"</span><span style="color:#ADBAC7"> : </span><span style="color:#6CB6FF">1</span><span style="color:#ADBAC7"> }</span></span></code></pre>
+</p>
+<p>Counting is not the only thing I can do of course. Anything can be returned by the map function including complex JSON objects. In this example I combine the names of all of the Factories in a given City into a simple comma-separated list.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#DCBDFB">mapCity</span><span style="color:#F47067"> =</span><span style="color:#F47067"> function</span><span style="color:#ADBAC7"> () {</span></span>
+<span class="line"><span style="color:#DCBDFB">    emit</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">this</span><span style="color:#ADBAC7">.metro.city, </span><span style="color:#6CB6FF">this</span><span style="color:#ADBAC7">.name);</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#DCBDFB">reduceNames</span><span style="color:#F47067"> =</span><span style="color:#F47067"> function</span><span style="color:#ADBAC7"> (</span><span style="color:#F69D50">k</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">vals</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">    return</span><span style="color:#ADBAC7"> vals.</span><span style="color:#DCBDFB">join</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">","</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#ADBAC7">res </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> db.factories.</span><span style="color:#DCBDFB">mapReduce</span><span style="color:#ADBAC7">(mapCity, reduceNames)</span></span>
+<span class="line"><span style="color:#ADBAC7">db[res.result].</span><span style="color:#DCBDFB">find</span><span style="color:#ADBAC7">()</span></span></code></pre>
+</p>
+<p>Give you:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">{ </span><span style="color:#96D0FF">"_id"</span><span style="color:#ADBAC7"> : </span><span style="color:#96D0FF">"Golden Springs"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"value"</span><span style="color:#ADBAC7"> : </span><span style="color:#96D0FF">"Coors"</span><span style="color:#ADBAC7"> }</span></span>
+<span class="line"><span style="color:#ADBAC7">{ </span><span style="color:#96D0FF">"_id"</span><span style="color:#ADBAC7"> : </span><span style="color:#96D0FF">"Milwaukee"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"value"</span><span style="color:#ADBAC7"> : </span><span style="color:#96D0FF">"Miller,Lakefront,Pabst,Blatz"</span><span style="color:#ADBAC7"> }</span></span>
+<span class="line"><span style="color:#ADBAC7">{ </span><span style="color:#96D0FF">"_id"</span><span style="color:#ADBAC7"> : </span><span style="color:#96D0FF">"Steven's Point"</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">"value"</span><span style="color:#ADBAC7"> : </span><span style="color:#96D0FF">"Point"</span><span style="color:#ADBAC7"> }</span></span></code></pre>
+</p>
+<h3>Conclusion</h3>
+These are fairly simple examples, but I think it helps to work through this kind of simple thing to fully understand a new technique before you have to work with harder examples.</p>
+<p>For more on MongoDB check out these books:</p>
+<ul>
+<li>
+<a href="http://www.amazon.com/gp/product/1449381561?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1449381561">MongoDB: The Definitive Guide</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=1449381561" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
+</li></p>
+<li>
+<a href="http://www.amazon.com/gp/product/1430230517?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=1430230517">The Definitive Guide to MongoDB: The NoSQL Database for Cloud and Desktop Computing</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=1430230517" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
+</li></p>
+<li>
+<a href="http://www.amazon.com/gp/product/0321705335?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0321705335">MongoDB for Web Development (Developer's Library)</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=0321705335" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
+</li></p>
+<li>
+<a href="http://www.amazon.com/gp/product/0262062186?ie=UTF8&tag=zorchednet-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=0262062186">How to Design Programs: An Introduction to Programming and Computing</a><img src="http://www.assoc-amazon.com/e/ir?t=zorchednet-20&l=as2&o=1&a=0262062186" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /> - If you want to learn more about functional programming I highly recommend this book.
+</li>
+</ul></p>

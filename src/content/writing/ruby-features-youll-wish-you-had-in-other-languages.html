@@ -1,0 +1,209 @@
+---
+title: "Ruby Features You'll Wish You Had In Other Languages"
+pubDate: "2006-02-19 20:51:00 -0500"
+permalink: "/2006/02/19/ruby-features-youll-wish-you-had-in-other-languages/"
+tags: []
+---
+<p><em>Three Ruby related posts in a row! Yes, I'm currently enamored with this colorful little language.</em></p>
+<p>If you know people that know (or you yourself know) languages like Smalltalk
+  and Lisp, you'll often hear them curse when they use other languages.
+  Something like "Damn, I could do this so much easier in Smalltalk. To do x
+  would only take me 2 lines of code!". This is the best reason NOT to learn
+  Ruby. Every time you program in other languages you'll think of all the
+  little tricks you wish you could use from Ruby. I figured I'd share the pain
+  (or at least what I think are some of the cool features).</p>
+<h3>Closures and Blocks</h3>
+Closures and Blocks are most used in Ruby in dealing with Arrays, Hashes and
+other like structures. They can be used in many places, but they are widely
+used in library routines for Enumerable types, so you get a lot of built in
+examples of that usage.</p>
+<p>Does an Array contain a specific item?:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">me</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> people.</span><span style="color:#DCBDFB">find</span><span style="color:#ADBAC7"> {  |p| </span><span style="color:#6CB6FF">p</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">first_name</span><span style="color:#F47067"> ==</span><span style="color:#96D0FF"> 'Geoff'</span><span style="color:#ADBAC7"> }</span></span></code></pre>
+</p>
+<p>Find all of elements matching the condition:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">myfamily</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> people.</span><span style="color:#6CB6FF">select</span><span style="color:#ADBAC7"> {  |p| </span><span style="color:#6CB6FF">p</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">last_name</span><span style="color:#F47067"> ==</span><span style="color:#96D0FF"> 'Lane'</span><span style="color:#ADBAC7"> }</span></span></code></pre>
+</p>
+<p>Create a new array with the results of running the block on each element (uniq then removes duplicates):
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">all_families</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> people.</span><span style="color:#DCBDFB">collect</span><span style="color:#ADBAC7"> { |p| </span><span style="color:#6CB6FF">p</span><span style="color:#ADBAC7">. last_name }.</span><span style="color:#DCBDFB">uniq</span></span></code></pre>
+</p>
+<p>All of that stuff without writing a single Iterator or for loop!</p>
+<p>Blocks can be stored as a variable to call later and can be passed as an
+  argument to a method. This can give you built-in support for light-weight
+  version of patterns like the <a
+    href="http://www.dofactory.com/Patterns/PatternStrategy.aspx">Strategy
+    Pattern</a> or the <a
+    href="http://www.dofactory.com/Patterns/PatternObserver.aspx">Observer
+    Pattern</a>.</p>
+<p>An Observer for example:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Subject</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> initialize</span></span>
+<span class="line"><span style="color:#ADBAC7">    @blocks </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> []</span></span>
+<span class="line"><span style="color:#ADBAC7">    @state </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> nil</span></span>
+<span class="line"><span style="color:#F47067">  end</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> attach</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">&#x26;</span><span style="color:#ADBAC7">block)</span></span>
+<span class="line"><span style="color:#ADBAC7">    @blocks </span><span style="color:#F47067">&#x3C;</span><span style="color:#F47067"> &#x3C;</span><span style="color:#ADBAC7"> block</span></span>
+<span class="line"><span style="color:#F47067">  end</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> state=</span><span style="color:#ADBAC7">(v)</span></span>
+<span class="line"><span style="color:#ADBAC7">    @state </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> v</span></span>
+<span class="line"><span style="color:#ADBAC7">    notify</span></span>
+<span class="line"><span style="color:#F47067">  end</span></span>
+<span class="line"><span style="color:#F47067">  private</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> notify</span></span>
+<span class="line"><span style="color:#ADBAC7">    @blocks.</span><span style="color:#DCBDFB">each</span><span style="color:#ADBAC7"> { |b| b.</span><span style="color:#DCBDFB">call</span><span style="color:#ADBAC7">(@state) }</span></span>
+<span class="line"><span style="color:#F47067">  end</span></span>
+<span class="line"><span style="color:#F47067">end&#x3C;/</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">>class</span><span style="color:#F69D50"> Observer</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> called</span></span>
+<span class="line"><span style="color:#6CB6FF">    puts</span><span style="color:#96D0FF"> "Observer called."</span></span>
+<span class="line"><span style="color:#F47067">  end</span></span>
+<span class="line"><span style="color:#F47067">end&#x3C;/</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">>class</span><span style="color:#F69D50"> Observer2</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> called</span><span style="color:#ADBAC7">(state)</span></span>
+<span class="line"><span style="color:#6CB6FF">    puts</span><span style="color:#96D0FF"> "Observer2 was called with '</span><span style="color:#F47067">#{</span><span style="color:#96D0FF">state</span><span style="color:#F47067">}</span><span style="color:#96D0FF">'."</span></span>
+<span class="line"><span style="color:#F47067">  end</span></span>
+<span class="line"><span style="color:#F47067">end&#x3C;/</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">o </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> Observer</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span></span>
+<span class="line"><span style="color:#F69D50">o2</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> Observer2</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span></span>
+<span class="line"><span style="color:#F69D50">s</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> Subject</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span></span>
+<span class="line"><span style="color:#ADBAC7">s.</span><span style="color:#DCBDFB">attach</span><span style="color:#ADBAC7"> { o.</span><span style="color:#DCBDFB">called</span><span style="color:#ADBAC7"> }</span></span>
+<span class="line"><span style="color:#ADBAC7">s.</span><span style="color:#DCBDFB">attach</span><span style="color:#ADBAC7"> { |s| o2.</span><span style="color:#DCBDFB">called</span><span style="color:#ADBAC7">(s) }</span></span>
+<span class="line"><span style="color:#ADBAC7">s.</span><span style="color:#DCBDFB">state</span><span style="color:#F47067"> =</span><span style="color:#96D0FF"> 'Hi'</span></span></code></pre>
+</p>
+<p>Gives us:</p>
+<pre>
+Observer called.
+Observer2 was called with 'Hi'.
+</pre></p>
+<p>A Strategy Example:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Mathify</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> initialize</span><span style="color:#ADBAC7">(x, y, </span><span style="color:#F47067">&#x26;</span><span style="color:#ADBAC7">block)</span></span>
+<span class="line"><span style="color:#ADBAC7">    @x </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> x</span></span>
+<span class="line"><span style="color:#ADBAC7">    @y </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> y</span></span>
+<span class="line"><span style="color:#ADBAC7">    @block </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> block</span></span>
+<span class="line"><span style="color:#F47067">  end&#x3C;/</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> call</span></span>
+<span class="line"><span style="color:#ADBAC7">    @block.</span><span style="color:#DCBDFB">call</span><span style="color:#ADBAC7">(@x, @y)</span></span>
+<span class="line"><span style="color:#F47067">  end</span></span>
+<span class="line"><span style="color:#F47067">end</span></span></code></pre>
+</p>
+<p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">add</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> proc</span><span style="color:#ADBAC7"> {|a, b| a </span><span style="color:#F47067">+</span><span style="color:#ADBAC7"> b}</span></span>
+<span class="line"><span style="color:#F69D50">mult</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> proc</span><span style="color:#ADBAC7"> {|a, b| a </span><span style="color:#F47067">*</span><span style="color:#ADBAC7"> b}</span></span>
+<span class="line"><span style="color:#F69D50">m</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> Mathify</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">2</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">3</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">&#x26;</span><span style="color:#ADBAC7">add)</span></span>
+<span class="line"><span style="color:#F69D50">n</span><span style="color:#F47067"> =</span><span style="color:#6CB6FF"> Mathify</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">2</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">3</span><span style="color:#ADBAC7">, </span><span style="color:#F47067">&#x26;</span><span style="color:#ADBAC7">mult)</span></span>
+<span class="line"><span style="color:#6CB6FF">puts</span><span style="color:#ADBAC7"> m.</span><span style="color:#DCBDFB">call</span></span>
+<span class="line"><span style="color:#6CB6FF">puts</span><span style="color:#ADBAC7"> n.</span><span style="color:#DCBDFB">call</span></span></code></pre>
+</p>
+<h3>Metaprogramming</h3>
+Metaprogramming as the name implies is 'programming your programming'. Using
+the dynamic nature of a language like Ruby (or Lisp where much of this
+originated), you can programmatically add functionality to your classes or
+instances at runtime.</p>
+<p>Built-in examples:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Person</span></span>
+<span class="line"><span style="color:#F47067">  attr_accessor</span><span style="color:#6CB6FF"> :first_name</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">:last_name</span></span>
+<span class="line"><span style="color:#F47067">  attr_reader</span><span style="color:#6CB6FF"> :person_id</span></span>
+<span class="line"><span style="color:#F47067">  alias</span><span style="color:#6CB6FF"> :last_name</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">:family_name</span></span>
+<span class="line"><span style="color:#F47067">end</span></span></code></pre>
+</p>
+<p><code class="inline">attr_accessor</code> and <code
+    class="inline">attr_reader</code> dynamically create accessors for your
+  class. <code class="inline">alias</code> creates another name that
+    can be used to access the same attribute.</p>
+<p>Ruby has a lot of built-in support for this kind of functionality, but it also allows you to add your own as well:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Module</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> log_call</span><span style="color:#ADBAC7">(method, </span><span style="color:#F47067">*</span><span style="color:#ADBAC7">args)</span></span>
+<span class="line"><span style="color:#F69D50">    old_method</span><span style="color:#F47067"> =</span><span style="color:#DCBDFB"> instance_method</span><span style="color:#ADBAC7">(method)</span></span>
+<span class="line"><span style="color:#DCBDFB">    define_method</span><span style="color:#ADBAC7">(method) </span><span style="color:#F47067">do</span><span style="color:#ADBAC7"> |</span><span style="color:#F47067">*</span><span style="color:#ADBAC7">args|</span></span>
+<span class="line"><span style="color:#6CB6FF">      puts</span><span style="color:#96D0FF"> "Calling '</span><span style="color:#F47067">#{</span><span style="color:#96D0FF">method</span><span style="color:#F47067">}</span><span style="color:#96D0FF">'."</span></span>
+<span class="line"><span style="color:#ADBAC7">      old_method.</span><span style="color:#DCBDFB">bind</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">self</span><span style="color:#ADBAC7">).</span><span style="color:#DCBDFB">call</span><span style="color:#ADBAC7">(</span><span style="color:#F47067">*</span><span style="color:#ADBAC7">args)</span></span>
+<span class="line"><span style="color:#F47067">    end</span></span>
+<span class="line"><span style="color:#F47067">  end</span></span>
+<span class="line"><span style="color:#F47067">end&#x3C;/</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">>class</span><span style="color:#F69D50"> MyClass</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> call_me</span></span>
+<span class="line"><span style="color:#6CB6FF">    puts</span><span style="color:#96D0FF"> "I've been called."</span></span>
+<span class="line"><span style="color:#F47067">  end</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> call_me_too</span></span>
+<span class="line"><span style="color:#6CB6FF">    puts</span><span style="color:#96D0FF"> "I've been called too."</span></span>
+<span class="line"><span style="color:#F47067">  end</span></span>
+<span class="line"><span style="color:#ADBAC7">  log_call </span><span style="color:#6CB6FF">:call_me_too</span></span>
+<span class="line"><span style="color:#F47067">end&#x3C;/</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">mc </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> MyClass</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span></span>
+<span class="line"><span style="color:#ADBAC7">mc.</span><span style="color:#DCBDFB">call_me</span></span>
+<span class="line"><span style="color:#ADBAC7">mc.</span><span style="color:#DCBDFB">call_me_too</span></span></code></pre>
+</p>
+<p>Prints:</p>
+<pre>
+I've been called.
+Calling 'call_me_too'.
+I've been called too.
+</pre></p>
+<p>As you see, I've 'decorated' one of the method calls with some new
+  functionality. Basically, I'm dynamically redefining the method to log the
+  call prior to passing along the call to the original implementation. You
+  could intercept calls to set a 'dirty' flag to know that an instance had been
+  changed so that you could do automatic caching.</p>
+
+<h3>Open Classes</h3>
+The other thing that this code example shows is that Classes in Ruby are never
+closed. You can at any time, open a Class add new methods, redefine methods,
+remove methods, anything you want. This is really great for Object Oriented
+programming because you can choose where a method resides based on where it is
+most appropriate.</p>
+<p>
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> Array</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> first_half</span></span>
+<span class="line"><span style="color:#DCBDFB">    slice</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">0</span><span style="color:#ADBAC7">, size</span><span style="color:#F47067">/</span><span style="color:#6CB6FF">2</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#F47067">  end</span></span>
+<span class="line"><span style="color:#F47067">end</span></span>
+<span class="line"><span style="color:#F69D50">a</span><span style="color:#F47067"> =</span><span style="color:#ADBAC7"> [</span><span style="color:#6CB6FF">1</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">2</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">3</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">4</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">5</span><span style="color:#ADBAC7">, </span><span style="color:#6CB6FF">6</span><span style="color:#ADBAC7">]</span></span>
+<span class="line"><span style="color:#6CB6FF">puts</span><span style="color:#ADBAC7"> a.</span><span style="color:#DCBDFB">to_s</span></span>
+<span class="line"><span style="color:#6CB6FF">puts</span><span style="color:#ADBAC7"> a.</span><span style="color:#DCBDFB">first_half</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">to_s</span></span></code></pre>
+</p>
+<p>Prints:</p>
+<pre>
+123456
+123
+</pre></p>
+<p>So, if you have special needs to deal with built-in Classes or even just Classes from libraries that you are using, you can put the methods with the Classes where they rightly belong.</p>
+<h3>Mixin Modules</h3>
+Ruby is a <a href="http://en.wikipedia.org/wiki/Single_inheritance">Single-Inheritance</a> language and it does not have Interfaces. Ruby believes in <a href="http://en.wikipedia.org/wiki/Duck_typing">Duck Typing</a>, if it has the right properties and methods, use it. What it has instead of multiple-inheritance or interfaces is Modules.</p>
+<p>When you <code>include</code> a Module into a Class, it 'mixes in' its
+  properties and methods into the Class. This is widely used in the core Ruby
+  classes. <code class="inline">Enumerable</code> is used to implement a whole
+  suite of features for interacting with lists of objects. Array and Hash both
+  include <code>Enumerable</code> to give them the implementation and interface
+  of this code. You can use <code>Enumerable</code> in your own code of course,
+  and as with all the other features I've talked about, you can create your own
+  as well.</p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">module</span><span style="color:#F69D50"> Example</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> contrived</span></span>
+<span class="line"><span style="color:#6CB6FF">    puts</span><span style="color:#96D0FF"> "This is contrived."</span></span>
+<span class="line"><span style="color:#F47067">  end</span></span>
+<span class="line"><span style="color:#F47067">end&#x3C;/</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">>class</span><span style="color:#F69D50"> Silly</span></span>
+<span class="line"><span style="color:#F47067">  include</span><span style="color:#6CB6FF"> Example</span></span>
+<span class="line"><span style="color:#F47067">end&#x3C;/</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">&#x3C;</span><span style="color:#6CB6FF">p</span><span style="color:#F47067">></span><span style="color:#ADBAC7">s </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> Silly</span><span style="color:#ADBAC7">.</span><span style="color:#F47067">new</span></span>
+<span class="line"><span style="color:#ADBAC7">s.</span><span style="color:#DCBDFB">contrived</span></span></code></pre>
+
+<p>Prints:</p>
+<pre>
+This is contrived.
+</pre>
+<h3>Conclusion</h3>
+<p>
+Those are some of my favorite features of Ruby, but you really should ignore
+them. If not, when you have to programming in Java or .NET you'll be one of
+those people saying "Damn, I could do this so much easier in Ruby. To do x
+would only take me 2 lines of code!"</p>

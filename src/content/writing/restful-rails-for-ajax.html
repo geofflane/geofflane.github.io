@@ -1,0 +1,86 @@
+---
+title: "RESTful Rails for Ajax"
+pubDate: "2007-04-27 21:53:27 -0400"
+permalink: "/2007/04/27/restful-rails-for-ajax/"
+tags: ["DOJO-Toolkit","JSON","ajax"]
+---
+<p>Ruby on Rails 1.2 added full support for building RESTful services to the already nice web page support. REST is a conceptually simple idea, yet incredibly powerful. REST is a Web based API to an application. It builds on the basic building blocks of HTTP: URLs and HTTP Methods (think verbs).</p>
+<p>A URL (Uniform Resource Locator) uniquely identifies a resources on the web. HTTP uses the concept of Methods to give context to a request to a URL. Most developers will be familiar with a GET and a POST. These methods are used to get a resource and to modify a resource respectively. But there are <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html">other http verbs</a> as well. The two other interesting ones for a REST service are PUT and DELETE. Both of these are pretty self explanatory. PUT creates a resource at the remote location and DELETE removes one.</p>
+<p>For Example:
+GET
+http://example.com/catalog/item/1</p>
+<p>DELETE
+http://example.com/catalog/item/1</p>
+<p>Both of these use the same URL, but the HTTP Method means different things will happen.</p>
+<h3>Creating A RESTful API with Rails</h3>
+Rails makes it easy to create a RESTful application. The same controllers can be used to render a web page and to provide a programmatic API to your application.</p>
+<p>Rails provides a <em>scaffold_resource</em> generator that creates the skeleton of a resource driven application:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F69D50">./script/generate</span><span style="color:#96D0FF"> scaffold_resource</span><span style="color:#96D0FF"> order</span></span></code></pre>
+</p>
+<p>This creates Model, View and Controllers just like regular scaffold, but unlike scaffold, it adds some extra functionality.
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> OrdersController</span><span style="color:#ADBAC7"> &#x3C; </span><span style="color:#6CB6FF">ApplicationController</span></span>
+<span class="line"><span style="color:#768390">  # GET /orders/1</span></span>
+<span class="line"><span style="color:#768390">  # GET /orders/1.xml</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> show</span></span>
+<span class="line"><span style="color:#ADBAC7">    @order </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> Order</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">find</span><span style="color:#ADBAC7">(params[</span><span style="color:#6CB6FF">:id</span><span style="color:#ADBAC7">])</span><span style="color:#F47067">&#x3C;</span></span>
+<span class="line"><span style="color:#ADBAC7">    respond_to </span><span style="color:#F47067">do</span><span style="color:#ADBAC7"> |format|</span></span>
+<span class="line"><span style="color:#6CB6FF">      format</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">html</span><span style="color:#768390"> # show.rhtml</span></span>
+<span class="line"><span style="color:#6CB6FF">      format</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">xml</span><span style="color:#ADBAC7">  { render </span><span style="color:#6CB6FF">:xml</span><span style="color:#ADBAC7"> => @order.</span><span style="color:#DCBDFB">to_xml</span><span style="color:#ADBAC7"> }</span></span>
+<span class="line"><span style="color:#F47067">    end</span></span>
+<span class="line"><span style="color:#F47067">  end</span></span>
+<span class="line"><span style="color:#F47067">end</span></span></code></pre>
+</p>
+<p>Now if you request a path ending in <em>.xml</em> it will render the response as an XML document that can be consumed by another program.</p>
+<h3>Applying REST as an Ajax solution</h3>
+The great news is that you can use this RESTful API directly as an API to use for building a highly-dynamic Ajax application. (See my post on <a href="/2006/10/30/ajax-with-json-using-php-and-dojo/">using Ajax with PHP</a> for an example). But what's even cooler is that you can use the same technique to build a <a href="http://www.json.org/">JSON</a> API. JSON is much easier and less resource intensive to consume in an Ajax application than XML.</p>
+<p>Changing your controller to support JSON ends up being really easy. All you have to do is add a single line in the respond_to block to support it:
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#F47067">class</span><span style="color:#F69D50"> OrdersController</span><span style="color:#ADBAC7"> &#x3C; </span><span style="color:#6CB6FF">ApplicationController</span></span>
+<span class="line"><span style="color:#768390">  # GET /orders/1</span></span>
+<span class="line"><span style="color:#768390">  # GET /orders/1.xml</span></span>
+<span class="line"><span style="color:#768390">  # GET /orders/1.js</span></span>
+<span class="line"><span style="color:#F47067">  def</span><span style="color:#DCBDFB"> show</span></span>
+<span class="line"><span style="color:#ADBAC7">    @order </span><span style="color:#F47067">=</span><span style="color:#6CB6FF"> Order</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">find</span><span style="color:#ADBAC7">(params[</span><span style="color:#6CB6FF">:id</span><span style="color:#ADBAC7">])</span></span>
+<span class="line"><span style="color:#ADBAC7">    respond_to </span><span style="color:#F47067">do</span><span style="color:#ADBAC7"> |format|</span></span>
+<span class="line"><span style="color:#6CB6FF">      format</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">html</span><span style="color:#768390"> # show.rhtml</span></span>
+<span class="line"><span style="color:#6CB6FF">      format</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">xml</span><span style="color:#ADBAC7">  { render </span><span style="color:#6CB6FF">:xml</span><span style="color:#ADBAC7"> => @order.</span><span style="color:#DCBDFB">to_xml</span><span style="color:#ADBAC7"> }</span></span>
+<span class="line"><span style="color:#6CB6FF">      format</span><span style="color:#ADBAC7">.</span><span style="color:#DCBDFB">js</span><span style="color:#ADBAC7"> { render </span><span style="color:#6CB6FF">:json</span><span style="color:#ADBAC7"> => @order.</span><span style="color:#DCBDFB">to_json</span><span style="color:#ADBAC7"> }</span></span>
+<span class="line"><span style="color:#F47067">    end</span></span>
+<span class="line"><span style="color:#F47067">  end</span></span>
+<span class="line"><span style="color:#F47067">end</span></span></code></pre>
+</p>
+<p>Just like in the XML example, if you make a request that ends in
+  <em>.js</em> then you will get a response rendered as JSON. Consuming that
+  JSON Service with something like Dojo allows you to easily create a dynamic
+  web application.</p>
+
+<pre class="shiki github-dark-dimmed" style="background-color:#22272e;color:#adbac7" tabindex="0"><code><span class="line"><span style="color:#ADBAC7">dojo.</span><span style="color:#DCBDFB">require</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"dojo.event.*"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">dojo.</span><span style="color:#DCBDFB">require</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"dojo.io.*"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">dojo.</span><span style="color:#DCBDFB">require</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"dojo.date.*"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">dojo.</span><span style="color:#DCBDFB">require</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"dojo.lfx.*"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> getOrder</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">id</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">    dojo.io.</span><span style="color:#DCBDFB">bind</span><span style="color:#ADBAC7">({url: </span><span style="color:#96D0FF">"/orders/"</span><span style="color:#F47067"> +</span><span style="color:#ADBAC7"> id </span><span style="color:#F47067">+</span><span style="color:#96D0FF"> ".js"</span><span style="color:#ADBAC7">, handler: showOrder, mimetype: </span><span style="color:#96D0FF">"text/json"</span><span style="color:#ADBAC7">});</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span><span style="color:#F47067">&#x3C;/</span><span style="color:#ADBAC7">p</span><span style="color:#F47067">></span></span>
+<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> showOrder</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">type</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">data</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">evt</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#ADBAC7">    dojo.dom.</span><span style="color:#DCBDFB">removeChildren</span><span style="color:#ADBAC7">(dojo.</span><span style="color:#DCBDFB">byId</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">'order'</span><span style="color:#ADBAC7">));</span></span>
+<span class="line"><span style="color:#DCBDFB">    appendOrderPart</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">'order_number'</span><span style="color:#ADBAC7">, data.attributes.order_number);</span></span>
+<span class="line"><span style="color:#DCBDFB">    appendOrderPart</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">'time'</span><span style="color:#ADBAC7">, data.attributes.time);</span></span>
+<span class="line"><span style="color:#ADBAC7">    dojo.lfx.</span><span style="color:#DCBDFB">highlight</span><span style="color:#ADBAC7">(dojo.</span><span style="color:#DCBDFB">byId</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">'order'</span><span style="color:#ADBAC7">), dojo.lfx.Color);</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> appendOrderPart</span><span style="color:#ADBAC7">(</span><span style="color:#F69D50">id</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">value</span><span style="color:#ADBAC7">) {</span></span>
+<span class="line"><span style="color:#F47067">    var</span><span style="color:#ADBAC7"> element </span><span style="color:#F47067">=</span><span style="color:#ADBAC7"> document.</span><span style="color:#DCBDFB">createElement</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">"div"</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">    element.id</span><span style="color:#F47067">=</span><span style="color:#ADBAC7">id;</span></span>
+<span class="line"><span style="color:#ADBAC7">    element.innerHTML</span><span style="color:#F47067">=</span><span style="color:#ADBAC7">value;</span></span>
+<span class="line"><span style="color:#ADBAC7">    dojo.</span><span style="color:#DCBDFB">byId</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">'order'</span><span style="color:#ADBAC7">).</span><span style="color:#DCBDFB">appendChild</span><span style="color:#ADBAC7">(element);</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#F47067">function</span><span style="color:#DCBDFB"> init</span><span style="color:#ADBAC7">() {</span></span>
+<span class="line"><span style="color:#DCBDFB">  getOrder</span><span style="color:#ADBAC7">(</span><span style="color:#6CB6FF">1</span><span style="color:#ADBAC7">);</span></span>
+<span class="line"><span style="color:#ADBAC7">}</span></span>
+<span class="line"><span style="color:#ADBAC7">dojo.</span><span style="color:#DCBDFB">addOnLoad</span><span style="color:#ADBAC7">(init);</span></span></code></pre>
+</p>
+<h3>Conclusion</h3>
+With a few simple lines of code you can not only render a web page, you can
+also create an XML API and a JSON API. That's what I call developer
+friendly!</p>
