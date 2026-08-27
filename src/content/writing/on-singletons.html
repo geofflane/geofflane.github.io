@@ -38,7 +38,7 @@ One consideration that must be made when you are designing software is: How are 
 <span class="line"><span style="color:#ADBAC7">    }</span></span>
 <span class="line"><span style="color:#ADBAC7">}</span></span></code></pre>
 </p>
-<p>I've written previously about <a href="/tag/mock-objects/">Mock Objects</a> for testing. Mock Objects allow you to create dummy implementations of dependencies to make testing a Class much easier. In the Singleton example here, you can see that there would be no way to inject a Mock instance into the SecondSingleton class.</p>
+<p>I've written previously about Mock Objects for testing. Mock Objects allow you to create dummy implementations of dependencies to make testing a Class much easier. In the Singleton example here, you can see that there would be no way to inject a Mock instance into the SecondSingleton class.</p>
 <h3>Factories or Containers to Enforce Single Instances</h3>
 One of the best ways to access dependencies in a class is through <a href="http://en.wikipedia.org/wiki/Dependency_injection">Constructor based Dependency Injection</a>. This can be done through a container like <a href="http://www.springframework.org/">Spring</a> or <a href="http://www.picocontainer.org/">Pico Container</a>. </p>
 <p>You can of course do this yourself as well. If you are using a Factory for object creation, then the singleton enforcement and the dependency injection can happen in the same class (whose sole responsibility is to manage the construction of objects).</p>

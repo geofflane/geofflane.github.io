@@ -137,10 +137,12 @@ HTML or needing a fixed URL. New images used from `.astro` pages should go in
 - **`publish_from_ical.png` was never archived.** Only the 300px version survived, so the
   "full size" link on that post points at the same image it displays.
 - **38 Amazon affiliate images** are dead links, from a program long since shut down.
-- **Four WordPress URLs still 404**: `/category/code/automation/`,
-  `/category/code/unit-testing/`, `/tag/mock-objects/` and `/nant-sqlschematask/`. These
-  were taxonomy and page URLs, not files, and did not survive the move to Jekyll in 2017
-  either.
+- **Four dead WordPress links were unlinked**, in `msbuild-with-nunit` and
+  `on-singletons`. They pointed at category, tag and page URLs that had no file behind
+  them and did not survive the move to Jekyll in 2017 either. The wording is untouched —
+  only the `<a>` wrappers were dropped, so the sentences read as written.
+
+The site currently has **no broken internal links**: all 154 resolve.
 - **`/tag/clojure/`, `/tag/code/` and `/tag/java/` now 404.** Jekyll generated those three
   pages; nothing links to them any more. Tags still appear on each post, as plain text.
 - **The résumé page is gone.** It listed a 2016 role as current. The original is still in
