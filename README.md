@@ -27,6 +27,10 @@ npm run check    # type-check .astro and .ts files
 
 `npm run build` is what CI runs. If it passes locally it will pass there.
 
+Astro is a local dependency, not a global command, so a bare `astro check` will not
+resolve. Use the `npm run` scripts above, or `npx astro <command>` to reach the CLI
+directly — `npx astro preview stop`, for example.
+
 ## Layout
 
 ```
