@@ -269,7 +269,11 @@ const features = [
         recognise — write to me, and say which device you are on and which version you have. The
         version is at the bottom of Settings, under About.
       </p>
-      <!--email_off--><a href="mailto:geoff@zorched.net">geoff@zorched.net</a><!--email_on-->
+      {/* Cloudflare obfuscates this mailto at the edge, so it needs script to resolve.
+          The noscript line is the fallback, spelled out rather than written as an
+          address so it does not hand a scraper what the obfuscation is withholding. */}
+      <a href="mailto:geoff@zorched.net">geoff@zorched.net</a>
+      <noscript><span class="plain-address">geoff at zorched dot net</span></noscript>
     </section>
   </main>
 </BaseLayout>
@@ -589,6 +593,12 @@ const features = [
   }
 
   /* --- support --------------------------------------------------------- */
+
+  /* Only ever rendered with script disabled — see the noscript line in the support
+     section. Set to match the link it stands in for. */
+  .plain-address {
+    color: var(--accent);
+  }
 
   .support {
     display: flex;
